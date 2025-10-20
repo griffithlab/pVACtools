@@ -6,6 +6,7 @@ import pandas as pd
 import tempfile
 import shutil
 import argparse
+import json
 
 from pvactools.lib.prediction_class import PredictionClass
 from pvactools.lib.run_utils import is_preferred_transcript, float_range, transcript_prioritization_strategy
@@ -33,6 +34,7 @@ class UpdateTiers:
         output_df.to_csv(self.output_file, sep='\t', na_rep='NA', index=False, float_format='%.3f')
         shutil.copy(self.output_file.name, self.input_file)
         self.output_file.close()
+        self.update_metrics_file()
 
     @abstractmethod
     def get_tier(self, mutation):
@@ -41,6 +43,9 @@ class UpdateTiers:
     @abstractmethod
     def sort_table(self, output_lines):
         raise Exception("Must implement method in child class")
+
+    def update_metrics_file(self):
+        pass
 
     @classmethod
     def parser(cls, tool):
@@ -53,6 +58,11 @@ class UpdateTiers:
             'input_file',
             help="Input aggregated file with tiers to update. This file will be overwritten with the output."
         )
+        if tool in ['pvacseq']:
+            parser.add_argument(
+                'metrics_file',
+                help="metrics.json file corresponding to the input aggregated file. This file will be overwritten to update tiering parameters used by this command."
+            )
         if tool in ['pvacseq', 'pvacsplice']:
             parser.add_argument(
                 'vaf_clonal', type=float_range(0.0, 1.0),
@@ -117,7 +127,13 @@ class UpdateTiers:
                 help="Tumor RNA Coverage Cutoff to consider when evaluating the expression criteria. Only sites above this read depth cutoff will be considered.",
                 default=10
             )
-        if tool in ['pvacseq', 'pvacfuse', 'pvacsplice']:
+        if tool in ['pvacseq', 'pvacsplice']:
+            parser.add_argument(
+                '--expn-val', type=float,
+                help="Gene and Transcript Expression cutoff. Sites above this cutoff will be considered.",
+                default=1.0
+            )
+        if tool in ['pvacfuse']:
             parser.add_argument(
                 '--expn-val', type=float,
                 help="Expression Cutoff to consider when evaluating the expression criteria. Expression is meassured as FFPM (fusion fragments per million total reads). Sites above this cutoff will be considered.",
@@ -187,6 +203,7 @@ class PvacseqUpdateTiers(UpdateTiers, metaclass=ABCMeta):
             allele_specific_anchors=False,
             anchor_contribution_threshold=0.8,
             top_score_metric2='ic50',
+            metrics_file=None,
         ):
         self.input_file = input_file
         self.output_file = tempfile.NamedTemporaryFile()
@@ -202,6 +219,7 @@ class PvacseqUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         self.trna_vaf = trna_vaf
         self.transcript_prioritization_strategy = transcript_prioritization_strategy
         self.maximum_transcript_support_level = maximum_transcript_support_level
+        self.metrics_file=metrics_file
         if top_score_metric2 == "percentile":
             self.top_score_mode = "%ile MT"
         else:
@@ -394,6 +412,28 @@ class PvacseqUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         df.drop(labels='rank', axis=1, inplace=True)
 
         return df
+
+    def update_metrics_file(self):
+        if self.metrics_file is not None:
+            output_metrics_file = tempfile.NamedTemporaryFile()
+            with open(self.metrics_file, 'r') as input_fh, open(output_metrics_file.name, 'w') as output_fh:
+                metrics = json.loads(input_fh.read())
+                metrics['vaf_clonal'] = round(self.vaf_clonal, 3)
+                metrics['vaf_subclonal'] = round(self.vaf_clonal/2, 3)
+                metrics['binding_threshold'] = self.binding_threshold
+                metrics['trna_vaf'] = self.trna_vaf
+                metrics['trna_cov'] = self.trna_cov
+                metrics['allele_expr_threshold'] = self.allele_expr_threshold
+                metrics['transcript_prioritization_strategy'] = sorted(self.transcript_prioritization_strategy)
+                metrics['maximum_transcript_support_level'] = self.maximum_transcript_support_level
+                metrics['percentile_threshold'] = self.percentile_threshold
+                metrics['percentile_threshold_strategy'] = self.percentile_threshold_strategy
+                metrics['use_allele_specific_binding_thresholds'] = self.use_allele_specific_binding_thresholds
+                metrics['top_score_metric2'] = 'ic50' if self.top_score_mode == "IC50 MT" else 'percentile'
+                metrics['allele_specific_anchors'] = self.anchor_calculator.use_allele_specific_anchors
+                metrics['anchor_contribution_threshold'] = self.anchor_calculator.anchor_contribution_threshold
+                json.dump(metrics, output_fh, indent=2, separators=(',', ': '))
+            shutil.copy(output_metrics_file.name, self.metrics_file)
 
 class PvacfuseUpdateTiers(UpdateTiers, metaclass=ABCMeta):
     def __init__(

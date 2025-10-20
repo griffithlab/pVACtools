@@ -28,6 +28,7 @@ def main(args_input = sys.argv[1:]):
         allele_specific_anchors=args.allele_specific_anchors,
         anchor_contribution_threshold=args.anchor_contribution_threshold,
         top_score_metric2=args.top_score_metric2,
+        metrics_file=args.metrics_file,
     ).execute()
 
 if __name__ == "__main__":
