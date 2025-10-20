@@ -86,6 +86,15 @@ def define_parser():
         help="Gene and Expression cutoff. Used to calculate the allele expression cutoff for tiering.",
     )
     parser.add_argument(
+        "--transcript-prioritization-strategy", type=transcript_prioritization_strategy(),
+        help="Specify the criteria to consider when prioritizing or filtering transcripts of the neoantigen candidates during aggregate report creation or TSL filtering. "
+             + "'canonical' will prioritize/select candidates resulting from variants on a Ensembl canonical transcript. "
+             + "'mane_select' will prioritize/select candidates resulting from variants on a MANE select transcript. "
+             + "'tsl' will prioritize/select candidates where the transcript support level (TSL) matches the --maximum-transcript-support-level. "
+             + "When selecting more than one criteria, a transcript meeting EITHER of the selected criteria will be prioritized/selected.",
+        default=['canonical', 'mane_select', 'tsl']
+    )
+    parser.add_argument(
         "--maximum-transcript-support-level", type=int,
         help="The threshold to use for filtering epitopes on the Ensembl transcript support level (TSL). "
         +"Transcript support level needs to be <= this cutoff to be included in most tiers.",
@@ -114,6 +123,7 @@ def main(args_input = sys.argv[1:]):
         trna_vaf=args.trna_vaf,
         trna_cov=args.trna_cov,
         expn_val=args.expn_val,
+        transcript_prioritization_strategy=args.transcript_prioritization_strategy,
         maximum_transcript_support_level=args.maximum_transcript_support_level,
         top_score_metric=args.top_score_metric,
         top_score_metric2=args.top_score_metric2,
