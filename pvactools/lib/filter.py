@@ -21,7 +21,6 @@ class Filter:
                 to_filter = False
 
                 process_criterion = lambda criterion: (
-                    (line[criterion.column] == 'NA' and criterion.exclude_nas) or
                     (line[criterion.column] != 'NA' and criterion.skip_value != line[criterion.column] and not eval("{} {} {}".format(
                         line[criterion.column] if line[criterion.column] != 'inf' else sys.maxsize,
                         criterion.operator,
@@ -38,9 +37,8 @@ class Filter:
                     writer.writerow(line)
 
 class FilterCriterion:
-    def __init__(self, column, operator, threshold, exclude_nas=False, skip_value=None):
+    def __init__(self, column, operator, threshold, skip_value=None):
         self.column = column
         self.operator = operator
         self.threshold = threshold
-        self.exclude_nas = exclude_nas
         self.skip_value = skip_value

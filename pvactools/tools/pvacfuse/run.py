@@ -168,7 +168,6 @@ def main(args_input = sys.argv[1:]):
         'starfusion_file'           : args.starfusion_file,
         'read_support'              : args.read_support,
         'expn_val'                  : args.expn_val,
-        'exclude_NAs'               : args.exclude_NAs,
         'peptide_fasta'             : args.peptide_fasta,
         'aggregate_inclusion_binding_threshold': args.aggregate_inclusion_binding_threshold,
         'aggregate_inclusion_count_limit': args.aggregate_inclusion_count_limit,

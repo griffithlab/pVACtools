@@ -14,7 +14,6 @@ def main(args_input = sys.argv[1:]):
         binding_threshold=args.binding_threshold,
         minimum_fold_change=args.minimum_fold_change,
         top_score_metric=args.top_score_metric,
-        exclude_nas=args.exclude_NAs,
         allele_specific_binding_thresholds=args.allele_specific_binding_thresholds,
         binding_percentile_threshold=args.binding_percentile_threshold,
         immunogenicity_percentile_threshold=args.immunogenicity_percentile_threshold,
