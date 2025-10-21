@@ -2,8 +2,9 @@ import argparse
 import sys
 import re
 import csv
+
+from pvactools.lib.prediction_class import PredictionClass
 from pvactools.lib.filter import Filter, FilterCriterion
-from pvactools.lib.allele_specific_binding_filter import AlleleSpecificBindingFilter
 from pvactools.lib.run_utils import *
 
 class BindingFilter:
@@ -21,58 +22,70 @@ class BindingFilter:
         self.minimum_fold_change = minimum_fold_change
         self.top_score_metric = top_score_metric
         self.allele_specific_cutoffs = allele_specific_binding_thresholds
+        self.hla_types = pd.read_csv(self.input_file, delimiter="\t", usecols=["HLA Allele"])['HLA Allele'].unique()
+        per_allele_binding_thresholds = {}
+        for hla_type in self.hla_types:
+            threshold = PredictionClass.cutoff_for_allele(hla_type)
+            if self.allele_specific_cutoffs and threshold is not None:
+                per_allele_binding_thresholds[hla_type] = float(threshold)
+            else:
+                per_allele_binding_thresholds[hla_type] = binding_threshold
+        self.per_allele_binding_thresholds = per_allele_binding_thresholds
         self.file_type = file_type
 
     def execute(self):
-        filter_criteria = []
+        with open(self.input_file, 'r') as input_fh, open(self.output_file, 'w') as output_fh:
+            reader = csv.DictReader(input_fh, delimiter='\t')
+            fieldnames = reader.fieldnames
+            writer = csv.DictWriter(output_fh, fieldnames, delimiter = '\t', lineterminator = '\n')
+            writer.writeheader()
 
-        if self.allele_specific_cutoffs:
-            AlleleSpecificBindingFilter(
-                self.input_file, self.output_file,
-                default_threshold=self.binding_threshold,
-                minimum_fold_change=self.minimum_fold_change,
-                top_score_metric=self.top_score_metric,
-                binding_percentile_threshold=self.binding_percentile_threshold,
-                immunogenicity_percentile_threshold=self.immunogenicity_percentile_threshold,
-                presentation_percentile_threshold=self.presentation_percentile_threshold,
-                percentile_threshold_strategy=self.percentile_threshold_strategy,
-                file_type=self.file_type
-            ).execute()
-        else:
-            if self.file_type in ['pVACbind', 'pVACfuse', 'pVACsplice']:
-                if self.top_score_metric == 'median':
-                    ic50_column = 'Median IC50 Score'
-                    binding_percentile_column = 'Median IC50 Percentile'
-                    immunogenicity_percentile_column = 'Median Immunogenicity Percentile'
-                    presentation_percentile_column = 'Median Presentation Percentile'
-                elif self.top_score_metric == 'lowest':
-                    ic50_column = 'Best IC50 Score'
-                    binding_percentile_column = 'Best IC50 Percentile'
-                    immunogenicity_percentile_column = 'Best Immunogenicity Percentile'
-                    presentation_percentile_column = 'Best Presentation Percentile'
-            else:
-                if self.top_score_metric == 'median':
-                    ic50_column = 'Median MT IC50 Score'
-                    binding_percentile_column = 'Median MT IC50 Percentile'
-                    immunogenicity_percentile_column = 'Median MT Immunogenicity Percentile'
-                    presentation_percentile_column = 'Median MT Presentation Percentile'
-                elif self.top_score_metric == 'lowest':
-                    ic50_column = 'Best MT IC50 Score'
-                    binding_percentile_column = 'Best MT IC50 Percentile'
-                    immunogenicity_percentile_column = 'Best MT Immunogenicity Percentile'
-                    presentation_percentile_column = 'Best MT Presentation Percentile'
-            filter_criteria.append(FilterCriterion(ic50_column, '<=', self.binding_threshold))
-            filter_criteria.append(FilterCriterion(binding_percentile_column, '<=', self.binding_percentile_threshold))
-            filter_criteria.append(FilterCriterion(immunogenicity_percentile_column, '<=', self.immunogenicity_percentile_threshold))
-            filter_criteria.append(FilterCriterion(presentation_percentile_column, '<=', self.presentation_percentile_threshold))
+            for entry in reader:
+                if self.file_type in ['pVACbind', 'pVACfuse', 'pVACsplice']:
+                    if self.top_score_metric == 'median':
+                        score = entry['Median IC50 Score']
+                        binding_percentile = entry['Median IC50 Percentile']
+                        immunogenicity_percentile = entry['Median Immunogenicity Percentile']
+                        presentation_percentile = entry['Median Presentation Percentile']
+                    elif self.top_score_metric == 'lowest':
+                        score = entry['Best IC50 Score']
+                        binding_percentile = entry['Best IC50 Percentile']
+                        immunogenicity_percentile = entry['Best Immunogenicity Percentile']
+                        presentation_percentile = entry['Best Presentation Percentile']
+                else:
+                    if self.top_score_metric == 'median':
+                        score = entry['Median MT IC50 Score']
+                        fold_change = sys.maxsize if entry['Median Fold Change'] == 'NA' else float(entry['Median Fold Change'])
+                        binding_percentile = entry['Median MT IC50 Percentile']
+                        immunogenicity_percentile = entry['Median MT Immunogenicity Percentile']
+                        presentation_percentile = entry['Median MT Presentation Percentile']
+                    elif self.top_score_metric == 'lowest':
+                        score = entry['Best MT IC50 Score']
+                        fold_change = sys.maxsize if entry['Corresponding Fold Change'] == 'NA' else float(entry['Corresponding Fold Change'])
+                        binding_percentile = entry['Best MT IC50 Percentile']
+                        immunogenicity_percentile = entry['Best MT Immunogenicity Percentile']
+                        presentation_percentile = entry['Best MT Presentation Percentile']
 
-            if self.minimum_fold_change is not None:
-                if self.top_score_metric == 'median':
-                    column = 'Median Fold Change'
-                elif self.top_score_metric == 'lowest':
-                    column = 'Corresponding Fold Change'
-                filter_criteria.append(FilterCriterion(column, '>=', self.minimum_fold_change))
-            Filter(self.input_file, self.output_file, filter_criteria, [], "AND" if self.percentile_threshold_strategy == 'conservative' else "OR").execute()
+                threshold = self.per_allele_binding_thresholds[entry['HLA Allele']]
+
+                filters = [
+                    False if score == 'NA' else float(score) > threshold,
+                    False if binding_percentile == 'NA' else float(binding_percentile) > self.binding_percentile_threshold,
+                    False if immunogenicity_percentile == 'NA' else float(immunogenicity_percentile) > self.immunogenicity_percentile_threshold,
+                    False if presentation_percentile == 'NA' else float(presentation_percentile) > self.presentation_percentile_threshold,
+                ]
+
+                if self.percentile_threshold_strategy == 'conservative':
+                    if any(filters):
+                        continue
+                elif self.percentile_threshold_strategy == 'exploratory':
+                    if all(filters):
+                        continue
+
+                if self.minimum_fold_change is not None and fold_change < self.minimum_fold_change:
+                    continue
+
+                writer.writerow(entry)
 
     @classmethod
     def parser(cls, tool):
