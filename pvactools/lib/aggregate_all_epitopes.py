@@ -700,17 +700,31 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         transcript_table = pd.DataFrame.from_records(records)
 
         transcript_table['Biotype Sort'] = transcript_table.Biotype.map(lambda x: 1 if x == 'protein_coding' else 2)
-        transcript_table['TSL Sort'] = transcript_table.apply(lambda x: 1 if is_preferred_transcript(x, self.transcript_prioritization_strategy, self.maximum_transcript_support_level) else 2, axis=1)
-
+        transcript_table['mane_select_sort'] = transcript_table["MANE Select"].apply(lambda x: 1 if x else 2)
+        transcript_table['canonical_sort'] = transcript_table["Canonical"].apply(lambda x: 1 if x else 2)
+        transcript_table['tsl_sort'] = transcript_table["Transcript Support Level"].apply(lambda x: 6 if x in ['NA', 'Not Supported'] or pd.isna(x) else int(x))
+        sort_columns = [
+            "Biotype Sort",
+            "mane_select_sort",
+            "canonical_sort",
+            "tsl_sort",
+            "Length",
+            "Expr"
+        ]
+        sort_orders = [
+            True,
+            True,
+            True,
+            True,
+            False,
+            False
+        ]
         if self.allow_incomplete_transcripts:
             transcript_table['Transcript CDS Flags Sort'] = transcript_table['Transcript CDS Flags'].apply(lambda x: 1 if x == "None" else (2 if any(flag in str(x) for flag in ["cds_start_nf", "cds_end_nf"]) else 1))
-            sort_columns = ["Biotype Sort", "Transcript CDS Flags Sort", "TSL Sort", "Length"]
-            sort_order = [True, True, True, False]
-        else:
-            sort_columns = ["Biotype Sort", "TSL Sort", "Length"]
-            sort_order = [True, True, False]
+            sort_columns.insert(0, 'Transcript CDS Flags Sort')
+            sort_orders.insert(0, True)
 
-        transcript_table.sort_values(by=sort_columns, ascending=sort_order, inplace=True)
+        transcript_table.sort_values(by=sort_columns, ascending=sort_orders, inplace=True)
         return transcript_table
 
     def calculate_unique_peptide_count(self, included_df):
