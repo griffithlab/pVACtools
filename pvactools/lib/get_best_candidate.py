@@ -1,3 +1,5 @@
+import pandas as pd
+
 from pvactools.lib.anchor_residue_pass import AnchorResiduePass
 from pvactools.lib.run_utils import is_preferred_transcript
 
@@ -19,11 +21,19 @@ class PvacseqBestCandidate:
         self.allow_incomplete_transcripts = allow_incomplete_transcripts
 
     def get(self, df):
-        #get all entries with Biotype 'protein_coding'
-        biotype_df = df[df['Biotype'] == 'protein_coding']
+        #get all entries that don't have CDS Flags
+        if self.allow_incomplete_transcripts:
+            cds_df = df[df['Transcript CDS Flags'] == 'None']
+            if cds_df.shape[0] == 0:
+                cds_df = df
+        else:
+            cds_df = df
+
+        #subset cds dataframe to only get entries with Biotype 'protein_coding'
+        biotype_df = cds_df[cds_df['Biotype'] == 'protein_coding']
         #if there are none, reset to previous dataframe
         if biotype_df.shape[0] == 0:
-            biotype_df = df
+            biotype_df = cds_df
 
         #subset protein_coding dataframe to only preferred transcripts
         biotype_df['transcript_pass'] = biotype_df.apply(lambda x: is_preferred_transcript(x, self.transcript_prioritization_strategy, self.maximum_transcript_support_level), axis=1)
@@ -32,7 +42,7 @@ class PvacseqBestCandidate:
         if transcript_df.shape[0] == 0:
             transcript_df = biotype_df
 
-        #subset tsl dataframe to only include entries with no problematic positions
+        #subset transcript dataframe to only include entries with no problematic positions
         if 'Problematic Positions' in transcript_df:
             prob_pos_df = transcript_df[transcript_df['Problematic Positions'] == "None"]
             #if this results in an empty dataframe, reset to previous dataframe
@@ -47,28 +57,31 @@ class PvacseqBestCandidate:
         if anchor_residue_pass_df.shape[0] == 0:
             anchor_residue_pass_df = prob_pos_df
 
-        # if allow_incomplete_transcripts is True, deprioritize certain flags
-        if self.allow_incomplete_transcripts:
-            anchor_residue_pass_df['Transcript CDS Flags Sort'] = anchor_residue_pass_df['Transcript CDS Flags'].apply(
-                lambda x: 1 if x == "None" else (2 if any(flag in str(x) for flag in ["cds_start_nf", "cds_end_nf"]) else 1)
-            )
-            sort_columns = [
-                'Transcript CDS Flags Sort',
-                f"{self.mt_top_score_metric} MT {self.top_score_mode}",
-                'Transcript Length',
-            ]
-            sort_order = [True, True, False]
-        else:
-            sort_columns = [
-                f"{self.mt_top_score_metric} MT {self.top_score_mode}",
-                'Transcript Length',
-            ]
-            sort_order = [True, False]
+        #set up sorting criteria
+        anchor_residue_pass_df['mane_select_sort'] = anchor_residue_pass_df["MANE Select"].apply(lambda x: 1 if x else 2)
+        anchor_residue_pass_df['canonical_sort'] = anchor_residue_pass_df["Canonical"].apply(lambda x: 1 if x else 2)
+        anchor_residue_pass_df['tsl_sort'] = anchor_residue_pass_df["Transcript Support Level"].apply(lambda x: 6 if x in ['NA', 'Not Supported'] or pd.isna(x) else int(x))
+        sort_columns = [
+            f"{self.mt_top_score_metric} MT {self.top_score_mode}",
+            "mane_select_sort",
+            "canonical_sort",
+            "tsl_sort",
+            "Transcript Length",
+            "Transcript Expression"
+        ]
+        sort_orders = [
+            True,
+            True,
+            True,
+            True,
+            False,
+            False
+        ]
 
-        #determine the entry with the lowest IC50 Score, transcript prioritization status, and longest Transcript
+        #Sort the dataframe according to the criteria and pick the first (best) one
         anchor_residue_pass_df.sort_values(
             by=sort_columns,
-            ascending=sort_order,
+            ascending=sort_orders,
             inplace=True
         )
         return anchor_residue_pass_df.iloc[0]
@@ -127,11 +140,19 @@ class PvacspliceBestCandidate:
         self.allow_incomplete_transcripts=allow_incomplete_transcripts
 
     def get(self, df):
-        #get all entries with Biotype 'protein_coding'
-        biotype_df = df[df['Biotype'] == 'protein_coding']
+        #get all entries that don't have CDS Flags
+        if self.allow_incomplete_transcripts:
+            cds_df = df[df['Transcript CDS Flags'] == 'None']
+            if cds_df.shape[0] == 0:
+                cds_df = df
+        else:
+            cds_df = df
+
+        #subset cds dataframe to only get entries with Biotype 'protein_coding'
+        biotype_df = cds_df[cds_df['Biotype'] == 'protein_coding']
         #if there are none, reset to previous dataframe
         if biotype_df.shape[0] == 0:
-            biotype_df = df
+            biotype_df = cds_df
 
         #subset protein_coding dataframe to only preferred transcripts
         biotype_df['transcript_pass'] = biotype_df.apply(lambda x: is_preferred_transcript(x, self.transcript_prioritization_strategy, self.maximum_transcript_support_level), axis=1)
@@ -149,28 +170,31 @@ class PvacspliceBestCandidate:
         else:
             prob_pos_df = transcript_df
 
-        # if allow_incomplete_transcripts is True, deprioritize certain flags
-        if self.allow_incomplete_transcripts:
-            prob_pos_df['Transcript CDS Flags Sort'] = prob_pos_df['Transcript CDS Flags'].apply(
-                lambda x: 1 if x == "None" else (2 if any(flag in str(x) for flag in ["cds_start_nf", "cds_end_nf"]) else 1)
-            )
-            sort_columns = [
-                'Transcript CDS Flags Sort',
-                f"{self.mt_top_score_metric} {self.top_score_mode}",
-                "WT Protein Length",
-            ]
-            sort_order = [True, True, False]
-        else:
-            sort_columns = [
-                f"{self.mt_top_score_metric} {self.top_score_mode}",
-                "WT Protein Length",
-            ]
-            sort_order = [True, False]
+        #set up sorting criteria
+        prob_pos_df['mane_select_sort'] = prob_pos_df["MANE Select"].apply(lambda x: 1 if x else 2)
+        prob_pos_df['canonical_sort'] = prob_pos_df["Canonical"].apply(lambda x: 1 if x else 2)
+        prob_pos_df['tsl_sort'] = prob_pos_df["Transcript Support Level"].apply(lambda x: 6 if x in ['NA', 'Not Supported'] or pd.isna(x) else int(x))
+        sort_columns = [
+            f"{self.mt_top_score_metric} {self.top_score_mode}",
+            "mane_select_sort",
+            "canonical_sort",
+            "tsl_sort",
+            "WT Protein Length",
+            "Transcript Expression"
+        ]
+        sort_orders = [
+            True,
+            True,
+            True,
+            True,
+            False,
+            False
+        ]
 
-        #determine the entry with the lowest IC50 Score, transcript prioritization status, and longest Transcript
+        #Sort the dataframe according to the criteria and pick the first (best) one
         prob_pos_df.sort_values(
             by=sort_columns,
-            ascending=sort_order,
+            ascending=sort_orders,
             inplace=True
         )
         return prob_pos_df.iloc[0]
