@@ -1217,6 +1217,7 @@ server <- shinyServer(function(input, output, session) {
         gather("col", "val", colnames(mt_data)[1]:tail(colnames(wt_data), n = 1)) %>%
         separate(col, c("HLA_allele", "Mutant", "Score"), sep = "\\_") %>%
         spread("Score", val)
+      full_data$type <- 'binding'
       full_data
     } else {
       return()
@@ -1226,16 +1227,19 @@ server <- shinyServer(function(input, output, session) {
   output$violinPlot_IC50 <- renderPlot({
     withProgress(message = "Loading Binding Plot", value = 0, {
       if (length(df$metricsData[[selectedID()]]$sets) != 0) {
-        line.data <- data.frame(yintercept = c(500, 1000), Cutoffs = c("500nM", "1000nM"), color = c("#28B463", "#EC7063"))
+        line.data <- data.frame(yintercept = c(500, 1000), cutoffs = c("500nM", "1000nM"), color = c("#28B463", "#28B463"))
         hla_allele_count <- length(unique(bindingDataIC50()$HLA_allele))
         incProgress(0.5)
         p <- ggplot(data = bindingDataIC50(), aes(x = Mutant, y = Score, color = Mutant), trim = FALSE) + geom_violin() + facet_grid(cols = vars(HLA_allele)) + scale_y_continuous(trans = "log10") + #coord_trans(y = "log10") +
           stat_summary(fun = mean, fun.min = mean, fun.max = mean, geom = "crossbar", width = 0.25, position = position_dodge(width = .25)) +
-          geom_jitter(data = bindingDataIC50(), aes(shape = algorithms), size = 5, stroke = 1, position = position_jitter(0.3)) +
+          geom_jitter(data = bindingDataIC50(), aes(shape = algorithms, color = type), size = 5, stroke = 1, position = position_jitter(0.3)) +
           scale_shape_manual(values = 0:8) +
-          geom_hline(aes(yintercept = yintercept, linetype = Cutoffs), line.data, color = rep(line.data$color, hla_allele_count)) +
-          scale_color_manual(values = rep(c("MT" = "#D2B4DE", "WT" = "#F7DC6F"), hla_allele_count)) +
-          theme(strip.text = element_text(size = 15), axis.text = element_text(size = 10), axis.title = element_text(size = 15), axis.ticks = element_line(linewidth = 3), legend.text = element_text(size = 15), legend.title = element_text(size = 15))
+          geom_hline(aes(yintercept = yintercept, linetype = cutoffs), line.data, color = rep(line.data$color, hla_allele_count)) +
+          scale_linetype_manual(values = rep(c("500nM" = "dashed", "1000nM" = "solid"), hla_allele_count), name="cutoffs") +
+          scale_color_manual(values = rep(c("binding" = "#94caec"), hla_allele_count)) +
+          guides(linetype = guide_legend(ncol=2), color = "none") +
+          labs(x = "") +
+          theme(strip.text = element_text(size = 15), axis.text = element_text(size = 15, face = "bold"), axis.title = element_text(size = 15), axis.ticks = element_line(linewidth = 3), legend.text = element_text(size = 15), legend.title = element_text(size = 15))
         incProgress(0.5)
         print(p)
       }else {
@@ -1246,22 +1250,25 @@ server <- shinyServer(function(input, output, session) {
       }
     })
   })
-  ##plotting percentile binding score violin plot
+  ##plotting percentile score violin plot
   output$violinPlot_percentile <- renderPlot({
     withProgress(message = "Loading Percentile Plot", value = 0, {
       if (length(df$metricsData[[selectedID()]]$sets) != 0) {
-        all_percentile_data <- rbind(bindingPercentileData(), immunogenicityPercentileData(), presentationPercentileData())
-        line.data <- data.frame(yintercept = c(0.5, 2), Cutoffs = c("0.5%", "2%"), color = c("#28B463", "#EC7063"))
+        all_percentile_data <- rbind(bindingPercentileData(), presentationPercentileData(), immunogenicityPercentileData())
+        line.data <- data.frame(yintercept = c(0.5, 2), cutoffs = c("0.5%", "2%"), color = c("#28B463", "#28B463"))
         hla_allele_count <- length(unique(all_percentile_data$HLA_allele))
         incProgress(0.5)
         algorithm_count <- length(unique(all_percentile_data$algorithms))
         p <- ggplot(data = all_percentile_data, aes(x = Mutant, y = Percentile, color = Mutant), trim = FALSE) + geom_violin() + facet_grid(cols = vars(HLA_allele)) + scale_y_continuous(trans = "log10") + #coord_trans(y = "log10") +
           stat_summary(fun = mean, fun.min = mean, fun.max = mean, geom = "crossbar", width = 0.25, position = position_dodge(width = .25)) +
-          geom_jitter(data = all_percentile_data, aes(shape = algorithms), size = 5, stroke = 1, position = position_jitter(0.3)) +
+          geom_jitter(data = all_percentile_data, aes(shape = algorithms, color = type), size = 5, stroke = 1, position = position_jitter(0.3)) +
           scale_shape_manual(values = 0:(algorithm_count-1)) +
-          geom_hline(aes(yintercept = yintercept, linetype = Cutoffs), line.data, color = rep(line.data$color, hla_allele_count)) +
-          scale_color_manual(values = rep(c("MT" = "#D2B4DE", "WT" = "#F7DC6F"), hla_allele_count)) +
-          theme(strip.text = element_text(size = 15), axis.text = element_text(size = 10), axis.title = element_text(size = 15), axis.ticks = element_line(linewidth = 3), legend.text = element_text(size = 15), legend.title = element_text(size = 15))
+          scale_color_manual(values = rep(c("binding" = "#94caec", "immunogenicity" = "#7e2954", "presentation" = "#dcce7d"), hla_allele_count), name="type") +
+          geom_hline(aes(yintercept = yintercept, linetype = cutoffs), line.data, color = rep(line.data$color, hla_allele_count)) +
+          scale_linetype_manual(values = rep(c("0.5%" = "dashed", "2%" = "solid"), hla_allele_count), name="cutoffs") +
+          guides(color = guide_legend(ncol=2), linetype = guide_legend(ncol=2)) +
+          labs(x = "") +
+          theme(strip.text = element_text(size = 15), axis.text = element_text(size = 15, face = "bold"), axis.title = element_text(size = 15), axis.ticks = element_line(linewidth = 3), legend.text = element_text(size = 15), legend.title = element_text(size = 15))
         incProgress(0.5)
         print(p)
       }else {
@@ -1304,6 +1311,7 @@ server <- shinyServer(function(input, output, session) {
         gather("col", "val", colnames(mt_data)[1]:tail(colnames(wt_data), n = 1)) %>%
         separate(col, c("HLA_allele", "Mutant", "Percentile"), sep = "\\_") %>%
         spread("Percentile", val)
+      full_data$type <- 'binding'
       full_data
     } else {
       return()
@@ -1363,6 +1371,7 @@ server <- shinyServer(function(input, output, session) {
         gather("col", "val", colnames(mt_data)[1]:tail(colnames(wt_data), n = 1)) %>%
         separate(col, c("HLA_allele", "Mutant", "Percentile"), sep = "\\_") %>%
         spread("Percentile", val)
+      full_data$type <- 'immunogenicity'
       full_data
     } else {
       return()
@@ -1425,6 +1434,7 @@ server <- shinyServer(function(input, output, session) {
         gather("col", "val", colnames(mt_data)[1]:tail(colnames(wt_data), n = 1)) %>%
         separate(col, c("HLA_allele", "Mutant", "Percentile"), sep = "\\_") %>%
         spread("Percentile", val)
+      full_data$type <- 'presentation'
       full_data
     } else {
       return()
