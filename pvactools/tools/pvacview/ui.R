@@ -282,20 +282,6 @@ explore_tab <- tabItem(
                           strong("Note"), span(": The MixMHCpred score does not respresent IC50 binding affinity."),
                           style = "overflow-x: scroll;"
                  ),
-                 tabPanel("Immunogenicity Data",
-                          h4("Prediction score table showing exact immunogenicity values and percentiles."),
-                          DTOutput(outputId = "immunogenicityDatatable"),
-                          br(),
-                          strong("BigMHC_IM"), span(": A deep learning tool for predicting MHC-I (neo)epitope immunogenicity. ("),
-                          a(href = "https://www.nature.com/articles/s42256-023-00694-6", "Citation", target = "_blank"), span(")"),
-                          br(),
-                          strong("DeepImmuno"), span(": Deep-learning empowered prediction of immunogenic epitopes for T cell immunity. ("),
-                          a(href = "https://academic.oup.com/bib/article/22/6/bbab160/6261914?login=false", "Citation", target = "_blank"), span(")"),
-                          br(),
-                          strong("PRIME"), span(": A PRedictor of class I IMmunogenic Epitopes. It combines predictions of binding to MHC-I molecules and propensity for TCR recognition. ("),
-                          a(href = "https://www.sciencedirect.com/science/article/pii/S2666379121000057?via%3Dihu", "Citation", target = "_blank"), span(")"),
-                          style = "overflow-x: scroll;"
-                 ),
                  tabPanel("Presentation Data",
                           h4("Prediction score table showing exact presentation values and percentiles."),
                           DTOutput(outputId = "presentationDatatable"),
@@ -311,6 +297,20 @@ explore_tab <- tabItem(
                           br(),
                           strong("NetMHCpanEL / NetMHCIIpanEL"), span(": A predictor trained on eluted ligand data. ("),
                           a(href = "https://academic.oup.com/nar/article/48/W1/W449/5837056", "Citation", target = "_blank"), span(")"),
+                          style = "overflow-x: scroll;"
+                 ),
+                 tabPanel("Immunogenicity Data",
+                          h4("Prediction score table showing exact immunogenicity values and percentiles."),
+                          DTOutput(outputId = "immunogenicityDatatable"),
+                          br(),
+                          strong("BigMHC_IM"), span(": A deep learning tool for predicting MHC-I (neo)epitope immunogenicity. ("),
+                          a(href = "https://www.nature.com/articles/s42256-023-00694-6", "Citation", target = "_blank"), span(")"),
+                          br(),
+                          strong("DeepImmuno"), span(": Deep-learning empowered prediction of immunogenic epitopes for T cell immunity. ("),
+                          a(href = "https://academic.oup.com/bib/article/22/6/bbab160/6261914?login=false", "Citation", target = "_blank"), span(")"),
+                          br(),
+                          strong("PRIME"), span(": A PRedictor of class I IMmunogenic Epitopes. It combines predictions of binding to MHC-I molecules and propensity for TCR recognition. ("),
+                          a(href = "https://www.sciencedirect.com/science/article/pii/S2666379121000057?via%3Dihu", "Citation", target = "_blank"), span(")"),
                           style = "overflow-x: scroll;"
                  )
           )
