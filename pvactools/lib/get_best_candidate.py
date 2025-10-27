@@ -1,7 +1,7 @@
 import pandas as pd
 
 from pvactools.lib.anchor_residue_pass import AnchorResiduePass
-from pvactools.lib.run_utils import is_preferred_transcript
+from pvactools.lib.run_utils import is_preferred_transcript, metrics_to_column
 
 class PvacseqBestCandidate:
     def __init__(
@@ -9,15 +9,15 @@ class PvacseqBestCandidate:
         transcript_prioritization_strategy,
         maximum_transcript_support_level,
         anchor_calculator,
-        mt_top_score_metric,
-        top_score_mode,
+        top_score_metric,
+        top_score_metric2,
         allow_incomplete_transcripts,
     ):
         self.transcript_prioritization_strategy = transcript_prioritization_strategy
         self.maximum_transcript_support_level = maximum_transcript_support_level
         self.anchor_calculator = anchor_calculator
-        self.mt_top_score_metric = mt_top_score_metric
-        self.top_score_mode = top_score_mode
+        self.top_score_metric = top_score_metric
+        self.top_score_metric2 = top_score_metric2
         self.allow_incomplete_transcripts = allow_incomplete_transcripts
 
     def get(self, df):
@@ -58,11 +58,15 @@ class PvacseqBestCandidate:
             anchor_residue_pass_df = prob_pos_df
 
         #set up sorting criteria
+        anchor_residue_pass_df["rank"] = 0
+        for metric2 in self.top_score_metric2:
+            anchor_residue_pass_df[f"rank_{metric2}"] = pd.to_numeric(anchor_residue_pass_df[metrics_to_column('pvacseq', self.top_score_metric, metric2)], errors='coerce').rank(ascending=True, method='dense', na_option='bottom')
+            anchor_residue_pass_df["rank"] += anchor_residue_pass_df[f"rank_{metric2}"]
         anchor_residue_pass_df['mane_select_sort'] = anchor_residue_pass_df["MANE Select"].apply(lambda x: 1 if x else 2)
         anchor_residue_pass_df['canonical_sort'] = anchor_residue_pass_df["Canonical"].apply(lambda x: 1 if x else 2)
         anchor_residue_pass_df['tsl_sort'] = anchor_residue_pass_df["Transcript Support Level"].apply(lambda x: 6 if x in ['NA', 'Not Supported'] or pd.isna(x) else int(x))
         sort_columns = [
-            f"{self.mt_top_score_metric} MT {self.top_score_mode}",
+            "rank",
             "mane_select_sort",
             "canonical_sort",
             "tsl_sort",
@@ -87,9 +91,9 @@ class PvacseqBestCandidate:
         return anchor_residue_pass_df.iloc[0]
 
 class PvacfuseBestCandidate:
-    def __init__(self, top_score_metric, top_score_mode):
+    def __init__(self, top_score_metric, top_score_metric2):
         self.top_score_metric = top_score_metric
-        self.top_score_mode = top_score_mode
+        self.top_score_metric2 = top_score_metric2
 
     def get(self, df):
         #subset dataframe to only include entries with no problematic positions
@@ -100,18 +104,33 @@ class PvacfuseBestCandidate:
                 prob_pos_df = df
         else:
             prob_pos_df = df
+
+        #set up sorting criteria
+        prob_pos_df["rank"] = 0
+        for metric2 in self.top_score_metric2:
+            prob_pos_df[f"rank_{metric2}"] = pd.to_numeric(prob_pos_df[metrics_to_column('pvacfuse', self.top_score_metric, metric2)], errors='coerce').rank(ascending=True, method='dense', na_option='bottom')
+            prob_pos_df["rank"] += prob_pos_df[f"rank_{metric2}"]
+        #sort by metrics included in top_score_metric2 in the order specified
+        sort_columns = ['rank']
+        sort_orders = [True]
+
         if 'Expression' in prob_pos_df:
             prob_pos_df['Expression Sort'] = prob_pos_df['Expression']
             prob_pos_df['Expression Sort'].replace({'NA': 0})
-            prob_pos_df.sort_values(by=["{} {}".format(self.top_score_metric, self.top_score_mode), 'Expression Sort'], inplace=True, ascending=[True, False])
-        else:
-            prob_pos_df.sort_values(by=["{} {}".format(self.top_score_metric, self.top_score_mode)], inplace=True, ascending=[True])
+            sort_columns.append('Expression Sort')
+            sort_orders.append(False)
+
+        prob_pos_df.sort_values(
+            by=sort_columns,
+            inplace=True,
+            ascending=sort_orders
+        )
         return prob_pos_df.iloc[0]
 
 class PvacbindBestCandidate:
-    def __init__(self, top_score_metric, top_score_mode):
+    def __init__(self, top_score_metric, top_score_metric2):
         self.top_score_metric = top_score_metric
-        self.top_score_mode = top_score_mode
+        self.top_score_metric2 = top_score_metric2
 
     def get(self, df):
         if 'Problematic Positions' in df:
@@ -121,7 +140,20 @@ class PvacbindBestCandidate:
                 prob_pos_df = df
         else:
             prob_pos_df = df
-        prob_pos_df.sort_values(by=["{} {}".format(self.top_score_metric, self.top_score_mode)], inplace=True, ascending=True)
+
+        prob_pos_df["rank"] = 0
+        for metric2 in self.top_score_metric2:
+            prob_pos_df[f"rank_{metric2}"] = pd.to_numeric(prob_pos_df[metrics_to_column('pvacbind', self.top_score_metric, metric2)], errors='coerce').rank(ascending=True, method='dense', na_option='bottom')
+            prob_pos_df["rank"] += prob_pos_df[f"rank_{metric2}"]
+        #sort by metrics included in top_score_metric2 in the order specified
+        sort_columns = ['rank']
+        sort_orders = [True]
+
+        prob_pos_df.sort_values(
+            by=sort_columns,
+            inplace=True,
+            ascending=sort_orders
+        )
         return prob_pos_df.iloc[0]
 
 class PvacspliceBestCandidate:
@@ -129,14 +161,14 @@ class PvacspliceBestCandidate:
         self,
         transcript_prioritization_strategy,
         maximum_transcript_support_level,
-        mt_top_score_metric,
-        top_score_mode,
+        top_score_metric,
+        top_score_metric2,
         allow_incomplete_transcripts,
     ):
         self.transcript_prioritization_strategy = transcript_prioritization_strategy
         self.maximum_transcript_support_level = maximum_transcript_support_level
-        self.mt_top_score_metric = mt_top_score_metric
-        self.top_score_mode = top_score_mode
+        self.top_score_metric = top_score_metric
+        self.top_score_metric2 = top_score_metric2
         self.allow_incomplete_transcripts=allow_incomplete_transcripts
 
     def get(self, df):
@@ -171,11 +203,15 @@ class PvacspliceBestCandidate:
             prob_pos_df = transcript_df
 
         #set up sorting criteria
+        prob_pos_df["rank"] = 0
+        for metric2 in self.top_score_metric2:
+            prob_pos_df[f"rank_{metric2}"] = pd.to_numeric(prob_pos_df[metrics_to_column('pvacsplice', self.top_score_metric, metric2)], errors='coerce').rank(ascending=True, method='dense', na_option='bottom')
+            prob_pos_df["rank"] += prob_pos_df[f"rank_{metric2}"]
         prob_pos_df['mane_select_sort'] = prob_pos_df["MANE Select"].apply(lambda x: 1 if x else 2)
         prob_pos_df['canonical_sort'] = prob_pos_df["Canonical"].apply(lambda x: 1 if x else 2)
         prob_pos_df['tsl_sort'] = prob_pos_df["Transcript Support Level"].apply(lambda x: 6 if x in ['NA', 'Not Supported'] or pd.isna(x) else int(x))
         sort_columns = [
-            f"{self.mt_top_score_metric} {self.top_score_mode}",
+            "rank",
             "mane_select_sort",
             "canonical_sort",
             "tsl_sort",
