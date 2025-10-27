@@ -972,7 +972,7 @@ server <- shinyServer(function(input, output, session) {
         incProgress(0.5)
         names(GB_transcripts) <- c("Transcripts in Selected Set", "Expression", "MANE Select", "Canonical", "Transcript Support Level", "Biotype", "CDS Flags", "Transcript Length (#AA)", "Best Transcript")
         incProgress(0.5)
-        datatable(GB_transcripts, options = list(columnDefs = list(list(defaultContent = "N/A", targets = c(3)), list(visible = FALSE, targets = c(-1))))) %>%
+        datatable(GB_transcripts, options = list(columnDefs = list(list(defaultContent = "NA", targets = c(5)), list(visible = FALSE, targets = c(-1))))) %>%
           formatStyle(c("Transcripts in Selected Set"), "Best Transcript", backgroundColor = styleEqual(c(TRUE), c("#98FF98")))
       }else {
         GB_transcripts <- data.frame("Transcript" = character(), "Expression" = character(), "MANE Select" = character(), "Canonical" = character(),"TSL" = character(), "Biotype" = character(), "Transcript Length (#AA)"= character(), "Length" = character())
