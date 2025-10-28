@@ -66,7 +66,7 @@ applied (in order):
 
 - Binding Filter
 - Coverage Filter
-- Transcript Support Level Filter
+- Transcript Filter
 - Top Score Filter
 
 Please see the :ref:`Standalone Filter Commands<filter_commands>`
