@@ -25,14 +25,14 @@ which records the inputs used for each specific pipeline run:
    * - ``<sample_name>.all_epitopes.aggregated.tsv``
      - An aggregated version of the ``all_epitopes.tsv`` file that gives information about
        the best epitope for each mutation in an easy-to-read format. Not
-       generated when running with elution algorithms only.
+       generated when running only with presentation and immunogenicity algorithms.
    * - ``<sample_name>.all_epitopes.aggregated.tsv.reference_matches``
      - A file outlining details of reference proteome matches
    * - ``<sample_name>.all_epitopes.aggregated.metrics.json``
      - A JSON file with detailed information about the predicted epitopes,
        formatted for pVACview. This file, in combination with the
        aggregated.tsv file, is required to visualize your results
-       in pVACview. Not generated when running with elution algorithms only.
+       in pVACview. Not generated when running only with presentation and immunogenicity algorithms.
 
 Usage
 -----

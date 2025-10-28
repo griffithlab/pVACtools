@@ -32,7 +32,7 @@ created):
        predictions added.
    * - ``<sample_name>.<MHC_I|MHC_II|Combined>.all_epitopes.aggregated.tsv``
      - An aggregated version of the ``all_epitopes.tsv`` file that gives information about
-       the best epitope for each mutation in an easy-to-read format. Not generated when running with elution algorithms only.
+       the best epitope for each mutation in an easy-to-read format. Not generated when running only with presentation and immunogenicity algorithms.
    * - ``<sample_name>.<MHC_I|MHC_II|Combined>.all_epitopes.aggregated.tsv.reference_matches`` (optional)
      - A file outlining details of reference proteome matches
 
@@ -55,8 +55,8 @@ documentation for more information on each individual filter. The standalone
 filter commands may be useful to reproduce the filtering or to chose different
 filtering thresholds.
 
-Prediction Algorithms Supporting Elution Scores
-_______________________________________________
+Prediction Algorithms Supporting Presentation Scores
+____________________________________________________
 
 - MHCflurryEL (Presentation and Processing)
 - NetMHCpanEL
@@ -69,14 +69,14 @@ ______________________________________________________
 - BigMHC_IM
 - DeepImmuno
 
-Please note that when running pVACfuse with only elution or immunogenicity algorithms, no
+Please note that when running pVACfuse with only presentation or immunogenicity algorithms, no
 aggregate report and pVACview files are created.
 
 Prediction Algorithms Supporting Percentile Information
 _______________________________________________________
 
 pVACfuse outputs percentile rank information when provided by
-a chosen binding affinity, elution, or immunogenicity prediction algorithm.
+a chosen binding affinity, presentation, or immunogenicity prediction algorithm.
 The following prediction algorithms calculate a
 percentile rank:
 
@@ -140,7 +140,7 @@ all_epitopes.tsv and filtered.tsv Report Columns
    * - ``Individual Prediction Algorithm Scores and Percentiles`` (multiple)
      - ic50 binding affintity and percentile ranks for the ``Epitope Seq`` for the individual prediction algorithms used
    * - ``MHCflurryEL Processing Score and Presentation Score and Percentile`` (optional)
-     - MHCflurry elution processing score and presentation score and percentiles
+     - MHCflurry processing score and presentation score and percentiles
        for the ``Epitope Seq`` if the run included
        MHCflurryEL as one of the prediction algorithms
    * - ``Read Support``

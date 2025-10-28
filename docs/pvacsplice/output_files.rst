@@ -39,7 +39,7 @@ created):
    * - ``<sample_name>.<MHC_I|MHC_II|Combined>.all_epitopes.aggregated.tsv``
      - An aggregated version of the ``all_epitopes.tsv`` file that gives information about
        the best epitope for each mutation in an easy-to-read format. Not
-       generated when running with elution algorithms only.
+       generated when running only with presentation and immunogenicity algorithms.
    * - ``<sample_name>.<MHC_I|MHC_II|Combined>.all_epitopes.aggregated.tsv.reference_matches`` (optional)
      - A file outlining details of reference proteome matches
 
@@ -85,8 +85,8 @@ The following prediction algorithms do not provide a percentile rank:
 
 - MHCnuggets
 
-Prediction Algorithms Supporting Elution Scores
-_______________________________________________
+Prediction Algorithms Supporting Presentation Scores
+____________________________________________________
 
 - MHCflurryEL
 - NetMHCpanEL
@@ -99,8 +99,8 @@ ______________________________________________________
 - BigMHC_IM
 - DeepImmuno
 
-Please note that when running pVACseq with only elution or immunogenicity algorithms, no
-aggregate report and pVACview files are created.
+Please note that when running pVACseq with only presentation or immunogenicity algorithms, no
+aggregate report is created.
 
 .. _pvacsplice_all_ep_and_filtered:
 
@@ -206,7 +206,7 @@ all_epitopes.tsv and filtered.tsv Report Columns
    * - ``Individual Prediction Algorithm  IC50 Scores and Percentiles`` (multiple)
      - ic50 binding affintity and percentile ranks for the ``Epitope Seq`` for the individual prediction algorithms used
    * - ``MHCflurryEL WT and MT Processing Score and Presentation Score and Percentile`` (optional)
-     - MHCflurry elution processing score and presentation score and percentiles
+     - MHCflurry processing score and presentation score and percentiles
        for the ``Epitope Seq`` if the run included
        MHCflurryEL as one of the prediction algorithms
    * - ``Problematic Positions`` (optional)
