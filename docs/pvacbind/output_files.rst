@@ -239,6 +239,15 @@ provided to the pVACfuse run:
        and percentile threshold (if set). The ``exploratory`` option requires a candidate to pass EITHER the binding threshold or
        the percentile threshold.
      - conservative
+   * - ``--run-reference-proteome-similarity``
+     - Set this flag in order to run reference proteome similarity analysis
+       and enable ``RefMatch`` tiering. Use ``--blastp-path``, ``--blastp-db``,
+       and ``--peptide-fasta`` parameters to configure your run.
+     - False
+   * - ``--problematic-amino-acids``
+     - Configure this parameter in order to define amino acids problematic for
+       the desired therapy delivery platform and enable ``ProbPos`` tiering.
+     - None
 
 Tiers
 *****
@@ -255,7 +264,7 @@ into tiers as follows:
      - Best Peptide passes the binding, reference match, and problematic
        position criteria
    * - ``PoorBinder``
-     - Best Peptide fails the binding criteria but passes the, reference match and problematic
+     - Best Peptide fails the binding criteria but passes the reference match and problematic
        position criteria
    * - ``RefMatch``
      - Best Peptide fails the reference match criteria but passes the binding and problematic
@@ -277,15 +286,21 @@ Criteria Details
      - Evaluation Logic
    * - Binding Criteria
      - Pass if Best Peptide is strong binder
-     - ``IC50 MT < binding_threshold`` and ``%ile MT < percentile_threshold``
-       (if ``--percentile-threshold`` parameter is set and 'conservative' ``--percentile-threshold-strategy`` is used) or
-       ``IC50 MT < binding_threshold`` or ``%ile MT < percentile_threshold``
-       (if 'exploratory' ``--percentile-threshold-strategy`` is used)
+     - binding score criteria: ``IC50 MT < binding_threshold``
+
+       percentile score criteria (if ``--percentile-threshold`` parameter is
+       set): ``%ile MT < percentile_threshold``
+
+       ``conservative`` ``--percentile-threshold-strategy``: needs to pass
+       BOTH the binding score criteria AND the percentile score criteria
+
+       ``exploratory`` ``--percentile-threshold-strategy``: needs to pass
+       EITHER the binding score criteria OR the percentile score criteria
    * - Reference Match Criteria
      - Pass if there are no reference protome matches
-     - ``Ref Match == True``
+     - ``Ref Match == False``
    * - Problematic Position Criteria
-     - Best Peptide contains a problematic amino acid as defined by the
+     - Best Peptide does not contain a problematic amino acid as defined by the
        ``--problematic-amino-acids`` parameters
      - ``Prob Pos == None``
 

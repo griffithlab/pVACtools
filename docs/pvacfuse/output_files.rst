@@ -292,6 +292,15 @@ provided to the pVACfuse run:
    * - ``--expn-val``
      - The threshold used for filtering epitopes on the Expr.
      - 0.1
+   * - ``--run-reference-proteome-similarity``
+     - Set this flag in order to run reference proteome similarity analysis
+       and enable ``RefMatch`` tiering. Use ``--blastp-path``, ``--blastp-db``,
+       and ``--peptide-fasta`` parameters to configure your run.
+     - False
+   * - ``--problematic-amino-acids``
+     - Configure this parameter in order to define amino acids problematic for
+       the desired therapy delivery platform and enable ``ProbPos`` tiering.
+     - None
 
 Tiers
 *****
@@ -331,13 +340,19 @@ Criteria Details
      - Evaluation Logic
    * - Binding Criteria
      - Pass if Best Peptide is strong binder
-     - ``IC50 MT < binding_threshold`` and ``%ile MT < percentile_threshold``
-       (if ``--percentile-threshold`` parameter is set and 'conservative' ``--percentile-threshold-strategy`` is used) or
-       ``IC50 MT < binding_threshold`` or ``%ile MT < percentile_threshold``
-       (if 'exploratory' ``--percentile-threshold-strategy`` is used)
+     - binding score criteria: ``IC50 MT < binding_threshold``
+
+       percentile score criteria (if ``--percentile-threshold`` parameter is
+       set): ``%ile MT < percentile_threshold``
+
+       ``conservative`` ``--percentile-threshold-strategy``: needs to pass
+       BOTH the binding score criteria AND the percentile score criteria
+
+       ``exploratory`` ``--percentile-threshold-strategy``: needs to pass
+       EITHER the binding score criteria OR the percentile score criteria
    * - Reference Match Criteria
      - Pass if there are no reference protome matches
-     - ``Ref Match == True``
+     - ``Ref Match == False``
    * - Read Support Criteria
      - Pass if the variant has read support
      - ``Read Support < read_support``
@@ -345,7 +360,7 @@ Criteria Details
      - Pass if Best Transcript is expressed
      - ``Expr < expn_val``
    * - Problematic Position Criteria
-     - Best Peptide contains a problematic amino acid as defined by the
+     - Best Peptide does not contains a problematic amino acid as defined by the
        ``--problematic-amino-acids`` parameters
      - ``Prob Pos == None``
 
