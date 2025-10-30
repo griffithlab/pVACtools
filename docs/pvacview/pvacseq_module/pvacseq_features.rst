@@ -73,11 +73,12 @@ There are three separate boxes in this section as shown, from left to right you 
     The selected variant may have multiple transcripts covering the region. However, some transcripts might code for the
     same set of neoantigen candidates if the difference between transcripts is outside of the immediate area around the
     somatic mutation of interest. This table lists these different sets with the number of transcripts in each set,
-    the number of corresponding peptides and the total expression of all transcripts in the set.
+    the number of corresponding peptides and the total expression of all transcripts in the set. The transcript set that includes
+    the best peptide is highlighted in green and selected by default.
 
-  - Referene Matches
+  - Reference Matches
 
-    When the reference proteome similarity feature was enabled during the
+    If the reference proteome similarity feature was enabled during the
     original pVACseq run, this tab will show the Best Peptide, the larger peptide
     sequence around the Best Peptide that was queried for and it will list the
     hits that were found in the reference proteome for that query sequence.
@@ -108,40 +109,61 @@ There are three separate boxes in this section as shown, from left to right you 
 :large:`Transcript Set Detailed Data (Peptide Information)`
 ___________________________________________________________
 
-Upon selecting the transcript set for further examination, users can navigate to this table which displays
-all peptide sequences (from your selected transcript set in the transcripts table) that were predicted to be good binders
-(for at least 1 HLA allele). Both mutant (MT) and wildtype (WT) sequences
-are shown, along with binding affinities (where the MT binding passed the binding threshold). Whether this table shows
-mutant or lowest binding affinities depends on the value of the
-``--top-score-metrics`` from the original pVACseq run.
+- :bold:`Peptide Candidates from Selected Transcript Set:`
 
-This table also shows for each peptide, whether there were any problematic
-positions and whether or not the peptide failed the anchor residue criteria
-for any of the HLA alleles. Peptides failing these criteria are deprioritized
-in the sorting of this table.
+  Upon selecting the transcript set for further examination, users can navigate to this table which displays
+  all peptide sequences included for the transcripts in the selected transcript set in the transcripts table.
+  Included peptides depend on the ``--aggregate-inclusion-binding-threshold`` and
+  ``--aggregate-inclusion-count-limit`` specified in the original pVACseq run.
+  Both mutant (MT) and wildtype (WT) sequences are shown, along with binding affinities (where the MT binding
+  passed the binding threshold). Whether this table shows mutant or lowest binding affinities depends on the
+  value of the ``--top-score-metrics`` from the original pVACseq run.
 
-.. figure:: ../../images/screenshots/pvacview-peptide_table.png
-    :width: 1000px
-    :align: right
-    :alt: pVACview Upload
-    :figclass: align-left
+  This table also shows for each peptide, whether there were any problematic
+  positions and whether or not the peptide failed the anchor residue criteria
+  for any of the HLA alleles. Peptides failing these criteria are deprioritized
+  in the sorting of this table.
 
-We also provide (in the "Transcripts in Set" tab), additional information regarding the transcripts producing these peptides.
-This includes: transcript id, individual transcript expression, `transcript support level <http://uswest.ensembl.org/info/genome/genebuild/transcript_quality_tags.html>`_, biotype and transcript length. Transcripts with a protein_coding biotype, low TSL and long length
-are prioritized in the sorting of this table.
-
-.. figure:: ../../images/screenshots/pvacview-transcript_set.png
-    :width: 1000px
-    :align: right
-    :alt: pVACview Upload
-    :figclass: align-left
+  .. figure:: ../../images/screenshots/pvacview-peptide_table.png
+      :width: 1000px
+      :align: right
+      :alt: pVACview Upload
+      :figclass: align-left
 
 
+- :bold:`Anchor Heatmap:`
 
-:large:`Additional Peptide Information (Additional information regarding individual algorithm binding and anchor scores)`
-_________________________________________________________________________________________________________________________
+  Previously, our lab has computationally predicted anchor positions for different hla alleles and peptide length combinations
+  (`"Computational prediction of MHC anchor locations guides neoantigen identification and prioritization" <https://www.science.org/doi/10.1126/sciimmunol.abg2200?url_ver=Z39.88-2003&rfr_id=ori:rid:crossref.org&rfr_dat=cr_pub%20%200pubmed>`_).
+  These predictions are normalized probabilities representing the likelihood of each position of the peptide to participate in anchoring to the hla allele.
+  The peptide pairs from the peptide table are shown in this tab with anchor probabilities overlaying as a heatmap. These anchor probabilities shown are both allele and peptide length specific.
+  The mutated amino acid(s) is/are marked in red (or the flanking ones are, in the case of deletions) and each MT/WT pair are separated from others using a dotted line.
 
-There are five different tabs in this section of the app, providing peptide-level details on the MT/WT peptide pair that you selected in the peptide table.
+  .. figure:: ../../images/screenshots/pvacview-anchor_heatmap.png
+      :width: 1000px
+      :align: center
+
+
+- :bold:`Transcripts in Set:`
+
+  In this tab we provide additional information regarding the transcripts producing these peptides.
+  This includes: Ensembl transcript id, individual transcript expression, MANE select status, Canonical
+  status, `transcript support level <http://uswest.ensembl.org/info/genome/genebuild/transcript_quality_tags.html>`_,
+  biotype, CDS Flags status, and transcript length. Transcripts with a protein_coding biotype, no CDS Flags,
+  that are the MANE Select or Canonical transcript, that have a low TSL, long length, and high expression
+  are prioritized in the sorting of this table (in this order).
+
+  .. figure:: ../../images/screenshots/pvacview-transcript_set.png
+      :width: 1000px
+      :align: right
+      :alt: pVACview Upload
+      :figclass: align-left
+
+
+:large:`Additional Peptide Information (Additional information regarding individual algorithm binding)`
+_______________________________________________________________________________________________________
+
+There are four different tabs in this section of the app, providing peptide-level details on the MT/WT peptide pair that you selected in the peptide table.
 
 - :bold:`IC50 Plot:`
 
@@ -152,7 +174,6 @@ There are five different tabs in this section of the app, providing peptide-leve
       :width: 1000px
       :align: center
       :alt: pVACview Upload
-      
 
 
 - :bold:`%ile Plot:`
@@ -164,7 +185,7 @@ There are five different tabs in this section of the app, providing peptide-leve
   .. figure:: ../../images/screenshots/pvacview-additional_info_2.png
       :width: 1000px
       :align: center
- 
+
 
 - :bold:`Binding Data:`
 
@@ -174,28 +195,13 @@ There are five different tabs in this section of the app, providing peptide-leve
   .. figure:: ../../images/screenshots/pvacview-additional_info_3.png
       :width: 1000px
       :align: center
-              
 
-- :bold:`Elution Data:`
 
-  Here, we provide the specific elution scores and percentiled generated from each individual algorithm.
+- :bold:`Elution and Immunogenicity Data:`
+
+  Here, we provide the specific presentation and immunogenicity scores and percentiles generated from each individual algorithm.
   This data is specific to the MT/WT peptide pair selected in the peptide table.
 
   .. figure:: ../../images/screenshots/pvacview-additional_info_4.png
       :width: 1000px
       :align: center
-     
-
-- :bold:`Allele-specific anchor prediction heatmap:`
-
-  Previously, our lab has computationally predicted anchor positions for different hla alleles and peptide length combinations
-  (`"Computational prediction of MHC anchor locations guides neoantigen identification and prioritization" <https://www.science.org/doi/10.1126/sciimmunol.abg2200?url_ver=Z39.88-2003&rfr_id=ori:rid:crossref.org&rfr_dat=cr_pub%20%200pubmed>`_).
-  These predictions are normalized probabilities representing the likelihood of each position of the peptide to participate in anchoring to the hla allele.
-  Top 30 MT/WT peptide pairs from the peptide table are shown in this tab with anchor probabilities overlaying as a heatmap. These anchor probabilities shown are both allele and peptide length specific.
-  The mutated amino acid(s) is/are marked in red (or the flanking ones are, in the case of deletions) and each MT/WT pair are separated from others using a dotted line.
-
-  .. figure:: ../../images/screenshots/pvacview-additional_info_5.png
-      :width: 1000px
-      :align: center
-
-
