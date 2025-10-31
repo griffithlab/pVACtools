@@ -165,11 +165,11 @@ Additionally, you can regenerate the :ref:`Tiers <pvacseq_aggregate_report_tiers
 
 - :bold:`Transcript Prioritization Strategy`
 
-  Specify the list of criteria to evaluate to determine wether or not the Best
+  Specify the list of criteria to evaluate to determine whether or not the Best
   Transcript is a good transcript. If "canonical" is in the list, check whether
   the Canonical value is True. If "mane_select" is in the list, check whether
   the MANE Select value is True. If "tsl" is in the list, check whether the
-  TSL value matches the Maximum Transcript Support Level cutoff. The Best Transcript
+  TSL value meets the Maximum Transcript Support Level cutoff. The Best Transcript
   needs to pass at least one of the specified criteria in
   order to be considered a good transcript.
 
@@ -181,7 +181,7 @@ Additionally, you can regenerate the :ref:`Tiers <pvacseq_aggregate_report_tiers
 - :bold:`Top Score Sorting Metric`
 
   Specify the metric that should be used as the primary sort criteria for
-  sortingt candidates within each tier.
+  sorting candidates within each tier.
 
 .. figure:: ../../images/screenshots/pvacview-regenerate_tier.png
     :width: 1000px
