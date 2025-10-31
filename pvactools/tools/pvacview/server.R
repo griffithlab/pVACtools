@@ -631,7 +631,7 @@ server <- shinyServer(function(input, output, session) {
       hla_columns <- which(colnames(filtered_table) %in% df$converted_hla_names)
 
       # Columns where the default value should be 'NA'
-      default_na_targets <- which(colnames(filtered_table) %in% c("POS", "IC50 WT", "%ile MT", "%ile WT", "RNA Expr", "RNA VAF", "Allele Expr",
+      default_na_targets <- which(colnames(filtered_table) %in% c("Pos", "IC50 WT", "%ile MT", "%ile WT", "RNA Expr", "RNA VAF", "Allele Expr",
                                                                   "RNA Depth", "DNA VAF"))
 
       # Columns that should be hidden from the display
