@@ -164,8 +164,8 @@ def merge_and_prepare_data(file1_path, file2_path, file3_path):
 
     # Unify the column names
     merged_all.rename(columns={
-        "NetMHCpanEL WT Score": "NetMHCpanEL WT IC50 Score",
-        "NetMHCpanEL MT Score": "NetMHCpanEL MT IC50 Score",
+        "NetMHCpanEL WT Presentation Score": "NetMHCpanEL WT IC50 Score",
+        "NetMHCpanEL MT Presentation Score": "NetMHCpanEL MT IC50 Score",
         "MHCflurry WT Score": "MHCflurry WT IC50 Score",
         "MHCflurry MT Score": "MHCflurry MT IC50 Score",
         "MHCnuggetsI WT Score": "MHCnuggetsI WT IC50 Score",
@@ -183,6 +183,9 @@ def merge_and_prepare_data(file1_path, file2_path, file3_path):
         "SMMPMBEC WT Score": "SMMPMBEC WT IC50 Score",
         "SMMPMBEC MT Score": "SMMPMBEC MT IC50 Score"
     }, inplace=True)
+    
+    # for pvactools v7 ('NetMHCpanEL MT IC50 Score' has been changed to 'NetMHCpanEL MT Presentation Score')
+    merged_all = merged_all.drop(columns=['IC50 %ile MT', 'IC50 %ile WT'])
 
     return merged_all
 
@@ -328,14 +331,14 @@ def create_final_output(post_imputed_data, original_agg_file_path, output_dir, s
         post_imputed_data[['ID', 'Evaluation_pred', 'Accept_pred_prob']], on="ID", how="left"
     ).rename(columns={'Evaluation_pred': 'Evaluation'})
     # Fill missing evaluations from unmatched IDs as Pending
-    final_df['Evaluation'] = final_df['Evaluation'].fillna('Pending')
+    final_df2['Evaluation'] = final_df2['Evaluation'].fillna('Pending')
 
     # Conditionally set ML Prediction (score) based on Evaluation_pred
     # NOTE: sometimes the ML model will not be able to make a prediction due to missing data, in this case, the Evaluation_pred will be "Pending"
     # This may be due to the class 1 and class 2 files not having the same number of rows.
     final_df2['ML Prediction (score)'] = final_df2.apply(
-        lambda row: "Unable to make prediction with ML model due to missing data" if row['Evaluation'] == "Pending" 
-        else row['Evaluation'] + " (" + str(round(row['Accept_pred_prob'], 2)) + ")", 
+        lambda row: "Unable to make prediction with ML model due to missing data" if (pd.isna(row['Evaluation']) or row['Evaluation'] == "Pending" or pd.isna(row['Accept_pred_prob']))
+        else str(row['Evaluation']) + " (" + str(round(row['Accept_pred_prob'], 2)) + ")", 
         axis=1
     )
     # Modify 'Review' to 'Pending' in Evaluation column

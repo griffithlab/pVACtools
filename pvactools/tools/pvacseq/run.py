@@ -57,9 +57,9 @@ def locate_ml_input_files(base_output_dir, sample_name):
     Returns:
         tuple: Paths to the three required files (file1, file2, file3)
     """
-    file1 = os.path.join(base_output_dir, 'MHC_Class_I', "{}-TumorDNA.all_epitopes.aggregated.tsv".format(sample_name))
-    file2 = os.path.join(base_output_dir, 'MHC_Class_I', "{}-TumorDNA.all_epitopes.tsv".format(sample_name))
-    file3 = os.path.join(base_output_dir, 'MHC_Class_II', "{}-TumorDNA.all_epitopes.aggregated.tsv".format(sample_name))
+    file1 = os.path.join(base_output_dir, 'MHC_Class_I', "{}.MHC_I.all_epitopes.aggregated.tsv".format(sample_name))
+    file2 = os.path.join(base_output_dir, 'MHC_Class_I', "{}.MHC_I.all_epitopes.tsv".format(sample_name))
+    file3 = os.path.join(base_output_dir, 'MHC_Class_II', "{}.MHC_II.all_epitopes.aggregated.tsv".format(sample_name))
     
     return file1, file2, file3
 
