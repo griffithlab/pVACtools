@@ -6,6 +6,7 @@ from pvactools.lib.mark_genes_of_interest import MarkGenesOfInterest
 from pvactools.lib.aggregate_all_epitopes import PvacseqAggregateAllEpitopes, PvacfuseAggregateAllEpitopes, PvacbindAggregateAllEpitopes, PvacspliceAggregateAllEpitopes
 from pvactools.lib.binding_filter import BindingFilter
 from pvactools.lib.filter import Filter, FilterCriterion
+from pvactools.lib.transcript_filter import TranscriptFilter
 from pvactools.lib.top_score_filter import PvacseqTopScoreFilter, PvacfuseTopScoreFilter, PvacbindTopScoreFilter, PvacspliceTopScoreFilter
 from pvactools.lib.calculate_manufacturability import CalculateManufacturability
 from pvactools.lib.calculate_reference_proteome_similarity import CalculateReferenceProteomeSimilarity
@@ -225,12 +226,11 @@ class PostProcessor:
     def execute_transcript_support_level_filter(self):
         if self.run_transcript_support_level_filter:
             print("Running Transcript Support Level Filter")
-            filter_criteria = [FilterCriterion('Transcript Support Level', '<=', self.maximum_transcript_support_level, exclude_nas=True, skip_value='Not Supported')]
-            Filter(
+            TranscriptFilter(
                 self.coverage_filter_fh.name,
                 self.transcript_support_level_filter_fh.name,
-                filter_criteria,
-                ['Transcript Support Level'],
+                self.transcript_prioritization_strategy,
+                self.maximum_transcript_support_level
             ).execute()
             print("Complete")
         else:

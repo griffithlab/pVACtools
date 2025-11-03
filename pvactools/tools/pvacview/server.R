@@ -631,7 +631,7 @@ server <- shinyServer(function(input, output, session) {
       hla_columns <- which(colnames(filtered_table) %in% df$converted_hla_names)
 
       # Columns where the default value should be 'NA'
-      default_na_targets <- which(colnames(filtered_table) %in% c("POS", "IC50 WT", "%ile MT", "%ile WT", "RNA Expr", "RNA VAF", "Allele Expr",
+      default_na_targets <- which(colnames(filtered_table) %in% c("Pos", "IC50 WT", "%ile MT", "%ile WT", "RNA Expr", "RNA VAF", "Allele Expr",
                                                                   "RNA Depth", "DNA VAF"))
 
       # Columns that should be hidden from the display
@@ -956,19 +956,23 @@ server <- shinyServer(function(input, output, session) {
       if (length(df$metricsData[[selectedID()]]$sets) != 0) {
         GB_transcripts <- data.frame("Transcripts" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcripts`,
                                      "Expression" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcript_expr`,
+                                     "MANE Select" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`mane_select`,
+                                     "Canonical" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`canonical`,
                                      "TSL" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`tsl`,
                                      "Biotype" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`biotype`,
+                                     "CDS Flags" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcript_cds_flags`,
                                      "Length" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcript_length`)
         GB_transcripts$`Best Transcript` <- apply(GB_transcripts, 1, function(x) grepl(best_transcript, x["Transcripts"], fixed = TRUE))
         incProgress(0.5)
-        names(GB_transcripts) <- c("Transcripts in Selected Set", "Expression", "Transcript Support Level", "Biotype", "Transcript Length (#AA)", "Best Transcript")
+        names(GB_transcripts) <- c("Transcripts in Selected Set", "Expression", "MANE Select", "Canonical", "Transcript Support Level", "Biotype", "CDS Flags", "Transcript Length (#AA)", "Best Transcript")
         incProgress(0.5)
-        datatable(GB_transcripts, options = list(columnDefs = list(list(defaultContent = "N/A", targets = c(3)), list(visible = FALSE, targets = c(-1))))) %>%
+        datatable(GB_transcripts, options = list(columnDefs = list(list(defaultContent = "NA", targets = c(5)), list(visible = FALSE, targets = c(-1))))) %>%
           formatStyle(c("Transcripts in Selected Set"), "Best Transcript", backgroundColor = styleEqual(c(TRUE), c("#98FF98")))
       }else {
-        GB_transcripts <- data.frame("Transcript" = character(), "Expression" = character(), "TSL" = character(), "Biotype" = character(), "Transcript Length (#AA)"= character(), "Length" = character())
+        GB_transcripts <- data.frame("Transcript" = character(), "Expression" = character(), "MANE Select" = character(), "Canonical" = character(),"TSL" = character(), "Biotype" = character(), "Transcript Length (#AA)"= character(), "Length" = character())
         incProgress(0.5)
         names(GB_transcripts) <- c("Transcripts in Selected Set", "Expression", "Transcript Support Level", "Biotype", "Transcript Length (#AA)", "Best Transcript")
+        names(GB_transcripts) <- c("Transcripts in Selected Set", "Expression", "MANE Select", "Canonical", "Transcript Support Level", "Biotype", "CDS Flags", "Transcript Length (#AA)", "Best Transcript")
         incProgress(0.5)
         datatable(GB_transcripts)
       }

@@ -25,15 +25,24 @@ class UpdateTiersTests(unittest.TestCase):
         input_file = os.path.join(self.test_data_dir, 'HCC1395.all_epitopes.aggregated.tsv')
         tmp_input_file = tempfile.NamedTemporaryFile()
         shutil.copy(input_file, tmp_input_file.name)
+        input_metrics_file = os.path.join(self.test_data_dir, 'HCC1395.all_epitopes.aggregated.metrics.json')
+        tmp_input_metrics_file = tempfile.NamedTemporaryFile()
+        shutil.copy(input_metrics_file, tmp_input_metrics_file.name)
         self.assertFalse(PvacseqUpdateTiers(
             tmp_input_file.name,
-            0.5
+            0.5,
+            metrics_file=tmp_input_metrics_file.name
         ).execute())
         self.assertTrue(cmp(
             tmp_input_file.name,
             os.path.join(self.test_data_dir, "HCC1395.all_epitopes.aggregated.out.tsv"),
         ))
+        self.assertTrue(cmp(
+            tmp_input_metrics_file.name,
+            os.path.join(self.test_data_dir, "HCC1395.all_epitopes.aggregated.metrics.out.json"),
+        ))
         tmp_input_file.close()
+        tmp_input_metrics_file.close()
 
     def test_update_tiers_pvacsplice(self):
         input_file = os.path.join(self.test_data_dir, 'HCC1395.pvacsplice.all_epitopes.aggregated.tsv')
