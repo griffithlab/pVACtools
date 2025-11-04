@@ -37,6 +37,7 @@ jobs:
           pip install polars==0.16.18
           pip install pypandoc==1.7.2
           pip install "tensorflow<2.16"
+          pip install imbalanced-learn
           pip install -e .
       - name: List installed packages
         run: |
