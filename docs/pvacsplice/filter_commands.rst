@@ -9,7 +9,7 @@ Filtering Commands
 ==================
 
 pVACsplice currently offers four filters: a binding filter, a coverage filter,
-a transcript support level filter, and a top score filter.
+a transcript filter, and a top score filter.
 
 These filters are always run automatically as part
 of the pVACsplice pipeline using default cutoffs.
@@ -19,7 +19,7 @@ or they can be run on the all_epitopes.tsv file to apply different filtering thr
 
 The binding filter is used to remove neoantigen candidates that do not meet desired peptide:MHC binding criteria.
 The coverage filter is used to remove variants that do not meet desired read count and VAF criteria (in normal DNA
-and tumor DNA/RNA). The transcript support level filter is used to remove variant annotations based on low quality
+and tumor DNA/RNA). The transcript filter is used to remove variant annotations based on low quality
 transcript annotations. The top score filter is used to select the most promising peptide candidate for each variant.
 Multiple candidate peptides from a single somatic variant can be caused by multiple peptide lengths, registers, HLA alleles,
 and transcript annotations.
@@ -90,17 +90,20 @@ the :ref:`pvacsplice_prerequisites_label` section for more information.
 By default, entries with ``NA`` values will be included in the output. This
 behavior can be turned off by using the ``--exclude-NAs`` flag.
 
-Transcript Support Level Filter
--------------------------------
+Transcript Filter
+-----------------
 
-.. program-output:: pvacsplice transcript_support_level_filter -h
+.. program-output:: pvacsplice transcript_filter -h
 
-This filter is used to eliminate variant annotations based on poorly-supported transcripts. By default,
-only transcripts with a `transcript support level (TSL) <https://useast.ensembl.org/info/genome/genebuild/transcript_quality_tags.html#tsl>`_
-of <=1 are kept. This threshold can be adjusted using the ``--maximum-transcript-support-level``
-parameter.
+This filter is used to eliminate variant annotations based on poorly-supported transcripts. This assessed
+based on whether the transcript is the MANE Select transcripts, whether it is
+the canonical transcript or whether the transcript support level (TSL) meets the
+``--maximum-transcript-support-level`` cutoff. The
+``--transcript-prioritizatio-strategy`` parameter controlls which ones of these three
+criteria are considered. A neoantigen candidate passes this filter if its
+transcript passes at least one of the specified criteria.
 
-By default, entries with ``Not Supported`` values will be included in the output. These occur if VEP was run
+Transcript with a TSL of ``Not Supported`` will pass the TSL criteria. These values occur if VEP was run
 without the ``--tsl`` flag or if data is aligned to GRCh37 or older.
 
 Top Score Filter

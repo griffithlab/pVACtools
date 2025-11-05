@@ -58,6 +58,8 @@ ____________________
    --vcf
    --symbol
    --terms SO
+   --mane_select
+   --canonical
    --tsl
    --biotype
    --hgvs
@@ -72,6 +74,10 @@ ____________________
 - The ``--symbol`` option will include gene symbol in the annotation.
 - The ``--terms SO`` option will result in Sequence Ontology terms being used
   for the consequences.
+- The ``--mane_select`` option adds a flag indicating if the transcript is the
+  MANE Select transcript for the gene.
+- The ``--canonical`` option adds a flag indicating if the transcript is the
+  canonical transcript for the gene.
 - The ``--tsl`` option adds transcript support level information to the
   annotation.
 - The ``--biotype`` option adds biotype of the transcript or regulatory

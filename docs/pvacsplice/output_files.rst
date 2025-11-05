@@ -39,7 +39,7 @@ created):
    * - ``<sample_name>.<MHC_I|MHC_II|Combined>.all_epitopes.aggregated.tsv``
      - An aggregated version of the ``all_epitopes.tsv`` file that gives information about
        the best epitope for each mutation in an easy-to-read format. Not
-       generated when running with elution algorithms only.
+       generated when running only with presentation and immunogenicity algorithms.
    * - ``<sample_name>.<MHC_I|MHC_II|Combined>.all_epitopes.aggregated.tsv.reference_matches`` (optional)
      - A file outlining details of reference proteome matches
 
@@ -55,7 +55,7 @@ applied (in order):
 
 - Binding Filter
 - Coverage Filter
-- Transcript Support Level Filter
+- Transcript Filter
 - Top Score Filter
 
 Please see the :ref:`Standalone Filter Commands<pvacsplice_filter_commands>`
@@ -85,8 +85,8 @@ The following prediction algorithms do not provide a percentile rank:
 
 - MHCnuggets
 
-Prediction Algorithms Supporting Elution Scores
-_______________________________________________
+Prediction Algorithms Supporting Presentation Scores
+____________________________________________________
 
 - MHCflurryEL
 - NetMHCpanEL
@@ -99,8 +99,8 @@ ______________________________________________________
 - BigMHC_IM
 - DeepImmuno
 
-Please note that when running pVACseq with only elution or immunogenicity algorithms, no
-aggregate report and pVACview files are created.
+Please note that when running pVACseq with only presentation or immunogenicity algorithms, no
+aggregate report is created.
 
 .. _pvacsplice_all_ep_and_filtered:
 
@@ -206,7 +206,7 @@ all_epitopes.tsv and filtered.tsv Report Columns
    * - ``Individual Prediction Algorithm  IC50 Scores and Percentiles`` (multiple)
      - ic50 binding affintity and percentile ranks for the ``Epitope Seq`` for the individual prediction algorithms used
    * - ``MHCflurryEL WT and MT Processing Score and Presentation Score and Percentile`` (optional)
-     - MHCflurry elution processing score and presentation score and percentiles
+     - MHCflurry processing score and presentation score and percentiles
        for the ``Epitope Seq`` if the run included
        MHCflurryEL as one of the prediction algorithms
    * - ``Problematic Positions`` (optional)
@@ -280,7 +280,7 @@ and ``%ile MT`` columns is controlled by the ``--top-score-metric`` parameter.
 
    * - ``ID``
      - A unique identifier for the junction (Gene name . transcript. Junction ID . variant chr . variant start - variant stop . junction type)
-   * - ``HLA Alleles`` (multiple)
+   * - HLA Alleles (multiple)
      - For each HLA allele in the run, the number of this variant's epitopes that bound well
        to the HLA allele (with median/lowest mutant binding affinity < binding_threshold)
    * - ``Gene``
@@ -294,8 +294,16 @@ and ``%ile MT`` columns is controlled by the ``--top-score-metric`` parameter.
    * - ``Best Peptide``
      - The best-binding mutant epitope sequence (see Best Peptide Criteria
        below for more details on how this is determined)
+   * - ``MANE Select`` (True/False/Not Run)
+     - Whether or not the Best Transcript is the MANE Select transcript.
+       ``Not Run`` if VCF was VEP-annotated without the ``--mane_select``
+       flag.
+   * - ``Canonical`` (True/False/Not Run)
+     - Whether or not the Best Transcript is the Canonical transcript. ``Not
+       Run`` if VCF was VEP-annotated without the ``--canonical`` flag.
    * - ``TSL``
-     - The Transcript Support Level of the Transcript
+     - The Transcript Support Level of the Best Transcript. ``Not Supported``
+       reference is GRCh37 or older.
    * - ``Allele``
      - The Allele that the Best Peptide is binding to
    * - ``Pos``
@@ -304,7 +312,7 @@ and ``%ile MT`` columns is controlled by the ``--top-score-metric`` parameter.
    * - ``Prob Pos``
      - A list of positions in the Best Peptide that are problematic.
        ``None`` if the ``--problematic-pos`` parameter was not set during
-       the pVACseq run
+       the pVACseq run.
    * - ``Num Included Peptides``
      - The number of included peptides according to the
        ``--aggregate-inclusion-binding-threshold`` and
@@ -339,11 +347,21 @@ _____________________
 
 To determine the Best Peptide, all peptides meeting the
 ``--aggregate-inclusion-threshold`` and ``--aggregate-inclusion-count-limit``
-(see above) are evaluated as follows:
+(see above) for a variant are evaluated as follows:
 
-- Pick the entries with no Problematic Positions.
-- Of the remaining entries, pick the one with the lowest median/best MT IC50
-  score.
+- If ``--allow-inclomplete-transcripts`` flag is set, pick the entries without
+  a ``Transcript CDS Flags`` set.
+- Of the remaining entries, pick the entries where the ``Biotype`` is ``protein_coding``.
+- Of the remaining entries, pick the entries that pass at least one of the transcript criteria selected in the
+  ``--transcript-prioritization-strategy`` taking into consideration the
+  ``--maximum-transcript-support-level`` if ``tsl`` is one of the selected
+  criteria.
+- Of the remaining entries, pick the entries with no ``Problematic Positions``.
+- Sort the remaining entries by lowest ``Median|Best IC50 Score|Percentile``
+  (depending on the selected ``--top-score-metric`` and
+  ``--top-score-metric2``), ``MANE Select`` (True), ``Canonical`` (True),
+  ``Transcript Support Level``, ``WT Protein Length``, and ``Transcript
+  Expression``. Select the highest sorted entry.
 
 .. _pvacsplice_aggregate_report_tiers_label:
 
@@ -392,10 +410,22 @@ To tier the Best Peptide, several cutoffs can be adjusted using arguments provid
    * - ``--expn-val``
      - Gene and Expression cutoff. Used to calculate the allele expression cutoff for tiering.
      - 1.0
+   * - ``--transcript-prioritization-strategy``
+     - Which transcript-specific criteria to consider to pass a transcript.
+     - ['mane_select', 'canonical', 'tsl']
    * - ``--maximum-transcript-support-level``
-     - The threshold to use for filtering epitopes on the Ensembl transcript support level (TSL).
-       Transcript support level needs to be <= this cutoff to be included in most tiers.
+     - The threshold to evaluate an epitope's best transcript on the Ensembl transcript support level (TSL).
+       Transcript support level needs to be <= this cutoff to be included most tiers when `tsl` is included as transcript prioritization strategy.
      - 1
+   * - ``--run-reference-proteome-similarity``
+     - Set this flag in order to run reference proteome similarity analysis
+       and enable ``RefMatch`` tiering. Use ``--blastp-path``, ``--blastp-db``,
+       and ``--peptide-fasta`` parameters to configure your run.
+     - False
+   * - ``--problematic-amino-acids``
+     - Configure this parameter in order to define amino acids problematic for
+       the desired therapy delivery platform and enable ``ProbPos`` tiering.
+     - None
 
 Tiers
 *****
@@ -439,22 +469,30 @@ Criteria Details
      - Evaluation Logic
    * - Binding Criteria
      - Pass if Best Peptide is strong binder
-     - ``IC50 MT < binding_threshold`` and ``%ile MT < percentile_threshold``
-       (if ``--percentile-threshold`` parameter is set and 'conservative' ``--percentile-threshold-strategy`` is used) or
-       ``IC50 MT < binding_threshold`` or ``%ile MT < percentile_threshold``
-       (if 'exploratory' ``--percentile-threshold-strategy`` is used)
+     - binding score criteria: ``IC50 MT < binding_threshold``
+
+       percentile score criteria (if ``--percentile-threshold`` parameter is
+       set): ``%ile MT < percentile_threshold``
+
+       ``conservative`` ``--percentile-threshold-strategy``: needs to pass
+       BOTH the binding score criteria AND the percentile score criteria
+
+       ``exploratory`` ``--percentile-threshold-strategy``: needs to pass
+       EITHER the binding score criteria OR the percentile score criteria
    * - Expression Criteria
      - Pass if Best Transcript is expressed
      - ``Allele Expr > trna_vaf * expn_val``
    * - Reference Match Criteria
      - Pass if there are no reference protome matches
-     - ``Ref Match == True``
+     - ``Ref Match == False``
    * - Transcript Criteria
      - Pass if Best Transcript matches any of the user-specified ``--transcript-prioritization-strategy`` criteria
      - ``TSL <= maximum_transcript_support_level`` (if
        ``--transcript-prioritization-strategy`` includes ``tsl``)
+
        ``MANE Select == True`` (if ``--transcript-prioritization-strategy
        includes ``mane_select``)
+
        ``Canonical == True`` (if ``--transcript-prioritization-strategy``
        incluces ``canonical``)
    * - Low Expression Criteria
@@ -465,7 +503,7 @@ Criteria Details
      - Best Peptide is likely in the founding clone of the tumor
      - ``DNA VAF > tumor_purity / 4``
    * - Problematic Position Criteria
-     - Best Peptide contains a problematic amino acid as defined by the
+     - Best Peptide does not contain a problematic amino acid as defined by the
        ``--problematic-amino-acids`` parameters
      - ``Prob Pos == None``
 

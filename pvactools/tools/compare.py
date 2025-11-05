@@ -123,6 +123,8 @@ def define_parser():
     default_reference_match_columns = ["Peptide", "Match Window"]
 
     parser = argparse.ArgumentParser(
+        "pvactools compare",
+        description="Run a comparison between two output results folders",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument(

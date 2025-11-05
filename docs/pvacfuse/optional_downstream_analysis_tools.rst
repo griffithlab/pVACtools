@@ -125,3 +125,8 @@ Mark Genes of Interest
 --------------------------------
 
 .. program-output:: pvacfuse mark_genes_of_interest -h
+
+Update Tiers
+------------
+
+.. program-output:: pvacseq update_tiers -h
