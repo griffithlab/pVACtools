@@ -24,7 +24,7 @@ options(shiny.port = 3333)
 server <- shinyServer(function(input, output, session) {
   ## pVACtools version
 
-  output$version <- renderText({"pVACtools version 5.5.4"})
+  output$version <- renderText({"pVACtools version 6.0.0"})
 
   ##############################DATA UPLOAD TAB###################################
   ## helper function defined for generating shinyInputs in mainTable (Evaluation dropdown menus)
@@ -209,7 +209,7 @@ server <- shinyServer(function(input, output, session) {
      ## Class I demo aggregate report
      #session$sendCustomMessage("unbind-DT", "mainTable")
      withProgress(message = "Loading Demo Data", value = 0, {
-       load(url("https://github.com/griffithlab/pVACtools/raw/3bcc0530f5deecae5a241edb2e16b9886bab25e7/pvactools/tools/pvacview/data/HCC1395_demo_data.rda"))
+       load(url("https://github.com/griffithlab/pVACtools/raw/b769d139c332839cbe6fbeb9afd04a33b30d2025/pvactools/tools/pvacview/data/HCC1395_demo_data.rda"))
        incProgress(0.3)
        #data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/3bcc0530f5deecae5a241edb2e16b9886bab25e7/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.tsv")
        #mainData <- read.table(text = data, sep = "\t", header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
@@ -272,7 +272,7 @@ server <- shinyServer(function(input, output, session) {
        rownames(df$comments) <- df$mainTable$ID
        incProgress(0.2)
        ## Class II additional demo aggregate report
-       add_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/3bcc0530f5deecae5a241edb2e16b9886bab25e7/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_II.all_epitopes.aggregated.tsv")
+       add_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/b769d139c332839cbe6fbeb9afd04a33b30d2025/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_II.all_epitopes.aggregated.tsv")
        addData <- read.table(text = add_data, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
        colnames(addData) <- addData[1, ]
        addData <- addData[-1, ]
@@ -668,7 +668,7 @@ server <- shinyServer(function(input, output, session) {
       hla_columns <- which(colnames(filtered_table) %in% df$converted_hla_names)
 
       # Columns where the default value should be 'NA'
-      default_na_targets <- which(colnames(filtered_table) %in% c("POS", "IC50 WT", "%ile MT", "%ile WT", "IC50 %ile MT", "IC50 %ile WT", "IM %ile MT", "IM %ile WT", "Pres %ile MT", "Pres %ile WT",
+      default_na_targets <- which(colnames(filtered_table) %in% c("Pos", "IC50 WT", "%ile MT", "%ile WT", "IC50 %ile MT", "IC50 %ile WT", "IM %ile MT", "IM %ile WT", "Pres %ile MT", "Pres %ile WT",
                                                                   "RNA Expr", "RNA VAF", "Allele Expr", "RNA Depth", "DNA VAF"))
 
       # Columns that should be hidden from the display

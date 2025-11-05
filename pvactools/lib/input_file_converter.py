@@ -647,7 +647,7 @@ class PvacspliceVcfConverter(VcfConverter):
                         else:
                             output_row['mane_select'] = 'True'
                     else:
-                        output_row['mane_select'] = 'Not Supported'
+                        output_row['mane_select'] = 'Not Run'
 
                     for (tag, key, comparison_fields) in zip(['TX', 'GX'], ['transcript_expression', 'gene_expression'], [[transcript_name], [ensembl_gene_id, gene_name]]):
                         if tag in self.vcf_reader.header.format_ids():

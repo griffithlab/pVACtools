@@ -37,7 +37,11 @@ binding prediction tools.
 
 **MHC Class I and Class II predictions**
 
-Both MHC Class I and Class II predictions are supported. Simply choose the desired prediction algorithms and HLA alleles during processing and Class I and Class II prediction results will be written to their own respective subdirectories in your output directory.
+Both MHC Class I and Class II predictions are supported. Simply choose the desired
+prediction algorithms and HLA alleles during processing and Class I and Class II
+prediction results will be written to their own respective subdirectories in your
+output directory. pVACbind supports binding affinity algorithms as well as presentation
+and immunogenicity algorithms.
 
 By using the IEDB RESTful web interface, pVACbind leverages their extensive support of different prediction algorithms.
 
@@ -67,20 +71,20 @@ NNalign                                            2.3                          
 MHCnuggets                                                                                                          yes
 ================================================== ================================================================ ========================
 
-======================================== ======= ========================
-MHC Class I Elution Prediction Algorithm Version Supports Percentile Rank
-======================================== ======= ========================
-NetMHCpanEL                              4.1     yes
-MHCflurryEL                                      | Processing Score: no;
-                                                 | Presentation Score: yes
-BigMHC_EL                                        no
-======================================== ======= ========================
+============================================= ======= ========================
+MHC Class I Presentation Prediction Algorithm Version Supports Percentile Rank
+============================================= ======= ========================
+NetMHCpanEL                                   4.1     yes
+MHCflurryEL                                           | Processing Score: no;
+                                                      | Presentation Score: yes
+BigMHC_EL                                             no
+============================================= ======= ========================
 
-========================================= ================================================================ ========================
-MHC Class II Elution Prediction Algorithm Version                                                          Supports Percentile Rank
-========================================= ================================================================ ========================
-NetMHCIIpan                               4.0 (not supported by standalone IEDB), 4.1 (default), 4.2., 4.3 yes
-========================================= ================================================================ ========================
+============================================== ================================================================ ========================
+MHC Class II Presentation Prediction Algorithm Version                                                          Supports Percentile Rank
+============================================== ================================================================ ========================
+NetMHCIIpanEL                                  4.0 (not supported by standalone IEDB), 4.1 (default), 4.2., 4.3 yes
+============================================== ================================================================ ========================
 
 =============================================== ======= ========================
 MHC Class I Immunogenicity Prediction Algorithm Version Supports Percentile Rank
