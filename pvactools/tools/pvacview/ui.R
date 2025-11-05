@@ -334,167 +334,272 @@ export_tab <- tabItem(
 )
 
 ## TUTORIAL TAB ##
-tutorial_tab <- tabItem("tutorial",
-                        tabsetPanel(type = "tabs",
-                                    tabPanel("Variant Level",
-                                             ## Aggregate Report Column Descriptions"
-                                             h3("Main table full column descriptions"),
-                                             p("If using pVACview with pVACtools output, the user is required to provide at least the following two files: ",
-                                               code("all_epitopes.aggregated.tsv"), code("all_epitopes.aggregated.metrics.json")), br(),
-                                             p("The ", code("all_epitopes.aggregated.tsv"),
-                                               "file is an aggregated version of the all_epitopes TSV. 
-        It presents the best-scoring (lowest binding affinity) epitope for each variant, along with 
-        additional binding affinity, expression, and coverage information for that epitope. 
-        It also gives information about the total number of well-scoring epitopes for each variant, 
-        the number of transcripts covered by those epitopes, and the HLA alleles that those 
-        epitopes are well-binding to. Here, a well-binding or well-scoring epitope is any epitope that has a stronger 
-        binding affinity than the ", code("aggregate_inclusion_binding_threshold"), "described below. The report then bins variants into 
-        tiers that offer suggestions about the suitability of variants for use in vaccines."), br(),
-                                             p("The ", code("all_epitopes.aggregated.metrics.json"),
-                                               "complements the ", code("all_epitopes_aggregated.tsv"), "and is required for the tool's proper functioning."), br(),
-                                             p(strong("Column Names : Description")),
-                                             p(code("ID"), " : ", "A unique identifier for the variant"),
-                                             p(code("Index"), " : ", "A unique identifier for the variant and best neoantigen candidate"),
-                                             p(code("HLA Alleles"), " : ", "For each HLA allele in the run, the number of this variant’s 
-        epitopes that bound well to the HLA allele (with ", code("lowest"), " or ", code("median"),
-                                               " mutant binding affinity < ", code("aggregate_inclusion_binding_threshold"), ")"),
-                                             p(code("Gene"), " : ", "The Ensembl gene name of the affected gene"),
-                                             p(code("AA Change"), " : ", "The amino acid change for the mutation"),
-                                             p(code("Num Passing Transcripts"), " : ", "The number of transcripts 
-        for this mutation that resulted in at least one well-binding peptide (", code("lowest"), " or ",
-                                               code("median"), " mutant binding affinity < ", code("aggregate_inclusion_binding_threshold"), ")"),
-                                             p(code("Best Peptide"), " : ", "The best-binding mutant epitope sequence (lowest binding affinity) 
-        prioritizing epitope sequences that resulted from a protein_coding transcript with a TSL below the 
-        maximum transcript support level and having no problematic positions."),
-                                             p(code("Best Transcript"), " : ", "Transcript corresponding to the best peptide with the lowest TSL and shortest length."),
-                                             p(code("TSL"), " : ", "Transcript support level of the best peptide"),
-                                             p(code("Pos"), " : ", "The one-based position of the start of the mutation within the epitope sequence. ",
-                                               code("0"), " if the start of the mutation is before the epitope (as can occur downstream of frameshift mutations)"),
-                                             p(code("Prob Pos"), " : ", "If you specify problematic amino acids when running pVACseq, the number of problematic peptides within the best peptide."),
-                                             p(code("Num Passing Peptides"), " : ", "The number of unique well-binding peptides for this mutation."),
-                                             p(code("IC50 MT"), " : ", code("Lowest"), " or ", code("Median"), " ic50 binding affinity of 
-        the best-binding mutant epitope across all prediction algorithms used."),
-                                             p(code("IC50 WT"), " : ", code("Lowest"), " or ", code("Median"), " ic50 binding affinity of 
-        the corresponding wildtype epitope across all prediction algorithms used."),
-                                             p(code("%ile MT"), " : ", code("Lowest"), " or ", code("Median"), "binding affinity percentile rank 
-        of the best-binding mutant epitope across all prediction algorithms used (those that provide percentile output)"),
-                                             p(code("%ile WT"), " : ", code("Lowest"), " or ", code("Median"), "binding affinity percentile rank of the 
-        corresponding wildtype epitope across all prediction algorithms used (those that provide percentile output)"),
-                                             p(code("RNA Expr"), " : ", "Gene expression value for the annotated gene containing the variant."),
-                                             p(code("RNA VAF"), " : ", "Tumor RNA variant allele frequency (VAF) at this position."),
-                                             p(code("Allele Expr"), " : ", "RNA Expr * RNA VAF"),
-                                             p(code("RNA Depth"), " : ", "Tumor RNA depth at this position."),
-                                             p(code("DNA VAF"), " : ", "Tumor DNA variant allele frequency (VAF) at this position."),
-                                             p(code("Tier"), " : ", "A tier suggesting the suitability of variants for use in vaccines."),
-                                             p(code("Evaluation"), " : ", "Column to store the evaluation of each variant when evaluating the run in pVACview.
-        Can be ", code("Accept,"), " ", code("Reject"), "  or ", code("Review"), "."),
-                                             ## Tiering Explained ##
-                                             h3("How is the Tiering column determined / How are the Tiers assigned?"), br(),
-                                             p(strong("Tier : Criteria")),
-                                             p(code("Pass"), " : ", code(("(MT binding < binding threshold) AND allele expr filter pass AND vaf clonal filter pass 
-        AND tsl filter pass AND anchor residue filter pass"))),
-                                             p(code("Anchor"), " : ", code(("(MT binding < binding threshold) AND allele expr filter pass AND vaf clonal filter pass 
-        AND tsl filter pass AND anchor residue filter fail"))),
-                                             p(code("Subclonal"), " : ", code(("(MT binding < binding threshold) AND allele expr filter pass AND vaf clonal filter fail 
-        AND tsl filter pass AND anchor residue filter pass"))),
-                                             p(code("LowExpr"), " : ", code(("(MT binding < binding threshold) AND low expression criteria met AND allele expr filter pass 
-        AND vaf clonal filter pass AND tsl filter pass AND anchor residue filter pass"))),
-                                             p(code("Poor"), " : ", "Best peptide for current variant FAILS in two or more categories"),
-                                             p(code("NoExpr"), " : ", code("((gene expr == 0) OR (RNA VAF == 0)) AND low expression criteria not met")), br(),
-                                             p("Here we list out the exact criteria for passing each respective filter: "),
-                                             p(strong("Allele Expr Filter: "), code("(allele expr >= allele expr cutoff) OR (rna_vaf == 'NA') OR (gene_expr == 'NA')")),
-                                             p(strong("VAF Clonal Filter: "), code("(dna vaf < vaf subclonal) OR (dna_vaf == 'NA')")),
-                                             p(strong("TSL Filter: "), code("(TSL != 'NA') AND (TSL < maximum transcript support level)")),
-                                             p(strong("Anchor Residue Filter: "), br(),
-                                               strong("1. "), code("(Mutation(s) is at anchor(s)) AND
-        ((WT binding < binding threshold) OR (WT percentile < percentile threshold))"), br(),
-                                               strong("    OR"), br(), strong("2. "), code("Mutation(s) not or not entirely at anchor(s)")),
-                                             p(strong("Low Expression Criteria: "), code("(allele expr > 0) OR ((gene expr == 0) AND (RNA Depth > RNA Coverage Cutoff) AND (RNA VAF > RNA vaf cutoff))")),br(),
-                                             p("Note that if a percentile threshold has been provided, then the ", code("%ile MT"), " column is also required to be lower than
-        the given threshold to qualify for tiers, including Pass, Anchor, Subclonal and LowExpr.") 
-                                    ),
-                                    tabPanel("Transcript Level",
-                                             h3(" "),
-                                             fluidRow(
-                                               column(width = 6,
-                                                      h4("Transcript Set Table", style = "font-weight: bold; text-decoration: underline;"),
-                                                      p("Upon selecting a variant for investigation, you may have multiple transcripts covering the region.", br(), br(),
-                                                        "These transcripts are grouped into ", strong("Trancripts Sets"), " , based on the good-binding peptides
-                produced. (Transcripts that produce the exact same set of peptides are grouped together.)", br(), br(),
-                                                        "The table also lists the number of transcripts and corresponding peptides in each set (each pair of WT and MT peptides are considered 1 when
-                counting).", br(), " A sum of the total expression across all transcripts in each set is also shown.", br(), " A light green color is used to
-                highlight the ", strong("Transcript Set"), " producing the Best Peptide for the variant in question.")
+tutorial_tab <- tabItem(
+    "tutorial",
+    tabsetPanel(
+        type = "tabs",
+        tabPanel(
+            "Variant Level",
+            ## Aggregate Report Column Descriptions"
+            h3("Aggregate Report of Best Candidates by Variant"),
+            p(
+                "If using pVACview with pVACtools output, the user is required to provide at least the following two files: ",
+                code("all_epitopes.aggregated.tsv"), code("all_epitopes.aggregated.metrics.json")
             ),
-            column(width = 6,
-                img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Explore_Transcript_Set.png",
-                align = "center", height = "300px", width = "500px"),
+            br(),
+            p(
+                "The ", code("all_epitopes.aggregated.tsv"), "file is an aggregated version of the all_epitopes TSV. It presents
+                the best-scoring epitope for each variant, along with additional binding affinity, expression, and coverage
+                information for that epitope. It also gives information about the total number of well-scoring epitopes for each
+                variant, the number of transcripts covered by those epitopes, and the HLA alleles that those epitopes are
+                well-binding to. Here, a well-binding or well-scoring epitope is any epitope that has a stronger binding affinity
+                than the ", code("binding_threshold"), " described below. Additional epitopes that are not meeting the binding
+                threshold are included in order to provide users with a wider range of epitopes to investigate that may not strictly
+                meet all the selected cutoffs. Included peptides are determined by the ", code("aggregate_inclusion_binding_threshold"),
+                " and the ", code("aggregate_includion_count_limit"), " and the total number of included epitopes is noted in the
+                aggregated TSV. The report then bins variants into tiers that offer suggestions about the suitability of variants
+                for use in vaccines."
+            ),
+            br(),
+            p(
+                "The ", code("all_epitopes.aggregated.metrics.json"), "complements the ", code("all_epitopes_aggregated.tsv"), "and
+                is required for the tool's proper functioning. It contains additional metadata for all included peptides that power
+                additional visualizations."
+            ),
+            br(),
+            p(strong("Column Names in the all_epitopes.aggregated.tsv File: Description")),
+            p(code("ID"), " : A unique identifier for the variant."),
+            p(code("Index"), " : A unique identifier for the variant and best neoantigen candidate."),
+            p(
+                "HLA Alleles : ", "For each HLA allele in the run, the number of this variant’s epitopes that bound well to
+                the HLA allele (with ", code("lowest"), " or ", code("median"), " mutant binding affinity < ", code("binding_threshold"), ")."
+            ),
+            p(code("Gene"), " : The Ensembl gene name of the affected gene."),
+            p(code("AA Change"), " : The amino acid change for the mutation."),
+            p(
+                code("Num Passing Transcripts"), " : The number of transcripts coding for this mutation that resulted in at least one
+                well-binding peptide (", code("lowest"), " or ", code("median"), " mutant binding affinity < ", code("binding_threshold"), ")."
+            ),
+            p(
+                code("Best Peptide"), " : The best-binding mutant epitope sequence (lowest binding affinity or percentile depending on
+                the selected ", code("top_score_metric"), " and ", code("top_score_metric2"), "). Epitope sequences that don't have any problematic
+                positions and that meet the anchor criteria are prioritized. Additionally, epitopes resulting from a transcript that is
+                protein_coding, that doesn't have any CDS flags, that is the MANE select or Canonical transcript, and that has a TSL below the ",
+                code("maximum_transcript_support_level"), " are also prioritized."
+            ),
+            p(code("Best Transcript"), " : Best transcript coding for the best peptide if multiple transcripts give rise to the best peptide.
+                Transcripts that are protein_coding, that don't have any CDS flags, that are the MANE select or Canonical transcript, that
+                have a TSL below the ", code("maximum_transcript_support_level"), "that are long, and have a high transcript expression are prioritized."
+            ),
+            p(code("MANE Select"), " : MANE Select status of the best transcript."),
+            p(code("Canonical"), " : Canonical status of the best transcript."),
+            p(code("TSL"), " : Transcript support level of the best transcript."),
+            p(
+                code("Pos"), " : The one-based position(s) of any amino acids that differ from the matched wildtype.", code("NA"), " if there is
+                no matched wildtype sequence (as can occur downstream of frameshift mutations or long indels)."
+            ),
+            p(
+                code("Prob Pos"), " : If you specify ", code("problematic_amino_acids"), " when running pVACseq, the position(s) of problematic
+                peptides within the best peptide."
+            ),
+            p(code("Num Included Peptides"), " : The number of unique included peptides for this mutation."),
+            p(code("Num Passing Peptides"), " : The number of unique well-binding peptides for this mutation."),
+            p(
+                code("IC50 MT"), " : ", code("Lowest"), " or ", code("Median"), " ic50 binding affinity of the best-binding mutant epitope
+                across all prediction algorithms used."
+            ),
+            p(
+                code("IC50 WT"), " : ", code("Lowest"), " or ", code("Median"), " ic50 binding affinity of the corresponding wildtype epitope
+                across all prediction algorithms used."
+            ),
+            p(
+                code("%ile MT"), " : ", code("Lowest"), " or ", code("Median"), "binding affinity percentile rank of the best-binding mutant
+                epitope across all prediction algorithms used (of those that provide percentile output)"
+            ),
+            p(
+                code("%ile WT"), " : ", code("Lowest"), " or ", code("Median"), "binding affinity percentile rank of the corresponding wildtype
+                epitope across all prediction algorithms used (of those that provide percentile output)"
+            ),
+            p(code("RNA Expr"), " : Gene expression value for the annotated gene containing the variant."),
+            p(code("RNA VAF"), " : Tumor RNA variant allele frequency (VAF) at this position."),
+            p(code("Allele Expr"), " : RNA Expr * RNA VAF"),
+            p(code("RNA Depth"), " : Tumor RNA depth at this position."),
+            p(code("DNA VAF"), " : Tumor DNA variant allele frequency (VAF) at this position."),
+            p(code("Tier"), " : A tier suggesting the suitability of variants for use in vaccines."),
+            p(code("Ref Match"), " : Whether or not a match for the best peptide to the reference proteome was found."),
+            p(
+                code("Evaluation"), " : ", "Column to store the evaluation of each variant when evaluating the run in pVACview. Can be ",
+                code("Pending"), ", ", code("Accept"), ", ", code("Reject"), ",  or ", code("Review"), "."
+            ),
+            ## Tiering Explained ##
+            h4("How are the Tiers assigned?"),
+            br(),
+            p(strong("Tiers")),
+            p(
+                code("Pass"), " : binding criteria pass AND reference match critieria pass AND allele expression criteria pass AND
+                vaf clonal criteria pass AND transcript criteria pass AND problematic position criteria pass AND anchor residue criteria pass"
+            ),
+            p(
+                code("PoorBinder"), " : ", strong("binding criteria fail"), " AND reference match critieria pass AND allele expression criteria pass AND
+                vaf clonal criteria pass AND transcript criteria pass AND problematic position criteria pass AND anchor residue criteria pass"
+            ),
+            p(
+                code("RefMatch"), " : binding criteria pass AND ", strong("reference match critieria fail"), " AND allele expression criteria pass AND
+                vaf clonal criteria pass AND transcript criteria pass AND problematic position criteria pass AND anchor residue criteria pass"
+            ),
+            p(
+                code("Poor Transcript"), " : binding criteria pass AND reference match critieria pass AND allele expression criteria pass AND
+                vaf clonal criteria pass AND ", strong("transcript criteria fail"), " AND problematic position criteria pass AND anchor residue criteria pass"
+            ),
+            p(
+                code("LowExpr"), " : binding criteria pass AND reference match critieria pass AND ", strong("allele expression criteria fail"), " AND
+                vaf clonal criteria pass AND transcript criteria pass AND problematic position criteria pass AND anchor residue criteria pass"
+            ),
+            p(
+                code("Anchor"), " : binding criteria pass AND reference match critieria pass AND allele expression criteria pass AND
+                vaf clonal criteria pass AND transcript criteria pass AND problematic position criteria pass AND ", strong("anchor residue criteria fail")
+            ),
+            p(
+                code("Subclonal"), " : binding criteria pass AND reference match critieria pass AND allele expression criteria pass AND ",
+                strong("vaf clonal criteria fail"), " AND transcript criteria pass AND problematic position criteria pass AND anchor residue criteria pass"
+            ),
+            p(
+                code("ProbPos"), " : binding criteria pass AND reference match critieria pass AND allele expression criteria pass AND
+                vaf clonal criteria pass AND transcript criteria pass AND ", strong("problematic position criteria fail"), " AND anchor residue criteria pass"
+            ),
+            p(code("Poor"), " : Fails two or more criteria"),
+            p(code("NoExpr"), " : ", code("((gene expr == 0) OR (RNA VAF == 0)) AND low expression criteria fail")),
+            br(),
+            p(strong("Tiering Criteria Details")),
+            p("Here we list out the exact logic for passing each respective criteria: "),
+            p(
+                strong("Binding Criteria: "), br(),
+                "1. ", code("(IC50 MT < binding threshold)"), br(),
+                "AND (", code("conservative"), "percentile threshold strategy) / OR (", code("exploratory"), "percentile threshold strategy)", br(),
+                "2. ", code("%ile MT < percentile threshold"), "(if a percentile threshold is set)"
+            ),
+            p(strong("Reference Match Criteria: "), br(), code("Ref Match == False")),
+            p(strong("Allele Expression Criteria: "), br(), code("(allele expr >= allele expr cutoff) OR (rna_vaf == 'NA') OR (gene_expr == 'NA')")),
+            p(strong("VAF Clonal Criteria: "), br(), code("(dna vaf < vaf subclonal) OR (dna_vaf == 'NA')")),
+            p(
+                strong("Transcript Criteria: "), br(),
+                "Meet at least one of the criteria specified in the ", code("transcript prioritization strategy"), br(),
+                "mane_select: ", code("MANE Select == True"), br(),
+                "canonical: ", code("Canonical == True"), br(),
+                "tsl: ", code("(TSL != 'NA') AND (TSL < maximum transcript support level)")
+            ),
+            p(strong("Problematic Position Criteria: "), br(), code("Prob Pos != None")),
+            p(
+                strong("Anchor Residue Criteria: "), br(),
+                "1. ", code("(Mutation(s) is at anchor(s)) AND (IC50 WT < binding threshold))"), br(),
+                "OR", br(),
+                "2. ", code("Mutation(s) not or not entirely at anchor(s)")
+            ),
+            p(strong("Low Expression Criteria: "), code("(allele expr > 0) OR ((gene expr == 0) AND (RNA Depth > RNA Coverage Cutoff) AND (RNA VAF > RNA vaf cutoff))")),
+            h3("Variant Information"),
+            p("The ", strong("Variant Information"), " panel contains various information for the selected variant."),
+            fluidRow(
+                column(
+                    width = 12,
+                    img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/Reference_Match.png", align = "center", width = "1200px"),
+                )
+            ),
+            h4("Reference Matches", style = "font-weight: bold; text-decoration: underline;"),
+            p(
+                "When the ", code("--run-reference-proteome-similarity"), "option is chosen, pVACseq will output a file of found matches of
+                the epitode candidates in the reference proteome. The ", strong("Reference Matches"), "tab will display the subsequent matches
+                for the candidate currently being investigated:", br(), br(),
+                "The tab shows the best peptide with the variant highlighted in red, the query peptide string which includes the flanking sequence
+                and the best peptide highlighted in yellow, and a table of reference proteome hits", br(), br(),
+                "The Hits table will display the peptide substring that match the query sequence and the genes, transcripts, and Hit IDs of the found matches."
+            ),
+            h4("Additional Data", style = "font-weight: bold; text-decoration: underline;"),
+            p(
+                "The data displayed in this tab is dependent on the additional data file that you provided in the Upload page. The IC50 MT value and %ile MT
+                values are shown if the app was able to locate the same variant in the data file provided. Values will show up as N/A if IC50 MT or %ile MT
+                values are not provided in the additional file. Additionaly, the Best Peptide of the variant from that file will be listed as well as the HLA
+                Allele the Best Peptide prediction was binding to and the Best Transcript for the prediction."
+            ),
+            h4("Variant & Gene Info", style = "font-weight: bold; text-decoration: underline;"),
+            p(
+                "This box displays the DNA VAF, RNA VAF, and gene expression values for the variant you have selected for investigation. The genomic information
+                is provided in the format showing the chromosomal location of the variant for further variant analysis such as manual review. We also provide a link
+                out to the variant report provided by OpenCRAVAT. This report will allow users to explore the variant with information regarding: variant annotation,
+                cancer, population allele frequencies, clinical relevance, gene annotation, pathogenicity prediction etc."
             )
         ),
-        fluidRow(
-            column(width = 3,
-                h4("Transcript Set Detailed Data", style = "font-weight: bold; text-decoration: underline;"),
-                p("Upon selecting a specific transcript set, you can see more details about the exact transcripts that are included.", br(), br(),
+        tabPanel(
+            "Transcript Level",
+            h3(" "),
+            fluidRow(
+                column(
+                    width = 6,
+                    h4("Transcript Set Table", style = "font-weight: bold; text-decoration: underline;"),
+                    p(
+                        "Upon selecting a variant for investigation, you may have multiple transcripts covering the region.", br(), br(),
+                        "These transcripts are grouped into ", strong("Trancripts Sets"), " , based on the good-binding peptides
+                        produced. (Transcripts that produce the exact same set of peptides are grouped together.)", br(), br(),
+                        "The table also lists the number of transcripts and corresponding peptides in each set (each pair of WT and MT peptides are considered 1 when
+                        counting). A sum of the total expression across all transcripts in each set is also shown.", br(), br(),
+                        "A light green color is used to highlight the ", strong("Transcript Set"), " producing the Best Peptide for the variant in question."
+                    )
+                ),
+                column(
+                    width = 6,
+                    img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Explore_Transcript_Set.png",
+                    align = "center", width = "600px"),
+                )
+            ),
+            h4("Transcript Set Detailed Data", style = "font-weight: bold; text-decoration: underline;"),
+            p(
+                "Upon selecting a specific transcript set, you can see more details about the exact transcripts that are included.", br(), br(),
                 "The ", strong("Transcripts in Set"), "table lists all information regarding each transcript including:", br(), br(),
-                "Transcript ID, Gene Name, Amino Acid Change, Mutation Position, individual transcript expression, transcript support level, biotype and transcript length.", br(), br(),
-                " A light green color is used to highlight the specific", strong("Transcript in Selected Set"), " that produced the Best Peptide for the variant in question.")
+                "Ensembl Transcript ID, Transcript Expression, MANE Select status, Canonical status, Transcript Support Level, Biotype, CDS Flags,
+                and Transcript Length.", br(), br(),
+                "A light green color is used to highlight the specific", strong("Transcript in Selected Set"), " that produced the Best Peptide
+                for the variant in question."
             ),
-            column(width = 9,
-                img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Explore_Transcript_in_Set.png",
-                align = "center", height = "300px", width = "1200px"),
+            fluidRow(
+                column(
+                    width = 12,
+                    img(src = "https://github.com/griffithlab/pVACtools/raw/a99dd8b0/pvactools/tools/pvacview/www/Explore_Transcript_in_Set.png", align = "center", width = "1200px"),
+                )
             )
         ),
-        fluidRow(
-          column(width = 3,
-                 h4("Reference Match", style = "font-weight: bold; text-decoration: underline;"),
-                 p("When the ", code("--run-reference-proteome-similarity"), "option is chosen, pVACseq will output a file of found matches of the epitode candidates in the reference proteome.", br(), br(),
-                   "The ", strong("Reference Matches"), "tab will display the subsequent matches for the candidate currently being investigated:", br(), br(),
-                   "The tab shows the best peptide with the variant highlighted in red, the query data which includes the flanking sequence and the best peptide highlighted in yellow, and a table of reference proteome hits", br(), br(),
-                   "The Hits table will display the peptides that match the query sequence and the genes, transcripts, and Hit IDs of the found matches.")
-          ),
-          column(width = 9,
-                 img(src = "https://github.com/griffithlab/pVACtools/raw/master/pvactools/tools/pvacview/www/Reference_Match.png",
-                     align = "center", width = "1200px"),
-          )
-        )
-    ),
-    tabPanel("Peptide Level",
-        h4(" "),
-        fluidRow(
-            column(width = 12,
-                h4("Peptide Table", style = "font-weight: bold; text-decoration: underline;"),
-                p("Upon selecting a specific transcript set, you can also visualize which well-binding peptides are produced from this set. The best peptide is highlighted in light green.", br(), br(),
+        tabPanel(
+            "Peptide Level",
+            h4("Peptide Table", style = "font-weight: bold; text-decoration: underline;"),
+            p(
+                "Upon selecting a specific transcript set, you can also visualize which well-binding peptides are produced from this set. The best peptide is highlighted in light green.", br(), br(),
                 "Both, mutant (", code("MT"), ") and wildtype (", code("WT"), ") sequences are shown, along with either the", code("lowest"), " or ", code("median"),
                 " binding affinities, depending on how you generated the aggregate report.", br(), br(),
                 "An ", code("X"), "is marked for binding affinities higher than the ", code("aggregate_inclusion_binding_threshold"), " set when generating the aggregate report.", br(), br(),
                 "We also include three extra columns, one specifying the mutated position(s) in the peptide, one providing information on any problematic amino acids in the mutant sequence, and one identifying whether the peptide failed the anchor criteria for any of the HLA alleles.", br(),
                 "Note that if users wish to utlitize the ", strong("problematic positions"), " feature, they should run the standalone command ", code("pvacseq identify_problematic_amino_acids"),
                 " or run pVACseq with the ", code("--problematic-amino-acids"), " option enabled to generate the needed information."
+            ),
+            fluidRow(
+                column(
+                    width = 12,
+                    img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Explore_Peptide_Table.png", align = "center", width = "1200px"), br(), br()
                 )
-            )
-        ),
-        fluidRow(
-            column(width = 12,
-                img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Explore_Peptide_Table.png",
-                align = "center", width = "1500px"), br(), br()
-            )
-        ),
-        fluidRow(
-            column(width = 12,
-                h4("Anchor Heatmap", style = "font-weight: bold; text-decoration: underline;"),
-                p("The ", strong("Anchor Heatmap"), "tab shows the top 30 MT/WT peptide pairs from the peptide table with anchor probabilities overlayed as a heatmap.
-                The anchor probabilities shown are both allele and peptide length specific. The mutated amino acid is marked in red (for missense mutations) and each 
+            ),
+            h4("Anchor Heatmap", style = "font-weight: bold; text-decoration: underline;"),
+            p(
+                "The ", strong("Anchor Heatmap"), "tab shows the included MT/WT peptide pairs from the peptide table with anchor probabilities overlayed as a heatmap.
+                The anchor probabilities shown are both allele and peptide length specific. The mutated amino acid is marked in red (for missense mutations) and each
                 MT/WT pair are separated from others using a dotted line. ", br(),
                 "For peptide sequences with no overlaying heatmap, we currently do not have allele-specific predictions in our database.", br(), br(),
                 "The Anchor Weights section shows a table of the per-allele per-length anchor weights for each peptide position.", br(), br(),
                 "For more details and explanations regarding anchor positions and its influence on neoantigen prediction and prioritization, please refer to the next section: ",
-                strong("Advanced Options: Anchor Contribution"))
+                strong("Advanced Options: Anchor Contribution")
             ),
-            column(width = 12,
-                img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Explore_Anchor_Heatmap.png",
-                align = "center", width = "1500px"), br(), br()
-            )
-        ),
-        fluidRow(
+            fluidRow(
+                column(
+                    width = 12,
+                    img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Explore_Anchor_Heatmap.png", align = "center", width = "1200px")
+                )
+            ),
             column(width = 12,
                 h4("Additional Information",  style = "font-weight: bold; text-decoration: underline;"),
                 h5("IC50 Plot", style = "font-weight: bold;"),
@@ -504,263 +609,313 @@ tutorial_tab <- tabItem("tutorial",
                 alleles that the MT binds well to. These peptides each have up to 8 binding algorithm scores for Class I alleles or up
                 to 4 algorithm scores for Class II alleles.", br())
             ),
-            column(width = 12,
-                img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Explore_IC50_Plots.png",
-                align = "center", width = "1500px"), br(), br()
-            )
-        ),
-        fluidRow(
-            column(width = 12,
-                h5("%ile Plot", style = "font-weight: bold;"),
-                p("The ", strong("%ile Plot"), "tab shows violin plots of the individual percentile-based binding affinity predictions of the MT and WT peptides
-                for HLA alleles that the MT binds well to.", br())
-            ),
-            column(width = 12,
-                img(src = "https://github.com/griffithlab/pVACtools/raw/0f008c1c/pvactools/tools/pvacview/www/Explore_Percentile_Plots.png",
-                align = "center", width = "1500px"), br(), br()
-            )
-        ),
-        fluidRow(
-            column(width = 12,
-                h5("Binding Data", style = "font-weight: bold;"),
-                p("The ", strong("Binding Data"), "tab shows the specific IC50 and percentile binding affinity predictions generated from each individual algorithm.
-                Each cell shows the IC50 prediction followed by the percentile predictions in parenthesis.", br())
-            ),
-            column(width = 12,
-                img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Explore_Binding_Data.png",
-                align = "center", width = "1500px"), br(), br()
-            )
-        ),
-        fluidRow(
-            column(width = 12,
-                h5("Elution and Immunogenicity Table", style = "font-weight: bold;"),
-                p("The ", strong("Elution and Immunigenicity Table"), "tab shows prediction results based on algorithms trained from peptide elution data. This includes algorithms
-                such as NetMHCpanEL/NetMHCIIpanEL, MHCflurryELProcessing and MHCflurryELPresentation.", br())
-            ),
-            column(width = 12,
-                img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Explore_Elution_Data.png",
-                align = "center", width = "1500px"), br(), br()
-            )
-        )
-    ),
-    tabPanel("Advanced Options: Anchor Contribution",
-        h4(" "),
-        fluidRow(
-            column(width = 6,
-                h4("Anchor vs Mutation Positions", style = "font-weight: bold; text-decoration: underline;"),
-                p("Neoantigen identification and prioritization relies on correctly predicting whether the presented 
-                peptide sequence can successfully induce an immune response. As the majority of somatic mutations are single nucleotide variants,
-                changes between wildtype and mutated peptides are typically subtle and require cautious interpretation. ", br(), br(),
-                                                        "In the context of neoantigen presentation by specific MHC alleles, researchers have noted that a subset of 
-                peptide positions are presented to the T-cell receptor for recognition, while others are responsible for anchoring 
-                to the MHC, making these positional considerations critical for predicting T-cell responses.", br(), br(),
-                                                        "Multiple factors should be considered when prioritizing neoantigens, including mutation location, anchor position, predicted MT
-                and WT binding affinities, and WT/MT fold change, also known as agretopicity.", br(), br(),
-                                                        "Examples of the four distinct possible scenarios for a predicted strong MHC binding peptide involving these factors are illustrated
-                in the figure on the right. There are other possible scenarios where the MT is a poor binder, however those are not listed as 
-                they would not pertain to our goal of neoantigen identification.", br(), br(),
-                                                        strong("Scenario 1"), "shows the case where the WT is a poor binder and the MT peptide is a strong binder,
-                containing a mutation at an anchor location. Here, the mutation results in a tighter binding of the MHC and allows for
-                better presentation and potential for recognition by the TCR. As the WT does not bind (or is a poor binder), this neoantigen 
-                remains a good candidate since the sequence presented to the TCR is novel.", br(), br(),
-                                                        strong("Scenario 2"), " and ", strong("Scenario 3"), " both have strong binding WT and MT peptides. In ", strong("Scenario 2"),
-                                                        ", the mutation of the peptide is located at a non-anchor location, creating a difference in the sequence participating in TCR
-                recognition compared to the WT sequence. In this case, although the WT is a strong binder, the neoantigen remains a good candidate
-                that should not be subject to central tolerance.", br(), br(),
-                                                        "However, as shown in ", strong("Scenario 3"), ", there are neoantigen candidates where the mutation is located at the anchor position
-                and both peptides are strong binders. Although anchor positions can themselves influence TCR recognition, a mutation at a strong
-                anchor location generally implies that both WT and MT peptides will present the same residues for TCR recognition. As the WT peptide
-                is a strong binder, the MT neoantigen, while also a strong binder, will likely be subject to central tolerance and should not be 
-                considered for prioritization.", br(), br(),
-                                                        strong("Scenario 4"), " is similar to the first scenario where the WT is a poor binder. However, in this case, the mutation is
-                located at a non-anchor position, likely resulting in a different set of residues presented to the TCR and thus making the neoantigen a good candidate."
+            fluidRow(
+                column(
+                    width = 12,
+                    img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Explore_IC50_Plots.png", align = "center", width = "1200px")
                 )
             ),
-            column(width = 6,
-                img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Anchor_Scenarios.png",
-                    align = "center", height = "800px", width = "400px"), br(), br()
-            )
-        ),
-        fluidRow(
-            column(width = 6,
-                h4("Anchor Guidance", style = "font-weight: bold; text-decoration: underline;"),
-                p("To summarize, here are the specific criteria for prioritizing (accept) and not prioritizing (reject) a neoantigen candidate:", br(),
-                "Note that in all four cases, we are assuming a strong MT binder which means ",
-                code("(MT IC50 < binding threshold) OR (MT percentile < percentile threshold)"), br(), br()),
-                p(code("I: WT Weak binder"), " : ", code("(WT IC50 < binding threshold) OR (WT percentile < percentile threshold)")),
-                p(code("II: WT Strong binder"), " : ", code("(WT IC50 > binding threshold) AND (WT percentile > percentile threshold)")),
-                p(code("III: Mutation at Anchor"), " : ", code("set(All mutated positions) is a subset of set(Anchor Positions of corresponding HLA allele)")),
-                p(code("IV: Mutation not at Anchor"), " : ", code("There is at least one mutated position between the WT and MT that is not at an anchor position")),
-                p(strong("Scenario 1 : "), code(" I + IV"), strong(" -> Accept")),
-                p(strong("Scenario 2 : "), code(" II + IV"), strong(" -> Accept")),
-                p(strong("Scenario 3 : "), code(" II + III"), strong(" -> Reject")),
-                p(strong("Scenario 4 : "), code(" I + III"), strong(" -> Accept"))
+            h5("%ile Plot", style = "font-weight: bold;"),
+            p(
+                "The ", strong("%ile Plot"), "tab shows violin plots of the individual percentile-based binding affinity predictions of the MT and WT peptides
+                for HLA alleles that the MT binds well to."
             ),
-            column(width = 6,
-                img(src = "https://github.com/griffithlab/pVACtools/raw/f19788ccdb313a14a57350557cd70e1aa6bdca9a/pvactools/tools/pvacview/www/anchor.jpg",
-                    align = "center", height = "350px", width = "600px"), br(), br()
-            )
-        )
-    ),
-    tabPanel("Advanced Options: Regenerate Tiering",
-        h4(" "),
-        fluidRow(
-            column(width = 6,
-                h4("Reassigning Tiers for all variants after adjusting parameters", style = "font-weight: bold; text-decoration: underline;"),
-                p("The Tier column generated by pVACtools is aimed at helping users group and prioritize neoantigens in a more efficient manner.
-                For details on how Tiering is done, please refer to the Variant Level tutorial tab where we break down each
-                specific Tier and its criteria.", br(), br(),
-                                                        "While we try to provide a set of reasonable default parameters, we fully understand the need for flexible changes to the
-                parameters used in the underlying Tiering algorithm. Thus, we provide an Advanced Options tab in our app where users can change the following
-                cutoffs custom to their individual analysis: ", br(), br(),
-                                                        code("Binding Threshold"), p("IC50 cutoff for a peptide to be considered a strong binder. Note that if allele-specific binding thresholds are
-                in place, those will stay the same and not overwritten by this parameter value change."), br(),
-                                                        code("Percentile Threshold"), p("Percentile cutoff for a peptide to be considered a strong binder."), br(),
-                                                        code("Clonal DNA VAF"), p("VAF cutoff that is taken into account when deciding subclonal variants. Note that variants with a DNA VAF lower
-                than half of the clonal VAF cutoff will be considered subclonal (e.g. setting a 0.6 clonal VAF cutoff means anything under 0.3 VAF is subclonal)."), br(),
-                                                        code("Allele Expr"), p("Allele expression cutoff for a peptide to be considered expressed. Note for each variant, the allele expression
-                is calculated by multiplying gene expression and RNA VAF."), br(),
-                                                        code("Scoring Cnadidates Ranking"), p("Whether to use IC50 or Percentile scores as a top score metric for scoring candidates"), br(),
-                                                        code("Default Anchors vs Allele-specific Anchors"), br(),
-                                                        "By default, pVACtools considers positions 1, 2, n-1, and n to be anchors for an n-mer allele. However, a recent study has shown that anchors should be
-                considered on an allele-specific basis and different anchor patterns exist among HLA alleles.",
-                                                        "Here, we provide users with the option to utilize allele-specific anchors when generating the Anchor Tier. However, to objectively determine
-                which positions are anchors for each individual allele, the users need to set a contribution percentage threshold (X).",
-                                                        "Per anchor calculation results from the described computational workflow in the cited paper, each position of the n-mer peptide is assigned a
-                score based on how its binding to a certain HLA allele was influenced by mutations. These scores can then be used to calculate the relative
-                contribution of each position to the overall binding affinity of the peptide. Given the contribution threshold X, we rank the normalized score
-                across the peptide in descending order (e.g. [2,9,1,3,2,8,7,6,5] for a 9-mer peptide) and start summing the scores from top to bottom.
-                Positions that together account for X% of the overall binding affinity change (e.g. 2,9,1) will be assigned as anchor locations for tiering purposes.", br(), br(),
-                "However, we recommend users also navigating to the Anchor Heatmap Tab in the peptide level description for a less binary approach."
+            fluidRow(
+                column(
+                    width = 12,
+                    img(src = "https://github.com/griffithlab/pVACtools/raw/0f008c1c/pvactools/tools/pvacview/www/Explore_Percentile_Plots.png", align = "center", width = "1200px")
                 )
             ),
-            column(width = 6,
-                img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Explore_Regenerate_Tiering.png",
-                    align = "center", width = "700px"), br(), br()
-            )
-        ),
-        fluidRow(
-            column(width = 6,
-                h4("Original Parameters", style = "font-weight: bold; text-decoration: underline;"),
-                p(" In this box, we provide users with the original parameters they had used to generate the currently loaded aggregate report and metrics file."),
-                p("Note that the app will keep track of your peptide evaluations and comments accordingly even when changing or reseting the parameters."),
-                p("If you see a parameter in the original parameter box but did not see an option to change it in the advanced options section, it is likely that you
-                will be required to rerun the", code("pvacseq generate-aggregate-report"), " command. This is likely due to the current metrics file not 
-                having the necessary peptide information to perform this request."
-                ),
-                h4("Current Parameters", style = "font-weight: bold; text-decoration: underline;"),
-                p(" In this box, we provide users with the tiering parameters that currently applied to the aggregate report.",
-                "This not only allows users to compare their current parameters (if changed) with the original parameters."
-                ),
-                h4("Resetting Parameters", style = "font-weight: bold; text-decoration: underline;"),
-                p("The ", strong("reset"),
-                " button allows the user to restore the original tiering when desired."
+            h5("Binding Data", style = "font-weight: bold;"),
+            p(
+                "The ", strong("Binding Data"), "tab shows the specific IC50 and percentile binding affinity predictions generated from each individual algorithm.
+                Each cell shows the IC50 prediction followed by the percentile predictions in parenthesis."
+            ),
+            fluidRow(
+                column(
+                    width = 12,
+                    img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Explore_Binding_Data.png", align = "center", width = "1200px"),
                 )
             ),
-            column(width = 6,
-                img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Explore_Original_Parameters.png",
-                    align = "center", width = "300px"), br(), br()
-            )
-        )
-    ),
-    tabPanel("NeoFox Module",
-      h4("Module for Exploring NeoFox Annotated Neoantigens", style = "font-weight: bold; text-decoration: underline;"),
-      p("The one required file should end with the suffix \"_neoantigen_candidates_annotated.tsv\".
-        The module expects all all NeoFox annotated features to be in in the file and can handle input with other annotations
-        you might append to the neoantigen candidates."
-      ),
-      img(src = "https://github.com/griffithlab/pVACtools/blob/e679155b2938fadf02dd6795c445a05f7fcb5fc0/docs/images/screenshots/pvacview-neofox-maintable.png?raw=true", align = "center", width = "1500px"),
-      h4("Features", style = "font-weight: bold; text-decoration: underline;"),
-      h5("Annotated Neoantigen Table", style = "font-weight: bold;"),
-      p("The annotated neoantigen table is generated as output from NeoFox and includes many annotations based on published neoantigen features. 
-        You can page through the candidates, sort by any feature, and select one or more candidates for further investgation. We have marked the 
-        features we find most informative with an asterisk. These columns are selected by default but additional columns can be selected using
-        the \"Column Visibility\" dropdown."
-      ),
-      p("Colored heatmap cell backgrounds on binding affinity and rank columns indicate where the value falls in comparison to the default 500 nM
-        binding affinity and 0.5 percentile thresholds, respectively. Green background colors indicate a value below the threshold while yellow to
-        red colors indicate a progressively higher value above the threshold. Horizontal barplot backgrounds on the expression and VAF columns
-        reflect how close the values are to the \"ideal\" values of 50 and 1, respectively."
-      ),
-      h5("Comparative Violin Plots", style = "font-weight: bold;"),
-      p("You can understand how selected candidates relate to the the rest of the dataset using the comparative violin plots. You can select as many candidates 
-        as you would like which will then be highlighted in red in the violin plots. You can also select up to six features to view at a time. We have pre-selected
-        five features which we found informative. "
-      ),
-      img(src = "https://github.com/griffithlab/pVACtools/blob/e679155b2938fadf02dd6795c445a05f7fcb5fc0/docs/images/screenshots/pvacview-neofox-table-violinplot.png?raw=true", align = "center", width = "1500px"),
-      h5("Dynamic Scatter Plot", style = "font-weight: bold;"),
-      p("You can also further investigate the data using the dynamic scatter plot where you can choose any feature to be the X-axis, Y-axis,
-        color, or size variable. The X and Y scale can be transformed and a range of values subsetted. The color represents the minimum
-        and maximum values can also be changed to any HEX value."
-      ),
-      p("To view information about different points on the plot simply mouse over individual points. You can also export the current scatter plot 
-        by using the camera icon at the top right corner of the plot."
-      ),
-      img(src = "https://github.com/griffithlab/pVACtools/blob/e679155b2938fadf02dd6795c445a05f7fcb5fc0/docs/images/screenshots/pvacview-neofox-dynamicscatterplot_selected.png?raw=true", align = "center", width = "1500px"),
-      h5("Evaluation and Commenting", style = "font-weight: bold;"),
-      p("The evaluation buttons at the right of each candidate row can be used to capture the final decision on whether to accept, reject, or 
-        further review the candidate. The total counts for each type of evaluation are displayed in the \"Peptide Evaluation Overview\" panel."
-      ),
-      p("You are able to leave a comment on all selected candidates by using the form in the panel on the top right of the page. This panel also displays
-        the comments left on each selected candidate. Both the selected evaluation and comment are included in the exported table."),
-      img(src = "https://github.com/griffithlab/pVACtools/blob/e679155b2938fadf02dd6795c445a05f7fcb5fc0/docs/images/screenshots/pvacview-neofox-evaluation.png?raw=true", align = "center", width = "1500px"),
-      h5("Exporting", style = "font-weight: bold;"),
-      p("After investigating and evaluating your candidates, you can export the main table, including the final evaluation and comment for each candidate.
-        After browsing to the \"Export Data\" tab, click the \"Download as TSV\" or \"Download as excel\" button to download the table in your desired
-        file format."
-      ),
-      img(src = "https://github.com/griffithlab/pVACtools/blob/e679155b2938fadf02dd6795c445a05f7fcb5fc0/docs/images/screenshots/pvacview-neofox-export.png?raw=true", align = "center", width = "1500px")
-    ),
-    tabPanel("Custom Module",
-        fluidRow(
-            column(width = 6,
-                h4("Module for Exploring Any Annotated Neoantigens", style = "font-weight: bold; text-decoration: underline;"),
-                p("The custom module boasts the most flexibility for viewing your data, since there are no required features that
-                    are expected to be in the file."
-                ),
-                p(
-                    "We provide three examples of neoantigen prediction pipeline output data: Vaxrank, NeoPredPipe, and antigen.garnish.2"
-                ),
-                p(
-                    "When you upload your file, you can then choose how to visualize the data by selecting which feature 
-                    from your input you would like to group and sort candidates by. The feature you choose to group by
-                    will allow you to explore candidates that are simliar to one another in a separate table. For example,
-                    to mimic the pVACseq Module grouping you could select to group by variant. The order of the candidates
-                    in each grouping is determined by the numeric feature you choose to sort by. Canidates within the pVACseq Module
-                    are sorted by best binders. Finally, you can select what features to display for each group of peptides,
-                    the default selection is all features."
-                )
+            h5("Elution and Immunogenicity Table", style = "font-weight: bold;"),
+            p(
+                "The ", strong("Elution and Immunigenicity Table"), "tab shows presentation and immunogenicity prediction results. This includes algorithms
+                such as NetMHCpanEL/NetMHCIIpanEL, MHCflurryEL (Processing and Presentation), DeepImmuno, and BigMHC (Presentation and Immunogenicity)."
             ),
-            column(width = 6,
-                img(src = "https://github.com/griffithlab/pVACtools/blob/29a1450d7f3b22ac99ffc5ce7472886ab8435717/docs/images/screenshots/pvacview-custom-upload-vaxrank.png?raw=true", align = "center", width = "700px")
+            fluidRow(
+                column(
+                    width = 12,
+                    img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Explore_Elution_Data.png", align = "center", width = "1200px")
+                )
             )
         ),
-        fluidRow(
-            column(width = 12,
-                h4("Features", style = "font-weight: bold; text-decoration: underline;"),
-                h5("Overview of Neoantigen Features", style = "font-weight: bold;"),
-                p("The Overview of Neantigen Features table displays the groups of candidates as designated
-                    by the feature you specify. The top candidate of the group according to the sort by feature
-                    is shown in the table. To investage the candidates within the group, click the Investigate button."
+        tabPanel(
+            "Advanced Options: Anchor Contribution",
+            fluidRow(
+                column(
+                    width = 6,
+                    h4("Anchor vs Mutation Positions", style = "font-weight: bold; text-decoration: underline;"),
+                    p(
+                        "Neoantigen identification and prioritization relies on correctly predicting whether the presented
+                        peptide sequence can successfully induce an immune response. As the majority of somatic mutations are single nucleotide variants,
+                        changes between wildtype and mutated peptides are typically subtle and require cautious interpretation. ", br(), br(),
+                        "In the context of neoantigen presentation by specific MHC alleles, researchers have noted that a subset of
+                        peptide positions are presented to the T-cell receptor for recognition, while others are responsible for anchoring
+                        to the MHC, making these positional considerations critical for predicting T-cell responses.", br(), br(),
+                        "Multiple factors should be considered when prioritizing neoantigens, including mutation location, anchor position, predicted MT
+                        and WT binding affinities, and WT/MT fold change, also known as agretopicity.", br(), br(),
+                        "Examples of the four distinct possible scenarios for a predicted strong MHC binding peptide involving these factors are illustrated
+                        in the figure on the right. There are other possible scenarios where the MT is a poor binder, however those are not listed as
+                        they would not pertain to our goal of neoantigen identification.", br(), br(),
+                        strong("Scenario 1"), "shows the case where the WT is a poor binder and the MT peptide is a strong binder,
+                        containing a mutation at an anchor location. Here, the mutation results in a tighter binding of the MHC and allows for
+                        better presentation and potential for recognition by the TCR. As the WT does not bind (or is a poor binder), this neoantigen
+                        remains a good candidate since the sequence presented to the TCR is novel.", br(), br(),
+                        strong("Scenario 2"), " and ", strong("Scenario 3"), " both have strong binding WT and MT peptides. In ", strong("Scenario 2"),
+                        ", the mutation of the peptide is located at a non-anchor location, creating a difference in the sequence participating in TCR
+                        recognition compared to the WT sequence. In this case, although the WT is a strong binder, the neoantigen remains a good candidate
+                        that should not be subject to central tolerance.", br(), br(),
+                        "However, as shown in ", strong("Scenario 3"), ", there are neoantigen candidates where the mutation is located at the anchor position
+                        and both peptides are strong binders. Although anchor positions can themselves influence TCR recognition, a mutation at a strong
+                        anchor location generally implies that both WT and MT peptides will present the same residues for TCR recognition. As the WT peptide
+                        is a strong binder, the MT neoantigen, while also a strong binder, will likely be subject to central tolerance and should not be
+                        considered for prioritization.", br(), br(),
+                        strong("Scenario 4"), " is similar to the first scenario where the WT is a poor binder. However, in this case, the mutation is
+                        located at a non-anchor position, likely resulting in a different set of residues presented to the TCR and thus making the neoantigen a good candidate."
+                    )
                 ),
-                h5("Detailed Data", style = "font-weight: bold;"),
-                p("The Detailed Data table shows you all the candidates within the group so that you can
-                    compared them to one another. This table will only display the features that you 
-                    selected on the upload page."
+                column(width = 6,
+                    img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Anchor_Scenarios.png",
+                        align = "center", height = "800px", width = "400px"), br(), br()
+                )
+            ),
+            fluidRow(
+                column(
+                    width = 6,
+                    h4("Anchor Guidance", style = "font-weight: bold; text-decoration: underline;"),
+                    p(
+                        "To summarize, here are the specific criteria for prioritizing (accept) and not prioritizing (reject) a neoantigen candidate:", br(),
+                        "Note that in all four cases, we are assuming a strong MT binder which means ", code("(MT IC50 < binding threshold)"), br(), br()
+                    ),
+                    p(strong("I: "), "WT Weak binder: ", code("WT IC50 < binding threshold")),
+                    p(strong("II: "), "WT Strong binder: ", code("WT IC50 > binding threshold")),
+                    p(strong("III: "), "Mutation at Anchor: ", code("set(All mutated positions)"), " is a subset of ", code("set(Anchor Positions of corresponding HLA allele)")),
+                    p(strong("IV: "), "Mutation not at Anchor: There is at least one mutated position between the WT and MT that is not at an anchor position"),
+                    p(strong("Scenario 1 : "), code(" I + IV"), strong(" -> Accept")),
+                    p(strong("Scenario 2 : "), code(" II + IV"), strong(" -> Accept")),
+                    p(strong("Scenario 3 : "), code(" II + III"), strong(" -> Reject")),
+                    p(strong("Scenario 4 : "), code(" I + III"), strong(" -> Accept"))
                 ),
-                h5("Dynamic Scatter Plot", style = "font-weight: bold;"),
-                p("You can also further investigate the data using the dynamic scatter plot where you can choose any feature to be the X-axis, Y-axis,
-                    color, or size variable. The X and Y scale can be transformed and a range of values subsetted. The color represents the minimum
-                    and maximum values can also be changed to any HEX value."
+                column(width = 6,
+                    img(src = "https://github.com/griffithlab/pVACtools/raw/f19788ccdb313a14a57350557cd70e1aa6bdca9a/pvactools/tools/pvacview/www/anchor.jpg", align = "center", width = "600px")
+                )
+            )
+        ),
+        tabPanel(
+            "Advanced Options: Regenerate Tiering",
+            fluidRow(
+                column(
+                    width = 6,
+                    h4("Reassigning Tiers for all variants after adjusting parameters", style = "font-weight: bold; text-decoration: underline;"),
+                    p(
+                        "The Tier column generated by pVACtools is aimed at helping users group and prioritize neoantigens in a more efficient manner.
+                        For details on how Tiering is done, please refer to the Variant Level tutorial tab where we break down each
+                        specific Tier and its criteria."
+                    ),
+                    p(
+                        "While we try to provide a set of reasonable default parameters, we fully understand the need for flexible changes to the
+                        parameters used in the underlying Tiering algorithm. Thus, we provide an Advanced Options tab in our app where users can change the following
+                        cutoffs custom to their individual analysis: "
+                    ),
+                    strong("Default Anchors vs Allele-specific Anchors"),
+                    p(
+                        "By default, pVACtools considers positions 1, 2, n-1, and n to be anchors for an n-mer allele. However, a recent study has shown that anchors should be
+                        considered on an allele-specific basis and different anchor patterns exist among HLA alleles.",
+                        "Here, we provide users with the option to utilize allele-specific anchors when generating the Anchor Tier by selecting the appropriate check box.
+                        However, to objectively determine which positions are anchors for each individual allele, the users need to set a contribution percentage threshold (X)."
+                    ),
+                    p(
+                        "Per anchor calculation results from the described computational workflow in the cited paper, each position of the n-mer peptide is assigned a
+                        score based on how its binding to a certain HLA allele was influenced by mutations. These scores can then be used to calculate the relative
+                        contribution of each position to the overall binding affinity of the peptide. Given the contribution threshold X, we rank the normalized score
+                        across the peptide in descending order (e.g. [2,9,1,3,2,8,7,6,5] for a 9-mer peptide) and start summing the scores from top to bottom.
+                        Positions that together account for X% of the overall binding affinity change (e.g. 2,9,1) will be assigned as anchor locations for tiering purposes."
+                    ),
+                    p(
+                        "However, we recommend users also navigating to the Anchor Heatmap Tab in the peptide level description for a less binary approach."
+                    ),
+                    strong("Binding Threshold"),
+                    p(
+                        "IC50 cutoff for a peptide to be considered a strong binder."
+                    ),
+                    strong("Allele-specific binding thresholds"),
+                    p(
+                        "When this box is checked, use allele-specific binding thresholds, as defined by IEDB, instead of the binding threshold set above.
+                        For alleles where no specific threshold is defined, the binding threshold set above is used as a fallback."
+                    ),
+                    strong("Percentile Threshold"),
+                    p(
+                        "Percentile cutoff for a peptide to be considered a strong binder."
+                    ),
+                    strong("Percentile Threshold Strategy"),
+                    p(
+                        "When specifying a percentile threshold, this parameter determines how it is evaluated. If it is set to ", code("conservative"), ", the peptide needs
+                        to meet BOTH the binding threshold AND the percentile threshold in order to be considered a good binder. If it is set to ", code("exploratory"),
+                        ", EITHER the binding threshold OR percentile threshold will need to be met."
+                    ),
+                    strong("Clonal DNA VAF"),
+                    p(
+                        "VAF cutoff that is taken into account when deciding subclonal variants. Note that variants with a DNA VAF lower
+                        than half of the clonal VAF cutoff will be considered subclonal (e.g. setting a 0.6 clonal VAF cutoff means anything under 0.3 VAF is subclonal)."
+                    ),
+                    strong("Allele Expression"),
+                    p(
+                        "Allele expression cutoff for a peptide to be considered expressed. Note for each variant, the allele expression
+                        is calculated by multiplying gene expression and RNA VAF."
+                    ),
+                    strong("Transcript Prioritization Strategy"),
+                    p(
+                        "Specify the list of criteria to evaluate to determine whether or not the Best Transcript is a good transcript. If ", code("canonical"), " is in the
+                        list, check whether the Canonical value is True. If ", code("mane_select"), " is in the list, check whether the MANE Select value is True. If ",
+                        code("tsl"), " is in the list, check whether the TSL value meets the Maximum Transcript Support Level cutoff. The Best Transcript needs to pass at
+                        least one of the specified criteria in order to be considered a good transcript."
+                    ),
+                    strong("Maximum Transcript Support Level"),
+                    p(
+                        "The threshold to use for evaluating a transcript on itse Ensembl transcript support level (TSL).",
+                    ),
+                    strong("Top Score Sorting Metric"),
+                    p(
+                        "Specify the metric that should be used as the primary sort criteria for sorting candidates within each tier."
+                    )
                 ),
-                p("To view information about different points on the plot simply mouse over individual points. You can also export the current scatter plot 
-                    by using the camera icon at the top right corner of the plot."
+                column(width = 6,
+                    img(src = "https://github.com/griffithlab/pVACtools/raw/a99dd8b0/pvactools/tools/pvacview/www/Explore_Regenerate_Tiering.png", align = "center", width = "600px")
+                )
+            ),
+            fluidRow(
+                column(
+                    width = 6,
+                    h4("Original Parameters", style = "font-weight: bold; text-decoration: underline;"),
+                    p(" In this box, we provide users with the original parameters they had used to generate the currently loaded aggregate report and metrics file."),
+                    p("Note that the app will keep track of your peptide evaluations and comments accordingly even when changing or reseting the parameters."),
+                    p(
+                        "If you see a parameter in the original parameter box but did not see an option to change it in the advanced options section, it is likely that you
+                        will be required to rerun the", code("pvacseq generate-aggregate-report"), " command. This is likely due to the current metrics file not 
+                        having the necessary peptide information to perform this request."
+                    ),
+                    h4("Current Parameters", style = "font-weight: bold; text-decoration: underline;"),
+                    p(
+                        "In this box, we provide users with the tiering parameters that currently applied to the aggregate report.",
+                        "This not only allows users to compare their current parameters (if changed) with the original parameters."
+                    ),
+                    h4("Resetting Parameters", style = "font-weight: bold; text-decoration: underline;"),
+                    p("The ", strong("reset"), " button allows the user to restore the original tiering when desired."
+                    )
                 ),
-                img(src = "https://github.com/griffithlab/pVACtools/blob/29a1450d7f3b22ac99ffc5ce7472886ab8435717/docs/images/screenshots/pvacview-custom-dynamicscatter-vaxrank.png?raw=true", align = "center", width = "1500px")
+                column(width = 6,
+                    img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Explore_Original_Parameters.png", align = "center", width = "300px")
+                )
+            )
+        ),
+        tabPanel("NeoFox Module",
+          h4("Module for Exploring NeoFox Annotated Neoantigens", style = "font-weight: bold; text-decoration: underline;"),
+          p("The one required file should end with the suffix \"_neoantigen_candidates_annotated.tsv\".
+            The module expects all all NeoFox annotated features to be in in the file and can handle input with other annotations
+            you might append to the neoantigen candidates."
+          ),
+          img(src = "https://github.com/griffithlab/pVACtools/blob/e679155b2938fadf02dd6795c445a05f7fcb5fc0/docs/images/screenshots/pvacview-neofox-maintable.png?raw=true", align = "center", width = "1500px"),
+          h4("Features", style = "font-weight: bold; text-decoration: underline;"),
+          h5("Annotated Neoantigen Table", style = "font-weight: bold;"),
+          p("The annotated neoantigen table is generated as output from NeoFox and includes many annotations based on published neoantigen features. 
+            You can page through the candidates, sort by any feature, and select one or more candidates for further investgation. We have marked the 
+            features we find most informative with an asterisk. These columns are selected by default but additional columns can be selected using
+            the \"Column Visibility\" dropdown."
+          ),
+          p("Colored heatmap cell backgrounds on binding affinity and rank columns indicate where the value falls in comparison to the default 500 nM
+            binding affinity and 0.5 percentile thresholds, respectively. Green background colors indicate a value below the threshold while yellow to
+            red colors indicate a progressively higher value above the threshold. Horizontal barplot backgrounds on the expression and VAF columns
+            reflect how close the values are to the \"ideal\" values of 50 and 1, respectively."
+          ),
+          h5("Comparative Violin Plots", style = "font-weight: bold;"),
+          p("You can understand how selected candidates relate to the the rest of the dataset using the comparative violin plots. You can select as many candidates 
+            as you would like which will then be highlighted in red in the violin plots. You can also select up to six features to view at a time. We have pre-selected
+            five features which we found informative. "
+          ),
+          img(src = "https://github.com/griffithlab/pVACtools/blob/e679155b2938fadf02dd6795c445a05f7fcb5fc0/docs/images/screenshots/pvacview-neofox-table-violinplot.png?raw=true", align = "center", width = "1500px"),
+          h5("Dynamic Scatter Plot", style = "font-weight: bold;"),
+          p("You can also further investigate the data using the dynamic scatter plot where you can choose any feature to be the X-axis, Y-axis,
+            color, or size variable. The X and Y scale can be transformed and a range of values subsetted. The color represents the minimum
+            and maximum values can also be changed to any HEX value."
+          ),
+          p("To view information about different points on the plot simply mouse over individual points. You can also export the current scatter plot 
+            by using the camera icon at the top right corner of the plot."
+          ),
+          img(src = "https://github.com/griffithlab/pVACtools/blob/e679155b2938fadf02dd6795c445a05f7fcb5fc0/docs/images/screenshots/pvacview-neofox-dynamicscatterplot_selected.png?raw=true", align = "center", width = "1500px"),
+          h5("Evaluation and Commenting", style = "font-weight: bold;"),
+          p("The evaluation buttons at the right of each candidate row can be used to capture the final decision on whether to accept, reject, or 
+            further review the candidate. The total counts for each type of evaluation are displayed in the \"Peptide Evaluation Overview\" panel."
+          ),
+          p("You are able to leave a comment on all selected candidates by using the form in the panel on the top right of the page. This panel also displays
+            the comments left on each selected candidate. Both the selected evaluation and comment are included in the exported table."),
+          img(src = "https://github.com/griffithlab/pVACtools/blob/e679155b2938fadf02dd6795c445a05f7fcb5fc0/docs/images/screenshots/pvacview-neofox-evaluation.png?raw=true", align = "center", width = "1500px"),
+          h5("Exporting", style = "font-weight: bold;"),
+          p("After investigating and evaluating your candidates, you can export the main table, including the final evaluation and comment for each candidate.
+            After browsing to the \"Export Data\" tab, click the \"Download as TSV\" or \"Download as excel\" button to download the table in your desired
+            file format."
+          ),
+          img(src = "https://github.com/griffithlab/pVACtools/blob/e679155b2938fadf02dd6795c445a05f7fcb5fc0/docs/images/screenshots/pvacview-neofox-export.png?raw=true", align = "center", width = "1500px")
+        ),
+        tabPanel("Custom Module",
+            fluidRow(
+                column(width = 6,
+                    h4("Module for Exploring Any Annotated Neoantigens", style = "font-weight: bold; text-decoration: underline;"),
+                    p("The custom module boasts the most flexibility for viewing your data, since there are no required features that
+                        are expected to be in the file."
+                    ),
+                    p(
+                        "We provide three examples of neoantigen prediction pipeline output data: Vaxrank, NeoPredPipe, and antigen.garnish.2"
+                    ),
+                    p(
+                        "When you upload your file, you can then choose how to visualize the data by selecting which feature 
+                        from your input you would like to group and sort candidates by. The feature you choose to group by
+                        will allow you to explore candidates that are simliar to one another in a separate table. For example,
+                        to mimic the pVACseq Module grouping you could select to group by variant. The order of the candidates
+                        in each grouping is determined by the numeric feature you choose to sort by. Canidates within the pVACseq Module
+                        are sorted by best binders. Finally, you can select what features to display for each group of peptides,
+                        the default selection is all features."
+                    )
+                ),
+                column(width = 6,
+                    img(src = "https://github.com/griffithlab/pVACtools/blob/29a1450d7f3b22ac99ffc5ce7472886ab8435717/docs/images/screenshots/pvacview-custom-upload-vaxrank.png?raw=true", align = "center", width = "700px")
+                )
+            ),
+            fluidRow(
+                column(width = 12,
+                    h4("Features", style = "font-weight: bold; text-decoration: underline;"),
+                    h5("Overview of Neoantigen Features", style = "font-weight: bold;"),
+                    p("The Overview of Neantigen Features table displays the groups of candidates as designated
+                        by the feature you specify. The top candidate of the group according to the sort by feature
+                        is shown in the table. To investage the candidates within the group, click the Investigate button."
+                    ),
+                    h5("Detailed Data", style = "font-weight: bold;"),
+                    p("The Detailed Data table shows you all the candidates within the group so that you can
+                        compared them to one another. This table will only display the features that you 
+                        selected on the upload page."
+                    ),
+                    h5("Dynamic Scatter Plot", style = "font-weight: bold;"),
+                    p("You can also further investigate the data using the dynamic scatter plot where you can choose any feature to be the X-axis, Y-axis,
+                        color, or size variable. The X and Y scale can be transformed and a range of values subsetted. The color represents the minimum
+                        and maximum values can also be changed to any HEX value."
+                    ),
+                    p("To view information about different points on the plot simply mouse over individual points. You can also export the current scatter plot 
+                        by using the camera icon at the top right corner of the plot."
+                    ),
+                    img(src = "https://github.com/griffithlab/pVACtools/blob/29a1450d7f3b22ac99ffc5ce7472886ab8435717/docs/images/screenshots/pvacview-custom-dynamicscatter-vaxrank.png?raw=true", align = "center", width = "1500px")
+                )
             )
         )
     )
-)
 )
 
 ## CONTACT TAB ##

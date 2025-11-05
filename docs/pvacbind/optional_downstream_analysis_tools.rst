@@ -92,3 +92,8 @@ combination, by providing them as a comma-separated list.
 
 This tool may be used with any filtered.tsv or all_epitopes.tsv pVACbind report
 file.
+
+Update Tiers
+------------
+
+.. program-output:: pvacseq update_tiers -h

@@ -13,9 +13,14 @@
 Usage
 -----
 
-The pVACview user interface has four sections:
+The pVACtools Output section of the pVACview user interface menu has three sections:
 
-- pVACtools Output, where pVACseq results can be uploaded, visualized/explored, and exported
+- Upload
+- Visualize and Explore
+- Export
+
+Additionally, the menu also has links to:
+
 - Tutorials, where the pVACview app is documented in more detail
 - pVACview Documentation, which is a link to the documentation here
 - Submit GitHub Issue, which is a link to GitHub to submit bug reports and
@@ -28,21 +33,20 @@ Once you've successfully launched pVACview by completing the :ref:`prerequisites
 your local directories to load in the aggregate report and metrics files, usually located in the same directory as your ``app.R`` file.
 You will need to select the type of your files uploaded (Class I or Class II).
 
-The two required inputs are ``<sample_name>.all_epitopes.aggregated.tsv`` and ``<sample_name>.all_epitopes.aggregated.metrics.json``), both of which are output files from the pVACseq pipeline. The aggregated tsv file is a list of all predicted epitopes and their binding affinity scores,
+The two required inputs are ``<sample_name>.all_epitopes.aggregated.tsv`` and ``<sample_name>.all_epitopes.aggregated.metrics.json``, both of which are output files from the pVACseq pipeline. The aggregated TSV file is a list of all predicted epitopes and their binding affinity scores,
 with additional variant information and the metrics json file contains additional transcript and peptide level information that is needed for certain features of the pVACview application. You can find further details on them :ref:`here <pvacseq_output_files>`.
 
 You have the option of uploading an additional file to supplement the data you are exploring. This is useful in cases where you are visualizing Class I prediction data but would like to have
 a general idea of the variant's Class II prediction performance or vice versa. In order to match your main data with data from your additional file, it is important that they were generated
 from the same set of variants (but predicted for different HLA alleles). You will also want to specify whether the type of data you are adding was generated from Class I or Class II on the upload page by selecting the appropriate radio button option.
 
-We also provide users with the opportunity of uploading a gene-of-interest tsv file, where each individual line consists of one gene name. If matched in the aggregate report, the gene name will be
+We also provide users with the opportunity of uploading a gene-of-interest TSV file, where each individual line consists of one gene name. If matched in the aggregate report, the gene name will be
 highlighted using bold font and a green box around the cell.
 
 .. figure:: ../../images/screenshots/pvacview-upload.png
     :width: 1000px
-    :align: right
+    :align: center
     :alt: pVACview Upload
-    :figclass: align-left
 
 :large:`Visualize and Explore`
 ______________________________
@@ -54,47 +58,54 @@ Upon successfully uploading the matching data files, you can now explore the dif
 
 .. figure:: ../../images/screenshots/pvacview-visualize_and_explore.png
     :width: 1000px
-    :align: right
+    :align: center
     :alt: pVACview Upload
-    :figclass: align-left
 
 Specifically, the features can be separated into five categories:
 
-- :bold:`Variant level information`
+- :bold:`Variant level information` (Aggregate Report of Best Candidate by Variant
+  panel)
 
-  - Main aggregate report table showcasing best candidates by variant
+  - The table in the Aggregate Report of Best Candidate by Variant panel showcases best neoantigen candidates by variant
 
-- :bold:`Selected Variant detail information`
+- :bold:`Selected Variant detail information` (Variant Information panel)
 
-  - Transcript sets for a selected variant in the main aggregate report table,
-    where all transcripts in the set code for the same set of neoantigen
-    candidates. The transcript set that includes the best transcript is
-    highlighted in green and selected by default.
-  - Reference proteome match details for the selected variant (if reference
-    protome similarity feature was originally run)
-  - Additional Data for the selected variant when a Additional Neoantigen Candidate Aggregate Report was uploaded
-  - Variant & Gene Info box with VAF and expression information for the
-    selected variant
+  - The Transcript Sets of Selected Variant tab lists the transcript sets
+    for the variant selected in the in the main aggregate report table.
+    A transcript set summarizes all transcripts that code for the same set
+    of neoantigen candidates. The transcript set that includes the best
+    transcript is highlighted in green and selected by default.
+  - The Reference Matches tab lists reference proteome match details for
+    the selected variant (if reference protome similarity feature was originally run)
+  - The Additional Data tab list additional information about the of the selected
+    variant when a Additional Neoantigen Candidate Aggregate Report was uploaded.
+  - Variant & Gene Info section lists VAF and expression information for the
+    selected variant.
 
-- :bold:`Selected Transcript Set information`
+- :bold:`Selected Transcript Set information` (certain tabs in the Transcript and Peptide Set
+  Data panel)
 
-  - Transcripts of selected set that produces good binding peptides
-  - Expression, transcript support level, and biotype information etc. of the
-    transcripts in the set
+  - The Transcripts in Set tab lists the Transcripts of selected set that produce good binding peptides.
+  - It also includes the Expression, MANE Select status, Canonical status, Transcript Support Level,
+    Biotypes, CDS Flags, and Transcript Length information of the transcripts in the set.
 
-- :bold:`Selected Transcript Set Peptide information`
+- :bold:`Selected Transcript Set Peptide information` (certain tabs in the
+  Transcript and Peptide Set Data panel)
 
-  - All well-binding peptides (for at least 1 HLA allele) in the selected
+  - The Peptide Candidates from Selected Transcript Set list all included peptides in the selected
     transcript set. The best peptide is highlighted in green.
-  - MHC binding prediction scores for each MT and WT peptide pair
-  - Allele-specific anchor prediction heatmap and per-position and per-allele anchor weights
+  - It also includes the MHC binding prediction scores for each MT and WT peptide pair.
+  - Lastly, it lists the mutation position, problematic amino acid positions,
+    and anchor status of each peptide.
+  - The Anchor Heatmap tab visualizes allele-specific anchor predictions using heatmaps and per-position
+    and per-allele anchor weights.
 
-- :bold:`Selected Peptide information`
+- :bold:`Selected Peptide information` (Additional Peptide Information panel)
 
-  - Per-algorithm and HLA-allele MHC binding predictions for the selected peptide and its
-    matched WT (IC50 and Percentile)
-  - Violin plot for the IC50 and Percentile predictions
-  - Elution and immunogenicity data for the selected peptide and its matched WT
+  - The Binding Data tab shows per-algorithm and HLA-allele MHC binding predictions for the selected peptide and its
+    matched WT (IC50 and Percentile).
+  - The IC50 Plot and %ile Plot tabs shows violin plots for the IC50 and Percentile predictions, respectively.
+  - The Elution and Immunogenicity Data tab shows presentation and immunogencity predictions.
 
 For detailed descriptions on individual sections, please refer to :ref:`features <features_pvacview_label>` page.
 
@@ -120,7 +131,7 @@ Additionally, you can regenerate the :ref:`Tiers <pvacseq_aggregate_report_tiers
 - :bold:`Binding Threshold`
 
   The threshold to consider a peptide a good binder. The IC50 MT will need to
-  be below this value
+  be below this value.
 
 - :bold:`Allele-specific binding thresholds`
 
@@ -132,9 +143,16 @@ Additionally, you can regenerate the :ref:`Tiers <pvacseq_aggregate_report_tiers
 
 - :bold:`Percentile Threshold`
 
-  In addition to passing the binding affinity IC50 threshold above, the %ile MT will
-  also need to be below this value in order for the peptide to be considered a
-  good binder.
+  Set this threshold to also consider the the %ile MT when determining whether will
+  the peptide is a good binder. The %ile MT will need to be below this value.
+
+- :bold:`Percentile Threshold Strategy`
+
+  When specifying a percentile threshold, this parameter determines how it is
+  evaluated. If it is set to "conservative", the peptide needs to meet BOTH
+  the binding threshold AND the percentile threshold in order to be considered
+  a good binder. If it is set to "exploratory", EITHER the binding threshold
+  OR percentile threshold will need to be met.
 
 - :bold:`Clonal variant VAF`
 
@@ -143,19 +161,39 @@ Additionally, you can regenerate the :ref:`Tiers <pvacseq_aggregate_report_tiers
 - :bold:`Allele Expression`
 
   Allele expression is calculated as gene expression * RNA VAF. This expression value is used as a cutoff in order to determine whether the peptide has good allele expression when the Allele Expr value of a variant is above this cutoff.
+  also need to be below this value in order for 
+
+- :bold:`Transcript Prioritization Strategy`
+
+  Specify the list of criteria to evaluate to determine whether or not the Best
+  Transcript is a good transcript. If "canonical" is in the list, check whether
+  the Canonical value is True. If "mane_select" is in the list, check whether
+  the MANE Select value is True. If "tsl" is in the list, check whether the
+  TSL value meets the Maximum Transcript Support Level cutoff. The Best Transcript
+  needs to pass at least one of the specified criteria in
+  order to be considered a good transcript.
+
+- :bold:`Maximum Transcript Support Level`
+
+  The threshold to use for evaluating a transcript on itse Ensembl transcript support
+  level (TSL).
+
+- :bold:`Top Score Sorting Metric`
+
+  Specify the metric that should be used as the primary sort criteria for
+  sorting candidates within each tier.
 
 .. figure:: ../../images/screenshots/pvacview-regenerate_tier.png
     :width: 1000px
-    :align: right
+    :align: center
     :alt: pVACview Upload
-    :figclass: align-left
 
 These parameters will default to the value used in your original pVACseq run.
 After adjusting and retiering your candidates, the currently applied tiering
 parameters are displayed in the ``Current Parameters for Tiering`` section.
 The parameters originally used for tiering are displayed in the ``Original
 Parameters for Tiering`` section. You can reset the tiers to the parameters
-used originally by clicking the ``Reset to original paramters`` button.
+used originally by clicking the ``Reset to original parameters`` button.
 
 Investigating Different Variants
 ********************************
@@ -163,18 +201,17 @@ Investigating Different Variants
 To investigate a specific variant in detail (on both the transcript and peptide levels), you will need to click on
 the candidate's row in the main aggregate report table. Afterwards, you may choose to select a rating for the
 neoantigen candidate using the three buttons on the right of the candidate's row. By default, all peptides are initially in a Pending state when the report is generated from pVACseq. Based on
-exploration and evaluation of the features provided an none of the buttons are selected. You can mark the peptide as
-either "Accept" (thumb-up button), "Reject" (thumbs-down button), or "Review" (flag button). Your current state of
+exploration and evaluation of the features provided, one of the buttons is selected. You can mark the peptide as
+either "Accept" (thumbs-up button), "Reject" (thumbs-down button), or "Review" (flag button). Your current state of
 selections are also counted and shown in the ``Peptide Evaluation Overview`` box.
 
 .. figure:: ../../images/screenshots/pvacview-comments.png
-    :width: 800px
-    :align: right
+    :width: 400px
+    :align: center
     :alt: pVACview comment interface
-    :figclass: align-left
 
 Users can add comments to each line of variants they are investigating. These comments can be reviewed in the Export page
-and will be in the final output (either tsv or excel) when downloaded. This column is by default ``No comments`` unless the input
+and will be in the final output (either TSV or Excel) when downloaded. This column is by default ``No comments`` unless the input
 aggregate report has a ``Comments`` column pre-specified.
 
 :large:`Export`
@@ -192,8 +229,8 @@ There are a couple things to note when exporting your current data:
 
 - Download as TSV/Excel
 
-  We provide two download file types (tsv and excel). The excel format is user-friendly for downstream visualization and manipulation. However, if you plan on to continuing editing the aggregate report and would like to load
-  it back in pVACview with the previous evaluations preloaded, you will need to download the file in a tsv format.
+  We provide two download file types (TSV and Excel). The Excel format is user-friendly for downstream visualization and manipulation. However, if you plan on to continuing editing the aggregate report and would like to load
+  it back into pVACview with the previous evaluations and comments preloaded, you will need to download the file in a TSV format.
 
   :bold:`This serves as a way to save your progress as your evaluations are
   cleared upon closing or refreshing the pVACview app.`
