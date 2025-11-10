@@ -575,17 +575,40 @@ tutorial_tab <- tabItem(
             p(
                 "The ", strong("Anchor Heatmap"), "tab shows the included MT/WT peptide pairs from the peptide table with anchor probabilities overlayed as a heatmap.
                 The anchor probabilities shown are both allele and peptide length specific. The mutated amino acid is marked in red (for missense mutations) and each
-                MT/WT pair are separated from others using a dotted line. ", br(),
-                "For peptide sequences with no overlaying heatmap, we currently do not have allele-specific predictions in our database.", br(), br(),
-                "The Anchor Weights section shows a table of the per-allele per-length anchor weights for each peptide position.", br(), br(),
-                "For more details and explanations regarding anchor positions and its influence on neoantigen prediction and prioritization, please refer to the next section: ",
-                strong("Advanced Options: Anchor Contribution")
+                MT/WT pair are separated from others using a dotted line. ", "For peptide sequences with no overlaying heatmap, we currently do not have allele-specific
+                predictions in our database."
             ),
             fluidRow(
                 column(
                     width = 12,
-                    img(src = "https://github.com/griffithlab/pVACtools/raw/5834def4/pvactools/tools/pvacview/www/Explore_Anchor_Heatmap.png", align = "center", width = "1200px")
+                    style = "margin-bottom: 20px;",
+                    img(src = "https://github.com/griffithlab/pVACtools/raw/anchor_docs/pvactools/tools/pvacview/www/Explore_Anchor_Heatmap.png", align = "center", width = "1200px")
                 )
+            ),
+            p(
+                "The Anchor Positions section shows a table of the per-allele, per-length anchor positions calculated from the anchor weights and the specified anchor contribution
+                threshold. For more information on how the anchor positions are calculated, please refer to ", strong("Advanced Options: Regenerate Tiering"), " section."
+            ),
+            fluidRow(
+                column(
+                    width = 12,
+                    style = "margin-bottom: 20px;",
+                    img(src = "https://github.com/griffithlab/pVACtools/raw/anchor_docs/pvactools/tools/pvacview/www/Explore_Anchor_Positions.png", align = "center", width = "1200px")
+                )
+            ),
+            p(
+                "The Anchor Weights section shows a table of the per-allele, per-length anchor weights for each peptide position."
+            ),
+            fluidRow(
+                column(
+                    width = 12,
+                    style = "margin-bottom: 20px;",
+                    img(src = "https://github.com/griffithlab/pVACtools/raw/anchor_docs/pvactools/tools/pvacview/www/Explore_Anchor_Weights.png", align = "center", width = "1200px")
+                )
+            ),
+            p(
+                "For more details and explanations regarding anchor positions and its influence on neoantigen prediction and prioritization, please refer to the next section: ",
+                strong("Advanced Options: Anchor Contribution")
             ),
             column(width = 12,
                 h4("Additional Information",  style = "font-weight: bold; text-decoration: underline;"),

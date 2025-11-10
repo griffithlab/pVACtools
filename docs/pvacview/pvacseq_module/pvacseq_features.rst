@@ -143,6 +143,17 @@ ___________________________________________________________
       :width: 1000px
       :align: center
 
+  The Anchor Positions section shows a table of the per-allele, per-length anchor positions calculated from the anchor weights and the specified anchor contribution threshold.
+
+  .. figure:: ../../images/screenshots/pvacview-anchor_positions.png
+      :width: 1000px
+      :align: center
+
+  The Anchor Weights section shows a table of the per-allele, per-length anchor weights for each peptide position.
+
+  .. figure:: ../../images/screenshots/pvacview-anchor_weights.png
+      :width: 1000px
+      :align: center
 
 - :bold:`Transcripts in Set:`
 
