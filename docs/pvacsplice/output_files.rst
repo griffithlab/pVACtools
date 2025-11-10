@@ -507,6 +507,30 @@ Criteria Details
        ``--problematic-amino-acids`` parameters
      - ``Prob Pos == None``
 
+The pVACsplice Aggregate Report Sorting
+_______________________________________
+
+The aggregate report is sorted as follows:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Sort Criteria
+     - Sort Order
+   * - ``Tier`` column
+     - "Pass", "PoorBinder", "RefMatch", "PoorTranscript", "LowExpr", "Subclonal", "ProbPos", "Poor", "NoExpr"
+   * - Ascending rank of ``Allele Expr`` column + ascending rank of either ``IC50 MT`` column (if
+       ``--top-score-metric`` is ``ic50``) or ``%ile MT`` column (if
+       ``--top-score-metric`` is ``percentile``)
+     - Ascending sum rank
+   * - ``Gene`` column
+     - Alphabetical
+   * - ``Transcript`` column
+     - Alphabetical
+   * - ``AA Change`` column
+     - Alphabetical
+
+
 .. _pvacsplice_reference_matches:
 
 aggregated.tsv.reference_matches Report Columns

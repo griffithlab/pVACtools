@@ -304,6 +304,23 @@ Criteria Details
        ``--problematic-amino-acids`` parameters
      - ``Prob Pos == None``
 
+The pVACbind Aggregate Report Sorting
+_____________________________________
+
+The aggregate report is sorted as follows:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Sort Criteria
+     - Sort Order
+   * - ``Tier`` column
+     - "Pass", "PoorBinder", "RefMatch", "ProbPos", "Poor"
+   * - Ascending rank of either ``IC50 MT`` column (if
+       ``--top-score-metric`` is ``ic50``) or ``%ile MT`` column (if
+       ``--top-score-metric`` is ``percentile``)
+     - Ascending sum rank
+
 .. _pvacbind_reference_matches:
 
 aggregated.tsv.reference_matches Report Columns
