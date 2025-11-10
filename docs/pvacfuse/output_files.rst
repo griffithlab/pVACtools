@@ -365,6 +365,29 @@ Criteria Details
      - ``Prob Pos == None``
 
 
+The pVACfuse Aggregate Report Sorting
+_____________________________________
+
+The aggregate report is sorted as follows:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Sort Criteria
+     - Sort Order
+   * - ``Tier`` column
+     - "Pass", "PoorBinder", "RefMatch", "LowReadSupport", "LowExpr", "ProbPos", "Poor"
+   * - Ascending rank of ``Expr`` column + ascending rank of either ``IC50 MT`` column (if
+       ``--top-score-metric`` is ``ic50``) or ``%ile MT`` column (if
+       ``--top-score-metric`` is ``percentile``)
+     - Ascending sum rank
+   * - ``IC50 MT`` column (if ``--top-score-metric`` is ``ic50``) or ``%ile MT`` column (if
+       ``--top-score-metric`` is ``percentile``)
+     - Ascending
+   * - ``ID`` column
+     - Alphabetical
+
+
 .. _pvacfuse_reference_matches:
 
 aggregated.tsv.reference_matches Report Columns
