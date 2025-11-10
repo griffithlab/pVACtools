@@ -96,7 +96,7 @@ class UpdateTiers:
             '-m2', '--top-score-metric2',
             choices=['ic50','percentile'],
             default='ic50',
-            help='Whether to use IC50 MT or to use %%ile MT score column when sorting candidates within a tier.'
+            help="Whether to use median/best IC50 or to use median/best percentile score as the primary sorting criteria in the aggregated report for the candidates within each tier."
         )
         if tool in ['pvacseq', 'pvacsplice']:
             parser.add_argument(
