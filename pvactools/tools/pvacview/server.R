@@ -569,7 +569,7 @@ server <- shinyServer(function(input, output, session) {
                   df$metricsData$binding_percentile_threshold, df$metricsData$immunogenicity_percentile_threshold, df$metricsData$presentation_percentile_threshold, df$metricsData$percentile_threshold_strategy,
                   df$metricsData$use_allele_specific_binding_thresholds,
                   df$metricsData$mt_top_score_metric, df$metricsData$wt_top_score_metric,
-                  if (is.null(df$metricsData$`top_score_metric2`) || is.na(df$metricsData$`top_score_metric2`)) {"ic50"} else {df$metricsData$`top_score_metric2`},
+                  paste0(df$metricsData$`top_score_metric2`, collapse=", "),
                   df$metricsData$allele_specific_anchors, df$metricsData$anchor_contribution_threshold)
     ), digits = 3
   )
@@ -614,7 +614,7 @@ server <- shinyServer(function(input, output, session) {
         df$use_allele_specific_binding_thresholds,
         df$metricsData$mt_top_score_metric,
         df$metricsData$wt_top_score_metric,
-        if(is.null(df$scoring_candidate_metric) || is.na(df$scoring_candidate_metric)){"ic50"}else{df$scoring_candidate_metric}, #Defaulting to ic50 since that was what everything made prior to this implementation used. That way old metrics.json files will still work
+        paste0(df$metricsData$`top_score_metric2`, collapse=", "),
         df$allele_specific_anchors, df$anchor_contribution)
     ), digits = 3
   )
@@ -1333,6 +1333,7 @@ server <- shinyServer(function(input, output, session) {
         gather("col", "val", colnames(mt_data)[1]:tail(colnames(wt_data), n = 1)) %>%
         separate(col, c("HLA_allele", "Mutant", "Score"), sep = "\\_") %>%
         spread("Score", val)
+      full_data$type <- 'binding'
       full_data
     } else {
       return()
