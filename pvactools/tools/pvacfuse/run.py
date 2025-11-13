@@ -156,6 +156,7 @@ def main(args_input = sys.argv[1:]):
         'downstream_sequence_length': downstream_sequence_length,
         'keep_tmp_files'            : args.keep_tmp_files,
         'n_threads'                 : args.n_threads,
+        'use_normalized_percentiles'  : args.use_normalized_percentiles,
         'species'                   : species,
         'run_reference_proteome_similarity': args.run_reference_proteome_similarity,
         'blastp_path'               : args.blastp_path,

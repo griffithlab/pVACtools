@@ -150,6 +150,7 @@ def main(args_input = sys.argv[1:]):
         'class_ii_epitope_length'          : args.class_ii_epitope_length,
         'biotypes'                         : args.biotypes,
         'allow_incomplete_transcripts'     : args.allow_incomplete_transcripts,
+        'use_normalized_percentiles'  : args.use_normalized_percentiles,
         'junction_score'                   : args.junction_score,
         'variant_distance'                 : args.variant_distance,
         'anchor_types'                     : args.anchor_types,

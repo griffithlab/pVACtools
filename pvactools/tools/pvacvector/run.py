@@ -42,6 +42,7 @@ def run_pipelines(input_file, base_output_dir, args, junctions_to_test, spacer, 
         'additional_report_columns' : None,
         'junctions_to_test': junctions_to_test,
         'allow_incomplete_transcripts': args.allow_incomplete_transcripts,
+        'use_normalized_percentiles'  : args.use_normalized_percentiles,
     }
 
     parsed_output_files = []
