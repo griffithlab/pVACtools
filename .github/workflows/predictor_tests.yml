@@ -35,6 +35,8 @@ jobs:
           sudo apt-get install -y ghostscript
           sudo apt-get install -y gcc
           sudo apt-get install -y pandoc
+          sudo apt-get install -y mafft
+          sudo apt-get install -y build-essential
           pip install pypandoc==1.7.2
           pip install coverage
           pip install coveralls
@@ -47,6 +49,32 @@ jobs:
           pip install git+https://github.com/griffithlab/deepimmuno.git#egg=deepimmuno
           pip install -e .
           mhcflurry-downloads fetch
+      - name: Install MixMHCpred
+        uses: actions/checkout@master
+        with:
+          repository: GfellerLab/MixMHCpred
+          path: ./MixMHCpred
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up MixMHCpred
+        run: |
+          cd MixMHCpred
+          pip install -r code/setup_pythonLibrary.txt
+          chmod +x MixMHCpred
+          echo "$(pwd -P)" >> $GITHUB_PATH
+          cd ..
+      - name: Install PRIME
+        uses: actions/checkout@master
+        with:
+          repository: GfellerLab/PRIME
+          path: ./PRIME
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up PRIME
+        run: |
+          cd PRIME
+          echo "$(pwd -P)" >> $GITHUB_PATH
+          cd lib
+          g++ -O3 PRIME.cc -o PRIME.x
+          cd ../..
       - name: List installed packages
         run: |
           pip list

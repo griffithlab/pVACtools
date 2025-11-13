@@ -36,11 +36,18 @@ class OutputParserTests(unittest.TestCase):
         expected_output_file  = os.path.join(self.test_data_dir, "output_peptide_sequence_length_21.iedb.parsed.tsv")
         self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
 
-    def test_parse_output_runs_and_produces_expected_output_with_multiple_iedb_files(self):
+    def test_parse_output_runs_and_produces_expected_output_with_all_class_i_files(self):
         parse_output_input_iedb_files = [
             os.path.join(self.test_data_dir, "input.ann.HLA-A*29:02.9.tsv"),
             os.path.join(self.test_data_dir, "input.smm.HLA-A*29:02.9.tsv"),
             os.path.join(self.test_data_dir, "input.smmpmbec.HLA-A*29:02.9.tsv"),
+            os.path.join(self.test_data_dir, "input.BigMHC_EL.HLA-A*29:02.9.tsv"),
+            os.path.join(self.test_data_dir, "input.BigMHC_IM.HLA-A*29:02.9.tsv"),
+            os.path.join(self.test_data_dir, "input.DeepImmuno.HLA-A*29:02.9.tsv"),
+            os.path.join(self.test_data_dir, "input.MHCflurry.HLA-A*29:02.9.tsv"),
+            os.path.join(self.test_data_dir, "input.MHCnuggetsI.HLA-A*29:02.9.tsv"),
+            os.path.join(self.test_data_dir, "input.MixMHCpred.HLA-A*29:02.9.tsv"),
+            os.path.join(self.test_data_dir, "input.PRIME.HLA-A*29:02.9.tsv"),
         ]
         parse_output_input_tsv_file = os.path.join(self.test_data_dir, "Test.tsv")
         parse_output_key_file = os.path.join(self.test_data_dir, "Test_21.key")
@@ -52,11 +59,38 @@ class OutputParserTests(unittest.TestCase):
             'key_file'               : parse_output_key_file,
             'output_file'            : parse_output_output_file.name,
             'sample_name'            : 'input',
+            'flurry_state'           : 'both',
         }
         parser = DefaultOutputParser(**parse_output_params)
 
         self.assertFalse(parser.execute())
         expected_output_file  = os.path.join(self.test_data_dir, "output_Test_21.iedb.parsed.tsv")
+        self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
+
+    def test_parse_output_runs_and_produces_expected_output_with_all_class_ii_files(self):
+        parse_output_input_iedb_files = [
+            os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.MHCnuggetsII.DRB1*04:05.12.tsv_1-200"),
+            os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.netmhciipan_ba.DRB1*04:05.12.tsv_1-200"),
+            os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.netmhciipan_el.DRB1*04:05.12.tsv_1-200"),
+            os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.nn_align.DRB1*04:05.12.tsv_1-200"),
+            os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.smm_align.DRB1*04:05.12.tsv_1-200"),
+        ]
+        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.tsv_1-100")
+        parse_output_key_file = os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.12.fa.split_1-200.key")
+        parse_output_output_file = tempfile.NamedTemporaryFile()
+
+        parse_output_params = {
+            'input_iedb_files'       : parse_output_input_iedb_files,
+            'input_tsv_file'         : parse_output_input_tsv_file,
+            'key_file'               : parse_output_key_file,
+            'output_file'            : parse_output_output_file.name,
+            'sample_name'            : 'HCC1395_TUMOR_DNA',
+            'flurry_state'           : 'both',
+        }
+        parser = DefaultOutputParser(**parse_output_params)
+
+        self.assertFalse(parser.execute())
+        expected_output_file  = os.path.join(self.test_data_dir, "output_class_ii.parsed.tsv")
         self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
 
     def test_parse_output_runs_and_produces_expected_output_for_repetitive_deletion_at_beginning_of_sequence(self):
