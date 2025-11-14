@@ -21,7 +21,10 @@
   "use_allele_specific_binding_thresholds": false,
   "mt_top_score_metric": "Best",
   "wt_top_score_metric": "Corresponding",
-  "top_score_metric2": "percentile",
+  "top_score_metric2": [
+    "combined_percentile",
+    "ic50"
+  ],
   "allele_specific_binding_thresholds": {
     "HLA-A*02:01": 255.0,
     "HLA-B*35:01": 348.0
@@ -5456,9 +5459,9 @@
     "DNA VAF": 0.1,
     "RNA VAF": "NA",
     "gene_expr": "NA",
-    "best_peptide_mt": "SVNEALNNL",
-    "best_peptide_wt": "SVNEALNHL",
-    "best_hla_allele": "HLA-B*35:01"
+    "best_peptide_mt": "SVNEALNNLL",
+    "best_peptide_wt": "SVNEALNHLL",
+    "best_hla_allele": "HLA-A*02:01"
   },
   "22-20709231-20709232-G-C": {
     "good_binders": {
@@ -6510,8 +6513,8 @@
     "DNA VAF": 0.5,
     "RNA VAF": "NA",
     "gene_expr": "NA",
-    "best_peptide_mt": "DAVQGIANQ",
-    "best_peptide_wt": "DAVQGIANE",
+    "best_peptide_mt": "IANQDAAQG",
+    "best_peptide_wt": "IANEDAAQG",
     "best_hla_allele": "HLA-B*35:01"
   },
   "22-22550449-22550450-C-G": {
@@ -6849,8 +6852,8 @@
     "DNA VAF": 1.0,
     "RNA VAF": "NA",
     "gene_expr": "NA",
-    "best_peptide_mt": "GSSGSIASNY",
-    "best_peptide_wt": "RSSGSIASNY",
+    "best_peptide_mt": "TGSSGSIAS",
+    "best_peptide_wt": "TRSSGSIAS",
     "best_hla_allele": "HLA-B*35:01"
   },
   "22-22550509-22550510-T-G": {
@@ -8385,9 +8388,9 @@
     "DNA VAF": 0.179,
     "RNA VAF": "NA",
     "gene_expr": "NA",
-    "best_peptide_mt": "IGKHGGVSL",
-    "best_peptide_wt": "IGKPGGVSL",
-    "best_hla_allele": "HLA-B*35:01"
+    "best_peptide_mt": "DLIGKHGGV",
+    "best_peptide_wt": "DLIGKPGGV",
+    "best_hla_allele": "HLA-A*02:01"
   },
   "22-29886116-29886117-C-A": {
     "good_binders": {
@@ -11657,9 +11660,9 @@
     "DNA VAF": 0.486,
     "RNA VAF": "NA",
     "gene_expr": "NA",
-    "best_peptide_mt": "SPEPARPPQ",
-    "best_peptide_wt": "SPEPPRPPQ",
-    "best_hla_allele": "HLA-B*35:01"
+    "best_peptide_mt": "LLHTVSPEPA",
+    "best_peptide_wt": "LLHTVSPEPP",
+    "best_hla_allele": "HLA-A*02:01"
   },
   "22-38119219-38119220-GA-G": {
     "good_binders": {
@@ -17950,28 +17953,28 @@
     "good_binders": {
       "Transcript Set 1": {
         "peptides": {
-          "TTVVVTTQK": {
+          "TVVVTTQKR": {
             "ic50s_MT": [
-              "X",
-              6743.83
+              5590.46,
+              "X"
             ],
             "percentiles_MT": [
-              "X",
-              8.476
+              13.23,
+              "X"
             ],
             "ic50s_WT": [
-              "X",
-              6753.73
+              5594.53,
+              "X"
             ],
             "percentiles_WT": [
-              "X",
-              8.476
+              14.874,
+              "X"
             ],
             "hla_types": [
               "HLA-A*02:01",
               "HLA-B*35:01"
             ],
-            "mutation_position": "7",
+            "mutation_position": "6",
             "problematic_positions": "None",
             "anchor_fails": "None",
             "individual_ic50_calls": {
@@ -17986,37 +17989,37 @@
                 "MHCnuggetsI"
               ],
               "MT": {
-                "HLA-B*35:01": [
-                  30939.57,
-                  30416.461,
-                  32965.5,
-                  28485.48,
-                  85031.531,
-                  56707.43,
-                  19000.57,
-                  6743.83
+                "HLA-A*02:01": [
+                  36796.84,
+                  35883.512,
+                  36337.109,
+                  50000.0,
+                  336596.812,
+                  402188.844,
+                  21226.711,
+                  5590.46
                 ]
               },
               "WT": {
-                "HLA-B*35:01": [
-                  28960.65,
-                  29915.46,
-                  32259.8,
-                  26694.99,
-                  65551.1,
-                  45565.9,
-                  18967.78,
-                  6753.73
+                "HLA-A*02:01": [
+                  37162.55,
+                  35079.64,
+                  37132.0,
+                  50000.0,
+                  485411.43,
+                  584023.07,
+                  22348.674,
+                  5594.53
                 ]
               }
             },
             "individual_binding_score_calls": {
               "algorithms": [],
               "MT": {
-                "HLA-B*35:01": []
+                "HLA-A*02:01": []
               },
               "WT": {
-                "HLA-B*35:01": []
+                "HLA-A*02:01": []
               }
             },
             "individual_binding_percentile_calls": {
@@ -18031,26 +18034,26 @@
                 "MHCnuggetsI"
               ],
               "MT": {
-                "HLA-B*35:01": [
-                  23.0,
-                  35.0,
-                  57.0,
-                  53.0,
-                  62.0,
-                  55.0,
-                  8.476,
+                "HLA-A*02:01": [
+                  61.0,
+                  74.0,
+                  86.0,
+                  66.0,
+                  63.0,
+                  65.0,
+                  13.23,
                   "NA"
                 ]
               },
               "WT": {
-                "HLA-B*35:01": [
-                  20.0,
-                  34.0,
-                  55.0,
-                  51.0,
-                  57.0,
-                  51.0,
-                  8.476,
+                "HLA-A*02:01": [
+                  62.0,
+                  71.0,
+                  91.0,
+                  66.0,
+                  68.0,
+                  70.0,
+                  14.874,
                   "NA"
                 ]
               }
@@ -18058,40 +18061,40 @@
             "individual_immunogenicity_calls": {
               "algorithms": [],
               "MT": {
-                "HLA-B*35:01": []
+                "HLA-A*02:01": []
               },
               "WT": {
-                "HLA-B*35:01": []
+                "HLA-A*02:01": []
               }
             },
             "individual_immunogenicity_percentile_calls": {
               "algorithms": [],
               "MT": {
-                "HLA-B*35:01": []
+                "HLA-A*02:01": []
               },
               "WT": {
-                "HLA-B*35:01": []
+                "HLA-A*02:01": []
               }
             },
             "individual_presentation_calls": {
               "algorithms": [],
               "MT": {
-                "HLA-B*35:01": []
+                "HLA-A*02:01": []
               },
               "WT": {
-                "HLA-B*35:01": []
+                "HLA-A*02:01": []
               }
             },
             "individual_presentation_percentile_calls": {
               "algorithms": [],
               "MT": {
-                "HLA-B*35:01": []
+                "HLA-A*02:01": []
               },
               "WT": {
-                "HLA-B*35:01": []
+                "HLA-A*02:01": []
               }
             },
-            "wt_peptide": "TTVVVTAQK"
+            "wt_peptide": "TVVVTAQKR"
           }
         },
         "transcripts": [
@@ -18138,9 +18141,9 @@
     "DNA VAF": 0.042,
     "RNA VAF": "NA",
     "gene_expr": "NA",
-    "best_peptide_mt": "TTVVVTTQK",
-    "best_peptide_wt": "TTVVVTAQK",
-    "best_hla_allele": "HLA-B*35:01"
+    "best_peptide_mt": "TVVVTTQKR",
+    "best_peptide_wt": "TVVVTAQKR",
+    "best_hla_allele": "HLA-A*02:01"
   },
   "22-50615580-50615581-C-T": {
     "good_binders": {
@@ -20107,9 +20110,9 @@
     "DNA VAF": 0.959,
     "RNA VAF": "NA",
     "gene_expr": "NA",
-    "best_peptide_mt": "PALGWEFLAF",
-    "best_peptide_wt": "PALGWEFLAS",
-    "best_hla_allele": "HLA-B*35:01"
+    "best_peptide_mt": "ALGWEFLAF",
+    "best_peptide_wt": "ALGWEFLAS",
+    "best_hla_allele": "HLA-A*02:01"
   },
   "22-50682229-50682230-T-C": {
     "good_binders": {

@@ -106,6 +106,24 @@ def transcript_prioritization_strategy():
     # Return function handle to checking function
     return transcript_prioritization_strategy_checker
 
+def top_score_metric2():
+    """Return function handle of an argument type function for
+       ArgumentParser checking of the top score metric2
+       checking that the specified criteria are in the list of: ['ic50', 'combined_percentile', 'binding_percentile', 'immunogenicity_percentile', 'presentation_percentile']"""
+
+    # Define the function with default arguments
+    def top_score_metric2_checker(arg):
+        """New Type function for argparse - a comma-separated list with predefined valid values."""
+
+        arg_list = arg.split(",")
+        for argument in arg_list:
+            if argument not in ['ic50', 'combined_percentile', 'binding_percentile', 'immunogenicity_percentile', 'presentation_percentile']:
+                raise argparse.ArgumentTypeError("List element must be one of 'ic50', 'combined_percentile', 'binding_percentile', 'immunogenicity_percentile', 'presentation_percentile', not {}".format(argument))
+        return arg_list
+
+    # Return function handle to checking function
+    return top_score_metric2_checker
+
 def pvacsplice_anchors():
     """Return function handle of an argument type function for
        ArgumentParser checking of the pVACsplice anchors
@@ -199,3 +217,31 @@ def is_preferred_transcript(mutation, transcript_prioritization_strategy, maximu
         elif int(mutation[col]) <= maximum_transcript_support_level:
             return True
     return False
+
+def metrics_to_column(tool, metric1, metric2):
+    pretty_metric1 = {
+        'median': 'Median',
+        'lowest': 'Best'
+    }
+    pretty_metric2 = {
+        'ic50': 'IC50 Score',
+        'combined_percentile': 'Percentile',
+        'binding_percentile': 'IC50 Percentile',
+        'immunogenicity_percentile': 'Immunogenicity Percentile',
+        'presentation_percentile': 'Presentation Percentile'
+    }
+
+    if tool == 'pvacseq':
+        return f"{pretty_metric1[metric1]} MT {pretty_metric2[metric2]}"
+    else:
+        return f"{pretty_metric1[metric1]} {pretty_metric2[metric2]}"
+
+def metric2_to_aggregate_column(metric2):
+    pretty_metric2 = {
+        'ic50': 'IC50 MT',
+        'combined_percentile': '%ile MT',
+        'binding_percentile': 'IC50 %ile MT',
+        'immunogenicity_percentile': 'IM %ile MT',
+        'presentation_percentile': 'Pres %ile MT'
+    }
+    return pretty_metric2[metric2]

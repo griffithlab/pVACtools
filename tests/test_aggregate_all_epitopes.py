@@ -228,7 +228,7 @@ class AggregateAllEpitopesTests(unittest.TestCase):
                 os.path.join(self.test_data_dir, 'Test.all_epitopes.tsv'),
                 output_file.name,
                 top_score_metric="lowest",
-                top_score_metric2="ic50"
+                top_score_metric2=["ic50", "combined_percentile"]
             ).execute()
         )
         self.assertTrue(cmp(
@@ -259,7 +259,7 @@ class AggregateAllEpitopesTests(unittest.TestCase):
                 os.path.join(self.test_data_dir, 'Test.all_epitopes.tsv'),
                 output_file.name,
                 top_score_metric="lowest",
-                top_score_metric2="percentile"
+                top_score_metric2=["combined_percentile", "ic50"]
             ).execute()
         )
         self.assertTrue(cmp(
@@ -290,7 +290,7 @@ class AggregateAllEpitopesTests(unittest.TestCase):
                 os.path.join(self.test_data_dir, 'Test.all_epitopes.pvacbind.tsv'),
                 output_file.name,
                 top_score_metric="lowest",
-                top_score_metric2 = "ic50", 
+                top_score_metric2=["ic50", "combined_percentile"]
             ).execute()
         )
         self.assertTrue(cmp(
@@ -307,7 +307,7 @@ class AggregateAllEpitopesTests(unittest.TestCase):
                 os.path.join(self.test_data_dir, "Test.all_epitopes.pvacbind.tsv"),
                 output_file_name,
                 top_score_metric="lowest",
-                top_score_metric2="percentile"
+                top_score_metric2=["combined_percentile", "ic50"]
             ).execute()
         )
         self.assertTrue(cmp(

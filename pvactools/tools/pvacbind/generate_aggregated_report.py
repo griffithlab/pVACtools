@@ -3,7 +3,7 @@ import argparse
 import tempfile
 
 from pvactools.lib.aggregate_all_epitopes import PvacbindAggregateAllEpitopes
-from pvactools.lib.run_utils import float_range
+from pvactools.lib.run_utils import float_range, top_score_metric2
 
 def define_parser():
     parser = argparse.ArgumentParser(
@@ -77,11 +77,10 @@ def define_parser():
              + "median: Use the median MT Score and Median Fold Change (i.e. the  median MT ic50 binding score and fold change of all chosen prediction methods)."
     )
     parser.add_argument(
-        '-m2', '--top-score-metric2',
-        choices=['ic50','percentile'],
-        default='ic50',
-        help="Whether to use median/best IC50 or to use median/best percentile score when determining the best peptide in the aggregated report. "
-             + "This parameter is also used to influence the primary sorting criteria in the aggregated report for the candidates within each tier."
+        '-m2', '--top-score-metric2', type=top_score_metric2(),
+        help="Which metrics to consider when selecting the best peptide and when sorting candidates within a tier. Each specified metric will be ranked and the sum of these ranks will be used."
+             + "Whether the lowest or median is considered for each metric is controlled by the --top-score-metric parameter. ",
+        default=['ic50', 'combined_percentile'],
     )
     return parser
 
