@@ -643,7 +643,9 @@ class PRIME(MHCI):
                 tmp_input_file.write("{}\n".format(epitope))
             tmp_input_file.close()
             tmp_output_file = tempfile.NamedTemporaryFile('r', dir=tmp_dir, delete=False)
-            arguments = ["PRIME", "-i", tmp_input_file.name, "-o", tmp_output_file.name, "-a", allele]
+            if allele.startswith('HLA'):
+                prime_allele = allele.replace("HLA-", "").replace("*", "").replace(":", "")
+            arguments = ["PRIME", "-i", tmp_input_file.name, "-o", tmp_output_file.name, "-a", prime_allele]
             stderr_fh = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
             try:
                 response = run(arguments, check=True, stdout=DEVNULL, stderr=stderr_fh)

@@ -31,12 +31,6 @@ def define_parser():
         help="Expression Cutoff. Expression is meassured as FFPM (fusion fragments per million total reads). Sites above this cutoff will be considered.",
         default=0.1
     )
-    parser.add_argument(
-        '--exclude-NAs',
-        help="Exclude NA values from the filtered output.",
-        default=False,
-        action='store_true'
-    )
     return parser
 
 def main(args_input = sys.argv[1:]):
@@ -47,8 +41,8 @@ def main(args_input = sys.argv[1:]):
 #Read Support
 #Expression
     filter_criteria = []
-    filter_criteria.append(FilterCriterion("Read Support", '>=', args.read_support, exclude_nas=args.exclude_NAs))
-    filter_criteria.append(FilterCriterion("Expression", '>=', args.expn_val, exclude_nas=args.exclude_NAs))
+    filter_criteria.append(FilterCriterion("Read Support", '>=', args.read_support))
+    filter_criteria.append(FilterCriterion("Expression", '>=', args.expn_val))
 
     Filter(args.input_file, args.output_file, filter_criteria).execute()
 

@@ -38,18 +38,30 @@ def define_parser():
         action='store_true',
     )
     parser.add_argument(
-        '--percentile-threshold', type=float_range(0.0,100.0),
-        help="When set, tier epitopes in the \"Pass\" tier when the mutant allele "
-             + "has percentile scores below this value and in the \"Relaxed\" tier "
-             + "when the mutant allele has percentile scores below double this value.",
+        '--binding-percentile-threshold', type=float_range(0.0,100.0),
+        default=2.0,
+        help="Tier epitopes in the \"Pass\" tier when the mutant allele "
+             + "has a binding percentile below this value.",
     )
     parser.add_argument(
-            '--percentile-threshold-strategy',
-            choices=['conservative', 'exploratory'],
-            help="Specify the candidate inclusion strategy. The 'conservative' option requires a candidate to pass BOTH the binding threshold and percentile threshold (default)."
-                 + " The 'exploratory' option requires a candidate to pass EITHER the binding threshold or the percentile threshold.",
-            default="conservative",
-        )
+        '--immunogenicity-percentile-threshold', type=float_range(0.0,100.0),
+        default=2.0,
+        help="Tier epitopes in the \"Pass\" tier when the mutant allele "
+             + "has a immunogenicity percentile below this value.",
+    )
+    parser.add_argument(
+        '--presentation-percentile-threshold', type=float_range(0.0,100.0),
+        default=2.0,
+        help="Tier epitopes in the \"Pass\" tier when the mutant allele "
+             + "has a presentation percentile below this value.",
+    )
+    parser.add_argument(
+        '--percentile-threshold-strategy',
+        choices=['conservative', 'exploratory'],
+        help="Specify the candidate inclusion strategy. The 'conservative' option requires a candidate to pass the binding threshold and all percentile thresholds (default)."
+             + " The 'exploratory' option requires a candidate to pass at the binding threshold or one of the percentile thresholds.",
+        default="conservative",
+    )
     parser.add_argument(
         '--aggregate-inclusion-binding-threshold', type=int,
         help="Binding threshold for including epitopes when creating the aggregate report",
@@ -69,10 +81,10 @@ def define_parser():
              + "median: Use the median MT Score and Median Fold Change (i.e. the  median MT ic50 binding score and fold change of all chosen prediction methods)."
     )
     parser.add_argument(
-        '-m2', '--top-score-metric2',
-        choices=['ic50','percentile'],
-        default='ic50',
-        help="Whether to use median/best IC50 or to use median/best percentile score."
+        '-m2', '--top-score-metric2', type=top_score_metric2(),
+        help="Which metrics to consider when selecting the best peptide and when sorting candidates within a tier. Each specified metric will be ranked and the sum of these ranks will be used."
+             + "Whether the lowest or median is considered for each metric is controlled by the --top-score-metric parameter. ",
+        default=['ic50', 'combined_percentile'],
     )
     parser.add_argument(
         '--trna-vaf', type=float_range(0.0, 1.0),
@@ -140,7 +152,9 @@ def main(args_input = sys.argv[1:]):
         tumor_purity=args.tumor_purity,
         binding_threshold=args.binding_threshold,
         allele_specific_binding_thresholds=args.allele_specific_binding_thresholds,
-        percentile_threshold=args.percentile_threshold,
+        binding_percentile_threshold=args.binding_percentile_threshold,
+        immunogenicity_percentile_threshold=args.immunogenicity_percentile_threshold,
+        presentation_percentile_threshold=args.presentation_percentile_threshold,
         percentile_threshold_strategy=args.percentile_threshold_strategy,
         trna_vaf=args.trna_vaf,
         trna_cov=args.trna_cov,

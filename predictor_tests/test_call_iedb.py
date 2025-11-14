@@ -199,6 +199,23 @@ class CallIEDBClassITests(CallIEDBTests):
         actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[0,8,9])
         pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_exact=False)
 
+    def test_prime_method_generates_expected_files_for_A02110(self):
+        call_iedb_output_file = tempfile.NamedTemporaryFile()
+        tmp_call_iedb_output_dir = tempfile.TemporaryDirectory()
+
+        pvactools.lib.call_iedb.main([
+            self.input_file,
+            call_iedb_output_file.name,
+            'PRIME',
+            'HLA-A*02:110',
+            '-l', str(self.epitope_length),
+            '--tmp-dir', tmp_call_iedb_output_dir.name,
+        ])
+        expected_output_file = os.path.join(self.test_data_dir, 'output_prime.A02110.tsv')
+        expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,8,9])
+        actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[0,8,9])
+        pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_exact=False)
+
 class CallIEDBClassIITests(CallIEDBTests):
     @classmethod
     def additional_setup(cls):

@@ -306,8 +306,8 @@ class CalculateReferenceProteomeSimilarity:
                 epitope = line['Best Peptide']
                 subpeptide_position = int(line['Pos'])
             else:
-                identifier = line['Mutation']
-                epitope = line['MT Epitope Seq']
+                identifier = line['Index']
+                epitope = line['Epitope Seq']
                 subpeptide_position = int(line['Protein Position'])
             if identifier in mt_records_dict and identifier in wt_records_dict:
                 wt_peptide = wt_records_dict[identifier]

@@ -32,7 +32,7 @@ created):
        predictions added.
    * - ``<sample_name>.<MHC_I|MHC_II|Combined>.all_epitopes.aggregated.tsv``
      - An aggregated version of the ``all_epitopes.tsv`` file that gives information about
-       the best epitope for each mutation in an easy-to-read format. Not generated when running with elution algorithms only.
+       the best epitope for each mutation in an easy-to-read format. Not generated when running only with presentation and immunogenicity algorithms.
    * - ``<sample_name>.<MHC_I|MHC_II|Combined>.all_epitopes.aggregated.tsv.reference_matches`` (optional)
      - A file outlining details of reference proteome matches
 
@@ -55,8 +55,8 @@ documentation for more information on each individual filter. The standalone
 filter commands may be useful to reproduce the filtering or to chose different
 filtering thresholds.
 
-Prediction Algorithms Supporting Elution Scores
-_______________________________________________
+Prediction Algorithms Supporting Presentation Scores
+____________________________________________________
 
 - MHCflurryEL (Presentation and Processing)
 - NetMHCpanEL
@@ -69,14 +69,14 @@ ______________________________________________________
 - BigMHC_IM
 - DeepImmuno
 
-Please note that when running pVACfuse with only elution or immunogenicity algorithms, no
+Please note that when running pVACfuse with only presentation or immunogenicity algorithms, no
 aggregate report and pVACview files are created.
 
 Prediction Algorithms Supporting Percentile Information
 _______________________________________________________
 
 pVACfuse outputs percentile rank information when provided by
-a chosen binding affinity, elution, or immunogenicity prediction algorithm.
+a chosen binding affinity, presentation, or immunogenicity prediction algorithm.
 The following prediction algorithms calculate a
 percentile rank:
 
@@ -140,7 +140,7 @@ all_epitopes.tsv and filtered.tsv Report Columns
    * - ``Individual Prediction Algorithm Scores and Percentiles`` (multiple)
      - ic50 binding affintity and percentile ranks for the ``Epitope Seq`` for the individual prediction algorithms used
    * - ``MHCflurryEL Processing Score and Presentation Score and Percentile`` (optional)
-     - MHCflurry elution processing score and presentation score and percentiles
+     - MHCflurry processing score and presentation score and percentiles
        for the ``Epitope Seq`` if the run included
        MHCflurryEL as one of the prediction algorithms
    * - ``Read Support``
@@ -292,6 +292,15 @@ provided to the pVACfuse run:
    * - ``--expn-val``
      - The threshold used for filtering epitopes on the Expr.
      - 0.1
+   * - ``--run-reference-proteome-similarity``
+     - Set this flag in order to run reference proteome similarity analysis
+       and enable ``RefMatch`` tiering. Use ``--blastp-path``, ``--blastp-db``,
+       and ``--peptide-fasta`` parameters to configure your run.
+     - False
+   * - ``--problematic-amino-acids``
+     - Configure this parameter in order to define amino acids problematic for
+       the desired therapy delivery platform and enable ``ProbPos`` tiering.
+     - None
 
 Tiers
 *****
@@ -331,13 +340,19 @@ Criteria Details
      - Evaluation Logic
    * - Binding Criteria
      - Pass if Best Peptide is strong binder
-     - ``IC50 MT < binding_threshold`` and ``%ile MT < percentile_threshold``
-       (if ``--percentile-threshold`` parameter is set and 'conservative' ``--percentile-threshold-strategy`` is used) or
-       ``IC50 MT < binding_threshold`` or ``%ile MT < percentile_threshold``
-       (if 'exploratory' ``--percentile-threshold-strategy`` is used)
+     - binding score criteria: ``IC50 MT < binding_threshold``
+
+       percentile score criteria (if ``--percentile-threshold`` parameter is
+       set): ``%ile MT < percentile_threshold``
+
+       ``conservative`` ``--percentile-threshold-strategy``: needs to pass
+       BOTH the binding score criteria AND the percentile score criteria
+
+       ``exploratory`` ``--percentile-threshold-strategy``: needs to pass
+       EITHER the binding score criteria OR the percentile score criteria
    * - Reference Match Criteria
      - Pass if there are no reference protome matches
-     - ``Ref Match == True``
+     - ``Ref Match == False``
    * - Read Support Criteria
      - Pass if the variant has read support
      - ``Read Support < read_support``
@@ -345,9 +360,32 @@ Criteria Details
      - Pass if Best Transcript is expressed
      - ``Expr < expn_val``
    * - Problematic Position Criteria
-     - Best Peptide contains a problematic amino acid as defined by the
+     - Best Peptide does not contains a problematic amino acid as defined by the
        ``--problematic-amino-acids`` parameters
      - ``Prob Pos == None``
+
+
+The pVACfuse Aggregate Report Sorting
+_____________________________________
+
+The aggregate report is sorted as follows:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Sort Criteria
+     - Sort Order
+   * - ``Tier`` column
+     - "Pass", "PoorBinder", "RefMatch", "LowReadSupport", "LowExpr", "ProbPos", "Poor"
+   * - Ascending rank of ``Expr`` column + ascending rank of either ``IC50 MT`` column (if
+       ``--top-score-metric`` is ``ic50``) or ``%ile MT`` column (if
+       ``--top-score-metric`` is ``percentile``)
+     - Ascending sum rank
+   * - ``IC50 MT`` column (if ``--top-score-metric`` is ``ic50``) or ``%ile MT`` column (if
+       ``--top-score-metric`` is ``percentile``)
+     - Ascending
+   * - ``ID`` column
+     - Alphabetical
 
 
 .. _pvacfuse_reference_matches:

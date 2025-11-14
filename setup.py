@@ -65,7 +65,7 @@ for dirpath, dirnames, filenames in os.walk("pvactools/tools/pvaccompare/html_re
 
 setup(
     name="pvactools",
-    version="5.5.3",
+    version="6.0.1",
     packages=[
         "pvactools.tools",
         "pvactools.tools.pvacbind",
@@ -92,7 +92,7 @@ setup(
         ]
     },
     install_requires=[
-        'vcfpy',
+        'vcfpy==0.13.8',
         'requests',
         'PyYAML>=5.1',
         'biopython==1.77',

@@ -102,15 +102,28 @@ class RunArgumentParser(metaclass=ABCMeta):
             help="Report only epitopes where the mutant allele has ic50 binding scores below this value.",
         )
         self.parser.add_argument(
-            '--percentile-threshold', type=float_range(0.0,100.0),
+            '--binding-percentile-threshold', type=float_range(0.0,100.0),
+            default=2.0,
             help="Report only epitopes where the mutant allele "
-                 +"has a percentile rank below this value."
+                 +"has a binding percentile rank below this value."
+        )
+        self.parser.add_argument(
+            '--immunogenicity-percentile-threshold', type=float_range(0.0,100.0),
+            default=2.0,
+            help="Report only epitopes where the mutant allele "
+                 +"has a immunogenicity percentile rank below this value."
+        )
+        self.parser.add_argument(
+            '--presentation-percentile-threshold', type=float_range(0.0,100.0),
+            default=2.0,
+            help="Report only epitopes where the mutant allele "
+                 +"has a presentation percentile rank below this value."
         )
         self.parser.add_argument(
             '--percentile-threshold-strategy',
             choices=['conservative', 'exploratory'],
-            help="Specify the candidate inclusion strategy. The 'conservative' option requires a candidate to pass BOTH the binding threshold and percentile threshold (default)."
-                 + " The 'exploratory' option requires a candidate to pass EITHER the binding threshold or the percentile threshold.",
+            help="Specify the candidate inclusion strategy. The 'conservative' option requires a candidate to pass BOTH the binding threshold and all percentile thresholds set (default)."
+                 + " The 'exploratory' option requires a candidate to pass EITHER the binding threshold or any of the percentile thresholds set.",
             default="conservative",
         )
         self.parser.add_argument(
@@ -129,10 +142,12 @@ class RunArgumentParser(metaclass=ABCMeta):
                  + "median: Use the median MT Score and Median Fold Change (i.e. the  median MT ic50 binding score and fold change of all chosen prediction methods)."
         )
         self.parser.add_argument(
-            '-m2', '--top-score-metric2',
-            choices=['ic50','percentile'],
-            default='ic50',
-            help="Whether to use median/best IC50 or to use median/best percentile score."
+            '-m2', '--top-score-metric2', type=top_score_metric2(),
+            help="Which metrics to consider when selecting the best peptide in the aggregate erport and the top score filter step (filtered report). "
+                 + "Each specified metric will be ranked and the sum of these ranks will be used. This rank sum is also used as the primary sorting criteria in the "
+                 + "aggregated report for the candidates within each tier as well as in the filtered report. "
+                 + "Whether the lowest or median is considered for each metric is controlled by the --top-score-metric parameter. ",
+            default=['ic50', 'combined_percentile'],
         )
 
     def prediction_args(self):
@@ -198,12 +213,6 @@ class RunArgumentParser(metaclass=ABCMeta):
             help="Number of FASTA entries per IEDB request. "
                  + "For some resource-intensive prediction algorithms like Pickpocket and NetMHCpan it might be helpful to reduce this number. "
                  + "Needs to be an even number.",
-        )
-        self.parser.add_argument(
-            '--exclude-NAs',
-            help="Exclude NA values from the filtered output.",
-            default=False,
-            action='store_true'
         )
 
     def pass_only_args(self):

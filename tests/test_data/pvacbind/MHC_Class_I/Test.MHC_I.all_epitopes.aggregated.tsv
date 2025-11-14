@@ -1,49 +1,49 @@
-ID	E*01:01	G*01:09	Best Peptide	Allele	Pos	Prob Pos	Num Included Peptides	Num Passing Peptides	IC50 MT	%ile MT	Tier	Ref Match	Evaluation
-30	13	5	KYQDVYVEL	HLA-G*01:09	2111	None	15	2	323.040	0.200	Pass	False	Pending
-43		2	RTYDMDVRL	HLA-G*01:09	13	None	2	0	995.270	0.300	PoorBinder	False	Pending
-44	1	2	RTYDMDVRL	HLA-G*01:09	13	None	3	0	995.270	0.300	PoorBinder	False	Pending
-44_duplicate	1	2	RTYDMDVRL	HLA-G*01:09	13	None	3	0	995.270	0.300	PoorBinder	False	Pending
-37	1	7	LYYSYGLLH	HLA-G*01:09	2	None	8	0	1028.110	0.300	PoorBinder	False	Pending
-38	1	7	LYYSYGLLH	HLA-G*01:09	2	None	8	0	1028.110	0.300	PoorBinder	False	Pending
-36	2	1	KFNPQTDYL	HLA-G*01:09	7	None	3	0	1262.760	0.500	PoorBinder	False	Pending
-35	2	1	KFNPETDYL	HLA-G*01:09	7	None	3	0	1318.610	0.600	PoorBinder	False	Pending
-25	1	1	SYLSVRGGF	HLA-G*01:09	4	None	2	0	1453.470	0.700	PoorBinder	False	Pending
-26	1	1	SYLSVRGGF	HLA-G*01:09	4	None	2	0	1453.470	0.700	PoorBinder	False	Pending
-31	2	3	GMYQPCDDM	HLA-G*01:09	1	None	5	0	1453.470	0.700	PoorBinder	False	Pending
-32	3	3	GMYQPCDDM	HLA-G*01:09	1	None	6	0	1453.470	0.700	PoorBinder	False	Pending
-28	2	1	ARPPQQPVP	HLA-E*01:01	11	None	3	0	1654.990	0.400	PoorBinder	False	Pending
-7	1		WTRSRDPEG	HLA-E*01:01	9	None	1	0	1765.990	0.500	PoorBinder	False	Pending
-6	1	1	ATLSRTLLL	HLA-E*01:01	4	None	1	0	2122.610	0.100	PoorBinder	False	Pending
-10	3	2	QKAVRPLEL	HLA-E*01:01	2	None	5	0	2264.980	1.100	PoorBinder	False	Pending
-9	3	2	QKAVRPLEL	HLA-E*01:01	2	None	5	0	2264.980	1.100	PoorBinder	False	Pending
-33	1	2	AMSHFEPNE	HLA-E*01:01	11	None	3	0	2443.190	1.300	PoorBinder	False	Pending
-8	1		WTHSRDPEG	HLA-E*01:01	9	None	1	0	2523.800	1.400	PoorBinder	False	Pending
-27	2	1	PEPPRPPQQ	HLA-E*01:01	8	None	3	0	2812.190	0.500	PoorBinder	False	Pending
-34	2	2	MSHFEPNEY	HLA-G*01:09	12	None	4	0	3133.530	3.400	PoorBinder	False	Pending
-41	2	1	FLASTRLTS	HLA-E*01:01	8	None	3	0	3202.080	2.400	PoorBinder	False	Pending
-42	2	2	RLTSELNFL	HLA-G*01:09	13	None	4	0	3272.120	3.700	PoorBinder	False	Pending
-5	1		ATLSRTLLA	HLA-E*01:01	4	None	1	0	3272.120	2.500	PoorBinder	False	Pending
-21	1		KSPVKEEEK	HLA-E*01:01	2	None	1	0	3454.020	2.900	PoorBinder	False	Pending
-22	1		KSPVKEEEK	HLA-E*01:01	2	None	1	0	3454.020	2.900	PoorBinder	False	Pending
-24	1	1	MVCELAGNL	HLA-G*01:09	3	None	2	0	3454.020	4.100	PoorBinder	False	Pending
-23	1		FNCECDLFG	HLA-E*01:01	12	None	1	0	4778.520	6.200	PoorBinder	False	Pending
-12		1	SVNEALNNL	HLA-G*01:09	4	None	1	0	4989.870	7.300	PoorBinder	False	Pending
-29	1		GQHWARLRG	HLA-E*01:01	11	None	1	0	4989.870	6.700	PoorBinder	False	Pending
-45		1	RTEASGSES	HLA-G*01:09	5	None	1	0	5267.250	7.900	PoorBinder	False	Pending
-11	1		KSVNEALNH	HLA-E*01:01	3	None	1	0	5441.030	8.100	PoorBinder	False	Pending
-46		1	GYESRVEPP	HLA-G*01:09	10	None	1	0	5620.540	8.700	PoorBinder	False	Pending
-14		1	ANQDAAQGI	HLA-G*01:09	9	None	1	0	5681.680	8.800	PoorBinder	False	Pending
-13		1	AVQGIANED	HLA-G*01:09	4	None	1	0	5743.490	9.000	PoorBinder	False	Pending
-20	1		KHGGVSLSK	HLA-E*01:01	10	None	1	0	6539.790	13.000	PoorBinder	False	Pending
-39	1		KRNSRRQLP	HLA-E*01:01	13	None	1	0	7860.430	18.000	PoorBinder	False	Pending
-40	1		KRNSRRQLP	HLA-E*01:01	13	None	1	0	7860.430	18.000	PoorBinder	False	Pending
-19	1		IGKPGGVSL	HLA-E*01:01	8	None	1	0	7945.940	1.400	PoorBinder	False	Pending
-3	1		VIPTVSTPPP	HLA-E*01:01	19	None	1	0	8664.370	1.800	PoorBinder	False	Pending
-4	1		VIPTVSTPPP	HLA-E*01:01	12	None	1	0	8664.370	1.800	PoorBinder	False	Pending
-18	2	2	QRPGSAPTT	HLA-E*01:01	6	None	4	0	1362.110	0.300	Poor	True	Pending
-17	2	2	QRPGSSPTT	HLA-E*01:01	6	None	4	0	1517.760	0.300	Poor	True	Pending
-2	4	1	LLPLLPLLL	HLA-E*01:01	8	None	4	0	2551.250	0.100	Poor	True	Pending
-1	3	1	LLPLLLLLL	HLA-E*01:01	8	None	3	0	3099.810	0.100	Poor	True	Pending
-1_duplicate	3	1	LLPLLLLLL	HLA-E*01:01	8	None	3	0	3099.810	0.100	Poor	True	Pending
-15	1		TRSSGSIAS	HLA-E*01:01	10	None	1	0	8571.130	20.000	Poor	True	Pending
-16		1	KTVTISCTG	HLA-G*01:09	3	None	1	0	9447.760	19.000	Poor	True	Pending
+ID	E*01:01	G*01:09	Best Peptide	Allele	Pos	Prob Pos	Num Included Peptides	Num Passing Peptides	IC50 MT	%ile MT	IC50 %ile MT	IM %ile MT	Pres %ile MT	Tier	Ref Match	Evaluation
+30	1	1	KYQDVYVEL	HLA-G*01:09	2111	None	15	2	323.040	0.200	0.200	NA	NA	Pass	False	Pending
+43			RTYDMDVRL	HLA-G*01:09	13	None	2	0	995.270	0.300	0.300	NA	NA	PoorBinder	False	Pending
+44			RTYDMDVRL	HLA-G*01:09	13	None	3	0	995.270	0.300	0.300	NA	NA	PoorBinder	False	Pending
+44_duplicate			RTYDMDVRL	HLA-G*01:09	13	None	3	0	995.270	0.300	0.300	NA	NA	PoorBinder	False	Pending
+37			LYYSYGLLH	HLA-G*01:09	2	None	8	0	1028.110	0.300	0.300	NA	NA	PoorBinder	False	Pending
+38			LYYSYGLLH	HLA-G*01:09	2	None	8	0	1028.110	0.300	0.300	NA	NA	PoorBinder	False	Pending
+36			KFNPQTDYL	HLA-G*01:09	7	None	3	0	1262.760	0.500	0.500	NA	NA	PoorBinder	False	Pending
+35			KFNPETDYL	HLA-G*01:09	7	None	3	0	1318.610	0.600	0.600	NA	NA	PoorBinder	False	Pending
+6			ATLSRTLLL	HLA-E*01:01	4	None	1	0	2122.610	0.100	0.100	NA	NA	PoorBinder	False	Pending
+28			ARPPQQPVP	HLA-E*01:01	11	None	3	0	1654.990	0.400	0.400	NA	NA	PoorBinder	False	Pending
+25			SYLSVRGGF	HLA-G*01:09	4	None	2	0	1453.470	0.700	0.700	NA	NA	PoorBinder	False	Pending
+26			SYLSVRGGF	HLA-G*01:09	4	None	2	0	1453.470	0.700	0.700	NA	NA	PoorBinder	False	Pending
+31			GMYQPCDDM	HLA-G*01:09	1	None	5	0	1453.470	0.700	0.700	NA	NA	PoorBinder	False	Pending
+32			GMYQPCDDM	HLA-G*01:09	1	None	6	0	1453.470	0.700	0.700	NA	NA	PoorBinder	False	Pending
+7			WTRSRDPEG	HLA-E*01:01	9	None	1	0	1765.990	0.500	0.500	NA	NA	PoorBinder	False	Pending
+10			QKAVRPLEL	HLA-E*01:01	2	None	5	0	2264.980	1.100	1.100	NA	NA	PoorBinder	False	Pending
+9			QKAVRPLEL	HLA-E*01:01	2	None	5	0	2264.980	1.100	1.100	NA	NA	PoorBinder	False	Pending
+27			PEPPRPPQQ	HLA-E*01:01	8	None	3	0	2812.190	0.500	0.500	NA	NA	PoorBinder	False	Pending
+33			AMSHFEPNE	HLA-E*01:01	11	None	3	0	2443.190	1.300	1.300	NA	NA	PoorBinder	False	Pending
+8			WTHSRDPEG	HLA-E*01:01	9	None	1	0	2523.800	1.400	1.400	NA	NA	PoorBinder	False	Pending
+41			FLASTRLTS	HLA-E*01:01	8	None	3	0	3202.080	2.400	2.400	NA	NA	PoorBinder	False	Pending
+34			MSHFEPNEY	HLA-G*01:09	12	None	4	0	3133.530	3.400	3.400	NA	NA	PoorBinder	False	Pending
+5			ATLSRTLLA	HLA-E*01:01	4	None	1	0	3272.120	2.500	2.500	NA	NA	PoorBinder	False	Pending
+21			KSPVKEEEK	HLA-E*01:01	2	None	1	0	3454.020	2.900	2.900	NA	NA	PoorBinder	False	Pending
+22			KSPVKEEEK	HLA-E*01:01	2	None	1	0	3454.020	2.900	2.900	NA	NA	PoorBinder	False	Pending
+42			RLTSELNFL	HLA-G*01:09	13	None	4	0	3272.120	3.700	3.700	NA	NA	PoorBinder	False	Pending
+24			MVCELAGNL	HLA-G*01:09	3	None	2	0	3454.020	4.100	4.100	NA	NA	PoorBinder	False	Pending
+23			FNCECDLFG	HLA-E*01:01	12	None	1	0	4778.520	6.200	6.200	NA	NA	PoorBinder	False	Pending
+19			IGKPGGVSL	HLA-E*01:01	8	None	1	0	7945.940	1.400	1.400	NA	NA	PoorBinder	False	Pending
+29			GQHWARLRG	HLA-E*01:01	11	None	1	0	4989.870	6.700	6.700	NA	NA	PoorBinder	False	Pending
+12			SVNEALNNL	HLA-G*01:09	4	None	1	0	4989.870	7.300	7.300	NA	NA	PoorBinder	False	Pending
+3			VIPTVSTPPP	HLA-E*01:01	19	None	1	0	8664.370	1.800	1.800	NA	NA	PoorBinder	False	Pending
+4			VIPTVSTPPP	HLA-E*01:01	12	None	1	0	8664.370	1.800	1.800	NA	NA	PoorBinder	False	Pending
+45			RTEASGSES	HLA-G*01:09	5	None	1	0	5267.250	7.900	7.900	NA	NA	PoorBinder	False	Pending
+11			KSVNEALNH	HLA-E*01:01	3	None	1	0	5441.030	8.100	8.100	NA	NA	PoorBinder	False	Pending
+46			GYESRVEPP	HLA-G*01:09	10	None	1	0	5620.540	8.700	8.700	NA	NA	PoorBinder	False	Pending
+14			ANQDAAQGI	HLA-G*01:09	9	None	1	0	5681.680	8.800	8.800	NA	NA	PoorBinder	False	Pending
+13			AVQGIANED	HLA-G*01:09	4	None	1	0	5743.490	9.000	9.000	NA	NA	PoorBinder	False	Pending
+20			KHGGVSLSK	HLA-E*01:01	10	None	1	0	6539.790	13.000	13.000	NA	NA	PoorBinder	False	Pending
+39			KRNSRRQLP	HLA-E*01:01	13	None	1	0	7860.430	18.000	18.000	NA	NA	PoorBinder	False	Pending
+40			KRNSRRQLP	HLA-E*01:01	13	None	1	0	7860.430	18.000	18.000	NA	NA	PoorBinder	False	Pending
+18			QRPGSAPTT	HLA-E*01:01	6	None	4	0	1362.110	0.300	0.300	NA	NA	Poor	True	Pending
+17			QRPGSSPTT	HLA-E*01:01	6	None	4	0	1517.760	0.300	0.300	NA	NA	Poor	True	Pending
+2			LLPLLPLLL	HLA-E*01:01	8	None	4	0	2551.250	0.100	0.100	NA	NA	Poor	True	Pending
+1			LLPLLLLLL	HLA-E*01:01	8	None	3	0	3099.810	0.100	0.100	NA	NA	Poor	True	Pending
+1_duplicate			LLPLLLLLL	HLA-E*01:01	8	None	3	0	3099.810	0.100	0.100	NA	NA	Poor	True	Pending
+15			TRSSGSIAS	HLA-E*01:01	10	None	1	0	8571.130	20.000	20.000	NA	NA	Poor	True	Pending
+16			KTVTISCTG	HLA-G*01:09	3	None	1	0	9447.760	19.000	19.000	NA	NA	Poor	True	Pending

@@ -1,20 +1,6 @@
-Mutation	HLA Allele	Sub-peptide Position	Epitope Seq	Median IC50 Score	Best IC50 Score	Best IC50 Score Method	Median Percentile	Best Percentile	Best Percentile Method	NetMHC Score	NetMHC Percentile	PickPocket Score	PickPocket Percentile	cterm_7mer_gravy_score	max_7mer_gravy_score	difficult_n_terminal_residue	c_terminal_cysteine	c_terminal_proline	cysteine_count	n_terminal_asparagine	asparagine_proline_bond_count	NNalign Score	NNalign Percentile
-41	HLA-DRB1*11:01	2	GWEFLASTRLTSELN	4.8	4.8	NNalign	0.21	0.21	NNalign	NA	NA	NA	NA	-0.7714285714285715	0.8857142857142858	False	False	False	0	False	0	4.8	0.21
-42	HLA-DRB1*11:01	2	GWEFLAFTRLTSELN	5.6	5.6	NNalign	0.34	0.34	NNalign	NA	NA	NA	NA	-0.7714285714285715	1.4000000000000001	False	False	False	0	False	0	5.6	0.34
-30	HLA-DRB1*11:01	1663	RRNWIEALRKTVRPT	6.9	6.9	NNalign	0.61	0.61	NNalign	NA	NA	NA	NA	-1.671428571428571	-0.3285714285714287	False	False	False	0	False	0	6.9	0.61
-44	HLA-DRB1*11:01	0	VSLFGALVRSRTYDM	16.7	16.7	NNalign	2.85	2.85	NNalign	NA	NA	NA	NA	-1.9142857142857144	2.1714285714285713	False	False	False	0	False	0	16.7	2.85
-44_duplicate	HLA-DRB1*11:01	0	VSLFGALVRSRTYDM	16.7	16.7	NNalign	2.85	2.85	NNalign	NA	NA	NA	NA	-1.9142857142857144	2.1714285714285713	False	False	False	0	False	0	16.7	2.85
-40	HLA-DRB1*11:01	1	KTTVVVTTQKRNSRR	24.0	24.0	NNalign	4.39	4.39	NNalign	NA	NA	NA	NA	-3.6	1.4000000000000001	False	False	False	0	False	0	24.0	4.39
-39	HLA-DRB1*11:01	2	TTVVVTAQKRNSRRQ	26.2	26.2	NNalign	4.83	4.83	NNalign	NA	NA	NA	NA	-3.6000000000000005	1.7571428571428573	False	False	False	0	False	0	26.2	4.83
-43	HLA-DRB1*11:01	0	VSLFGALVHSRTYDM	27.0	27.0	NNalign	4.97	4.97	NNalign	NA	NA	NA	NA	-1.7285714285714284	2.1714285714285713	False	False	False	0	False	0	27.0	4.97
-37	HLA-DRB1*11:01	0	YYSYGLLHTYGSGGY	28.1	28.1	NNalign	5.17	5.17	NNalign	NA	NA	NA	NA	-0.7571428571428571	0.35714285714285704	False	False	False	0	False	0	28.1	5.17
-38	HLA-DRB1*11:01	-1	LYYSYGLLHIYGSGG	41.4	41.4	NNalign	7.33	7.33	NNalign	NA	NA	NA	NA	-0.2857142857142857	0.9714285714285714	False	False	False	0	False	0	41.4	7.33
-25	HLA-DRB1*11:01	-1	HLSYLSVRGGFNMSS	60.1	60.1	NNalign	9.78	9.78	NNalign	NA	NA	NA	NA	-0.17142857142857149	0.8142857142857142	False	False	False	0	False	0	60.1	9.78
-26	HLA-DRB1*11:01	-1	HLSYLSVRGGFNMSS	60.1	60.1	NNalign	9.78	9.78	NNalign	NA	NA	NA	NA	-0.17142857142857149	0.8142857142857142	False	False	False	0	False	0	60.1	9.78
-33	HLA-DRB1*11:01	0	ASVLCQRAKVAMSHF	80.9	80.9	NNalign	12.01	12.01	NNalign	NA	NA	NA	NA	0.39999999999999997	0.5	False	False	False	1	False	0	80.9	12.01
-10	HLA-DRB1*11:01	4	PLELVYCLQKCNVPL	87.0	87.0	NNalign	12.6	12.6	NNalign	NA	NA	NA	NA	-0.28571428571428586	1.9000000000000001	False	False	False	2	False	0	87.0	12.6
-9	HLA-DRB1*11:01	4	PLELAYCLQKCNVPL	96.8	96.8	NNalign	13.46	13.46	NNalign	NA	NA	NA	NA	-0.28571428571428586	1.557142857142857	False	False	False	2	False	0	96.8	13.46
-5	HLA-DRB1*11:01	1	ATLSRTLLAAAGGSS	138.3	138.3	NNalign	16.63	16.63	NNalign	NA	NA	NA	NA	0.42857142857142855	1.742857142857143	False	False	False	0	False	0	138.3	16.63
-34	HLA-DRB1*11:01	0	ASVLCQRAKVEMSHF	142.6	142.6	NNalign	16.92	16.92	NNalign	NA	NA	NA	NA	-0.35714285714285715	0.5	False	False	False	1	False	0	142.6	16.92
-6	HLA-DRB1*11:01	3	TLSRTLLLAAAGGSS	221.4	221.4	NNalign	21.36	21.36	NNalign	NA	NA	NA	NA	0.42857142857142855	2.342857142857143	False	False	False	0	False	0	221.4	21.36
-15	HLA-DRB1*11:01	0	KTVTISCTRSSGSIA	242.9	242.9	NNalign	22.37	22.37	NNalign	NA	NA	NA	NA	-0.14285714285714282	1.1857142857142857	False	False	False	1	False	0	242.9	22.37
+Mutation	HLA Allele	Sub-peptide Position	Epitope Seq	Median IC50 Score	Best IC50 Score	Best IC50 Score Method	Median Percentile	Best Percentile	Best Percentile Method	Median IC50 Percentile	Best IC50 Percentile	Best IC50 Percentile Method	Median Immunogenicity Percentile	Best Immunogenicity Percentile	Best Immunogenicity Percentile Method	Median Presentation Percentile	Best Presentation Percentile	Best Presentation Percentile Method	NetMHC IC50 Score	NetMHC Percentile	PickPocket IC50 Score	PickPocket Percentile	cterm_7mer_gravy_score	max_7mer_gravy_score	difficult_n_terminal_residue	c_terminal_cysteine	c_terminal_proline	cysteine_count	n_terminal_asparagine	asparagine_proline_bond_count	NNalign IC50 Score	NNalign Percentile
+39	HLA-DRB1*11:01	6	TVVVTAQKRNSRRQL	14.7	14.7	NNalign	1.4	1.4	NNalign	1.4	1.4	NNalign	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	-2.5	1.3571428571428574	False	False	False	0	False	0	14.7	1.4
+41	HLA-DRB1*11:01	5	GWEFLASTRLTSELN	15.4	15.4	NNalign	1.4	1.4	NNalign	1.4	1.4	NNalign	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	-0.7714285714285715	0.8857142857142858	False	False	False	0	False	0	15.4	1.4
+30	HLA-E*01:01	1542	RMPGDRPTL	399.415	363.86	PickPocket	0.1	0.1	NetMHC	0.1	0.1	NetMHC	NA	NA	NA	NA	NA	NA	434.97	0.1	363.86	0.1	-1.2142857142857142	-1.2142857142857142	False	False	False	0	False	0	NA	NA
+42	HLA-DRB1*11:01	5	GWEFLAFTRLTSELN	16.2	16.2	NNalign	1.6	1.6	NNalign	1.6	1.6	NNalign	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	-0.7714285714285715	1.4000000000000001	False	False	False	0	False	0	16.2	1.6
+40	HLA-DRB1*11:01	5	TTVVVTTQKRNSRRQ	18.2	18.2	NNalign	1.8	1.8	NNalign	1.8	1.8	NNalign	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	-3.6000000000000005	1.4000000000000001	False	False	False	0	False	0	18.2	1.8

@@ -1,0 +1,69 @@
+additional_report_columns: null
+aggregate_inclusion_binding_threshold: 5000
+aggregate_inclusion_count_limit: 15
+allele:
+- HLA-A*29:02
+- HLA-B*45:01
+- DRB1*04:05
+allele_specific_binding_thresholds: false
+allow_incomplete_transcripts: false
+anchor_types:
+- A
+- D
+- NDA
+annotated_vcf: /storage1/fs1/mgriffit/Active/griffithlab/pipeline_test/susanna//pvacsplice_example_data_inputs/annotated.expression.vcf.gz
+binding_threshold: 500
+biotypes:
+- protein_coding
+blastp_db: refseq_select_prot
+blastp_path: null
+class_i_epitope_length:
+- 8
+- 9
+- 10
+class_ii_epitope_length:
+- 15
+exclude_NAs: false
+expn_val: 1.0
+fasta_size: 200
+genes_of_interest_file: null
+gtf_file: /storage1/fs1/mgriffit/Active/griffithlab/pipeline_test/susanna//pvacsplice_example_data_inputs/Homo_sapiens.GRCh38.105.chr.gtf.gz
+iedb_install_directory: /opt/iedb
+iedb_retries: 5
+input_file: /storage1/fs1/mgriffit/Active/griffithlab/pipeline_test/susanna//pvacsplice_example_data_inputs/HCC1395.splice_junctions.tsv
+junction_score: 10
+keep_tmp_files: true
+maximum_transcript_support_level: 1
+n_threads: 8
+net_chop_method: null
+net_chop_threshold: 0.5
+netmhc_stab: false
+netmhciipan_version: '4.1'
+normal_cov: 5
+normal_sample_name: HCC1395_NORMAL_DNA
+normal_vaf: 0.02
+output_dir: /storage1/fs1/mgriffit/Active/griffithlab/pipeline_test/susanna//v6.0.0a12-pvacsplice_example_data/results
+pass_only: false
+peptide_fasta: null
+percentile_threshold: null
+percentile_threshold_strategy: conservative
+prediction_algorithms:
+- all
+problematic_amino_acids: null
+pvactools_version: 6.0.0a12
+ref_fasta: /storage1/fs1/mgriffit/Active/griffithlab/pipeline_test/susanna//pvacsplice_example_data_inputs/ref_genome.fa
+run_reference_proteome_similarity: false
+sample_name: HCC1395_TUMOR_DNA
+save_gtf: false
+tdna_cov: 10
+tdna_vaf: 0.25
+top_score_metric: median
+top_score_metric2: ic50
+transcript_prioritization_strategy:
+- canonical
+- mane_select
+- tsl
+trna_cov: 10
+trna_vaf: 0.25
+tumor_purity: null
+variant_distance: 100
