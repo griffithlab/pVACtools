@@ -162,6 +162,9 @@ server <- shinyServer(function(input, output, session) {
     }else {
       df$comments <- data.frame(matrix("No comments", nrow = nrow(df$mainTable)), ncol = 1)
     }
+    if ("ML Prediction (score)" %in% colnames(df$mainTable)) {
+    columns_needed <- c(columns_needed, "ML Prediction (score)")
+    }
     df$mainTable <- df$mainTable[, columns_needed]
     df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
     rownames(df$comments) <- df$mainTable$ID
@@ -949,6 +952,16 @@ server <- shinyServer(function(input, output, session) {
   output$addData_transcript <- renderText({
     df$additionalData[df$additionalData$ID == selectedID(), ]$`Best Transcript`
   })
+  output$ml_prediction_score <- renderText({
+  if (is.null(df$additionalData)) {
+    return()
+  }
+  row <- df$additionalData[df$additionalData$ID == selectedID(), ]
+  if (nrow(row) == 0 || !("ML Prediction (score)" %in% colnames(df$additionalData))) {
+    return("N/A")
+  }
+  row$`ML Prediction (score)`
+})
   ##transcript sets table displaying sets of transcripts with the same consequence
   output$transcriptSetsTable <- renderDT({
     withProgress(message = "Loading Transcript Sets Table", value = 0, {
