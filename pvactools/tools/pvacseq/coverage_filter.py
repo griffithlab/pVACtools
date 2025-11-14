@@ -56,12 +56,6 @@ def define_parser():
         help="Gene and Transcript Expression cutoff. Sites above this cutoff will be considered.",
         default=1.0
     )
-    parser.add_argument(
-        '--exclude-NAs',
-        help="Exclude NA values from the filtered output.",
-        default=False,
-        action='store_true'
-    )
     return parser
 
 def main(args_input = sys.argv[1:]):
@@ -78,14 +72,14 @@ def main(args_input = sys.argv[1:]):
 #Gene Expression
 #Transcript Expression
     filter_criteria = []
-    filter_criteria.append(FilterCriterion("Normal Depth", '>=', args.normal_cov, exclude_nas=args.exclude_NAs))
-    filter_criteria.append(FilterCriterion("Normal VAF", '<=', args.normal_vaf, exclude_nas=args.exclude_NAs))
-    filter_criteria.append(FilterCriterion("Tumor DNA Depth", '>=', args.tdna_cov, exclude_nas=args.exclude_NAs))
-    filter_criteria.append(FilterCriterion("Tumor DNA VAF", '>=', args.tdna_vaf, exclude_nas=args.exclude_NAs))
-    filter_criteria.append(FilterCriterion("Tumor RNA Depth", '>=', args.trna_cov, exclude_nas=args.exclude_NAs))
-    filter_criteria.append(FilterCriterion("Tumor RNA VAF", '>=', args.trna_vaf, exclude_nas=args.exclude_NAs))
-    filter_criteria.append(FilterCriterion("Gene Expression", '>=', args.expn_val, exclude_nas=args.exclude_NAs))
-    filter_criteria.append(FilterCriterion("Transcript Expression", '>=', args.expn_val, exclude_nas=args.exclude_NAs))
+    filter_criteria.append(FilterCriterion("Normal Depth", '>=', args.normal_cov))
+    filter_criteria.append(FilterCriterion("Normal VAF", '<=', args.normal_vaf))
+    filter_criteria.append(FilterCriterion("Tumor DNA Depth", '>=', args.tdna_cov))
+    filter_criteria.append(FilterCriterion("Tumor DNA VAF", '>=', args.tdna_vaf))
+    filter_criteria.append(FilterCriterion("Tumor RNA Depth", '>=', args.trna_cov))
+    filter_criteria.append(FilterCriterion("Tumor RNA VAF", '>=', args.trna_vaf))
+    filter_criteria.append(FilterCriterion("Gene Expression", '>=', args.expn_val))
+    filter_criteria.append(FilterCriterion("Transcript Expression", '>=', args.expn_val))
 
     Filter(args.input_file, args.output_file, filter_criteria).execute()
 

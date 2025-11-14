@@ -14,7 +14,9 @@ def main(args_input = sys.argv[1:]):
     PvacbindUpdateTiers(
         args.input_file,
         binding_threshold=args.binding_threshold,
-        percentile_threshold=args.percentile_threshold,
+        binding_percentile_threshold=args.binding_percentile_threshold,
+        immunogenicity_percentile_threshold=args.immunogenicity_percentile_threshold,
+        presentation_percentile_threshold=args.presentation_percentile_threshold,
         percentile_threshold_strategy=args.percentile_threshold_strategy,
         allele_specific_binding_thresholds=args.allele_specific_binding_thresholds,
         top_score_metric2=args.top_score_metric2,

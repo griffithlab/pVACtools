@@ -93,15 +93,28 @@ class RunArgumentParser(metaclass=ABCMeta):
             help="Report only epitopes where the mutant allele has ic50 binding scores below this value.",
         )
         self.parser.add_argument(
-            '--percentile-threshold', type=float_range(0.0,100.0),
+            '--binding-percentile-threshold', type=float_range(0.0,100.0),
+            default=2.0,
             help="Report only epitopes where the mutant allele "
-                 +"has a percentile rank below this value."
+                 +"has a binding percentile rank below this value."
+        )
+        self.parser.add_argument(
+            '--immunogenicity-percentile-threshold', type=float_range(0.0,100.0),
+            default=2.0,
+            help="Report only epitopes where the mutant allele "
+                 +"has a immunogenicity percentile rank below this value."
+        )
+        self.parser.add_argument(
+            '--presentation-percentile-threshold', type=float_range(0.0,100.0),
+            default=2.0,
+            help="Report only epitopes where the mutant allele "
+                 +"has a presentation percentile rank below this value."
         )
         self.parser.add_argument(
             '--percentile-threshold-strategy',
             choices=['conservative', 'exploratory'],
-            help="Specify the candidate inclusion strategy. The 'conservative' option requires a candidate to pass BOTH the binding threshold and percentile threshold (default)."
-                 + " The 'exploratory' option requires a candidate to pass EITHER the binding threshold or the percentile threshold.",
+            help="Specify the candidate inclusion strategy. The 'conservative' option requires a candidate to pass BOTH the binding threshold and all percentile thresholds set (default)."
+                 + " The 'exploratory' option requires a candidate to pass EITHER the binding threshold or any of the percentile thresholds set.",
             default="conservative",
         )
         self.parser.add_argument(
@@ -190,12 +203,6 @@ class RunArgumentParser(metaclass=ABCMeta):
             help="Number of FASTA entries per IEDB request. "
                  + "For some resource-intensive prediction algorithms like Pickpocket and NetMHCpan it might be helpful to reduce this number. "
                  + "Needs to be an even number.",
-        )
-        self.parser.add_argument(
-            '--exclude-NAs',
-            help="Exclude NA values from the filtered output.",
-            default=False,
-            action='store_true'
         )
 
     def pass_only_args(self):

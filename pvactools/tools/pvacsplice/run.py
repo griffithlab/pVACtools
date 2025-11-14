@@ -169,7 +169,9 @@ def main(args_input = sys.argv[1:]):
         'top_score_metric'          : args.top_score_metric,
         'top_score_metric2'         : args.top_score_metric2,
         'binding_threshold'         : args.binding_threshold,
-        'percentile_threshold'      : args.percentile_threshold,
+        'binding_percentile_threshold': args.binding_percentile_threshold,
+        'immunogenicity_percentile_threshold': args.immunogenicity_percentile_threshold,
+        'presentation_percentile_threshold': args.presentation_percentile_threshold,
         'percentile_threshold_strategy': args.percentile_threshold_strategy,
         'allele_specific_binding_thresholds': args.allele_specific_binding_thresholds,
         'aggregate_inclusion_binding_threshold' : args.aggregate_inclusion_binding_threshold,
@@ -197,7 +199,6 @@ def main(args_input = sys.argv[1:]):
         'transcript_prioritization_strategy': args.transcript_prioritization_strategy,
         'maximum_transcript_support_level' : args.maximum_transcript_support_level,
         'run_post_processor'        : True,
-        'exclude_NAs'               : args.exclude_NAs,
         'genes_of_interest_file': args.genes_of_interest_file,
     }
     junction_arguments.update(additional_args)

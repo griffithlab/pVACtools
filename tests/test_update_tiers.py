@@ -31,6 +31,7 @@ class UpdateTiersTests(unittest.TestCase):
         self.assertFalse(PvacseqUpdateTiers(
             tmp_input_file.name,
             0.5,
+            percentile_threshold_strategy='exploratory',
             metrics_file=tmp_input_metrics_file.name
         ).execute())
         self.assertTrue(cmp(
@@ -64,6 +65,7 @@ class UpdateTiersTests(unittest.TestCase):
         shutil.copy(input_file, tmp_input_file.name)
         self.assertFalse(PvacbindUpdateTiers(
             tmp_input_file.name,
+            percentile_threshold_strategy='exploratory'
         ).execute())
         self.assertTrue(cmp(
             tmp_input_file.name,
@@ -77,6 +79,7 @@ class UpdateTiersTests(unittest.TestCase):
         shutil.copy(input_file, tmp_input_file.name)
         self.assertFalse(PvacfuseUpdateTiers(
             tmp_input_file.name,
+            binding_threshold=100,
         ).execute())
         self.assertTrue(cmp(
             tmp_input_file.name,

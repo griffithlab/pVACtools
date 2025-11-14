@@ -14,7 +14,9 @@
     "tsl"
   ],
   "maximum_transcript_support_level": 1,
-  "percentile_threshold": null,
+  "binding_percentile_threshold": 2.0,
+  "immunogenicity_percentile_threshold": 2.0,
+  "presentation_percentile_threshold": 2.0,
   "percentile_threshold_strategy": "conservative",
   "use_allele_specific_binding_thresholds": false,
   "mt_top_score_metric": "Median",

@@ -97,7 +97,9 @@ class PostProcessor:
                 self.aggregate_report,
                 tumor_purity=self.tumor_purity,
                 binding_threshold=self.binding_threshold,
-                percentile_threshold=self.percentile_threshold,
+                binding_percentile_threshold=self.binding_percentile_threshold,
+                immunogenicity_percentile_threshold=self.immunogenicity_percentile_threshold,
+                presentation_percentile_threshold=self.presentation_percentile_threshold,
                 percentile_threshold_strategy=self.percentile_threshold_strategy,
                 allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
                 trna_vaf=self.trna_vaf,
@@ -121,7 +123,9 @@ class PostProcessor:
                 self.aggregate_report,
                 binding_threshold=self.binding_threshold,
                 allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
-                percentile_threshold=self.percentile_threshold,
+                binding_percentile_threshold=self.binding_percentile_threshold,
+                immunogenicity_percentile_threshold=self.immunogenicity_percentile_threshold,
+                presentation_percentile_threshold=self.presentation_percentile_threshold,
                 percentile_threshold_strategy=self.percentile_threshold_strategy,
                 top_score_metric=self.top_score_metric,
                 top_score_metric2=self.top_score_metric2,
@@ -136,7 +140,9 @@ class PostProcessor:
                 self.aggregate_report,
                 binding_threshold=self.binding_threshold,
                 allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
-                percentile_threshold=self.percentile_threshold,
+                binding_percentile_threshold=self.binding_percentile_threshold,
+                immunogenicity_percentile_threshold=self.immunogenicity_percentile_threshold,
+                presentation_percentile_threshold=self.presentation_percentile_threshold,
                 percentile_threshold_strategy=self.percentile_threshold_strategy,
                 top_score_metric=self.top_score_metric,
                 top_score_metric2=self.top_score_metric2,
@@ -149,7 +155,9 @@ class PostProcessor:
                 self.aggregate_report,
                 tumor_purity=self.tumor_purity,
                 binding_threshold=self.binding_threshold,
-                percentile_threshold=self.percentile_threshold,
+                binding_percentile_threshold=self.binding_percentile_threshold,
+                immunogenicity_percentile_threshold=self.immunogenicity_percentile_threshold,
+                presentation_percentile_threshold=self.presentation_percentile_threshold,
                 percentile_threshold_strategy=self.percentile_threshold_strategy,
                 allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
                 aggregate_inclusion_binding_threshold=self.aggregate_inclusion_binding_threshold,
@@ -185,9 +193,10 @@ class PostProcessor:
             self.binding_threshold,
             self.minimum_fold_change,
             self.top_score_metric,
-            self.exclude_NAs,
             self.allele_specific_binding_thresholds,
-            self.percentile_threshold,
+            self.binding_percentile_threshold,
+            self.immunogenicity_percentile_threshold,
+            self.presentation_percentile_threshold,
             self.percentile_threshold_strategy,
             self.file_type,
         ).execute()
@@ -198,26 +207,26 @@ class PostProcessor:
             print("Running Coverage Filters")
             filter_criteria = []
             if self.file_type == 'pVACseq':
-                filter_criteria.append(FilterCriterion("Normal Depth", '>=', self.normal_cov, exclude_nas=self.exclude_NAs))
-                filter_criteria.append(FilterCriterion("Normal VAF", '<=', self.normal_vaf, exclude_nas=self.exclude_NAs))
-                filter_criteria.append(FilterCriterion("Tumor DNA Depth", '>=', self.tdna_cov, exclude_nas=self.exclude_NAs))
-                filter_criteria.append(FilterCriterion("Tumor DNA VAF", '>=', self.tdna_vaf, exclude_nas=self.exclude_NAs))
-                filter_criteria.append(FilterCriterion("Tumor RNA Depth", '>=', self.trna_cov, exclude_nas=self.exclude_NAs))
-                filter_criteria.append(FilterCriterion("Tumor RNA VAF", '>=', self.trna_vaf, exclude_nas=self.exclude_NAs))
-                filter_criteria.append(FilterCriterion("Gene Expression", '>=', self.expn_val, exclude_nas=self.exclude_NAs))
-                filter_criteria.append(FilterCriterion("Transcript Expression", '>=', self.expn_val, exclude_nas=self.exclude_NAs))
+                filter_criteria.append(FilterCriterion("Normal Depth", '>=', self.normal_cov))
+                filter_criteria.append(FilterCriterion("Normal VAF", '<=', self.normal_vaf))
+                filter_criteria.append(FilterCriterion("Tumor DNA Depth", '>=', self.tdna_cov))
+                filter_criteria.append(FilterCriterion("Tumor DNA VAF", '>=', self.tdna_vaf))
+                filter_criteria.append(FilterCriterion("Tumor RNA Depth", '>=', self.trna_cov))
+                filter_criteria.append(FilterCriterion("Tumor RNA VAF", '>=', self.trna_vaf))
+                filter_criteria.append(FilterCriterion("Gene Expression", '>=', self.expn_val))
+                filter_criteria.append(FilterCriterion("Transcript Expression", '>=', self.expn_val))
             # excluding transcript expression filter for pvacsplice
             elif self.file_type == 'pVACsplice':
-                filter_criteria.append(FilterCriterion("Normal Depth", '>=', self.normal_cov, exclude_nas=self.exclude_NAs))
-                filter_criteria.append(FilterCriterion("Normal VAF", '<=', self.normal_vaf, exclude_nas=self.exclude_NAs))
-                filter_criteria.append(FilterCriterion("Tumor DNA Depth", '>=', self.tdna_cov, exclude_nas=self.exclude_NAs))
-                filter_criteria.append(FilterCriterion("Tumor DNA VAF", '>=', self.tdna_vaf, exclude_nas=self.exclude_NAs))
-                filter_criteria.append(FilterCriterion("Tumor RNA Depth", '>=', self.trna_cov, exclude_nas=self.exclude_NAs))
-                filter_criteria.append(FilterCriterion("Tumor RNA VAF", '>=', self.trna_vaf, exclude_nas=self.exclude_NAs))
-                filter_criteria.append(FilterCriterion("Gene Expression", '>=', self.expn_val, exclude_nas=self.exclude_NAs))
+                filter_criteria.append(FilterCriterion("Normal Depth", '>=', self.normal_cov))
+                filter_criteria.append(FilterCriterion("Normal VAF", '<=', self.normal_vaf))
+                filter_criteria.append(FilterCriterion("Tumor DNA Depth", '>=', self.tdna_cov))
+                filter_criteria.append(FilterCriterion("Tumor DNA VAF", '>=', self.tdna_vaf))
+                filter_criteria.append(FilterCriterion("Tumor RNA Depth", '>=', self.trna_cov))
+                filter_criteria.append(FilterCriterion("Tumor RNA VAF", '>=', self.trna_vaf))
+                filter_criteria.append(FilterCriterion("Gene Expression", '>=', self.expn_val))
             elif self.file_type == 'pVACfuse':
-                filter_criteria.append(FilterCriterion("Read Support", '>=', self.read_support, exclude_nas=self.exclude_NAs))
-                filter_criteria.append(FilterCriterion("Expression", '>=', self.expn_val, exclude_nas=self.exclude_NAs))
+                filter_criteria.append(FilterCriterion("Read Support", '>=', self.read_support))
+                filter_criteria.append(FilterCriterion("Expression", '>=', self.expn_val))
             Filter(self.binding_filter_fh.name, self.coverage_filter_fh.name, filter_criteria).execute()
             print("Completed")
         else:
@@ -322,7 +331,9 @@ class PostProcessor:
                     self.aggregate_report,
                     self.vaf_clonal,
                     binding_threshold=self.binding_threshold,
-                    percentile_threshold=self.percentile_threshold,
+                    binding_percentile_threshold=self.binding_percentile_threshold,
+                    immunogenicity_percentile_threshold=self.immunogenicity_percentile_threshold,
+                    presentation_percentile_threshold=self.presentation_percentile_threshold,
                     percentile_threshold_strategy=self.percentile_threshold_strategy,
                     allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
                     trna_vaf=self.trna_vaf,
@@ -353,7 +364,9 @@ class PostProcessor:
                         self.aggregate_report,
                         binding_threshold=self.binding_threshold,
                         allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
-                        percentile_threshold=self.percentile_threshold,
+                        binding_percentile_threshold=self.binding_percentile_threshold,
+                        immunogenicity_percentile_threshold=self.immunogenicity_percentile_threshold,
+                        presentation_percentile_threshold=self.presentation_percentile_threshold,
                         percentile_threshold_strategy=self.percentile_threshold_strategy,
                         top_score_metric2 = self.top_score_metric2,
                     ).execute()
@@ -362,7 +375,9 @@ class PostProcessor:
                         self.aggregate_report,
                         binding_threshold=self.binding_threshold,
                         allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
-                        percentile_threshold=self.percentile_threshold,
+                        binding_percentile_threshold=self.binding_percentile_threshold,
+                        immunogenicity_percentile_threshold=self.immunogenicity_percentile_threshold,
+                        presentation_percentile_threshold=self.presentation_percentile_threshold,
                         percentile_threshold_strategy=self.percentile_threshold_strategy,
                         read_support=self.read_support,
                         expn_val=self.expn_val,
@@ -374,7 +389,9 @@ class PostProcessor:
                         self.vaf_clonal,
                         binding_threshold=self.binding_threshold,
                         allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
-                        percentile_threshold=self.percentile_threshold,
+                        binding_percentile_threshold=self.binding_percentile_threshold,
+                        immunogenicity_percentile_threshold=self.immunogenicity_percentile_threshold,
+                        presentation_percentile_threshold=self.presentation_percentile_threshold,
                         percentile_threshold_strategy=self.percentile_threshold_strategy,
                         trna_vaf=self.trna_vaf,
                         trna_cov=self.trna_cov,
