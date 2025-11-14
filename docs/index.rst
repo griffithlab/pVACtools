@@ -58,6 +58,14 @@ Contents
    contact
    mailing_list
 
+
+New in Version |release|
+------------------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+* Ensure that the top_score_metric2 parameter is passed through to UpdateTiers so that the aggregate report gets sorted correctly. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1335
+
 New in Version 6
 ----------------
 

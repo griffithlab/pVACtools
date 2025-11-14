@@ -58,3 +58,9 @@ ________
 
 - This relase fixes a bug with sorting of pVACfuse output files.
 
+Version 6.0.1
+-------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+* Ensure that the top_score_metric2 parameter is passed through to UpdateTiers so that the aggregate report gets sorted correctly. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1335
