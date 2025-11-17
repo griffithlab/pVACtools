@@ -160,7 +160,7 @@ def main(peptides_path, classI_path, classII_path, input_vcf, external_vcf, samp
                 modified_id = f"{gene}.{transcript}.{ref}{pos}{alt}"
             else:
                 print(f"Unrecognized inframe_del format: {original_id}")
-                modified_id = original_id
+                modified_id = original_id.replace('inframe_del.', '').replace('inframe_del.', '')
 
         else:
             print(f"Non-missense variant not handled: {original_id}")
@@ -182,28 +182,9 @@ def main(peptides_path, classI_path, classII_path, input_vcf, external_vcf, samp
                                 "IC50 MT":"Class II IC50 MT", "%ile MT":"Class II %ile MT",
                                 "Best Transcript":"Class II Best Transcript"}, inplace=True)
 
-    def rearrange_string(s):
-        # Handle insertions like -287-288L → 287-288-/L
-        insertion_match = re.match(r'-?(\d+-\d+)([A-Za-z]+)', s)
-        if insertion_match:
-            position = insertion_match.group(1)
-            inserted = insertion_match.group(2)
-            return f"{position}-/{inserted}"
-
-        # Handle substitutions like E510Q → 510E/Q
-        substitution_match = re.match(r'([A-Za-z]+)(\d+)([A-Za-z]+)', s)
-        if substitution_match:
-            letters_before = substitution_match.group(1)
-            numbers = substitution_match.group(2)
-            letters_after = substitution_match.group(3)
-            return f"{numbers}{letters_before}/{letters_after}"
-
-        # Return unchanged if no pattern matched
-        return s
-
-
-    classI['position AA Change'] = classI['AA Change'].apply(rearrange_string)
-    classI['51mer ID'] = classI['Gene'] + '.' + classI['Class I Best Transcript'] + '.' + classI['position AA Change'] 
+    classI['51mer ID'] = classI['Index']
+    classI['51mer ID'] = classI['51mer ID'].apply(lambda x: x.split('.', 1)[1])  # Removes the MT index from the Index column
+    classI['51mer ID'] = classI['51mer ID'].apply(modify_id)
     class_sequences = pd.merge(classI[['ID', 'Best Peptide Class I', '51mer ID', 'Pos', 'AA Change', 'Class I Allele', "Class I IC50 MT", "Class I %ile MT", "Class I Best Transcript"]], 
                                 classII[['ID', 'Best Peptide Class II', 'Class II Allele', "Class II IC50 MT", "Class II %ile MT", "Class II Best Transcript"]], on='ID', how='left')
     class_sequences = class_sequences.drop(columns=['ID'])
