@@ -124,12 +124,9 @@ def main(peptides_path, classI_path, classII_path, input_vcf, external_vcf, samp
                            "RESTRICTING HLA ALLELE", "CANDIDATE NEOANTIGEN AMINO ACID SEQUENCE MW (CLIENT)", "Comments"]]
 
     # Add the Restricting HLA Alles from Class I and Class II
-    # create a dataframe that contains the classI and classII pepetide sequence
-    # Create a universal ID by editing the peptide 51mer ID
+    # create a dataframe that contains the classI and classII peptide sequence
     peptides.rename(columns={'ID': 'full ID'}, inplace=True)
-    peptides['51mer ID'] = peptides['full ID']
-    peptides['51mer ID'] = peptides['51mer ID'].apply(lambda x: x.split('.', 1)[1])  # Removes the 'MT' from the beginning of ID column
-    peptides['51mer ID'] = peptides['51mer ID'].apply(lambda x: x.split('.', 1)[1])  # Remives the MT index from the ID column
+    peptides['Index'] = peptides['full ID'].apply(lambda x: x.split('.', 1)[1])
 
     def modify_id(original_id):
         match = re.match(r'([\w\-]+)\.(ENS[0-9A-Z]+\d+(?:\.\d+)?)\.(\w+)\.(.+)$', original_id)
@@ -168,10 +165,6 @@ def main(peptides_path, classI_path, classII_path, input_vcf, external_vcf, samp
 
         return modified_id
 
-
-    #peptides['51mer ID'] = peptides['51mer ID'].apply(lambda x: '.'.join(x.split('.')[:3]) + '.' + '.'.join(x.split('.')[4:])) # removes the variant label
-    peptides['51mer ID'] = peptides['51mer ID'].apply(modify_id)
-
     classI = pd.read_csv(classI_path, sep="\t")
     classII = pd.read_csv(classII_path, sep="\t")
 
@@ -185,11 +178,11 @@ def main(peptides_path, classI_path, classII_path, input_vcf, external_vcf, samp
     classI['51mer ID'] = classI['Index']
     classI['51mer ID'] = classI['51mer ID'].apply(lambda x: x.split('.', 1)[1])  # Removes the MT index from the Index column
     classI['51mer ID'] = classI['51mer ID'].apply(modify_id)
-    class_sequences = pd.merge(classI[['ID', 'Best Peptide Class I', '51mer ID', 'Pos', 'AA Change', 'Class I Allele', "Class I IC50 MT", "Class I %ile MT", "Class I Best Transcript"]], 
+    class_sequences = pd.merge(classI[['ID', 'Index', 'Best Peptide Class I', '51mer ID', 'Pos', 'AA Change', 'Class I Allele', "Class I IC50 MT", "Class I %ile MT", "Class I Best Transcript"]], 
                                 classII[['ID', 'Best Peptide Class II', 'Class II Allele', "Class II IC50 MT", "Class II %ile MT", "Class II Best Transcript"]], on='ID', how='left')
-    class_sequences = class_sequences.drop(columns=['ID'])
 
-    merged_peptide_51mer = pd.merge(peptides, class_sequences, on='51mer ID', how='left')
+    merged_peptide_51mer = pd.merge(peptides, class_sequences, on='Index', how='left')
+    merged_peptide_51mer = merged_peptide_51mer.drop(columns=['ID', 'Index'])
 
     merged_peptide_51mer['sorting id'] = merged_peptide_51mer['full ID'].apply(extract_info) # creating a ID to sort reviewed canidates by the order of the 51mer
     merged_peptide_51mer = make_column_unique(merged_peptide_51mer, 'sorting id') # make sure every sorting id is unique
