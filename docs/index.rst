@@ -64,7 +64,8 @@ New in Version |release|
 
 This is a bugfix release. It fixes the following problem(s):
 
-* Ensure that the top_score_metric2 parameter is passed through to UpdateTiers so that the aggregate report gets sorted correctly. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1335
+* Define transcript set in the pVACsplice top score filter on Junction, not Index, in order to be consistent with the aggregate report. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1340
+* Fix some bugs with the `pvacseq create_peptide_ordering_form` command by using the Index to construct the 51mer ID instead of modifying the AA change. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1341
 
 New in Version 6
 ----------------
