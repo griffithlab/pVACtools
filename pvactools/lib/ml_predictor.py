@@ -4,8 +4,8 @@
 #              and performs ML-based neoantigen evaluation predictions.
 # --------------------------------------------------------------------------------------------------
 
+import argparse
 import os
-import sys
 import pandas as pd
 import joblib
 import pickle
@@ -13,29 +13,89 @@ import numpy as np
 from pathlib import Path
 
 
-def merge_and_prepare_data(file1_path, file2_path, file3_path):
+def merge_and_prepare_data(class1_aggregated_path, class1_all_epitopes_path, class2_aggregated_path):
     """
     Merge the three input files and prepare data for ML prediction.
     
     Args:
-        file1_path (str): Path to MHC Class I aggregated epitopes file
-        file2_path (str): Path to MHC Class I all epitopes file  
-        file3_path (str): Path to MHC Class II aggregated epitopes file
+        class1_aggregated_path (str): Path to MHC Class I aggregated epitopes file
+        class1_all_epitopes_path (str): Path to MHC Class I all epitopes file  
+        class2_aggregated_path (str): Path to MHC Class II aggregated epitopes file
         
     Returns:
         pd.DataFrame: Prepared data ready for ML prediction
     """
     print("Reading input files...")
     
-    # Read the three input files
-    mhc1_agg_df = pd.read_csv(file1_path, sep='\t', na_values=["NA", "NaN", ""], keep_default_na=False)
-    mhc1_allepi_df = pd.read_csv(file2_path, sep='\t', na_values=["NA", "NaN", ""], keep_default_na=False)
-    mhc2_agg_df = pd.read_csv(file3_path, sep='\t', na_values=["NA", "NaN", ""], keep_default_na=False)
+    # --- Columns to read from input files ---
+    mhc1_agg_columns = [
+        'ID', 'Index', 'Best Peptide', 'IC50 MT', 'IC50 WT', '%ile MT', '%ile WT',
+        'Allele', 'Allele Expr', 'DNA VAF', 'TSL', 'Num Passing Peptides', 
+        'Pos', 'Prob Pos', 'RNA Depth', 'RNA Expr', 'RNA VAF', 
+        'Ref Match', 'Evaluation'
+    ]
+    mhc2_agg_columns = [
+        'ID', '%ile MT', '%ile WT', 'IC50 MT', 'IC50 WT'
+    ]
+    mhc1_allepi_columns = [
+        'Index', 'MT Epitope Seq', 'HLA Allele', 'Gene of Interest', 
+        'Corresponding Fold Change', 'Variant Type', 'Best MT IC50 Score', 
+        'Best MT Percentile', 'Corresponding WT IC50 Score', 
+        'Corresponding WT Percentile', 'Biotype', 'cysteine_count'
+    ]
+    predictor_columns = [
+        'MHCflurry MT IC50 Score',
+        'MHCflurry MT Percentile',
+        'MHCflurry WT IC50 Score',
+        'MHCflurry WT Percentile',
+        'MHCflurryEL Presentation MT Percentile',
+        'MHCflurryEL Presentation MT Score',
+        'MHCflurryEL Presentation WT Percentile',
+        'MHCflurryEL Presentation WT Score',
+        'MHCflurryEL Processing MT Score',
+        'MHCflurryEL Processing WT Score',
+        'MHCnuggetsI MT IC50 Score',
+        'MHCnuggetsI MT Percentile',
+        'MHCnuggetsI WT IC50 Score',
+        'MHCnuggetsI WT Percentile',
+        'Median Fold Change',
+        'NetMHC MT IC50 Score',
+        'NetMHC MT Percentile',
+        'NetMHC WT IC50 Score',
+        'NetMHC WT Percentile',
+        'NetMHCcons MT IC50 Score',
+        'NetMHCcons MT Percentile',
+        'NetMHCcons WT IC50 Score',
+        'NetMHCcons WT Percentile',
+        'NetMHCpan MT IC50 Score',
+        'NetMHCpan MT Percentile',
+        'NetMHCpan WT IC50 Score',
+        'NetMHCpan WT Percentile',
+        'NetMHCpanEL MT Presentation Score',
+        'NetMHCpanEL MT Percentile',
+        'NetMHCpanEL WT Presentation Score',
+        'NetMHCpanEL WT Percentile',
+        'Peptide Length',
+        'PickPocket MT IC50 Score',
+        'PickPocket MT Percentile',
+        'PickPocket WT IC50 Score',
+        'PickPocket WT Percentile',
+        'SMM MT IC50 Score',
+        'SMM MT Percentile',
+        'SMM WT IC50 Score',
+        'SMM WT Percentile',
+        'SMMPMBEC MT IC50 Score',
+        'SMMPMBEC MT Percentile',
+        'SMMPMBEC WT IC50 Score',
+        'SMMPMBEC WT Percentile'
+    ]
+    # --- Read the three input files ---
+    mhc1_agg_df = pd.read_csv(class1_aggregated_path, sep='\t', na_values=["NA", "NaN", ""], keep_default_na=False, usecols=mhc1_agg_columns)
+    mhc1_allepi_df = pd.read_csv(class1_all_epitopes_path, sep='\t', na_values=["NA", "NaN", ""], keep_default_na=False, usecols=mhc1_allepi_columns+predictor_columns)
+    mhc2_agg_df = pd.read_csv(class2_aggregated_path, sep='\t', na_values=["NA", "NaN", ""], keep_default_na=False, usecols=mhc2_agg_columns)
     
     # Rename columns in mhc1_agg_df
-    mhc1_agg_df.rename(columns={
-        "Best Peptide": "Best Peptide class1", 
-        "Best Transcript": "Best Transcript class1", 
+    mhc1_agg_df.rename(columns={ 
         "IC50 MT": "IC50 MT class1", 
         "IC50 WT": "IC50 WT class1", 
         "%ile MT": "%ile MT class1", 
@@ -44,69 +104,42 @@ def merge_and_prepare_data(file1_path, file2_path, file3_path):
 
     # Rename columns in mhc2_agg_df
     mhc2_agg_df.rename(columns={
-        "Best Peptide": "Best Peptide class2", 
-        "Best Transcript": "Best Transcript class2", 
         "IC50 MT": "IC50 MT class2", 
         "IC50 WT": "IC50 WT class2", 
         "%ile MT": "%ile MT class2", 
         "%ile WT": "%ile WT class2"
     }, inplace=True)
 
-    # Columns to keep in mhc2_agg_df (doing this step first becuase of not, merging data would cause names such as "Index.x" and "Index.y", making column selection difficult later)
-    columns_to_keep = [
-        "ID",  # Always include "ID"
-        *[col for col in mhc2_agg_df.columns if col.startswith("D") and "DNA VAF" not in col],  # Columns starting with "D" but without "DNA VAF"
-        *[col for col in mhc2_agg_df.columns if col.endswith("class2")]  # Renamed columns ending with "class2"
-    ]
-    
-    # Select the subset of columns
-    mhc2_agg_subset = mhc2_agg_df[columns_to_keep]
-
     # Compare the number of rows
-    if mhc1_agg_df.shape[0] != mhc2_agg_subset.shape[0]:
-        print("Warning: Class 1 aggregated file DOES NOT have the same number of rows as Class 2 aggregated file.\n Extra rows in Class 1 aggregated file will have Evaluation as Pending.")
+    if mhc1_agg_df.shape[0] != mhc2_agg_df.shape[0]:
+        print("Warning: Class 1 aggregated file DOES NOT have the same number of rows as Class 2 aggregated file.\n May cause \"NA\" in ML predictions.")
 
-    # Merge class 1 and class 2 aggregated dataframes
-    merged_df = pd.merge(mhc1_agg_df, mhc2_agg_subset, on="ID")
+    # --- Merge class 1 and class 2 aggregated dataframes ---
+    merged_df = pd.merge(mhc1_agg_df, mhc2_agg_df, on="ID")
 
-    # Split the "ID" column in merged_df into separate columns for matching to all epitopes file
-    merged_df_split = merged_df.copy()
-    merged_df_split[['Chromosome', 'Start', 'Stop', 'Reference', 'Variant']] = merged_df_split['ID'].str.split('-', expand=True)
-
-    # Convert "Start" and "Stop" columns to integers
-    merged_df_split['Start'] = merged_df_split['Start'].astype(int)
-    merged_df_split['Stop'] = merged_df_split['Stop'].astype(int)
-    
-    # Convert Chromosome column to string in both dataframes to ensure consistent data types for merging
-    merged_df_split['Chromosome'] = merged_df_split['Chromosome'].astype(str)
-    mhc1_allepi_df['Chromosome'] = mhc1_allepi_df['Chromosome'].astype(str)
-
-    # Perform an inner join with mhc1_allepi_df on the specified columns
+    # Perform an inner join with mhc1_allepi_df on the specified columns ---
     merged_all = pd.merge(
-        merged_df_split,
+        merged_df,
         mhc1_allepi_df,
         how='inner',
-        left_on=[
-            'Chromosome', 'Start', 'Stop', 'Reference', 'Variant', 
-            'Best Transcript class1', 'Best Peptide class1', 'Allele'
-        ],
-        right_on=[
-            'Chromosome', 'Start', 'Stop', 'Reference', 'Variant', 
-            'Transcript', 'MT Epitope Seq', 'HLA Allele'
-        ]
+        left_on=['Index', 'Best Peptide', 'Allele'],
+        right_on=['Index', 'MT Epitope Seq', 'HLA Allele']
     )
 
-    # Drop the redundant columns created from splitting "ID"
-    merged_all.drop(columns=["Chromosome", "Start", "Stop", "Reference", "Variant", "Transcript", "MT Epitope Seq", "HLA Allele"], inplace=True)
-
-    # Transformations
-    # NOTE: Pos may take form "#-#", so we need to extract the first integer
+    # --- Transformations ---
+    # NOTE: Pos may take form "#-#" or "#,#", so we need to extract the first integer
+    # NOTE: the "#-#" format is from older version of pVACtools that I encountered during training the model, it might not be needed anymore
     if merged_all["Pos"].dtype == "object":
-        merged_all["Pos"] = merged_all["Pos"].str.extract(r"^(\d+)").astype("Int64")  # Extract the first integer from Pos
-    # Convert Pos to float64
-    merged_all['Pos'] = merged_all['Pos'].astype(float)
+        # Extract the first integer (handles formats like "5", "5-10", "5,10", etc.)
+        merged_all["Pos"] = merged_all["Pos"].astype(str).str.extract(r"^(\d+)").astype("Int64")
+        # Convert Pos to float64
+        merged_all['Pos'] = merged_all['Pos'].astype(float)
+    else:
+        # Convert Pos to float64
+        merged_all['Pos'] = merged_all['Pos'].astype(float)
 
     # NOTE: Prob Pos may take form "#,#", so we need to extract the first integer
+    # NOTE: these formats might also be from older version of pVACtools 
     merged_all["Prob Pos"] = (
         merged_all["Prob Pos"]
         .fillna("0")  # Replace NaN with "0"
@@ -129,76 +162,47 @@ def merge_and_prepare_data(file1_path, file2_path, file3_path):
     # Replace NA in TSL with 6, change into int (updated to match merge_data_predict_ml.py)
     merged_all["TSL"] = merged_all["TSL"].fillna(6).astype(int)
 
-    # Select columns to keep from merged_all
-    columns_keep = [
-        "ID",
-        "Evaluation",
-        "TSL",
-        "Pos",
-        "Prob Pos",
-        "Num Passing Peptides",
-        "RNA Expr",
-        "RNA VAF",
-        "Allele Expr",
-        "RNA Depth",
-        "DNA VAF",
-        "Ref Match",
-        "Biotype",
-        "Variant Type",
-        "Peptide Length",
-        "Best MT IC50 Score",
-        "Corresponding WT IC50 Score",
-        "Corresponding Fold Change",
-        "Best MT Percentile",
-        "Corresponding WT Percentile",
-        "Median Fold Change",
-        "cysteine_count"
-    ]
-
-    # Select the final columns
-    final_columns = columns_keep + [
-        col for col in merged_all.columns if col.startswith(("IC50", "%ile", "MHCflurry", "MHCnuggetsI", "NetMHC", "PickPocket", "SMM"))
-    ] + ['Prob match', 'Gene of Interest']
-
-    merged_all = merged_all[final_columns]
-
-    # Unify the column names
-    merged_all.rename(columns={
-        "NetMHCpanEL WT Presentation Score": "NetMHCpanEL WT IC50 Score",
+    # --- Rename columns for pvactools v7, otherwise I will need to retrain the model to use new column names (will do this in the future) ---
+    rename_map_v7 = {
         "NetMHCpanEL MT Presentation Score": "NetMHCpanEL MT IC50 Score",
-        "MHCflurry WT Score": "MHCflurry WT IC50 Score",
-        "MHCflurry MT Score": "MHCflurry MT IC50 Score",
-        "MHCnuggetsI WT Score": "MHCnuggetsI WT IC50 Score",
-        "MHCnuggetsI MT Score": "MHCnuggetsI MT IC50 Score",
-        "NetMHC WT Score": "NetMHC WT IC50 Score",
-        "NetMHC MT Score": "NetMHC MT IC50 Score",
-        "NetMHCcons WT Score": "NetMHCcons WT IC50 Score",
-        "NetMHCcons MT Score": "NetMHCcons MT IC50 Score",
-        "NetMHCpan WT Score": "NetMHCpan WT IC50 Score",
-        "NetMHCpan MT Score": "NetMHCpan MT IC50 Score",
-        "PickPocket WT Score": "PickPocket WT IC50 Score",
-        "PickPocket MT Score": "PickPocket MT IC50 Score",
-        "SMM WT Score": "SMM WT IC50 Score",
-        "SMM MT Score": "SMM MT IC50 Score",
-        "SMMPMBEC WT Score": "SMMPMBEC WT IC50 Score",
-        "SMMPMBEC MT Score": "SMMPMBEC MT IC50 Score"
-    }, inplace=True)
-    
-    # for pvactools v7 ('NetMHCpanEL MT IC50 Score' has been changed to 'NetMHCpanEL MT Presentation Score')
-    merged_all = merged_all.drop(columns=['IC50 %ile MT', 'IC50 %ile WT'])
+        "NetMHCpanEL WT Presentation Score": "NetMHCpanEL WT IC50 Score"
+    }
+    merged_all = merged_all.rename(columns=rename_map_v7)
+
+    # --- Drop the redundant columns ---
+    merged_all = merged_all.drop(columns=["Index", "MT Epitope Seq", "HLA Allele", 'Best Peptide', 'Allele'])
 
     return merged_all
 
-def _resolve_artifact_paths(model_artifacts_path):
+def _get_default_artifacts_dir():
+    """
+    Get the path to the default ML model artifacts directory included in the pvactools package.
+    
+    Returns:
+        str: Path to the artifacts directory
+    """
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+    artifacts_dir = os.path.join(base_dir, 'supporting_files', 'ml_model_artifacts')
+    return artifacts_dir
+
+def _resolve_artifact_paths(model_artifacts_path=None):
     """
     Resolve standard artifact file paths inside the provided artifacts directory.
+    If no path is provided, uses the default artifacts directory from the package.
 
     Expected filenames (numpy126 versions):
       - rf_downsample_model_numpy126.pkl
       - trained_imputer_numpy126.joblib
       - label_encoders_numpy126.pkl
+    
+    Args:
+        model_artifacts_path (str, optional): Path to artifacts directory. If None, uses default package location.
     """
-    artifacts_dir = Path(model_artifacts_path)
+    if model_artifacts_path is None:
+        artifacts_dir = _get_default_artifacts_dir()
+    else:
+        artifacts_dir = model_artifacts_path
+    artifacts_dir = Path(artifacts_dir)
     model_path = artifacts_dir / 'rf_downsample_model_numpy126.pkl'
     imputer_path = artifacts_dir / 'trained_imputer_numpy126.joblib'
     encoders_path = artifacts_dir / 'label_encoders_numpy126.pkl'
@@ -210,8 +214,7 @@ def clean_and_impute_data(merged_all, model_artifacts_path):
     
     Args:
         merged_all (pd.DataFrame): Merged data from merge_and_prepare_data
-        imputer_path (str): Path to the trained imputer
-        label_encoders_path (str): Path to the label encoders
+        model_artifacts_path (str): Path to the model artifacts directory
         
     Returns:
         pd.DataFrame: Cleaned and imputed data ready for prediction
@@ -291,7 +294,7 @@ def make_ml_predictions(post_imputed_data, model_artifacts_path, threshold=0.55)
 
 def create_final_output(post_imputed_data, original_agg_file_path, output_dir, sample_name):
     """
-    Create the final output files with ML predictions.
+    Create the final output file with ML predictions.
     
     Args:
         post_imputed_data (pd.DataFrame): Data with ML predictions
@@ -300,9 +303,9 @@ def create_final_output(post_imputed_data, original_agg_file_path, output_dir, s
         sample_name (str): Sample name for output file
         
     Returns:
-        tuple: Paths to the two final output files (comments format, new format)
+        str: Path to the final output file
     """
-    print("Creating final output files...")
+    print("Creating final output file...")
     
     # Read original aggregated file
     mhc1_agg_df_itb = pd.read_csv(original_agg_file_path, sep="\t", dtype=str)
@@ -310,77 +313,58 @@ def create_final_output(post_imputed_data, original_agg_file_path, output_dir, s
     # Create output directory if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
     
-    # Version 1: put the prediction and score in the Comments column
+    # Put the prediction and score in an extra column (ML Prediction (score))
     final_df = mhc1_agg_df_itb.drop(columns=['Evaluation']).merge(
         post_imputed_data[['ID', 'Evaluation_pred', 'Accept_pred_prob']], on="ID", how="left"
     ).rename(columns={'Evaluation_pred': 'Evaluation'})
-    final_df['Comments'] = "Probability of Accept: " + final_df['Accept_pred_prob'].round(3).astype(str)
-    final_df = final_df.drop(columns=['Accept_pred_prob'])
-    # There is a case where mhc1_agg_df_itb has an extra column when merged with post_imputed_data
-    # this causes the Evaluation is NA and Accept_pred_prob is NA. 
-    # (this is because the class I file has more rows than the class II file, extra rows are removed in 03_merge_data.py)
-    # In this case, we manually set the Evaluation to "Pending"
-    final_df.loc[(final_df['Evaluation'].isna()), 'Evaluation'] = "Pending"
-    # For rows where Evaluation is "Pending", set Comments accordingly
-    final_df.loc[final_df['Evaluation'] == "Pending", 'Comments'] = "Unable to make prediction with ML model"
-    # Modify 'Review' to 'Pending' in Evaluation column
-    final_df.loc[final_df['Evaluation'] == 'Review', 'Evaluation'] = 'Pending'
-    
-    # Version 2: put the prediction and score in an extra column, instead of the Comments column
-    final_df2 = mhc1_agg_df_itb.drop(columns=['Evaluation']).merge(
-        post_imputed_data[['ID', 'Evaluation_pred', 'Accept_pred_prob']], on="ID", how="left"
-    ).rename(columns={'Evaluation_pred': 'Evaluation'})
     # Fill missing evaluations from unmatched IDs as Pending
-    final_df2['Evaluation'] = final_df2['Evaluation'].fillna('Pending')
+    final_df['Evaluation'] = final_df['Evaluation'].fillna('Pending')
 
     # Conditionally set ML Prediction (score) based on Evaluation_pred
     # NOTE: sometimes the ML model will not be able to make a prediction due to missing data, in this case, the Evaluation_pred will be "Pending"
     # This may be due to the class 1 and class 2 files not having the same number of rows.
-    final_df2['ML Prediction (score)'] = final_df2.apply(
-        lambda row: "Unable to make prediction with ML model due to missing data" if (pd.isna(row['Evaluation']) or row['Evaluation'] == "Pending" or pd.isna(row['Accept_pred_prob']))
+    final_df['ML Prediction (score)'] = final_df.apply(
+        lambda row: "NA" if (pd.isna(row['Evaluation']) or row['Evaluation'] == "Pending" or pd.isna(row['Accept_pred_prob']))
         else str(row['Evaluation']) + " (" + str(round(row['Accept_pred_prob'], 2)) + ")", 
         axis=1
     )
     # Modify 'Review' to 'Pending' in Evaluation column
-    final_df2.loc[final_df2['Evaluation'] == 'Review', 'Evaluation'] = 'Pending'
-    final_df2 = final_df2.drop(columns=['Accept_pred_prob'])
+    final_df.loc[final_df['Evaluation'] == 'Review', 'Evaluation'] = 'Pending'
+    final_df = final_df.drop(columns=['Accept_pred_prob'])
     
-    # --- Ensure TSL is integer in outputs ---
-    for df in [final_df, final_df2]:
-        if 'TSL' in df.columns:
-            df['TSL'] = pd.to_numeric(df['TSL'], errors='coerce').fillna(6).astype(int)
+    # --- Ensure TSL is integer in output ---
+    final_df['TSL'] = pd.to_numeric(final_df['TSL'], errors='coerce').fillna(6).astype(int)
     
-    # Save both output files
-    output_file1 = os.path.join(output_dir, f"{sample_name}_predict_pvacview.tsv")
-    output_file2 = os.path.join(output_dir, f"{sample_name}_predict_pvacview_new_format.tsv")
-    
-    final_df.to_csv(output_file1, sep="\t", index=False, na_rep="NA")
-    final_df2.to_csv(output_file2, sep="\t", index=False, na_rep="NA")
-    
-    print(f"ML predictions saved to: {output_file1} and {output_file2}")
-    return output_file1, output_file2
+    # Save output file
+    output_file = os.path.join(output_dir, f"{sample_name}_predict_pvacview.tsv")
 
-def run_ml_predictions(file1_path, file2_path, file3_path, model_artifacts_path, output_dir, sample_name, threshold=0.55):
+    final_df.to_csv(output_file, sep="\t", index=False, na_rep="NA")
+    
+    print(f"ML predictions saved to: {output_file}")
+    return output_file
+
+def run_ml_predictions(class1_aggregated_path, class1_all_epitopes_path, class2_aggregated_path, model_artifacts_path=None, output_dir=None, sample_name=None, threshold=0.55):
     """
     Main function to run ML predictions on pVACtools output files.
     
     Args:
-        file1_path (str): Path to MHC Class I aggregated epitopes file
-        file2_path (str): Path to MHC Class I all epitopes file
-        file3_path (str): Path to MHC Class II aggregated epitopes file
-        model_artifacts_path (str): Path to directory containing model artifacts
-        output_dir (str): Output directory for results
-        sample_name (str): Sample name for output file
+        class1_aggregated_path (str): Path to MHC Class I aggregated epitopes file
+        class1_all_epitopes_path (str): Path to MHC Class I all epitopes file
+        class2_aggregated_path (str): Path to MHC Class II aggregated epitopes file
+        model_artifacts_path (str, optional): Path to directory containing model artifacts. 
+            If None, uses the default artifacts directory from the pvactools package.
+        output_dir (str, optional): Output directory for results
+        sample_name (str, optional): Sample name for output file
         threshold (float): Threshold for Accept predictions (default: 0.55)
         
     Returns:
-        tuple: Paths to the two final output files (comments format, new format)
+        str: Path to the final output file
     """
     print("Starting ML prediction pipeline...")
     
     try:
         # Step 1: Merge and prepare data
-        merged_all = merge_and_prepare_data(file1_path, file2_path, file3_path)
+        merged_all = merge_and_prepare_data(class1_aggregated_path, class1_all_epitopes_path, class2_aggregated_path)
         
         # Step 2: Clean and impute data
         post_imputed_data = clean_and_impute_data(merged_all, model_artifacts_path)
@@ -389,7 +373,7 @@ def run_ml_predictions(file1_path, file2_path, file3_path, model_artifacts_path,
         post_imputed_data = make_ml_predictions(post_imputed_data, model_artifacts_path, threshold)
         
         # Step 4: Create final output
-        output_files = create_final_output(post_imputed_data, file1_path, output_dir, sample_name)
+        output_files = create_final_output(post_imputed_data, class1_aggregated_path, output_dir, sample_name)
         
         print("ML prediction pipeline completed successfully!")
         return output_files
@@ -398,23 +382,66 @@ def run_ml_predictions(file1_path, file2_path, file3_path, model_artifacts_path,
         print(f"Error in ML prediction pipeline: {str(e)}")
         raise
 
+
+def define_add_ml_predictions_parser(tool='pvacseq'):
+    """
+    Create and return an argparse parser for the add_ml_predictions command.
+    """
+    parser = argparse.ArgumentParser(
+        f"{tool} add_ml_predictions",
+        description="Add ML-based neoantigen evaluation predictions to existing pVACseq output files.",
+        formatter_class=argparse.RawTextHelpFormatter
+    )
+    parser.add_argument(
+        "--class1-aggregated",
+        required=True,
+        dest="class1_aggregated",
+        help="Path to the MHC Class I aggregated epitopes TSV."
+    )
+    parser.add_argument(
+        "--class1-all-epitopes",
+        required=True,
+        dest="class1_all_epitopes",
+        help="Path to the MHC Class I all epitopes TSV."
+    )
+    parser.add_argument(
+        "--class2-aggregated",
+        required=True,
+        dest="class2_aggregated",
+        help="Path to the MHC Class II aggregated epitopes TSV."
+    )
+    parser.add_argument(
+        "--artifacts-path",
+        dest="artifacts_path",
+        help="Optional path to a directory containing ML model artifacts. Defaults to the package-provided artifacts."
+    )
+    parser.add_argument(
+        "output_dir",
+        help="Directory where the ML prediction TSV files should be written."
+    )
+    parser.add_argument(
+        "sample_name",
+        help="Sample name prefix to use for the output files."
+    )
+    parser.add_argument(
+        "--threshold",
+        type=float,
+        default=0.55,
+        help="Prediction threshold for evaluating Accept vs Reject (default: 0.55)."
+    )
+    return parser
+
+
 if __name__ == "__main__":
-    # This section is for testing the script independently
-    import argparse
-    
-    parser = argparse.ArgumentParser(description="ML prediction for pVACtools output")
-    parser.add_argument("--file1", required=True, help="MHC Class I aggregated epitopes file")
-    parser.add_argument("--file2", required=True, help="MHC Class I all epitopes file")
-    parser.add_argument("--file3", required=True, help="MHC Class II all epitopes file")
-    parser.add_argument("--artifacts", required=True, help="Path to directory containing model artifacts")
-    parser.add_argument("--output", required=True, help="Output directory")
-    parser.add_argument("--sample", required=True, help="Sample name")
-    parser.add_argument("--threshold", type=float, default=0.55, help="Prediction threshold")
-    
+    parser = define_add_ml_predictions_parser(tool='ml_predictor')
     args = parser.parse_args()
-    
+
     run_ml_predictions(
-        args.file1, args.file2, args.file3,
-        args.artifacts,
-        args.output, args.sample, args.threshold
+        args.class1_aggregated,
+        args.class1_all_epitopes,
+        args.class2_aggregated,
+        args.artifacts_path,
+        args.output_dir,
+        args.sample_name,
+        args.threshold
     )

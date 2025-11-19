@@ -265,6 +265,12 @@ server <- shinyServer(function(input, output, session) {
        columns_needed <- c("ID", "Index", df$converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "MANE Select", "Canonical", "TSL", "Allele", "Pos", "Prob Pos",
                            "Num Included Peptides", "Num Passing Peptides", "IC50 MT", "IC50 WT", "%ile MT", "%ile WT", "IC50 %ile MT", "IC50 %ile WT", "Pres %ile MT", "Pres %ile WT", "IM %ile MT", "IM %ile WT",
                            "RNA Expr", "RNA VAF", "Allele Expr", "RNA Depth", "DNA VAF", "Tier", "Ref Match", "Acpt", "Rej", "Rev")
+       if ("Comments" %in% colnames(df$mainTable)) {
+         columns_needed <- c(columns_needed, "Comments")
+       }
+       if ("ML Prediction (score)" %in% colnames(df$mainTable)) {
+         columns_needed <- c(columns_needed, "ML Prediction (score)")
+       }
        df$mainTable <- df$mainTable[, columns_needed]
        df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
        if ("Comments" %in% colnames(df$mainTable)) {

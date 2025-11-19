@@ -1,6 +1,7 @@
 import unittest
 import os
 import tempfile
+import shutil
 import pandas as pd
 import py_compile
 from unittest.mock import patch, MagicMock
@@ -11,7 +12,9 @@ from pvactools.lib.ml_predictor import (
     clean_and_impute_data,
     make_ml_predictions,
     create_final_output,
-    _resolve_artifact_paths
+    _resolve_artifact_paths,
+    _get_default_artifacts_dir,
+    define_add_ml_predictions_parser
 )
 from tests.utils import *
 
@@ -100,36 +103,29 @@ class MLPredictorTests(unittest.TestCase):
             0.55
         )
         
-        # Check that output files were created
-        self.assertTrue(os.path.exists(result[0]))
-        self.assertTrue(os.path.exists(result[1]))
+        # Check that output file was created
+        self.assertTrue(os.path.exists(result))
         
-        # Check file paths match expected naming convention
-        self.assertIn("_predict_pvacview.tsv", result[0])
-        self.assertIn("_predict_pvacview_new_format.tsv", result[1])
+        # Check file path matches expected naming convention
+        self.assertIn("_predict_pvacview.tsv", result)
         
-        # Check that files contain data
-        df1 = pd.read_csv(result[0], sep='\t')
-        df2 = pd.read_csv(result[1], sep='\t')
+        # Check that file contains data
+        df = pd.read_csv(result, sep='\t')
         
-        self.assertGreater(df1.shape[0], 0)
-        self.assertGreater(df2.shape[0], 0)
+        self.assertGreater(df.shape[0], 0)
         
         # Check required columns exist
-        self.assertIn('Evaluation', df1.columns)
-        self.assertIn('Evaluation', df2.columns)
-        self.assertIn('Comments', df1.columns)
-        self.assertIn('ML Prediction (score)', df2.columns)
+        self.assertIn('Evaluation', df.columns)
+        self.assertIn('ML Prediction (score)', df.columns)
         
         # Check Evaluation values are valid
         valid_evaluations = {'Accept', 'Reject', 'Pending'}
-        self.assertTrue(df1['Evaluation'].isin(valid_evaluations).all())
-        self.assertTrue(df2['Evaluation'].isin(valid_evaluations).all())
+        self.assertTrue(df['Evaluation'].isin(valid_evaluations).all())
         
-        # Print file paths for easy inspection
-        print(f"\nTest output files saved to:")
-        print(f"File 1: {result[0]}")
-        print(f"File 2: {result[1]}")
+        # Print file path for easy inspection
+        print(f"\nTest output file saved to: {result}")
+        
+        df.to_csv(os.path.join(output_dir, "HCC1395_predict_pvacview.tsv"), sep='\t', index=False)
 
     def test_ml_predictions_different_threshold(self):
         """Test that different threshold values produce different results."""
@@ -151,8 +147,8 @@ class MLPredictorTests(unittest.TestCase):
                     self.model_artifacts_path, output_dir_high, 'HCC1395', 0.80
                 )
                 
-                df_low = pd.read_csv(result_low[0], sep='\t')
-                df_high = pd.read_csv(result_high[0], sep='\t')
+                df_low = pd.read_csv(result_low, sep='\t')
+                df_high = pd.read_csv(result_high, sep='\t')
                 
                 # With lower threshold, we should have more Accept predictions
                 # (assuming the model produces probabilities across the range)
@@ -161,51 +157,9 @@ class MLPredictorTests(unittest.TestCase):
                     (df_high['Evaluation'] == 'Accept').sum()
                 )
 
-    def test_output_format_comments_version(self):
-        """Test the format of the comments version output file."""
-        with tempfile.TemporaryDirectory() as output_dir:
-            mhc1_agg_file = os.path.join(self.test_data_path, "MHC_Class_I", "HCC1395_TUMOR_DNA.MHC_I.all_epitopes.aggregated.tsv")
-            mhc1_all_file = os.path.join(self.test_data_path, "MHC_Class_I", "HCC1395_TUMOR_DNA.MHC_I.all_epitopes.tsv")
-            mhc2_agg_file = os.path.join(self.test_data_path, "MHC_Class_II", "HCC1395_TUMOR_DNA.MHC_II.all_epitopes.aggregated.tsv")
-            
-            result = run_ml_predictions(
-                mhc1_agg_file, mhc1_all_file, mhc2_agg_file,
-                self.model_artifacts_path, output_dir, 'HCC1395', 0.55
-            )
-            
-            df = pd.read_csv(result[0], sep='\t')
-            
-            # Check Comments format
-            accept_rows = df[df['Evaluation'] == 'Accept']
-            if len(accept_rows) > 0:
-                # Accept rows should have Comments starting with "Probability of Accept: "
-                # Handle potential NaN values in Comments
-                valid_comments = accept_rows['Comments'].dropna()
-                if len(valid_comments) > 0:
-                    self.assertTrue(
-                        valid_comments.str.startswith("Probability of Accept: ").all(),
-                        "Some Accept rows don't have correct Comments format"
-                    )
-            
-            pending_rows = df[df['Evaluation'] == 'Pending']
-            if len(pending_rows) > 0:
-                # Pending rows can have either:
-                # 1. "Unable to make prediction with ML model" (for rows that were truly Pending)
-                # 2. "Probability of Accept: X.XXX" (for rows that were Review, then converted to Pending)
-                pending_comments = pending_rows['Comments'].dropna()
-                if len(pending_comments) > 0:
-                    valid_formats = (
-                        pending_comments == "Unable to make prediction with ML model"
-                    ) | (
-                        pending_comments.str.startswith("Probability of Accept: ")
-                    )
-                    self.assertTrue(
-                        valid_formats.all(),
-                        "Some Pending rows don't have correct Comments format (Note: Review evaluations become Pending but keep their probability comments)"
-                    )
 
     def test_output_format_new_format_version(self):
-        """Test the format of the new format version output file."""
+        """Test the format of the output file."""
         with tempfile.TemporaryDirectory() as output_dir:
             mhc1_agg_file = os.path.join(self.test_data_path, "MHC_Class_I", "HCC1395_TUMOR_DNA.MHC_I.all_epitopes.aggregated.tsv")
             mhc1_all_file = os.path.join(self.test_data_path, "MHC_Class_I", "HCC1395_TUMOR_DNA.MHC_I.all_epitopes.tsv")
@@ -216,7 +170,7 @@ class MLPredictorTests(unittest.TestCase):
                 self.model_artifacts_path, output_dir, 'HCC1395', 0.55
             )
             
-            df = pd.read_csv(result[1], sep='\t')
+            df = pd.read_csv(result, sep='\t')
             
             # Check ML Prediction (score) format
             accept_rows = df[df['Evaluation'] == 'Accept']
@@ -231,12 +185,12 @@ class MLPredictorTests(unittest.TestCase):
             
             pending_rows = df[df['Evaluation'] == 'Pending']
             if len(pending_rows) > 0:
-                # Pending rows can have either the error message or "Review (X.XX)" format
+                # Pending rows can have either "NA" or "Review (X.XX)" format
                 # (because Review gets converted to Pending but keeps original score format)
                 pending_scores = pending_rows['ML Prediction (score)'].dropna()
                 if len(pending_scores) > 0:
                     expected_formats = (
-                        pending_scores == "Unable to make prediction with ML model due to missing data"
+                        pending_scores == "NA"
                     ) | (
                         pending_scores.str.startswith("Review (")
                     )
@@ -262,7 +216,7 @@ class MLPredictorTests(unittest.TestCase):
                 self.model_artifacts_path, output_dir, 'HCC1395', 0.55
             )
             
-            output_df = pd.read_csv(result[0], sep='\t')
+            output_df = pd.read_csv(result, sep='\t')
             output_cols = set(output_df.columns)
             output_cols.discard('Comments')  # This is new
             
@@ -281,14 +235,11 @@ class MLPredictorTests(unittest.TestCase):
                 self.model_artifacts_path, output_dir, 'HCC1395', 0.55
             )
             
-            df1 = pd.read_csv(result[0], sep='\t')
-            df2 = pd.read_csv(result[1], sep='\t')
+            df = pd.read_csv(result, sep='\t')
             
             # TSL should be integer if it exists
-            if 'TSL' in df1.columns:
-                self.assertTrue(pd.api.types.is_integer_dtype(df1['TSL'].fillna(6)))
-            if 'TSL' in df2.columns:
-                self.assertTrue(pd.api.types.is_integer_dtype(df2['TSL'].fillna(6)))
+            if 'TSL' in df.columns:
+                self.assertTrue(pd.api.types.is_integer_dtype(df['TSL'].fillna(6)))
 
     # ============================================================================
     # EDGE CASE TESTS
@@ -318,7 +269,7 @@ class MLPredictorTests(unittest.TestCase):
                 self.model_artifacts_path, output_dir, 'HCC1395', 0.55
             )
             
-            df = pd.read_csv(result[0], sep='\t')
+            df = pd.read_csv(result, sep='\t')
             
             # If there are any NA evaluations, they should be set to Pending
             self.assertFalse(df['Evaluation'].isna().any())
@@ -370,14 +321,14 @@ class MLPredictorTests(unittest.TestCase):
                 self.model_artifacts_path, output_dir, 'HCC1395', 0.55
             )
             
-            # Read the comments version and extract probabilities
-            df = pd.read_csv(result[0], sep='\t')
+            # Read the output file and extract probabilities
+            df = pd.read_csv(result, sep='\t')
             accept_rows = df[df['Evaluation'] == 'Accept']
             
             if len(accept_rows) > 0:
-                # Extract probability from Comments
-                comments = accept_rows['Comments'].str.extract(r'Probability of Accept: ([\d.]+)')
-                probabilities = pd.to_numeric(comments[0])
+                # Extract probability from ML Prediction (score) column
+                scores = accept_rows['ML Prediction (score)'].str.extract(r'Accept \(([\d.]+)\)')
+                probabilities = pd.to_numeric(scores[0])
                 self.assertTrue((probabilities >= 0).all())
                 self.assertTrue((probabilities <= 1).all())
 
@@ -396,7 +347,7 @@ class MLPredictorTests(unittest.TestCase):
                 self.model_artifacts_path, output_dir, 'HCC1395', 0.55
             )
             
-            output_df = pd.read_csv(result[0], sep='\t')
+            output_df = pd.read_csv(result, sep='\t')
             output_row_count = len(output_df)
             
             # Output should have same number of rows as input
@@ -419,8 +370,7 @@ class MLPredictorTests(unittest.TestCase):
                 self.model_artifacts_path, output_dir, sample_name, 0.55
             )
             
-            self.assertIn(sample_name, result[0])
-            self.assertIn(sample_name, result[1])
+            self.assertIn(sample_name, result)
 
 
 if __name__ == '__main__':

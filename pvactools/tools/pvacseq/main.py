@@ -100,6 +100,13 @@ def define_parser():
         )
     mark_genes_of_interest_parser.set_defaults(func=mark_genes_of_interest)
 
+    add_ml_predictions_parser = subparsers.add_parser(
+        "add_ml_predictions",
+        help="Add ML-based neoantigen evaluation predictions to pVACtools output files.",
+        add_help = False
+        )
+    add_ml_predictions_parser.set_defaults(func=add_ml_predictions)
+
     update_tiers_parser = subparsers.add_parser(
         "update_tiers",
         help="Update tiers in an aggregated report in order to, for example, use different thresholds or account for problematic position or reference match information if run after initial pipeline run.",

@@ -372,11 +372,6 @@ class RunArgumentParser(metaclass=ABCMeta):
             action='store_true',
         )
         self.parser.add_argument(
-            "--ml-model-artifacts-path",
-            help="Path to the ML model artifacts directory containing the trained models.",
-            default=None,
-        )
-        self.parser.add_argument(
             "--ml-threshold", type=float,
             default=0.55,
             help="Threshold for Accept predictions in ML model (default: 0.55).",

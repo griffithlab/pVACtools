@@ -94,16 +94,16 @@ def run_ml_predictions(base_output_dir, args):
         # Import and run ML predictions
         from pvactools.lib.ml_predictor import run_ml_predictions
         
-        output_files = run_ml_predictions(
-            file1_path=file1,
-            file2_path=file2,
-            file3_path=file3,
-            model_artifacts_path=args.ml_model_artifacts_path,
+        output_file = run_ml_predictions(
+            class1_aggregated_path=file1,
+            class1_all_epitopes_path=file2,
+            class2_aggregated_path=file3,
+            model_artifacts_path=None,  # None uses default package location
             output_dir=ml_output_dir,
             sample_name=args.sample_name,
             threshold=args.ml_threshold
         )
-        print(f"ML predictions completed successfully using Class I and Class II files. Results saved to: {output_files[0]} and {output_files[1]}")
+        print(f"ML predictions completed successfully using Class I and Class II files. Results saved to: {output_file}")
         
     except Exception as e:
         print(f"Error during standalone ML predictions: {str(e)}")
@@ -194,7 +194,6 @@ def main(args_input = sys.argv[1:]):
         'aggregate_inclusion_count_limit': args.aggregate_inclusion_count_limit,
         'genes_of_interest_file': args.genes_of_interest_file,
         'run_ml_predictions': args.run_ml_predictions,
-        'ml_model_artifacts_path': args.ml_model_artifacts_path,
         'ml_threshold': args.ml_threshold,
     }
 
