@@ -784,15 +784,13 @@ class OutputParser(metaclass=ABCMeta):
             elif pretty_method in ['BigMHC_EL', 'NetMHCIIpanEL', 'NetMHCpanEL', 'MixMHCpred']:
                 row[f'{pretty_method} MT Presentation Score'] = self.score_or_na(mt_scores, pretty_method, 'presentation')
                 row[f'{pretty_method} WT Presentation Score'] = self.score_or_na(wt_scores, pretty_method, 'presentation')
-                if pretty_method in ['NetMHCIIpanEL', 'NetMHCpanEL', 'MixMHCpred']:
-                    row[f'{pretty_method} MT Percentile'] = self.score_or_na(mt_scores, pretty_method, 'percentile')
-                    row[f'{pretty_method} WT Percentile'] = self.score_or_na(wt_scores, pretty_method, 'percentile')
+                row[f'{pretty_method} MT Percentile'] = self.score_or_na(mt_scores, pretty_method, 'percentile')
+                row[f'{pretty_method} WT Percentile'] = self.score_or_na(wt_scores, pretty_method, 'percentile')
             elif pretty_method in ['BigMHC_IM', 'DeepImmuno', 'PRIME']:
                 row[f'{pretty_method} MT Immunogenicity Score'] = self.score_or_na(mt_scores, pretty_method, 'immunogenicity')
                 row[f'{pretty_method} WT Immunogenicity Score'] = self.score_or_na(wt_scores, pretty_method, 'immunogenicity')
-                if pretty_method in ['PRIME']:
-                    row[f'{pretty_method} MT Percentile'] = self.score_or_na(mt_scores, pretty_method, 'percentile')
-                    row[f'{pretty_method} WT Percentile'] = self.score_or_na(wt_scores, pretty_method, 'percentile')
+                row[f'{pretty_method} MT Percentile'] = self.score_or_na(mt_scores, pretty_method, 'percentile')
+                row[f'{pretty_method} WT Percentile'] = self.score_or_na(wt_scores, pretty_method, 'percentile')
             else:
                 row[f'{pretty_method} MT IC50 Score'] = self.score_or_na(mt_scores, pretty_method, 'ic50')
                 row[f'{pretty_method} MT Percentile'] = self.score_or_na(mt_scores, pretty_method, 'percentile')
@@ -1127,12 +1125,10 @@ class UnmatchedSequencesOutputParser(OutputParser):
                 row[f'{pretty_method} Percentile'] = self.score_or_na(mt_scores, pretty_method, 'percentile')
             elif pretty_method in ['BigMHC_EL', 'NetMHCIIpanEL', 'NetMHCpanEL', 'MixMHCpred']:
                 row[f'{pretty_method} Presentation Score'] = self.score_or_na(mt_scores, pretty_method, 'presentation')
-                if pretty_method in ['NetMHCIIpanEL', 'NetMHCpanEL', 'MixMHCpred']:
-                    row[f'{pretty_method} Percentile'] = self.score_or_na(mt_scores, pretty_method, 'percentile')
+                row[f'{pretty_method} Percentile'] = self.score_or_na(mt_scores, pretty_method, 'percentile')
             elif pretty_method in ['BigMHC_IM', 'DeepImmuno', 'PRIME']:
                 row[f'{pretty_method} Immunogenicity Score'] = self.score_or_na(mt_scores, pretty_method, 'immunogenicity')
-                if pretty_method in ['PRIME']:
-                    row[f'{pretty_method} Percentile'] = self.score_or_na(mt_scores, pretty_method, 'percentile')
+                row[f'{pretty_method} Percentile'] = self.score_or_na(mt_scores, pretty_method, 'percentile')
             else:
                 row[f'{pretty_method} IC50 Score'] = self.score_or_na(mt_scores, pretty_method, 'ic50')
                 row[f'{pretty_method} Percentile'] = self.score_or_na(mt_scores, pretty_method, 'percentile')
