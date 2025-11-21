@@ -75,6 +75,12 @@ class RunArgumentParser(metaclass=ABCMeta):
             default=False,
             action='store_true'
         )
+        parser.add_argument(
+            "--reference-scores-path",
+            default="/tmp",
+            help="Directory to store pre-computed reference percentile files. "
+                 + "If a file is missing, it will be downloaded here when --use-normalized-percentiles is set."
+        )
         self.parser = parser
 
     def epitope_args(self):

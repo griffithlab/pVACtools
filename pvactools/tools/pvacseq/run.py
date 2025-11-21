@@ -119,6 +119,7 @@ def main(args_input = sys.argv[1:]):
         'biotypes'                  : args.biotypes,
         'allow_incomplete_transcripts': args.allow_incomplete_transcripts,
         'use_normalized_percentiles'  : args.use_normalized_percentiles,
+        'reference_scores_path'    : args.reference_scores_path,
         'species'                   : species,
         'run_reference_proteome_similarity': args.run_reference_proteome_similarity,
         'blastp_path'               : args.blastp_path,

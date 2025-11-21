@@ -88,6 +88,7 @@ def main(args_input = sys.argv[1:]):
         'keep_tmp_files'            : args.keep_tmp_files,
         'n_threads'                 : args.n_threads,
         'use_normalized_percentiles'  : args.use_normalized_percentiles,
+        'reference_scores_path'    : args.reference_scores_path,
         'species'                   : species,
         'run_reference_proteome_similarity': args.run_reference_proteome_similarity,
         'blastp_path'               : args.blastp_path,

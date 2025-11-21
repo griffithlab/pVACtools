@@ -153,6 +153,7 @@ def main(args_input = sys.argv[1:]):
         'biotypes'                         : args.biotypes,
         'allow_incomplete_transcripts'     : args.allow_incomplete_transcripts,
         'use_normalized_percentiles'  : args.use_normalized_percentiles,
+        'reference_scores_path'    : args.reference_scores_path,
         'junction_score'                   : args.junction_score,
         'variant_distance'                 : args.variant_distance,
         'anchor_types'                     : args.anchor_types,

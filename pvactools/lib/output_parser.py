@@ -3,6 +3,7 @@ import sys
 import csv
 import re
 import operator
+import requests
 import os
 import pandas as pd
 import h5py
@@ -25,6 +26,7 @@ class OutputParser(metaclass=ABCMeta):
         self.add_sample_name         = kwargs.get('add_sample_name_column')
         self.flurry_state            = kwargs.get('flurry_state')
         self.use_normalized_percentiles = kwargs.get('use_normalized_percentiles')
+        self.reference_scores_path   = kwargs.get('reference_scores_path')
 
     def parse_input_tsv_file(self):
         with open(self.input_tsv_file, 'r') as reader:
@@ -164,213 +166,257 @@ class OutputParser(metaclass=ABCMeta):
     def transform_empty_percentiles(self,p):
         return float(p) if p != 'None' and p is not None and p != "" else 'NA'
     
-    def calculate_normalized_percentile(self, line, method):
-        allele = line['allele']
-        length = len(line['peptide'])
-
-        if 'ic50' in line:
-            score = line['ic50']
-        elif 'immunogenicity' in line:
-            score = line['immunogenicity']
-        elif 'presentation' in line:
-            score = line['presentation']
-        else:
+    def calculate_normalized_percentile(self, allele, length, score, method):
+        if allele is None or length is None or score is None or score == 'NA':
             return 'NA'
 
-        try:
-            score = float(score)
-        except Exception:
+        normalized = self._normalize_allele(allele)
+        if normalized is None:
             return 'NA'
 
-        # normalize allele formatting so e.g. HLA-A*01:01 or HLA-A*0101 -> HLA-A_01_01
-        raw = allele
-        if raw.startswith('HLA-'):
-            raw = raw[4:]
+        allele_file = f"HLA-{normalized}_percentiles.h5"
+        file_path = os.path.join(self.reference_scores_path, allele_file)
 
-            locus, rest = raw.split('*', 1)
-            # compact forms like 0101 or 02101 -> split into groups: first 2 digits, remainder as second group
-            digits = re.sub(r'\D', '', rest)
-            if len(digits) >= 4:
-                g1 = digits[0:2]
-                g2 = digits[2:]
-                normalized = locus + '_' + g1 + '_' + g2
-            else:
-                # fallback: replace non-alnum with underscore
-                normalized = re.sub(r'[^A-Za-z0-9]', '_', raw)
+        if not os.path.exists(file_path):
+            url = f"https://raw.githubusercontent.com/griffithlab/pvactools_percentiles_data/main/hdf5/{allele_file}"
+            try:
+                response = requests.get(url, stream=True)
+                response.raise_for_status()
+                os.makedirs(self.reference_scores_path, exist_ok=True)
+                with open(file_path, 'wb') as f:
+                    for chunk in response.iter_content(chunk_size=8192):
+                        f.write(chunk)
+            except Exception:
+                return 'NA'
 
-        grp_name = f"HLA-{normalized}"
-        key = f"{grp_name}/{length}mer"
+        key = f"{method}/{length}mer"
         try:
-            with h5py.File(f"pvactools/supporting_files/{method}_percentiles.h5", "r") as f:
+            with h5py.File(file_path, "r") as f:
+                if key not in f:
+                    return 'NA'  # algorithm or length not present
                 ref_scores = f[key][...]
         except Exception:
             return 'NA'
 
         if ref_scores.size == 0:
             return 'NA'
-        
-        n = len(ref_scores)
 
+        n = len(ref_scores)
         left = np.searchsorted(ref_scores, score, side="left")
         right = np.searchsorted(ref_scores, score, side="right")
 
         if left == right:
             percentile = left / n * 100
-        else: # duplicates exist, take the midpoint
+        else:
             percentile = (left + right) / (2 * n) * 100
 
         return percentile
 
+    def _normalize_allele(self, allele):
+        # Convert allele to standard format: e.g., HLA-A*01:01 -> HLA-A_01_01
+        if allele is None:
+            return None
+
+        raw = allele
+        if raw.startswith("HLA-"):
+            raw = raw[4:]
+
+        try:
+            locus, rest = raw.split("*", 1)
+        except ValueError:
+            return re.sub(r'[^A-Za-z0-9]', '_', raw)
+
+        digits = re.sub(r'\D', '', rest)
+        if len(digits) >= 4:
+            g1 = digits[0:2]
+            g2 = digits[2:]
+            normalized = f"{locus}_{g1}_{g2}"
+        else:
+            normalized = re.sub(r'[^A-Za-z0-9]', '_', raw)
+
+        return normalized
+
+    def _parse_float_or_na(self, value):
+        try:
+            return float(value)
+        except Exception:
+            return 'NA'
+
+    def _extract_percentile(self, line, *keys, fallback='NA'):
+        for key in keys:
+            if key in line and line[key] not in (None, '', 'NA'):
+                return self.transform_empty_percentiles(line[key])
+        return fallback
+
+    def _make_score_entry(
+        self,
+        line,
+        label,
+        value_key,
+        raw_value,
+        method,
+        percentile_keys=None,
+        percentile_fallback='NA',
+        include_percentile=True
+    ):
+        """
+        Centralized entry builder for all predictors.
+        Handles:
+        - raw numeric parsing
+        - percentile extraction
+        - normalized percentile override
+        """
+        val = self._parse_float_or_na(raw_value)
+        entry = {label: {value_key: val}}
+
+        if include_percentile:
+            if self.use_normalized_percentiles:
+                normalized_input = None if val == 'NA' else val
+                percentile = self.calculate_normalized_percentile(
+                    line.get('allele'),
+                    len(line.get('peptide') or ''),
+                    normalized_input,
+                    method
+                )
+            else:
+                if percentile_keys:
+                    percentile = self._extract_percentile(
+                        line, *percentile_keys, fallback=percentile_fallback
+                    )
+                else:
+                    percentile = percentile_fallback
+
+            entry[label]['percentile'] = percentile
+
+        return entry
+
     def get_scores(self, line, method):
-        if method.lower() == 'mhcflurry':
+        m = method.lower()
+
+        if m == 'mhcflurry':
             if self.flurry_state == 'both':
                 return {
-                    'MHCflurry': {
-                        'ic50': float(line['ic50']),
-                        'percentile': 
-                            self.calculate_normalized_percentile(line, method)
-                            if self.use_normalized_percentiles
-                            else self.transform_empty_percentiles(line['percentile']),
-                    },
-                    'MHCflurryEL Processing': {
-                        'presentation': float(line['mhcflurry_processing_score']),
-                        'percentile':
-                            self.calculate_normalized_percentile(line, method)
-                            if self.use_normalized_percentiles
-                            else 'NA'
-                    },
-                    'MHCflurryEL Presentation': {
-                        'presentation': float(line['mhcflurry_presentation_score']),
-                        'percentile':
-                            self.calculate_normalized_percentile(line, method)
-                            if self.use_normalized_percentiles
-                            else self.transform_empty_percentiles(line['mhcflurry_presentation_percentile']),
-                    }
+                    **self._make_score_entry(
+                        line, 'MHCflurry', 'ic50',
+                        line.get('ic50'), method,
+                        percentile_keys=['percentile']
+                    ),
+                    **self._make_score_entry(
+                        line, 'MHCflurryEL Processing', 'presentation',
+                        line.get('mhcflurry_processing_score'), method,
+                        percentile_keys=None, percentile_fallback='NA'
+                    ),
+                    **self._make_score_entry(
+                        line, 'MHCflurryEL Presentation', 'presentation',
+                        line.get('mhcflurry_presentation_score'), method,
+                        percentile_keys=['mhcflurry_presentation_percentile']
+                    )
                 }
-            elif self.flurry_state == 'EL_only':
+
+            if self.flurry_state == 'el_only':
                 return {
-                    'MHCflurryEL Processing': {
-                        'presentation': float(line['mhcflurry_processing_score']),
-                    },
-                    'MHCflurryEL Presentation': {
-                        'presentation': float(line['mhcflurry_presentation_score']),
-                        'percentile':
-                            self.calculate_normalized_percentile(line, method)
-                            if self.use_normalized_percentiles
-                            else self.transform_empty_percentiles(line['mhcflurry_presentation_percentile']),
-                    }
+                    **self._make_score_entry(
+                        line, 'MHCflurryEL Processing', 'presentation',
+                        line.get('mhcflurry_processing_score'), method,
+                        include_percentile=False
+                    ),
+                    **self._make_score_entry(
+                        line, 'MHCflurryEL Presentation', 'presentation',
+                        line.get('mhcflurry_presentation_score'), method,
+                        percentile_keys=['mhcflurry_presentation_percentile']
+                    )
                 }
+
+            return self._make_score_entry(
+                line, 'MHCflurry', 'ic50',
+                line.get('ic50'), method,
+                percentile_keys=['percentile']
+            )
+
+        if m == 'deepimmuno':
+            return self._make_score_entry(
+                line, 'DeepImmuno', 'immunogenicity',
+                line.get('immunogenicity'), method,
+                percentile_keys=None, percentile_fallback='NA'
+            )
+
+        if m == 'bigmhc_el':
+            return self._make_score_entry(
+                line, 'BigMHC_EL', 'presentation',
+                line.get('BigMHC_EL'), method,
+                percentile_keys=None, percentile_fallback='NA'
+            )
+
+        if m == 'bigmhc_im':
+            return self._make_score_entry(
+                line, 'BigMHC_IM', 'immunogenicity',
+                line.get('BigMHC_IM'), method,
+                percentile_keys=None, percentile_fallback='NA'
+            )
+
+        if m == 'netmhcpan_el':
+            return self._make_score_entry(
+                line, 'NetMHCpanEL', 'presentation',
+                line.get('score'), method,
+                percentile_keys=['rank']
+            )
+
+        if 'netmhciipan_el' in m:
+            presentation = (
+                line.get('score') if 'score' in line
+                else line.get('ic50') if 'ic50' in line
+                else None
+            )
+            if presentation is None:
+                raise Exception("Missing expected columns 'score' or 'ic50' in NetMHCIIpanEL output")
+
+            percentile = self._extract_percentile(
+                line, 'percentile_rank', 'rank',
+                fallback='NA'
+            )
+
+            entry = self._make_score_entry(
+                line, 'NetMHCIIpanEL', 'presentation',
+                presentation, method,
+                include_percentile=False
+            )
+
+            if not self.use_normalized_percentiles:
+                entry['NetMHCIIpanEL']['percentile'] = percentile
             else:
-                return {
-                    'MHCflurry': {
-                        'ic50': float(line['ic50']),
-                        'percentile':
-                            self.calculate_normalized_percentile(line, method)
-                            if self.use_normalized_percentiles
-                            else self.transform_empty_percentiles(line['percentile']),
-                    }
-                }
-        elif method.lower() == 'deepimmuno':
-            return {
-                'DeepImmuno': {
-                    'immunogenicity': float(line['immunogenicity']),
-                    'percentile':
-                        self.calculate_normalized_percentile(line, method)
-                        if self.use_normalized_percentiles
-                        else 'NA'
-                }
-            }
-        elif method.lower() == 'bigmhc_el':
-            return {
-                'BigMHC_EL': {
-                    'presentation': float(line['BigMHC_EL']),
-                    'percentile':
-                        self.calculate_normalized_percentile(line, method)
-                        if self.use_normalized_percentiles
-                        else 'NA'
-                }
-            }
-        elif method.lower() == 'bigmhc_im':
-            return {
-                'BigMHC_IM': {
-                    'immunogenicity': float(line['BigMHC_IM']),
-                    'percentile':
-                        self.calculate_normalized_percentile(line, method)
-                        if self.use_normalized_percentiles
-                        else 'NA'
-                }
-            }
-        elif method.lower() == 'netmhcpan_el':
-            return {
-                'NetMHCpanEL': {
-                    'presentation': float(line['score']),
-                    'percentile':
-                        self.calculate_normalized_percentile(line, method)
-                        if self.use_normalized_percentiles
-                        else self.transform_empty_percentiles(line['rank'])
-                }
-            }
-        elif 'netmhciipan_el' in method.lower():
-            if 'score' in line:
-                presentation = float(line['score'])
-            elif 'ic50' in line:
-                presentation = float(line['ic50'])
-            else:
-                raise Exception("Missing expected columns: 'score' or 'ic50' in NetMHCIIpanEL output")
-            if 'percentile_rank' in line:
-                percentile = self.transform_empty_percentiles(line['percentile_rank'])
-            elif 'rank' in line:
-                percentile = self.transform_empty_percentiles(line['rank'])
-            else:
-                raise Exception("Missing expected columns: 'rank' or 'percentile_rank' in NetMHCIIpanEL output")
-            return {
-                'NetMHCIIpanEL': {
-                    'presentation': presentation,
-                    'percentile':
-                        self.calculate_normalized_percentile(line, method)
-                        if self.use_normalized_percentiles
-                        else percentile,
-                }
-            }
-        elif method == 'MixMHCpred':
-            return {
-                method: {
-                    'binding_score': float(line['score']), #this is a peptide binding predictor but the output is a score, not IC50
-                    'percentile':
-                        self.calculate_normalized_percentile(line, method)
-                        if self.use_normalized_percentiles
-                        else self.transform_empty_percentiles(line['percentile'])
-                }
-            }
-        elif method == 'PRIME':
-            return {
-                method: {
-                    'immunogenicity': float(line['score']),
-                    'percentile':
-                        self.calculate_normalized_percentile(line, method)
-                        if self.use_normalized_percentiles
-                        else self.transform_empty_percentiles(line['percentile'])
-                }
-            }
-        else:
-            pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
-            if 'percentile' in line:
-                percentile = line['percentile']
-            elif 'percentile_rank' in line:
-                percentile = line['percentile_rank']
-            elif 'rank' in line:
-                percentile = line['rank']
-            else:
-                percentile = ''
-            return {
-                pretty_method: {
-                    'ic50': float(line['ic50']),
-                    'percentile':
-                        self.calculate_normalized_percentile(line, method)
-                        if self.use_normalized_percentiles
-                        else self.transform_empty_percentiles(percentile)
-                }
-            }
+                entry['NetMHCIIpanEL']['percentile'] = self.calculate_normalized_percentile(
+                    line.get('allele'),
+                    len(line.get('peptide') or ''),
+                    self._parse_float_or_na(presentation),
+                    method
+                )
+
+            return entry
+
+        if m == 'mixmhcpred':
+            return self._make_score_entry(
+                line, 'MixMHCpred', 'binding_score',
+                line.get('score'), method,
+                percentile_keys=['percentile']
+            )
+
+        if m == 'prime':
+            return self._make_score_entry(
+                line, 'PRIME', 'immunogenicity',
+                line.get('score'), method,
+                percentile_keys=['percentile']
+            )
+
+        pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
+        percentile_keys = [
+            key for key in ('percentile', 'percentile_rank', 'rank') if key in line
+        ] or None
+
+        return self._make_score_entry(
+            line, pretty_method, 'ic50',
+            line.get('ic50'), method,
+            percentile_keys=percentile_keys
+        )
 
     def format_match_na(self, result, metric):
         return {method: {field: 'NA' for field in fields.keys()} for method, fields in result[f'mt_{metric}s'].items()}
