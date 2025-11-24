@@ -165,7 +165,7 @@ class OutputParser(metaclass=ABCMeta):
 
     def transform_empty_percentiles(self,p):
         return float(p) if p != 'None' and p is not None and p != "" else 'NA'
-    
+
     def calculate_normalized_percentile(self, allele, length, score, method):
         if allele is None or length is None or score is None or score == 'NA':
             return 'NA'
@@ -210,7 +210,7 @@ class OutputParser(metaclass=ABCMeta):
         else:
             percentile = (left + right) / (2 * n) * 100
 
-        return percentile
+        return round(percentile, 3)
 
     def _normalize_allele(self, allele):
         # Convert allele to standard format: e.g., HLA-A*01:01 -> HLA-A_01_01
@@ -303,12 +303,12 @@ class OutputParser(metaclass=ABCMeta):
                     ),
                     **self._make_score_entry(
                         line, 'MHCflurryEL Processing', 'presentation',
-                        line.get('mhcflurry_processing_score'), method,
+                        line.get('mhcflurry_processing_score'), 'MHCflurry_EL_Processing',
                         percentile_keys=None, percentile_fallback='NA'
                     ),
                     **self._make_score_entry(
                         line, 'MHCflurryEL Presentation', 'presentation',
-                        line.get('mhcflurry_presentation_score'), method,
+                        line.get('mhcflurry_presentation_score'), 'MHCflurry_EL_Presentation',
                         percentile_keys=['mhcflurry_presentation_percentile']
                     )
                 }
@@ -317,12 +317,12 @@ class OutputParser(metaclass=ABCMeta):
                 return {
                     **self._make_score_entry(
                         line, 'MHCflurryEL Processing', 'presentation',
-                        line.get('mhcflurry_processing_score'), method,
+                        line.get('mhcflurry_processing_score'), 'MHCflurry_EL_Processing',
                         include_percentile=False
                     ),
                     **self._make_score_entry(
                         line, 'MHCflurryEL Presentation', 'presentation',
-                        line.get('mhcflurry_presentation_score'), method,
+                        line.get('mhcflurry_presentation_score'), 'MHCflurry_EL_Presentation',
                         percentile_keys=['mhcflurry_presentation_percentile']
                     )
                 }
@@ -414,7 +414,7 @@ class OutputParser(metaclass=ABCMeta):
 
         return self._make_score_entry(
             line, pretty_method, 'ic50',
-            line.get('ic50'), method,
+            line.get('ic50'), pretty_method,
             percentile_keys=percentile_keys
         )
 
@@ -789,6 +789,8 @@ class OutputParser(metaclass=ABCMeta):
     def flurry_headers(self, headers):
         headers.append("MHCflurryEL Processing WT Score")
         headers.append("MHCflurryEL Processing MT Score")
+        headers.append("MHCflurryEL Processing WT Percentile")
+        headers.append("MHCflurryEL Processing MT Percentile")
         headers.append("MHCflurryEL Presentation WT Score")
         headers.append("MHCflurryEL Presentation MT Score")
         headers.append("MHCflurryEL Presentation WT Percentile")
@@ -812,7 +814,9 @@ class OutputParser(metaclass=ABCMeta):
             if pretty_method == 'MHCflurry':
                 if self.flurry_state == 'EL_only' or self.flurry_state == 'both':
                     row['MHCflurryEL Processing MT Score'] = self.score_or_na(mt_scores, 'MHCflurryEL Processing', 'presentation')
+                    row['MHCflurryEL Processing MT Percentile'] = self.score_or_na(mt_scores, 'MHCflurryEL Processing', 'percentile')
                     row['MHCflurryEL Processing WT Score'] = self.score_or_na(wt_scores, 'MHCflurryEL Processing', 'presentation')
+                    row['MHCflurryEL Processing WT Percentile'] = self.score_or_na(wt_scores, 'MHCflurryEL Processing', 'percentile')
                     row['MHCflurryEL Presentation MT Score'] = self.score_or_na(mt_scores, 'MHCflurryEL Presentation', 'presentation')
                     row['MHCflurryEL Presentation MT Percentile'] = self.score_or_na(mt_scores, 'MHCflurryEL Presentation', 'percentile')
                     row['MHCflurryEL Presentation WT Score'] = self.score_or_na(wt_scores, 'MHCflurryEL Presentation', 'presentation')
@@ -822,25 +826,20 @@ class OutputParser(metaclass=ABCMeta):
                     row['MHCflurry MT Percentile'] = self.score_or_na(mt_scores, 'MHCflurry', 'percentile')
                     row['MHCflurry WT IC50 Score'] = self.score_or_na(wt_scores, 'MHCflurry', 'ic50')
                     row['MHCflurry WT Percentile'] = self.score_or_na(wt_scores, 'MHCflurry', 'percentile')
-            elif pretty_method == 'MixMHCpred':
-                row[f'{pretty_method} MT Binding Score'] = self.score_or_na(mt_scores, pretty_method, 'binding_score')
-                row[f'{pretty_method} WT Binding Score'] = self.score_or_na(wt_scores, pretty_method, 'binding_score')
-                row[f'{pretty_method} MT Percentile'] = self.score_or_na(mt_scores, pretty_method, 'percentile')
-                row[f'{pretty_method} WT Percentile'] = self.score_or_na(wt_scores, pretty_method, 'percentile')
-            elif pretty_method in ['BigMHC_EL', 'NetMHCIIpanEL', 'NetMHCpanEL', 'MixMHCpred']:
-                row[f'{pretty_method} MT Presentation Score'] = self.score_or_na(mt_scores, pretty_method, 'presentation')
-                row[f'{pretty_method} WT Presentation Score'] = self.score_or_na(wt_scores, pretty_method, 'presentation')
-                row[f'{pretty_method} MT Percentile'] = self.score_or_na(mt_scores, pretty_method, 'percentile')
-                row[f'{pretty_method} WT Percentile'] = self.score_or_na(wt_scores, pretty_method, 'percentile')
-            elif pretty_method in ['BigMHC_IM', 'DeepImmuno', 'PRIME']:
-                row[f'{pretty_method} MT Immunogenicity Score'] = self.score_or_na(mt_scores, pretty_method, 'immunogenicity')
-                row[f'{pretty_method} WT Immunogenicity Score'] = self.score_or_na(wt_scores, pretty_method, 'immunogenicity')
-                row[f'{pretty_method} MT Percentile'] = self.score_or_na(mt_scores, pretty_method, 'percentile')
-                row[f'{pretty_method} WT Percentile'] = self.score_or_na(wt_scores, pretty_method, 'percentile')
             else:
-                row[f'{pretty_method} MT IC50 Score'] = self.score_or_na(mt_scores, pretty_method, 'ic50')
+                if pretty_method == 'MixMHCpred':
+                    row[f'{pretty_method} MT Binding Score'] = self.score_or_na(mt_scores, pretty_method, 'binding_score')
+                    row[f'{pretty_method} WT Binding Score'] = self.score_or_na(wt_scores, pretty_method, 'binding_score')
+                elif pretty_method in ['BigMHC_EL', 'NetMHCIIpanEL', 'NetMHCpanEL', 'MixMHCpred']:
+                    row[f'{pretty_method} MT Presentation Score'] = self.score_or_na(mt_scores, pretty_method, 'presentation')
+                    row[f'{pretty_method} WT Presentation Score'] = self.score_or_na(wt_scores, pretty_method, 'presentation')
+                elif pretty_method in ['BigMHC_IM', 'DeepImmuno', 'PRIME']:
+                    row[f'{pretty_method} MT Immunogenicity Score'] = self.score_or_na(mt_scores, pretty_method, 'immunogenicity')
+                    row[f'{pretty_method} WT Immunogenicity Score'] = self.score_or_na(wt_scores, pretty_method, 'immunogenicity')
+                else:
+                    row[f'{pretty_method} MT IC50 Score'] = self.score_or_na(mt_scores, pretty_method, 'ic50')
+                    row[f'{pretty_method} WT IC50 Score'] = self.score_or_na(wt_scores, pretty_method, 'ic50')
                 row[f'{pretty_method} MT Percentile'] = self.score_or_na(mt_scores, pretty_method, 'percentile')
-                row[f'{pretty_method} WT IC50 Score'] = self.score_or_na(wt_scores, pretty_method, 'ic50')
                 row[f'{pretty_method} WT Percentile'] = self.score_or_na(wt_scores, pretty_method, 'percentile')
         return row
 
@@ -1152,6 +1151,7 @@ class UnmatchedSequencesOutputParser(OutputParser):
 
     def flurry_headers(self, headers):
         headers.append("MHCflurryEL Processing Score")
+        headers.append("MHCflurryEL Processing Percentile")
         headers.append("MHCflurryEL Presentation Score")
         headers.append("MHCflurryEL Presentation Percentile")
 
@@ -1161,22 +1161,21 @@ class UnmatchedSequencesOutputParser(OutputParser):
             if pretty_method == 'MHCflurry':
                 if self.flurry_state == 'EL_only' or self.flurry_state == 'both':
                     row['MHCflurryEL Processing Score'] = self.score_or_na(mt_scores, 'MHCflurryEL Processing', 'presentation')
+                    row['MHCflurryEL Processing Percentile'] = self.score_or_na(mt_scores, 'MHCflurryEL Processing', 'percentile')
                     row['MHCflurryEL Presentation Score'] = self.score_or_na(mt_scores, 'MHCflurryEL Presentation', 'presentation')
                     row['MHCflurryEL Presentation Percentile'] = self.score_or_na(mt_scores, 'MHCflurryEL Presentation', 'percentile')
                 if self.flurry_state in ['both', 'BA_only', None]:
                     row['MHCflurry IC50 Score'] = self.score_or_na(mt_scores, 'MHCflurry', 'ic50')
                     row['MHCflurry Percentile'] = self.score_or_na(mt_scores, 'MHCflurry', 'percentile')
-            elif pretty_method == 'MixMHCpred':
-                row[f'{pretty_method} Binding Score'] = self.score_or_na(mt_scores, pretty_method, 'binding_score')
-                row[f'{pretty_method} Percentile'] = self.score_or_na(mt_scores, pretty_method, 'percentile')
-            elif pretty_method in ['BigMHC_EL', 'NetMHCIIpanEL', 'NetMHCpanEL', 'MixMHCpred']:
-                row[f'{pretty_method} Presentation Score'] = self.score_or_na(mt_scores, pretty_method, 'presentation')
-                row[f'{pretty_method} Percentile'] = self.score_or_na(mt_scores, pretty_method, 'percentile')
-            elif pretty_method in ['BigMHC_IM', 'DeepImmuno', 'PRIME']:
-                row[f'{pretty_method} Immunogenicity Score'] = self.score_or_na(mt_scores, pretty_method, 'immunogenicity')
-                row[f'{pretty_method} Percentile'] = self.score_or_na(mt_scores, pretty_method, 'percentile')
             else:
-                row[f'{pretty_method} IC50 Score'] = self.score_or_na(mt_scores, pretty_method, 'ic50')
+                if pretty_method == 'MixMHCpred':
+                    row[f'{pretty_method} Binding Score'] = self.score_or_na(mt_scores, pretty_method, 'binding_score')
+                elif pretty_method in ['BigMHC_EL', 'NetMHCIIpanEL', 'NetMHCpanEL', 'MixMHCpred']:
+                    row[f'{pretty_method} Presentation Score'] = self.score_or_na(mt_scores, pretty_method, 'presentation')
+                elif pretty_method in ['BigMHC_IM', 'DeepImmuno', 'PRIME']:
+                    row[f'{pretty_method} Immunogenicity Score'] = self.score_or_na(mt_scores, pretty_method, 'immunogenicity')
+                else:
+                    row[f'{pretty_method} IC50 Score'] = self.score_or_na(mt_scores, pretty_method, 'ic50')
                 row[f'{pretty_method} Percentile'] = self.score_or_na(mt_scores, pretty_method, 'percentile')
         return row
 
