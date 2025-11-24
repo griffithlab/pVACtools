@@ -3,16 +3,23 @@ import os
 import sys
 import tempfile
 import py_compile
+import requests
 
 from pvactools.lib.output_parser import DefaultOutputParser, UnmatchedSequencesOutputParser
 from tests.utils import *
 
 class OutputParserTests(unittest.TestCase):
     @classmethod
-    def setUp(cls):
+    def setUpClass(cls):
         executable_dir    = os.path.join(pvactools_directory(), 'pvactools', 'lib')
         cls.executable    = os.path.join(executable_dir, 'output_parser.py')
         cls.test_data_dir = os.path.join(pvactools_directory(), 'tests', 'test_data', 'output_parser')
+        url = f"https://raw.githubusercontent.com/griffithlab/pvactools_percentiles_data/main/hdf5/HLA-A_02_01_percentiles.h5"
+        response = requests.get(url, stream=True)
+        response.raise_for_status()
+        f = tempfile.NamedTemporaryFile(mode='wb', delete=False, prefix='HLA-A_29_02_percentiles', suffix='.h5')
+        for chunk in response.iter_content(chunk_size=8192):
+            f.write(chunk)
 
     def test_source_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))
@@ -67,6 +74,41 @@ class OutputParserTests(unittest.TestCase):
 
         self.assertFalse(parser.execute())
         expected_output_file  = os.path.join(self.test_data_dir, "output_Test_21.iedb.parsed.tsv")
+        self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
+
+    def test_parse_output_runs_and_produces_expected_output_with_all_class_i_files_normalized_percentiles(self):
+        parse_output_input_iedb_files = [
+            os.path.join(self.test_data_dir, "input.ann.HLA-A*02:01.9.tsv"),
+            os.path.join(self.test_data_dir, "input.smm.HLA-A*02:01.9.tsv"),
+            os.path.join(self.test_data_dir, "input.smmpmbec.HLA-A*02:01.9.tsv"),
+            os.path.join(self.test_data_dir, "input.netmhcpan.HLA-A*02:01.9.tsv"),
+            os.path.join(self.test_data_dir, "input.netmhcpan_el.HLA-A*02:01.9.tsv"),
+            os.path.join(self.test_data_dir, "input.BigMHC_EL.HLA-A*02:01.9.tsv"),
+            os.path.join(self.test_data_dir, "input.BigMHC_IM.HLA-A*02:01.9.tsv"),
+            os.path.join(self.test_data_dir, "input.DeepImmuno.HLA-A*02:01.9.tsv"),
+            os.path.join(self.test_data_dir, "input.MHCflurry.HLA-A*02:01.9.tsv"),
+            os.path.join(self.test_data_dir, "input.MHCnuggetsI.HLA-A*02:01.9.tsv"),
+            os.path.join(self.test_data_dir, "input.MixMHCpred.HLA-A*02:01.9.tsv"),
+            os.path.join(self.test_data_dir, "input.PRIME.HLA-A*02:01.9.tsv"),
+        ]
+        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "Test.tsv")
+        parse_output_key_file = os.path.join(self.test_data_dir, "Test_21.key")
+        parse_output_output_file = tempfile.NamedTemporaryFile()
+
+        parse_output_params = {
+            'input_iedb_files'       : parse_output_input_iedb_files,
+            'input_tsv_file'         : parse_output_input_tsv_file,
+            'key_file'               : parse_output_key_file,
+            'output_file'            : parse_output_output_file.name,
+            'sample_name'            : 'input',
+            'flurry_state'           : 'both',
+            'use_normalized_percentiles': True,
+            'reference_scores_path': '/tmp',
+        }
+        parser = DefaultOutputParser(**parse_output_params)
+
+        self.assertFalse(parser.execute())
+        expected_output_file  = os.path.join(self.test_data_dir, "output_Test_21.iedb.parsed.normalized_percentiles.tsv")
         self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
 
     def test_parse_output_runs_and_produces_expected_output_with_all_class_ii_files(self):
