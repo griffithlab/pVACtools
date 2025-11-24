@@ -38,16 +38,16 @@ class OutputParserTests(unittest.TestCase):
 
     def test_parse_output_runs_and_produces_expected_output_with_all_class_i_files(self):
         parse_output_input_iedb_files = [
-            os.path.join(self.test_data_dir, "input.ann.HLA-A*29:02.9.tsv"),
-            os.path.join(self.test_data_dir, "input.smm.HLA-A*29:02.9.tsv"),
-            os.path.join(self.test_data_dir, "input.smmpmbec.HLA-A*29:02.9.tsv"),
-            os.path.join(self.test_data_dir, "input.BigMHC_EL.HLA-A*29:02.9.tsv"),
-            os.path.join(self.test_data_dir, "input.BigMHC_IM.HLA-A*29:02.9.tsv"),
-            os.path.join(self.test_data_dir, "input.DeepImmuno.HLA-A*29:02.9.tsv"),
-            os.path.join(self.test_data_dir, "input.MHCflurry.HLA-A*29:02.9.tsv"),
-            os.path.join(self.test_data_dir, "input.MHCnuggetsI.HLA-A*29:02.9.tsv"),
-            os.path.join(self.test_data_dir, "input.MixMHCpred.HLA-A*29:02.9.tsv"),
-            os.path.join(self.test_data_dir, "input.PRIME.HLA-A*29:02.9.tsv"),
+            os.path.join(self.test_data_dir, "input.ann.HLA-A*02:01.9.tsv"),
+            os.path.join(self.test_data_dir, "input.smm.HLA-A*02:01.9.tsv"),
+            os.path.join(self.test_data_dir, "input.smmpmbec.HLA-A*02:01.9.tsv"),
+            os.path.join(self.test_data_dir, "input.BigMHC_EL.HLA-A*02:01.9.tsv"),
+            os.path.join(self.test_data_dir, "input.BigMHC_IM.HLA-A*02:01.9.tsv"),
+            os.path.join(self.test_data_dir, "input.DeepImmuno.HLA-A*02:01.9.tsv"),
+            os.path.join(self.test_data_dir, "input.MHCflurry.HLA-A*02:01.9.tsv"),
+            os.path.join(self.test_data_dir, "input.MHCnuggetsI.HLA-A*02:01.9.tsv"),
+            os.path.join(self.test_data_dir, "input.MixMHCpred.HLA-A*02:01.9.tsv"),
+            os.path.join(self.test_data_dir, "input.PRIME.HLA-A*02:01.9.tsv"),
         ]
         parse_output_input_tsv_file = os.path.join(self.test_data_dir, "Test.tsv")
         parse_output_key_file = os.path.join(self.test_data_dir, "Test_21.key")
@@ -361,7 +361,7 @@ class OutputParserTests(unittest.TestCase):
         self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
 
     def test_parse_output_runs_with_iedb_dna_warning(self):
-        parse_output_input_iedb_file = [os.path.join(self.test_data_dir, "input_iedb_dna_warning.ann.HLA-A*29:02.9.tsv")]
+        parse_output_input_iedb_file = [os.path.join(self.test_data_dir, "input_iedb_dna_warning.ann.HLA-A*02:01.9.tsv")]
         parse_output_input_tsv_file = os.path.join(self.test_data_dir, "Test.tsv")
         parse_output_key_file = os.path.join(self.test_data_dir, "Test_21.key")
         parse_output_output_file = tempfile.NamedTemporaryFile()
