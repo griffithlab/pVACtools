@@ -41,6 +41,8 @@ class OutputParserTests(unittest.TestCase):
             os.path.join(self.test_data_dir, "input.ann.HLA-A*02:01.9.tsv"),
             os.path.join(self.test_data_dir, "input.smm.HLA-A*02:01.9.tsv"),
             os.path.join(self.test_data_dir, "input.smmpmbec.HLA-A*02:01.9.tsv"),
+            os.path.join(self.test_data_dir, "input.netmhcpan.HLA-A*02:01.9.tsv"),
+            os.path.join(self.test_data_dir, "input.netmhcpan_el.HLA-A*02:01.9.tsv"),
             os.path.join(self.test_data_dir, "input.BigMHC_EL.HLA-A*02:01.9.tsv"),
             os.path.join(self.test_data_dir, "input.BigMHC_IM.HLA-A*02:01.9.tsv"),
             os.path.join(self.test_data_dir, "input.DeepImmuno.HLA-A*02:01.9.tsv"),
