@@ -166,7 +166,7 @@ class OutputParser(metaclass=ABCMeta):
     def transform_empty_percentiles(self,p):
         return float(p) if p != 'None' and p is not None and p != "" else 'NA'
 
-    def calculate_normalized_percentile(self, allele, length, score, method):
+    def calculate_normalized_percentile(self, allele, length, score, method, is_reversed=False):
         if allele is None or length is None or score is None or score == 'NA':
             return 'NA'
 
@@ -210,7 +210,10 @@ class OutputParser(metaclass=ABCMeta):
         else:
             percentile = (left + right) / (2 * n) * 100
 
-        return round(percentile, 3)
+        if is_reversed:
+            return round(100.0 - percentile, 3)
+        else:
+            return round(percentile, 3)
 
     def _normalize_allele(self, allele):
         # Convert allele to standard format: e.g., HLA-A*01:01 -> HLA-A_01_01
@@ -242,7 +245,7 @@ class OutputParser(metaclass=ABCMeta):
         except Exception:
             return 'NA'
 
-    def _extract_percentile(self, line, *keys, fallback='NA'):
+    def _extract_percentile(self, line, *keys, fallback='NA', is_reversed=False):
         for key in keys:
             if key in line and line[key] not in (None, '', 'NA'):
                 return self.transform_empty_percentiles(line[key])
@@ -257,7 +260,8 @@ class OutputParser(metaclass=ABCMeta):
         method,
         percentile_keys=None,
         percentile_fallback='NA',
-        include_percentile=True
+        include_percentile=True,
+        is_reversed=False
     ):
         """
         Centralized entry builder for all predictors.
@@ -276,7 +280,8 @@ class OutputParser(metaclass=ABCMeta):
                     line.get('allele'),
                     len(line.get('peptide') or ''),
                     normalized_input,
-                    method
+                    method,
+                    is_reversed
                 )
             else:
                 if percentile_keys:
@@ -304,12 +309,12 @@ class OutputParser(metaclass=ABCMeta):
                     **self._make_score_entry(
                         line, 'MHCflurryEL Processing', 'presentation',
                         line.get('mhcflurry_processing_score'), 'MHCflurry_EL_Processing',
-                        percentile_keys=None, percentile_fallback='NA'
+                        percentile_keys=None, percentile_fallback='NA', is_reversed=True
                     ),
                     **self._make_score_entry(
                         line, 'MHCflurryEL Presentation', 'presentation',
                         line.get('mhcflurry_presentation_score'), 'MHCflurry_EL_Presentation',
-                        percentile_keys=['mhcflurry_presentation_percentile']
+                        percentile_keys=['mhcflurry_presentation_percentile'], is_reversed=True
                     )
                 }
 
@@ -318,12 +323,12 @@ class OutputParser(metaclass=ABCMeta):
                     **self._make_score_entry(
                         line, 'MHCflurryEL Processing', 'presentation',
                         line.get('mhcflurry_processing_score'), 'MHCflurry_EL_Processing',
-                        include_percentile=False
+                        percentile_keys=None, percentile_fallback='NA', is_reversed=True
                     ),
                     **self._make_score_entry(
                         line, 'MHCflurryEL Presentation', 'presentation',
                         line.get('mhcflurry_presentation_score'), 'MHCflurry_EL_Presentation',
-                        percentile_keys=['mhcflurry_presentation_percentile']
+                        percentile_keys=['mhcflurry_presentation_percentile'], is_reversed=True
                     )
                 }
 
@@ -337,21 +342,21 @@ class OutputParser(metaclass=ABCMeta):
             return self._make_score_entry(
                 line, 'DeepImmuno', 'immunogenicity',
                 line.get('immunogenicity'), method,
-                percentile_keys=None, percentile_fallback='NA'
+                percentile_keys=None, percentile_fallback='NA', is_reversed=True
             )
 
         if m == 'bigmhc_el':
             return self._make_score_entry(
                 line, 'BigMHC_EL', 'presentation',
                 line.get('BigMHC_EL'), method,
-                percentile_keys=None, percentile_fallback='NA'
+                percentile_keys=None, percentile_fallback='NA', is_reversed=True
             )
 
         if m == 'bigmhc_im':
             return self._make_score_entry(
                 line, 'BigMHC_IM', 'immunogenicity',
                 line.get('BigMHC_IM'), method,
-                percentile_keys=None, percentile_fallback='NA'
+                percentile_keys=None, percentile_fallback='NA', is_reversed=True
             )
 
         if m == 'netmhcpan_el':
@@ -365,7 +370,8 @@ class OutputParser(metaclass=ABCMeta):
             entry = self._make_score_entry(
                 line, 'NetMHCpanEL', 'presentation',
                 presentation, 'NetMHCpanEL',
-                include_percentile=False
+                include_percentile=False,
+                is_reversed=True
             )
 
             if not self.use_normalized_percentiles:
@@ -376,6 +382,7 @@ class OutputParser(metaclass=ABCMeta):
                     len(line.get('peptide') or ''),
                     self._parse_float_or_na(presentation),
                     'NetMHCpanEL',
+                    is_reversed=True
                 )
 
             return entry
@@ -397,7 +404,8 @@ class OutputParser(metaclass=ABCMeta):
             entry = self._make_score_entry(
                 line, 'NetMHCIIpanEL', 'presentation',
                 presentation, 'NetMHCIIpanEL',
-                include_percentile=False
+                include_percentile=False,
+                is_reversed=True
             )
 
             if not self.use_normalized_percentiles:
@@ -408,6 +416,7 @@ class OutputParser(metaclass=ABCMeta):
                     len(line.get('peptide') or ''),
                     self._parse_float_or_na(presentation),
                     'NetMHCIIpanEL',
+                    is_reversed=True
                 )
 
             return entry
@@ -416,14 +425,16 @@ class OutputParser(metaclass=ABCMeta):
             return self._make_score_entry(
                 line, 'MixMHCpred', 'binding_score',
                 line.get('score'), method,
-                percentile_keys=['percentile']
+                percentile_keys=['percentile'],
+                is_reversed=True
             )
 
         if m == 'prime':
             return self._make_score_entry(
                 line, 'PRIME', 'immunogenicity',
                 line.get('score'), method,
-                percentile_keys=['percentile']
+                percentile_keys=['percentile'],
+                is_reversed=True
             )
 
         pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
