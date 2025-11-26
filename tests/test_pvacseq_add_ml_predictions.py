@@ -60,9 +60,9 @@ class PvacseqAddMlPredictionsTests(unittest.TestCase):
         input_file_II_aggregated = os.path.join(self.test_data_directory, 'MHC_Class_II', 'HCC1395_TUMOR_DNA.MHC_II.all_epitopes.aggregated.tsv')
         output_dir = tempfile.TemporaryDirectory()
         self.assertFalse(add_ml_predictions.main([
-            '--class1-aggregated', input_file_I_aggregated,
-            '--class1-all-epitopes', input_file_I_all_epitopes,
-            '--class2-aggregated', input_file_II_aggregated,
+            input_file_I_aggregated,
+            input_file_I_all_epitopes,
+            input_file_II_aggregated,
             output_dir.name,
             'HCC1395'
         ]))

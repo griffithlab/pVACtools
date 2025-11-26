@@ -167,6 +167,8 @@ explore_tab <- tabItem(
                 dropdownMenu = boxDropdown(boxDropdownItem("Help", id = "help", icon = icon("question-circle"))),
                 DTOutput("mainTable") %>% withSpinner(color = "#8FCCFA"),
                 span("Currently investigating row: ", verbatimTextOutput("selected")),
+                br(),
+                div(textOutput("ml_prediction_footnote", inline = TRUE), style = "font-style: italic; color: #666; font-size: 90%; text-align: right;"),
                 style = "overflow-x: scroll;font-size:100%")
         ),
 
