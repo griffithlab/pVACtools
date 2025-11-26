@@ -397,9 +397,7 @@ def define_add_ml_predictions_parser(tool='pvacseq'):
         help="Path to the MHC Class I aggregated epitopes TSV."
     )
     parser.add_argument(
-        "--class1-all-epitopes",
-        required=True,
-        dest="class1_all_epitopes",
+        "class1_all_epitopes",
         help="Path to the MHC Class I all epitopes TSV."
     )
     parser.add_argument(
