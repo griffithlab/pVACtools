@@ -393,9 +393,7 @@ def define_add_ml_predictions_parser(tool='pvacseq'):
         formatter_class=argparse.RawTextHelpFormatter
     )
     parser.add_argument(
-        "--class1-aggregated",
-        required=True,
-        dest="class1_aggregated",
+        "class1_aggregated",
         help="Path to the MHC Class I aggregated epitopes TSV."
     )
     parser.add_argument(
