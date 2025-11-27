@@ -23,7 +23,7 @@ from pvactools.lib.run_argument_parser import PvacvectorRunArgumentParser
 from pvactools.lib.pvacvector_input_fasta_generator import PvacvectorInputFastaGenerator
 from pvactools.lib.pipeline import *
 from pvactools.lib.run_utils import *
-from pvactools.lib.prediction_class import *
+from pvactools.lib.prediction_class import NetMHCIIVersion
 from pvactools.lib.prediction_class_utils import *
 
 def define_parser():
