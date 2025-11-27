@@ -26,6 +26,9 @@ def status_message(msg):
 
 class Pipeline(metaclass=ABCMeta):
     def __init__(self, **kwargs):
+        self.use_normalized_percentiles = kwargs.pop('use_normalized_percentiles', False)
+        self.reference_scores_path      = kwargs.pop('reference_scores_path', None)
+
         for (k,v) in kwargs.items():
            setattr(self, k, v)
         #We need to make a copy of prediction_algorithms here because get_flurry_state
