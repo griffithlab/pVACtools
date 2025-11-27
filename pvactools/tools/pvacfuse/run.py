@@ -159,8 +159,6 @@ def main(args_input = sys.argv[1:]):
         'downstream_sequence_length': downstream_sequence_length,
         'keep_tmp_files'            : args.keep_tmp_files,
         'n_threads'                 : args.n_threads,
-        'use_normalized_percentiles'  : args.use_normalized_percentiles,
-        'reference_scores_path'    : args.reference_scores_path,
         'species'                   : species,
         'run_reference_proteome_similarity': args.run_reference_proteome_similarity,
         'blastp_path'               : args.blastp_path,
@@ -186,6 +184,10 @@ def main(args_input = sys.argv[1:]):
     else:
         iedb_mhc_i_executable = None
         iedb_mhc_ii_executable = None
+    
+    if args.use_normalized_percentiles and species != 'human':
+        print("WARNING: Normalized percentiles are only available for human alleles. Option will be ignored.")
+        args.use_normalized_percentiles = False
 
     all_params = {
         'I': {
@@ -193,7 +195,9 @@ def main(args_input = sys.argv[1:]):
             'prediction_algorithms': class_i_prediction_algorithms,
             'alleles': class_i_alleles,
             'epitope_lengths': args.class_i_epitope_length,
-            'netmhc_stab': args.netmhc_stab
+            'netmhc_stab': args.netmhc_stab,
+            'use_normalized_percentiles': args.use_normalized_percentiles,
+            'reference_scores_path': args.reference_scores_path
         },
         'II': {
             'iedb_executable': iedb_mhc_ii_executable,

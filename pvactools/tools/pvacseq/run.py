@@ -118,8 +118,6 @@ def main(args_input = sys.argv[1:]):
         'maximum_transcript_support_level': args.maximum_transcript_support_level,
         'biotypes'                  : args.biotypes,
         'allow_incomplete_transcripts': args.allow_incomplete_transcripts,
-        'use_normalized_percentiles'  : args.use_normalized_percentiles,
-        'reference_scores_path'    : args.reference_scores_path,
         'species'                   : species,
         'run_reference_proteome_similarity': args.run_reference_proteome_similarity,
         'blastp_path'               : args.blastp_path,
@@ -141,6 +139,10 @@ def main(args_input = sys.argv[1:]):
                 sys.exit("IEDB MHC I executable path doesn't exist %s" % iedb_mhc_i_executable)
         else:
             iedb_mhc_i_executable = None
+        
+        if args.use_normalized_percentiles and species != 'human':
+            print("WARNING: Normalized percentiles are only available for human alleles. Option will be ignored.")
+            args.use_normalized_percentiles = False
 
         print("Executing MHC Class I predictions")
 
@@ -155,6 +157,8 @@ def main(args_input = sys.argv[1:]):
         class_i_arguments['output_dir']              = output_dir
         class_i_arguments['netmhc_stab']             = args.netmhc_stab
         class_i_arguments['filename_addition']         = "MHC_I"
+        class_i_arguments['use_normalized_percentiles']  = args.use_normalized_percentiles
+        class_i_arguments['reference_scores_path']    = args.reference_scores_path
         pipeline = Pipeline(**class_i_arguments)
         pipeline.execute()
     elif len(class_i_prediction_algorithms) == 0:

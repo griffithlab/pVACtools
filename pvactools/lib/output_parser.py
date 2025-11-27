@@ -4,6 +4,7 @@ import csv
 import re
 import operator
 import requests
+import threading
 import os
 import pandas as pd
 import h5py
@@ -16,6 +17,34 @@ from pvactools.lib.prediction_class import PredictionClass
 
 csv.field_size_limit(sys.maxsize)
 
+class PercentileFileCache:
+    """Thread-safe cache for allele file download status."""
+    _missing = set()
+    _events = {}
+    _lock = threading.Lock()
+
+    @classmethod
+    def get_event(cls, allele):
+        with cls._lock:
+            if allele not in cls._events:
+                cls._events[allele] = threading.Event()
+            return cls._events[allele]
+
+    @classmethod
+    def mark_missing(cls, allele):
+        with cls._lock:
+            cls._missing.add(allele)
+
+    @classmethod
+    def is_missing(cls, allele):
+        with cls._lock:
+            return allele in cls._missing
+
+    @classmethod
+    def mark_done(cls, allele):
+        event = cls.get_event(allele)
+        event.set()  # unblock all waiting threads
+
 class OutputParser(metaclass=ABCMeta):
     def __init__(self, **kwargs):
         self.input_iedb_files        = kwargs['input_iedb_files']
@@ -25,8 +54,8 @@ class OutputParser(metaclass=ABCMeta):
         self.sample_name             = kwargs['sample_name']
         self.add_sample_name         = kwargs.get('add_sample_name_column')
         self.flurry_state            = kwargs.get('flurry_state')
-        self.use_normalized_percentiles = kwargs.get('use_normalized_percentiles')
-        self.reference_scores_path   = kwargs.get('reference_scores_path')
+        self.use_normalized_percentiles = kwargs.get('use_normalized_percentiles', False)
+        self.reference_scores_path   = kwargs.get('reference_scores_path', None)
 
     def parse_input_tsv_file(self):
         with open(self.input_tsv_file, 'r') as reader:
@@ -177,18 +206,6 @@ class OutputParser(metaclass=ABCMeta):
         allele_file = f"HLA-{normalized}_percentiles.h5"
         file_path = os.path.join(self.reference_scores_path, allele_file)
 
-        if not os.path.exists(file_path):
-            url = f"https://raw.githubusercontent.com/griffithlab/pvactools_percentiles_data/main/hdf5/{allele_file}"
-            try:
-                response = requests.get(url, stream=True)
-                response.raise_for_status()
-                os.makedirs(self.reference_scores_path, exist_ok=True)
-                with open(file_path, 'wb') as f:
-                    for chunk in response.iter_content(chunk_size=8192):
-                        f.write(chunk)
-            except Exception:
-                return 'NA'
-
         key = f"{method}/{length}mer"
         try:
             with h5py.File(file_path, "r") as f:
@@ -210,13 +227,10 @@ class OutputParser(metaclass=ABCMeta):
         else:
             percentile = (left + right) / (2 * n) * 100
 
-        if is_reversed:
-            return round(100.0 - percentile, 3)
-        else:
-            return round(percentile, 3)
+        percentile = 100 - percentile if is_reversed else percentile
+        return round(percentile, 3)
 
     def _normalize_allele(self, allele):
-        # Convert allele to standard format: e.g., HLA-A*01:01 -> HLA-A_01_01
         if allele is None:
             return None
 
@@ -229,15 +243,19 @@ class OutputParser(metaclass=ABCMeta):
         except ValueError:
             return re.sub(r'[^A-Za-z0-9]', '_', raw)
 
+        # extract all digits from the part after "*"
         digits = re.sub(r'\D', '', rest)
-        if len(digits) >= 4:
-            g1 = digits[0:2]
-            g2 = digits[2:]
-            normalized = f"{locus}_{g1}_{g2}"
-        else:
-            normalized = re.sub(r'[^A-Za-z0-9]', '_', raw)
 
-        return normalized
+        # pad or trim to exactly four digits (2 + 2)
+        if len(digits) < 4:
+            digits = digits.ljust(4, "0")  # pad right with zeros
+        if len(digits) > 4:
+            digits = digits[:4]  # trim to first 4 digits
+
+        g1 = digits[0:2]
+        g2 = digits[2:4]
+
+        return f"{locus}_{g1}_{g2}"
 
     def _parse_float_or_na(self, value):
         try:
@@ -250,6 +268,49 @@ class OutputParser(metaclass=ABCMeta):
             if key in line and line[key] not in (None, '', 'NA'):
                 return self.transform_empty_percentiles(line[key])
         return fallback
+
+    def _has_normalized_file(self, allele, normalized_allele):
+        allele_file = f"HLA-{normalized_allele}_percentiles.h5"
+        file_path = os.path.join(self.reference_scores_path, allele_file)
+
+        if os.path.exists(file_path):
+            return True
+
+        event = PercentileFileCache.get_event(normalized_allele)
+
+        if PercentileFileCache.is_missing(normalized_allele) and event.is_set():
+            return False
+
+        with PercentileFileCache._lock:
+            if os.path.exists(file_path):
+                return True
+
+            if not event.is_set() and normalized_allele not in PercentileFileCache._missing:
+                pass
+            else:
+                # Another thread is already downloading – wait for it
+                event.wait()
+                return os.path.exists(file_path)
+
+        url = f"https://raw.githubusercontent.com/griffithlab/pvactools_percentiles_data/main/hdf5/{allele_file}"
+        try:
+            response = requests.get(url, stream=True)
+            response.raise_for_status()
+
+            os.makedirs(self.reference_scores_path, exist_ok=True)
+            with open(file_path, 'wb') as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    f.write(chunk)
+
+            PercentileFileCache.mark_done(normalized_allele)
+            return True
+
+        except Exception:
+            PercentileFileCache.mark_missing(normalized_allele)
+            PercentileFileCache.mark_done(normalized_allele)
+
+            print(f"WARNING: No percentile file found for allele {allele} ({normalized_allele}). Using 'NA' for percentile values.")
+            return False
 
     def _make_score_entry(
         self,
@@ -275,14 +336,20 @@ class OutputParser(metaclass=ABCMeta):
 
         if include_percentile:
             if self.use_normalized_percentiles:
-                normalized_input = None if val == 'NA' else val
-                percentile = self.calculate_normalized_percentile(
-                    line.get('allele'),
-                    len(line.get('peptide') or ''),
-                    normalized_input,
-                    method,
-                    is_reversed
-                )
+                allele = line.get('allele')
+                normalized_allele = self._normalize_allele(allele)
+
+                if normalized_allele is None or not self._has_normalized_file(allele, normalized_allele):
+                    percentile = 'NA'
+                else:
+                    normalized_input = None if val == 'NA' else val
+                    percentile = self.calculate_normalized_percentile(
+                        allele,
+                        len(line.get('peptide') or ''),
+                        normalized_input,
+                        method,
+                        is_reversed
+                    )
             else:
                 if percentile_keys:
                     percentile = self._extract_percentile(

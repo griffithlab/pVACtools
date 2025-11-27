@@ -23,13 +23,13 @@ from pvactools.lib.run_argument_parser import PvacvectorRunArgumentParser
 from pvactools.lib.pvacvector_input_fasta_generator import PvacvectorInputFastaGenerator
 from pvactools.lib.pipeline import *
 from pvactools.lib.run_utils import *
-from pvactools.lib.prediction_class import NetMHCIIVersion
+from pvactools.lib.prediction_class import *
 from pvactools.lib.prediction_class_utils import *
 
 def define_parser():
     return PvacvectorRunArgumentParser().parser
 
-def run_pipelines(input_file, base_output_dir, args, junctions_to_test, spacer, tries, class_i_prediction_algorithms, class_ii_prediction_algorithms, class_i_alleles, class_ii_alleles):
+def run_pipelines(input_file, base_output_dir, args, junctions_to_test, spacer, tries, class_i_prediction_algorithms, class_ii_prediction_algorithms, class_i_alleles, class_ii_alleles, species):
     shared_arguments = {
         'input_file'      : input_file,
         'input_file_type' : 'pvacvector_input_fasta',
@@ -42,8 +42,6 @@ def run_pipelines(input_file, base_output_dir, args, junctions_to_test, spacer, 
         'additional_report_columns' : None,
         'junctions_to_test': junctions_to_test,
         'allow_incomplete_transcripts': args.allow_incomplete_transcripts,
-        'use_normalized_percentiles'  : args.use_normalized_percentiles,
-        'reference_scores_path'    : args.reference_scores_path,
     }
 
     parsed_output_files = []
@@ -54,6 +52,10 @@ def run_pipelines(input_file, base_output_dir, args, junctions_to_test, spacer, 
                 sys.exit("IEDB MHC I executable path doesn't exist %s" % iedb_mhc_i_executable)
         else:
             iedb_mhc_i_executable = None
+
+        if args.use_normalized_percentiles and species != 'human':
+            print("WARNING: Normalized percentiles are only available for human alleles. Option will be ignored.")
+            args.use_normalized_percentiles = False
 
         print("Executing MHC Class I predictions")
 
@@ -67,6 +69,8 @@ def run_pipelines(input_file, base_output_dir, args, junctions_to_test, spacer, 
         class_i_arguments['prediction_algorithms']   = class_i_prediction_algorithms
         class_i_arguments['output_dir']              = output_dir
         class_i_arguments['filename_addition']         = "MHC_I"
+        class_i_arguments['use_normalized_percentiles']  = args.use_normalized_percentiles
+        class_i_arguments['reference_scores_path']    = args.reference_scores_path
         pipeline_i = Pipeline(**class_i_arguments)
         pipeline_i.generate_fasta([[1, 1]])
         pipeline_i.call_iedb([[1, 1]])
@@ -482,7 +486,8 @@ def main(args_input=sys.argv[1:]):
                 class_i_prediction_algorithms,
                 class_ii_prediction_algorithms,
                 class_i_alleles,
-                class_ii_alleles
+                class_ii_alleles,
+                species
             )
             min_scores, min_percentiles = find_min_scores(parsed_output_files, current_output_dir, args, min_scores, min_percentiles)
             add_valid_junctions_to_graph(graph, min_scores, min_percentiles)
