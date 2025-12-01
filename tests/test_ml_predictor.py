@@ -125,7 +125,7 @@ class MLPredictorTests(unittest.TestCase):
         # Print file path for easy inspection
         print(f"\nTest output file saved to: {result}")
         
-        df.to_csv(os.path.join(output_dir, "HCC1395_predict_pvacview.tsv"), sep='\t', index=False)
+        #df.to_csv(os.path.join(output_dir, "HCC1395_predict_pvacview.tsv"), sep='\t', index=False)
 
     def test_ml_predictions_different_threshold(self):
         """Test that different threshold values produce different results."""

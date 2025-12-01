@@ -144,7 +144,6 @@ def merge_and_prepare_data(class1_aggregated_path, class1_all_epitopes_path, cla
         merged_all["Prob Pos"]
         .fillna("0")  # Replace NaN with "0"
         .astype(str)  # Ensure all values are strings
-        .replace("None", "0")  # Replace "None" with "0"
         .str.split(",")  # Split by commas
         .apply(lambda x: int(float(x[0])) if x[0].replace('.', '', 1).isdigit() else 0)  # Handle floats and integers
     )
@@ -307,38 +306,45 @@ def create_final_output(post_imputed_data, original_agg_file_path, output_dir, s
     """
     print("Creating final output file...")
     
-    # Read original aggregated file
-    mhc1_agg_df_itb = pd.read_csv(original_agg_file_path, sep="\t", dtype=str)
+    # 1) Read original aggregated file as pure text
+    orig_df = pd.read_csv(original_agg_file_path, sep="\t", dtype=str)
+    original_columns = list(orig_df.columns)
+    
+    # We know we will replace 'Evaluation', so treat everything else as "must preserve"
+    cols_to_preserve = [c for c in original_columns if c != "Evaluation"]
     
     # Create output directory if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
     
-    # Put the prediction and score in an extra column (ML Prediction (score))
-    final_df = mhc1_agg_df_itb.drop(columns=['Evaluation']).merge(
-        post_imputed_data[['ID', 'Evaluation_pred', 'Accept_pred_prob']], on="ID", how="left"
+    # 2) Merge in ML predictions
+    #    Work from a copy that drops the old Evaluation column
+    base_df = orig_df.drop(columns=["Evaluation"])
+    merged_df = base_df.merge(
+        post_imputed_data[['ID', 'Evaluation_pred', 'Accept_pred_prob']], 
+        on="ID", 
+        how="left"
     ).rename(columns={'Evaluation_pred': 'Evaluation'})
     # Fill missing evaluations from unmatched IDs as Pending
-    final_df['Evaluation'] = final_df['Evaluation'].fillna('Pending')
+    merged_df['Evaluation'] = merged_df['Evaluation'].fillna('Pending')
 
     # Conditionally set ML Prediction (score) based on Evaluation_pred
     # NOTE: sometimes the ML model will not be able to make a prediction due to missing data, in this case, the Evaluation_pred will be "Pending"
     # This may be due to the class 1 and class 2 files not having the same number of rows.
-    final_df['ML Prediction (score)'] = final_df.apply(
+    merged_df['ML Prediction (score)'] = merged_df.apply(
         lambda row: "NA" if (pd.isna(row['Evaluation']) or row['Evaluation'] == "Pending" or pd.isna(row['Accept_pred_prob']))
         else str(row['Evaluation']) + " (" + str(round(row['Accept_pred_prob'], 2)) + ")", 
         axis=1
     )
     # Modify 'Review' to 'Pending' in Evaluation column
-    final_df.loc[final_df['Evaluation'] == 'Review', 'Evaluation'] = 'Pending'
-    final_df = final_df.drop(columns=['Accept_pred_prob'])
+    merged_df.loc[merged_df['Evaluation'] == 'Review', 'Evaluation'] = 'Pending'
+    final_df = merged_df.drop(columns=['Accept_pred_prob'])
     
-    # --- Ensure TSL is integer in output ---
-    final_df['TSL'] = pd.to_numeric(final_df['TSL'], errors='coerce').fillna(6).astype(int)
+    final_df[cols_to_preserve] = orig_df[cols_to_preserve]
     
     # Save output file
     output_file = os.path.join(output_dir, f"{sample_name}_predict_pvacview.tsv")
 
-    final_df.to_csv(output_file, sep="\t", index=False, na_rep="NA")
+    final_df.to_csv(output_file, float_format='%.3f', sep="\t", index=False, na_rep="NA")
     
     print(f"ML predictions saved to: {output_file}")
     return output_file
@@ -405,7 +411,7 @@ def define_add_ml_predictions_parser(tool='pvacseq'):
         help="Path to the MHC Class II aggregated epitopes TSV."
     )
     parser.add_argument(
-        "--artifacts-path",
+        "--artifacts_path",
         dest="artifacts_path",
         help="Optional path to a directory containing ML model artifacts. Defaults to the package-provided artifacts."
     )
