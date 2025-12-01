@@ -64,7 +64,7 @@ New in Version |release|
 
 This is a bugfix release. It fixes the following problem(s):
 
-* Ensure that the top_score_metric2 parameter is passed through to UpdateTiers so that the aggregate report gets sorted correctly. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1335
+* Remove allele no longer supported by MHCflurry. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1342
 
 New in Version 6
 ----------------
@@ -109,6 +109,9 @@ ____________
     the TSL cutoff (depending on the specified ``transcript-prioritization-strategy``; only available
     in pVACseq and pVACsplice).
 
+- A new set of standalone commands, ``pvacseq|fuse|splice|bind update_tiers``,
+  has been added to update the tiering in an aggregate report if different
+  tiering thresholds are desired after the initial pipeline run.
 - By default, transcripts where the FLAGS VEP annotation is set will now be filtered out before processing
   by pVACseq and pVACsplice. This field identifies transcripts where the CDS 5' or 3' is incomplete. A new
   parameter ``--allow-incomplete-transcripts`` has been added which can be used to replicate the previous

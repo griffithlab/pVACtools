@@ -346,7 +346,7 @@ class PvacspliceTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
             for line in reader:
                 if line["{} IC50 Score".format(self.formatted_top_score_metric)] == 'NA':
                     continue
-                lines_per_variant[line['Index']].append(line)
+                lines_per_variant[line['Junction']].append(line)
 
             filtered_lines = []
             for index, lines in lines_per_variant.items():
