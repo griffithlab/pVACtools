@@ -43,7 +43,7 @@ Running VEP
 
    ./vep \
    --input_file <input VCF> --output_file <output VCF> \
-   --format vcf --vcf --symbol --terms SO --tsl --biotype \
+   --format vcf --vcf --symbol --terms SO --tsl --mane_select --canonical --biotype \
    --hgvs --fasta <reference build FASTA file location> \
    --offline --cache [--dir_cache <VEP cache directory>] \
    --plugin Frameshift --plugin Wildtype \
