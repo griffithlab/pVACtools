@@ -56,6 +56,7 @@ class OutputParser(metaclass=ABCMeta):
         self.flurry_state            = kwargs.get('flurry_state')
         self.use_normalized_percentiles = kwargs.get('use_normalized_percentiles', False)
         self.reference_scores_path   = kwargs.get('reference_scores_path', None)
+        self.reference_scores        = {}
 
     def parse_input_tsv_file(self):
         with open(self.input_tsv_file, 'r') as reader:
@@ -207,13 +208,17 @@ class OutputParser(metaclass=ABCMeta):
         file_path = os.path.join(self.reference_scores_path, allele_file)
 
         key = f"{method}/{length}mer"
-        try:
-            with h5py.File(file_path, "r") as f:
-                if key not in f:
-                    return 'NA'  # algorithm or length not present
-                ref_scores = f[key][...]
-        except Exception:
-            return 'NA'
+        if key in self.reference_scores:
+            ref_scores = self.reference_scores[key]
+        else:
+            try:
+                with h5py.File(file_path, "r") as f:
+                    if key not in f:
+                        return 'NA'  # algorithm or length not present
+                    ref_scores = f[key][...]
+                    self.reference_scores[key] = ref_scores
+            except Exception:
+                return 'NA'
 
         if ref_scores.size == 0:
             return 'NA'
