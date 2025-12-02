@@ -121,8 +121,8 @@ class CallIEDBClassITests(CallIEDBTests):
             expected_output_file = os.path.join(self.test_data_dir, 'output_mhcnuggetsI.python36.tsv')
         else:
             expected_output_file = os.path.join(self.test_data_dir, 'output_mhcnuggetsI.tsv')
-        expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,2,3])
-        actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[0,2,3])
+        expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,3,4,5])
+        actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[0,3,4,5])
         pd.testing.assert_frame_equal(
             expected_df,
             actual_df,
