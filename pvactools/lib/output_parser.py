@@ -203,7 +203,7 @@ class OutputParser(metaclass=ABCMeta):
         if normalized is None:
             return 'NA'
 
-        allele_file = f"HLA-{normalized}_percentiles.h5"
+        allele_file = f"{normalized}_percentiles.h5"
         file_path = os.path.join(self.reference_scores_path, allele_file)
 
         key = f"{method}/{length}mer"
@@ -234,28 +234,7 @@ class OutputParser(metaclass=ABCMeta):
         if allele is None:
             return None
 
-        raw = allele
-        if raw.startswith("HLA-"):
-            raw = raw[4:]
-
-        try:
-            locus, rest = raw.split("*", 1)
-        except ValueError:
-            return re.sub(r'[^A-Za-z0-9]', '_', raw)
-
-        # extract all digits from the part after "*"
-        digits = re.sub(r'\D', '', rest)
-
-        # pad or trim to exactly four digits (2 + 2)
-        if len(digits) < 4:
-            digits = digits.ljust(4, "0")  # pad right with zeros
-        if len(digits) > 4:
-            digits = digits[:4]  # trim to first 4 digits
-
-        g1 = digits[0:2]
-        g2 = digits[2:4]
-
-        return f"{locus}_{g1}_{g2}"
+        return allele.replace("*", "_").replace(":", "_")
 
     def _parse_float_or_na(self, value):
         try:
@@ -270,7 +249,7 @@ class OutputParser(metaclass=ABCMeta):
         return fallback
 
     def _has_normalized_file(self, allele, normalized_allele):
-        allele_file = f"HLA-{normalized_allele}_percentiles.h5"
+        allele_file = f"{normalized_allele}_percentiles.h5"
         file_path = os.path.join(self.reference_scores_path, allele_file)
 
         if os.path.exists(file_path):
