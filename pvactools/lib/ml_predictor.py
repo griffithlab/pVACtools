@@ -306,8 +306,8 @@ def create_final_output(post_imputed_data, original_agg_file_path, output_dir, s
     """
     print("Creating final output file...")
     
-    # 1) Read original aggregated file as pure text
-    orig_df = pd.read_csv(original_agg_file_path, sep="\t", dtype=str)
+    # 1) Read original aggregated file as pure text, preserving None/empty values
+    orig_df = pd.read_csv(original_agg_file_path, sep="\t", dtype=str, keep_default_na=False, na_values=[])
     original_columns = list(orig_df.columns)
     
     # We know we will replace 'Evaluation', so treat everything else as "must preserve"
