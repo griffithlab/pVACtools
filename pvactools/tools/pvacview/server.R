@@ -657,25 +657,13 @@ server <- shinyServer(function(input, output, session) {
     print(val)
   })
   outputOptions(output, "filesUploaded", suspendWhenHidden = FALSE)
-  ## Check if selected row has NA in ML Prediction column for footnote
+  ## Display footnote when ML Prediction column is present
   output$ml_prediction_footnote <- renderText({
     if (is.null(df$mainTable) | is.null(df$metricsData)) {
       return("")
     }
     if ("ML Prediction (score)" %in% colnames(df$mainTable)) {
-      # Get the selected row
-      selected_row_idx <- if (is.null(input$mainTable_rows_selected)) {
-        df$lastSelectedRow
-      } else {
-        input$mainTable_rows_selected
-      }
-      
-      if (!is.null(selected_row_idx) && selected_row_idx > 0 && selected_row_idx <= nrow(df$mainTable)) {
-        ml_prediction <- df$mainTable[selected_row_idx, "ML Prediction (score)"]
-        if (is.na(ml_prediction) || ml_prediction == "NA" || ml_prediction == "") {
-          return("ML Prediction NA: Unable to make prediction with ML model due to missing data")
-        }
-      }
+      return("NA or empty ML Prediction: Unable to make prediction with ML model due to missing data")
     }
     return("")
   })
