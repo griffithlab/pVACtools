@@ -24,6 +24,26 @@ class OutputParserTests(unittest.TestCase):
     def test_source_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))
 
+    def test_allele_normalization(self):
+        parse_output_input_iedb_file = [os.path.join(self.test_data_dir, "input_peptide_sequence_length_21.ann.HLA-A*29:02.9.tsv")]
+        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "input_peptide_sequence_length_21.tsv")
+        parse_output_key_file = os.path.join(self.test_data_dir, "input_peptide_sequence_length_21.key")
+        parse_output_output_file = tempfile.NamedTemporaryFile()
+
+        parse_output_params = {
+            'input_iedb_files'       : parse_output_input_iedb_file,
+            'input_tsv_file'         : parse_output_input_tsv_file,
+            'key_file'               : parse_output_key_file,
+            'output_file'            : parse_output_output_file.name,
+            'sample_name'            : 'input_peptide_sequence_length_21',
+        }
+        parser = DefaultOutputParser(**parse_output_params)
+
+        self.assertEqual(parser._normalize_allele("HLA-A*02:01"), "HLA-A_02_01")
+        self.assertEqual(parser._normalize_allele("HLA-A*02:122"), "HLA-A_02_122")
+        self.assertEqual(parser._normalize_allele("HLA-A*02:125N"), "HLA-A_02_125N")
+        self.assertEqual(parser._normalize_allele("HLA-A*02:53N"), "HLA-A_02_53N")
+
     def test_parse_output_runs_and_produces_expected_output(self):
         parse_output_input_iedb_file = [os.path.join(self.test_data_dir, "input_peptide_sequence_length_21.ann.HLA-A*29:02.9.tsv")]
         parse_output_input_tsv_file = os.path.join(self.test_data_dir, "input_peptide_sequence_length_21.tsv")
