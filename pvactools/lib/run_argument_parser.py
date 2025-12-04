@@ -66,6 +66,21 @@ class RunArgumentParser(metaclass=ABCMeta):
             default="4.1",
             help="Specify the version of NetMHCIIpan or NetMHCIIpanEL to be used during the run.",
         )
+        parser.add_argument(
+            "--use-normalized-percentiles",
+            help="When set, calculate normalized percentile scores for all prediction algorithms. For algorithms "
+                 + "that do not natively provide percentiles, percentiles will be derived by comparing prediction "
+                 + "scores against pre-computed reference distributions. For algorithms that do provide native percentiles, "
+                 + "their values will be overwritten with the normalized percentile.",
+            default=False,
+            action='store_true'
+        )
+        parser.add_argument(
+            "--reference-scores-path",
+            default="/tmp",
+            help="Directory to store pre-computed reference percentile files. "
+                 + "If a file is missing, it will be downloaded here when --use-normalized-percentiles is set."
+        )
         self.parser = parser
 
     def epitope_args(self):

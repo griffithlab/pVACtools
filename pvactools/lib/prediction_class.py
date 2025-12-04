@@ -404,9 +404,6 @@ class DeepImmuno(MHCI):
             os.unlink(tmp_input_file.name)
             tmp_output_file_name = os.path.join(output_dir.name, "deepimmuno-cnn-result.txt")
             df = pd.read_csv(tmp_output_file_name, sep="\t")
-            df.rename(columns={
-                'HLA': 'allele',
-            }, inplace=True)
             output_dir.cleanup()
             for record in SeqIO.parse(input_file, "fasta"):
                 seq_num = record.id
@@ -416,6 +413,7 @@ class DeepImmuno(MHCI):
                     epitope_df = df[df['peptide'] == epitope]
                     epitope_df['seq_num'] = seq_num
                     epitope_df['start'] = start
+                    epitope_df['allele'] = allele
                     results = pd.concat((results, epitope_df), axis=0)
         return (results, 'pandas')
 

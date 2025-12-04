@@ -170,7 +170,7 @@ class AggregateAllEpitopes:
 
     def determine_used_immunogenicity_percentile_algorithms(self):
         headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
-        potential_algorithms = ["PRIME"]
+        potential_algorithms = ["BigMHC_IM", "DeepImmuno", "PRIME"]
         prediction_algorithms = []
         for algorithm in potential_algorithms:
             if "{} MT Percentile".format(algorithm) in headers or "{} Percentile".format(algorithm) in headers:
@@ -197,21 +197,10 @@ class AggregateAllEpitopes:
 
     def determine_used_presentation_percentile_algorithms(self):
         headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
-        potential_algorithms = ["NetMHCpanEL", "MHCflurryEL Presentation", "NetMHCIIpanEL"]
+        potential_algorithms = ["NetMHCpanEL", "NetMHCIIpanEL", "BigMHC_EL", "MHCflurryEL Presentation", "MHCflurryEL Processing"]
         prediction_algorithms = []
         for algorithm in potential_algorithms:
             if "{} MT Percentile".format(algorithm) in headers or "{} Percentile".format(algorithm) in headers:
-                prediction_algorithms.append(algorithm)
-        return prediction_algorithms
-
-    def determine_used_prediction_algorithms(self):
-        headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
-        potential_algorithms = PredictionClass.prediction_methods()
-        prediction_algorithms = []
-        for algorithm in potential_algorithms:
-            if algorithm in ['NetMHCpanEL', 'NetMHCIIpanEL', 'BigMHC_EL', 'BigMHC_IM', 'DeepImmuno']:
-                continue
-            if "{} MT IC50 Score".format(algorithm) in headers or "{} IC50 Score".format(algorithm) in headers:
                 prediction_algorithms.append(algorithm)
         return prediction_algorithms
 
@@ -316,7 +305,6 @@ class AggregateAllEpitopes:
         return dtypes
 
     def execute(self):
-        prediction_algorithms = self.determine_used_prediction_algorithms()
         epitope_lengths = self.determine_used_epitope_lengths()
         used_columns = self.determine_columns_used_for_aggregation()
         dtypes = self.set_column_types()

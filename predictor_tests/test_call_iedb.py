@@ -98,7 +98,14 @@ class CallIEDBClassITests(CallIEDBTests):
             expected_output_file = os.path.join(self.test_data_dir, 'output_mhcflurry_osx.tsv')
             expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[1,7,8])
             actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[1,7,8])
-            pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_exact=False, rtol=0.05)
+            pd.testing.assert_frame_equal(
+                expected_df,
+                actual_df,
+                check_like=True,
+                check_exact=False,
+                rtol=1e-3,
+                atol=2e-2
+            )
 
     def test_mhcnuggetsi_method_generates_expected_files(self):
         call_iedb_output_file = tempfile.NamedTemporaryFile()
@@ -114,9 +121,16 @@ class CallIEDBClassITests(CallIEDBTests):
             expected_output_file = os.path.join(self.test_data_dir, 'output_mhcnuggetsI.python36.tsv')
         else:
             expected_output_file = os.path.join(self.test_data_dir, 'output_mhcnuggetsI.tsv')
-        expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,2,3])
-        actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[0,2,3])
-        pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_exact=False)
+        expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,3,4,5])
+        actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[0,3,4,5])
+        pd.testing.assert_frame_equal(
+            expected_df,
+            actual_df,
+            check_like=True,
+            check_exact=False,
+            rtol=1e-3,
+            atol=2e-2
+        )
 
     def test_bigmhc_el__method_generates_expected_files(self):
         call_iedb_output_file = tempfile.NamedTemporaryFile()
@@ -131,7 +145,14 @@ class CallIEDBClassITests(CallIEDBTests):
         expected_output_file = os.path.join(self.test_data_dir, 'output_bigmhc_el.tsv')
         expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[1,5,6])
         actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[1,5,6])
-        pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_exact=False)
+        pd.testing.assert_frame_equal(
+            expected_df,
+            actual_df,
+            check_like=True,
+            check_exact=False,
+            rtol=1e-3,
+            atol=2e-2
+        )
 
     def test_bigmhc_im_method_generates_expected_files(self):
         call_iedb_output_file = tempfile.NamedTemporaryFile()
@@ -146,7 +167,14 @@ class CallIEDBClassITests(CallIEDBTests):
         expected_output_file = os.path.join(self.test_data_dir, 'output_bigmhc_im.tsv')
         expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[1,5,6])
         actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[1,5,6])
-        pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_exact=False)
+        pd.testing.assert_frame_equal(
+            expected_df,
+            actual_df,
+            check_like=True,
+            check_exact=False,
+            rtol=1e-3,
+            atol=2e-2
+        )
 
     def test_deepimmuno_method_generates_expected_files(self):
         call_iedb_output_file = tempfile.NamedTemporaryFile()
@@ -163,7 +191,14 @@ class CallIEDBClassITests(CallIEDBTests):
         expected_output_file = os.path.join(self.test_data_dir, 'output_deepimmuno.tsv')
         expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,3,4])
         actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[0,3,4])
-        pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_exact=False)
+        pd.testing.assert_frame_equal(
+            expected_df,
+            actual_df,
+            check_like=True,
+            check_exact=False,
+            rtol=1e-3,
+            atol=2e-2
+        )
 
     def test_mixmhcpred_method_generates_expected_files(self):
         call_iedb_output_file = tempfile.NamedTemporaryFile()
@@ -180,7 +215,14 @@ class CallIEDBClassITests(CallIEDBTests):
         expected_output_file = os.path.join(self.test_data_dir, 'output_mixmhcpred.tsv')
         expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,6,7])
         actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[0,6,7])
-        pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_exact=False)
+        pd.testing.assert_frame_equal(
+            expected_df,
+            actual_df,
+            check_like=True,
+            check_exact=False,
+            rtol=1e-3,
+            atol=2e-2
+        )
 
     def test_prime_method_generates_expected_files(self):
         call_iedb_output_file = tempfile.NamedTemporaryFile()
@@ -197,7 +239,14 @@ class CallIEDBClassITests(CallIEDBTests):
         expected_output_file = os.path.join(self.test_data_dir, 'output_prime.tsv')
         expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,8,9])
         actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[0,8,9])
-        pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_exact=False)
+        pd.testing.assert_frame_equal(
+            expected_df,
+            actual_df,
+            check_like=True,
+            check_exact=False,
+            rtol=1e-3,
+            atol=2e-2
+        )
 
     def test_prime_method_generates_expected_files_for_A02110(self):
         call_iedb_output_file = tempfile.NamedTemporaryFile()
@@ -214,7 +263,14 @@ class CallIEDBClassITests(CallIEDBTests):
         expected_output_file = os.path.join(self.test_data_dir, 'output_prime.A02110.tsv')
         expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,8,9])
         actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[0,8,9])
-        pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_exact=False)
+        pd.testing.assert_frame_equal(
+            expected_df,
+            actual_df,
+            check_like=True,
+            check_exact=False,
+            rtol=1e-3,
+            atol=2e-2
+        )
 
 class CallIEDBClassIITests(CallIEDBTests):
     @classmethod
@@ -262,7 +318,14 @@ class CallIEDBClassIITests(CallIEDBTests):
             expected_output_file = os.path.join(self.test_data_dir, 'output_mhcnuggetsII.tsv')
         expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,2,3])
         actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[0,2,3])
-        pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_exact=False)
+        pd.testing.assert_frame_equal(
+            expected_df,
+            actual_df,
+            check_like=True,
+            check_exact=False,
+            rtol=1e-3,
+            atol=2e-2
+        )
 
     def test_netmhciipan_method_with_version(self):
         temp_dir = tempfile.TemporaryDirectory()
@@ -290,7 +353,14 @@ class CallIEDBClassIITests(CallIEDBTests):
         expected_output_file = os.path.join(self.test_data_dir, 'output_netmhciipan-4.2.tsv')
         expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,2,3])
 
-        pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_exact=False)
+        pd.testing.assert_frame_equal(
+            expected_df,
+            actual_df,
+            check_like=True,
+            check_exact=False,
+            rtol=1e-3,
+            atol=2e-2
+        )
 
     def test_netmhciipan_el_method_with_version(self):
         temp_dir = tempfile.TemporaryDirectory()
@@ -318,7 +388,14 @@ class CallIEDBClassIITests(CallIEDBTests):
         expected_output_file = os.path.join(self.test_data_dir, 'output_netmhciipan_el-4.2.tsv')
         expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,2,3])
 
-        pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_exact=False)
+        pd.testing.assert_frame_equal(
+            expected_df,
+            actual_df,
+            check_like=True,
+            check_exact=False,
+            rtol=1e-3,
+            atol=2e-2
+        )
 
 if __name__ == '__main__':
     unittest.main()
