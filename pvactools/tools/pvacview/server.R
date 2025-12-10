@@ -1151,9 +1151,7 @@ server <- shinyServer(function(input, output, session) {
           peptide_data[[peptide_names[[i]]]]$individual_immunogenicity_percentile_calls <- NULL
         }
         peptide_data <- as.data.frame(peptide_data)
-        p1 <- ggplot() + scale_x_continuous(limits = c(0, 80)) + scale_y_continuous(limits = c((length(peptide_names) * 2 + 1) * -1, 1))
         all_peptides <- list()
-        incProgress(0.1)
         for (i in 1:length(peptide_names)) {
           #set & constrain mutation_pos' to not exceed length of peptide (may happen if mutation range goes off end)
           mutation_pos <- pos_str_to_seq(df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$peptides[[peptide_names[i]]]$`mutation_position`)
@@ -1200,6 +1198,8 @@ server <- shinyServer(function(input, output, session) {
         h_line_pos <- data.frame(y_pos = seq(min(all_peptides_multiple_hla["y_pos"]) - 0.5, max(all_peptides_multiple_hla["y_pos"]) - 1.5, 2), x_pos = c(min(all_peptides_multiple_hla["x_pos"]) - 1))
         h_line_pos <- rbind(h_line_pos, data.frame(x_pos = max(all_peptides_multiple_hla["x_pos"]) + 1, y_pos = seq(min(all_peptides_multiple_hla["y_pos"]) - 0.5, max(all_peptides_multiple_hla["y_pos"]) - 1.5, 2)))
         incProgress(0.2)
+        p1 <- ggplot() + scale_x_continuous(limits = c(0, max(h_line_pos$x_pos))) + scale_y_continuous(limits = c((length(peptide_names) * 2 + 1) * -1, 1))
+        incProgress(0.1)
         p1 <- p1 +
           geom_rect(data = all_peptides_multiple_hla, aes(xmin = x_pos - 0.5, xmax = 1 + x_pos - 0.5, ymin = .5 + y_pos, ymax = -.5 + y_pos), fill = all_peptides_multiple_hla$color_value) +
           geom_text(data = all_peptides_multiple_hla, aes(x = x_pos, y = y_pos, label = aa, color = mutation), size = 4) +
