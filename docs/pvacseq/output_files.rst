@@ -56,6 +56,8 @@ created):
      - pVACview R Shiny application files. Not generated when running with elution algorithms only.
    * - ``www`` (directory)
      - Directory containing image files for pVACview. Not generated when running with elution algorithms only.
+   * - ``ml_predict/<sample_name>_predict_pvacview.tsv`` (optional)
+     - ML-based neoantigen evaluation predictions file. Generated when both MHC Class I and Class II predictions are run and the ``--run-ml-predictions`` flag is set, or when using the :ref:`add_ml_predictions <optional_downstream_analysis_tools_label>` tool.
 
 
 Filters applied to the filtered.tsv file
@@ -376,6 +378,25 @@ included epitopes, selecting the best-scoring epitope, and which values are outp
      - Was there a match of the mutated peptide sequence to the reference proteome?
    * - ``Evaluation``
      - Column to store the evaluation of each variant when evaluating the run in pVACview. Either ``Accept``, ``Reject``, or ``Review``.
+
+.. _ml_prediction_output:
+
+<sample_name>_predict_pvacview.tsv Report Columns
+--------------------------------------------------
+
+The ``<sample_name>_predict_pvacview.tsv`` file is generated when using the :ref:`add_ml_predictions <optional_downstream_analysis_tools_label>` tool or when running pVACseq with both MHC Class I and Class II predictions and the ``--run-ml-predictions`` flag enabled. This file contains all columns from the Class I aggregated file (``all_epitopes.aggregated.tsv``) with one additional ML prediction columns added.
+
+The file is written to the ``ml_predict`` subdirectory within the output directory.
+
+.. list-table::
+   :header-rows: 1
+
+   * - All columns from ``all_epitopes.aggregated.tsv``
+     - All columns described in the :ref:`aggregated` section above are included in this file.
+   * - ``Evaluation``
+     - Populated with ML-predicted evaluation status for each candidate. Values: ``Accept`` for variants with prediction probability >= threshold (default: 0.55), ``Reject`` for variants with prediction probability <= 0.30, and ``Pending`` for variants with prediction probability between 0.30 and the threshold or when the ML model cannot make a prediction due to missing data.
+   * - ``ML Prediction (score)``
+     - ML-based prediction evaluation with probability score. Format: ``"<Evaluation> (<probability_score>)"`` (e.g., ``"Accept (0.72)"``, ``"Reject (0.15)"``, ``"Review (0.48)"``). Shows ``"NA"`` when the ML model cannot make a prediction due to missing data (e.g., when Class I and Class II aggregated files have different numbers of rows).
 
 .. _pvacseq_best_peptide:
 

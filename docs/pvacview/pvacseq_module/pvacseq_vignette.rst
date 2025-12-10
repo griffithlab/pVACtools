@@ -384,6 +384,59 @@ These potentially problematic characteristics are also flagged by the red boxes 
 Since the candidate peptide has a match in the reference proteome, we will reject this candidate by clicking the
 thumbs-down button.
 
+ML-Based Neoantigen Evaluation Predictions
+__________________________________________
+
+When pVACseq is run with both MHC Class I and Class II predictions and the ``--run-ml-predictions`` flag enabled, or when using the :ref:`add_ml_predictions <optional_downstream_analysis_tools_label>` 
+tool, the ML prediction output file (``<sample_name>_predict_pvacview.tsv``) can be loaded into pVACview. 
+This file contains ML-based evaluation predictions that can help prioritize neoantigen candidates by presetting the evaluation status for each candidate.
+
+The ML prediction file includes all columns from the Class I aggregated file with two columns different:
+
+**Evaluation Column**
+
+The ``Evaluation`` column is pre-populated with ML-predicted evaluation status for each candidate:
+
+- ``Accept``: Variants with prediction probability >= threshold (default: 0.55). These candidates are predicted to be favorable neoantigen candidates to be included in a vaccine. 
+- ``Reject``: Variants with prediction probability <= 0.30. These candidates are predicted to be unfavorable.
+- ``Pending``: Variants with prediction probability between 0.30 and the threshold, or when the ML model cannot make a prediction due to missing data. These candidates require manual review.
+
+**ML Prediction (score) Column**
+
+The ``ML Prediction (score)`` column provides additional context by displaying the evaluation status along with the underlying prediction probability score. 
+The format is ``"<Evaluation> (<probability_score>)"`` (e.g., ``"Accept (0.72)"``, ``"Reject (0.15)"``, ``"Review (0.48)"``). 
+The "Review" status is retained in this column as a suggestion for users to change the status in the "Evaluation" column to "Review", or "Accept" or "Reject" manually.
+This column shows ``"NA"`` when the ML model cannot make a prediction due to missing data (e.g., when Class I and Class II aggregated files have different numbers of rows).
+
+The probability score represents the model's confidence that a candidate should be accepted to be in a vaccine, with values closer to 1.0 indicating higher confidence in acceptance.
+
+
+**Important Features Used by the ML Model**
+
+The ML model integrates information from multiple sources to make its predictions. The following features are among the five most important factors considered:
+1. Allele expression
+2. RNA VAF
+3. RNA Expression
+4. NetMHCpan MT IC50 Score
+5. TSL
+
+The model combines these features (and more not listed here) using a trained random forest algorithm that has learned patterns from expert-reviewed neoantigen candidates. 
+The predictions serve as a starting point for evaluation, but should be reviewed in conjunction with the detailed information available in pVACview, 
+including binding affinity plots, anchor position analysis, and reference proteome matches.
+
+**pVACview ML Predictions Example**
+
+To view predictions on pVACview, load the following files: 
+1. The ML prediction file (``<sample_name>_predict_pvacview.tsv``) in place of the Class I tsv file. 
+2. The json file of Class I data. 
+3. The Class II tsv file.
+4. A list of genes of interest (optional).
+
+.. figure:: ../../images/screenshots/vignette/pvacview-ml-predictions-example.png
+    :width: 1000px
+    :align: right
+    :alt: pVACview ML Predictions Example
+    :figclass: align-left
 
 Export
 ______
