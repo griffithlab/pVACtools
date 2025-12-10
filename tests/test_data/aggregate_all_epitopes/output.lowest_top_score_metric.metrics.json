@@ -48,17 +48,41 @@
               24.41,
               819.15
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               0.21,
               0.6
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
+              "NA"
             ],
             "ic50s_WT": [
               415.05,
               33869.37
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               2.1,
               37.0
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -241,16 +265,40 @@
               35.54,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               0.61,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               55.98,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               0.55,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -384,16 +432,40 @@
               55.98,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               0.55,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               50.78,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               1.2,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -527,17 +599,41 @@
               3343.7,
               92.312
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               4.796,
               0.273
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
+              "NA"
             ],
             "ic50s_WT": [
               32085.75,
               5335.415
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               12.951,
               2.812
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -720,16 +816,40 @@
               96.966,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               0.594,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               85.286,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               0.545,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -863,16 +983,40 @@
               188.06,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               1.118,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               9654.43,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               10.374,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -1006,16 +1150,40 @@
               192.18,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               2.0,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               133.03,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               2.1,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -1149,16 +1317,40 @@
               205.07,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               0.992,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               1376.93,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               7.538,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -1292,16 +1484,40 @@
               618.7,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               5.3,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               749.0,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               6.3,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -1435,16 +1651,40 @@
               625.01,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               3.15,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               32085.75,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               12.951,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -1578,17 +1818,41 @@
               "X",
               776.01
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               1.205
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               1517.76
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               1.695
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -1721,17 +1985,41 @@
               924.94,
               3236.91
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               3.1,
               4.1
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
+              "NA"
             ],
             "ic50s_WT": [
               489.59,
               3236.91
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               2.2,
               4.1
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -1914,17 +2202,41 @@
               "X",
               1455.12
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               2.8
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               418697.15
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               89.0
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -2057,17 +2369,41 @@
               "X",
               4731.22
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               4.924
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               5346.59
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               6.639
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -2200,17 +2536,41 @@
               4382.3,
               831.866
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               5.543,
               1.145
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
+              "NA"
             ],
             "ic50s_WT": [
               146.63,
               31038.343
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               2.266,
               41.281
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -2446,17 +2806,41 @@
               4576.12,
               4098.08
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               25.39,
               8.5
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
+              "NA"
             ],
             "ic50s_WT": [
               6262.79,
               11132.17
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               33.268,
               19.0
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -2639,17 +3023,41 @@
               "X",
               4499.172
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               2.558
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               16550.81
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               6.915
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -2835,17 +3243,41 @@
               819.15,
               202.321
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               3.708,
               0.46
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
+              "NA"
             ],
             "ic50s_WT": [
               1362.11,
               235.88
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               5.901,
               0.42
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -3028,16 +3460,40 @@
               340.99,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               2.69,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               1672.99,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               5.593,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -3171,16 +3627,40 @@
               592.1,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               1.722,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               2607.06,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               4.591,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -3314,16 +3794,40 @@
               2289.62,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               6.681,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               2145.7,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               6.612,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -3457,16 +3961,40 @@
               4335.14,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               10.545,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               4062.65,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               12.687,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -3600,17 +4128,41 @@
               "X",
               4494.07
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               9.6
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               1272.45
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               4.5
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -3743,17 +4295,41 @@
               "X",
               4577.21
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               2.3
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               3568.43
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               1.9
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -3886,17 +4462,41 @@
               "X",
               107.431
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               0.317
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               81.083
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               0.235
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -4029,17 +4629,41 @@
               "X",
               1133.26
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               0.86
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               479.47
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               0.66
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -4225,16 +4849,40 @@
               461.65,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               4.522,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               514.41,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               5.184,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -4368,16 +5016,40 @@
               735.14,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               2.882,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               466.68,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               1.845,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -4511,16 +5183,40 @@
               1005.73,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               3.942,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               884.06,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               3.642,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -4654,17 +5350,41 @@
               "X",
               1296.1
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               5.4
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               1187.52
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               6.3
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -4797,16 +5517,40 @@
               1654.99,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               10.206,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               1804.62,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               14.874,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -4940,17 +5684,41 @@
               "X",
               1847.74
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               3.193
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               876.27
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               1.627
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -5083,16 +5851,40 @@
               1994.44,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               13.0,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               1166.33,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               8.6,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -5226,17 +6018,41 @@
               223.61,
               3083.028
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               1.022,
               2.113
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
+              "NA"
             ],
             "ic50s_WT": [
               216.47,
               1199.113
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               0.683,
               1.364
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -5472,17 +6288,41 @@
               "X",
               952.01
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               3.2
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               670.87
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               2.6
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -5615,16 +6455,40 @@
               3807.28,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               7.538,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               3807.28,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               7.905,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -5758,16 +6622,40 @@
               4062.65,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               11.951,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               37739.56,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               20.383,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -5901,16 +6789,40 @@
               4106.84,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               9.886,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               4106.84,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               10.047,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -6044,17 +6956,41 @@
               "X",
               4564.896
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               2.571
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               8978.747
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               3.912
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -6187,16 +7123,40 @@
               4676.23,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               8.312,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               9865.62,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               9.739,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -6330,17 +7290,41 @@
               "X",
               4989.87
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               6.9
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               4830.5
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               6.6
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -6526,17 +7510,41 @@
               "X",
               834.8
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               2.8
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               11183.56
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               14.0
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -6669,17 +7677,41 @@
               "X",
               2210.82
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               1.811
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               2030.071
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               1.739
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -6865,17 +7897,41 @@
               "X",
               107.295
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               0.317
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               129.337
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               0.378
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -7008,17 +8064,41 @@
               "X",
               620.312
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               0.997
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               888.358
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               1.179
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -7151,17 +8231,41 @@
               "X",
               1665.64
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               4.8
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               969.57
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               3.2
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -7294,17 +8398,41 @@
               "X",
               2339.71
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               2.026
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               2314.53
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               2.192
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -7437,16 +8565,40 @@
               2567.32,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               15.0,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               3503.32,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               18.0,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -7580,16 +8732,40 @@
               3099.81,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               13.0,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               3807.28,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               19.0,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -7723,17 +8899,41 @@
               "X",
               4421.6
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               2.694
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               4379.0
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               2.461
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -7919,16 +9119,40 @@
               180.1,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               2.625,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               202.86,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               1.898,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -8062,16 +9286,40 @@
               1485.27,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               3.114,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               1728.19,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               2.431,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -8205,17 +9453,41 @@
               "X",
               1896.402
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               1.679
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               413.883
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               0.813
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -8401,16 +9673,40 @@
               2406.56,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               2.474,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               2521.061,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               2.533,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -8597,16 +9893,40 @@
               118.1,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               1.2,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               953.12,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               8.7,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -8740,17 +10060,41 @@
               356.07,
               1501.9
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               1.212,
               1.52
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
+              "NA"
             ],
             "ic50s_WT": [
               2873.7,
               16851.56
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               10.545,
               18.062
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -8933,16 +10277,40 @@
               405.44,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               2.97,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               1145.59,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               5.493,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -9076,16 +10444,40 @@
               439.3,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               2.1,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               28893.04,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               39.0,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -9219,17 +10611,41 @@
               "X",
               700.87
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               1.8
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               11712.24
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               13.0
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -9362,17 +10778,41 @@
               "X",
               2941.98
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               9.0
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               4535.65
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               16.0
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -9505,16 +10945,40 @@
               3133.53,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               17.0,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               5743.49,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               24.0,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -9648,17 +11112,41 @@
               "X",
               3567.97
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               2.849
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               1824.25
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               2.558
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -9791,16 +11279,40 @@
               3572.1,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               6.5,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               8038.29,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               12.0,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -9934,17 +11446,41 @@
               61.04,
               4429.97
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               1.3,
               6.7
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
+              "NA"
             ],
             "ic50s_WT": [
               8478.89,
               371.82
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               36.0,
               0.51
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -10127,17 +11663,41 @@
               4224.93,
               183.799
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               5.104,
               0.498
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
+              "NA"
             ],
             "ic50s_WT": [
               2470.7,
               145.931
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               6.478,
               0.421
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -10320,17 +11880,41 @@
               626.35,
               4778.52
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               3.251,
               3.0
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
+              "NA"
             ],
             "ic50s_WT": [
               33252.17,
               401.08
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               23.491,
               0.21
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -10566,16 +12150,40 @@
               5560.06,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               16.061,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               4288.48,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               16.061,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -10762,16 +12370,40 @@
               339.15,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               1.798,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               12449.51,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               14.182,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -10905,17 +12537,41 @@
               "X",
               1184.673
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               1.358
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               636.191
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               1.013
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -11048,17 +12704,41 @@
               "X",
               2486.45
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               3.597
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               11818.98
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               3.521
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -11191,17 +12871,41 @@
               "X",
               2677.935
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               1.971
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               1481.873
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               1.502
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -11334,17 +13038,41 @@
               "X",
               3491.59
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               3.651
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               10874.65
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               4.364
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -11477,17 +13205,41 @@
               "X",
               3950.39
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               3.149
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               5710.05
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               3.048
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -11673,15 +13425,39 @@
               "X",
               105.84
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               0.31
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               "NA"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
               "X",
               "NA"
             ],
@@ -11869,17 +13645,41 @@
               71.552,
               4429.97
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               0.477,
               5.335
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
+              "NA"
             ],
             "ic50s_WT": [
               1813.406,
               7366.35
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               2.204,
               10.964
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -12062,17 +13862,41 @@
               423.37,
               1210.23
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               2.4,
               0.84
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
+              "NA"
             ],
             "ic50s_WT": [
               674.19,
               2612.37
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               8.3,
               1.6
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -12255,17 +14079,41 @@
               "X",
               581.62
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               1.3
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               29352.16
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               21.0
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -12398,17 +14246,41 @@
               "X",
               612.21
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               1.1
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               5506.81
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               9.5
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -12541,17 +14413,41 @@
               "X",
               683.335
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               0.89
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               1026.155
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               1.6
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -12684,17 +14580,41 @@
               "X",
               1009.02
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               1.9
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               899.29
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               1.7
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -12827,16 +14747,40 @@
               1390.34,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               5.2,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               10236.42,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               20.0,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -12970,16 +14914,40 @@
               2503.11,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               5.225,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               13755.61,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               10.909,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -13113,16 +15081,40 @@
               3454.02,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               12.433,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               2904.96,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               10.206,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -13309,17 +15301,41 @@
               "X",
               425.67
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               1.277
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               1737.56
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               1.766
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -13452,16 +15468,40 @@
               1183.39,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               3.775,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               1183.39,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               4.257,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -13595,17 +15635,41 @@
               "X",
               1313.741
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               1.419
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               1016.887
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               1.263
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -13738,16 +15802,40 @@
               4062.65,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               17.982,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               995.27,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               9.739,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -13881,16 +15969,40 @@
               4335.14,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               28.874,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               1422.36,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               19.725,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -14024,16 +16136,40 @@
               4883.05,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               19.725,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               579.42,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               4.018,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -14167,17 +16303,41 @@
               "X",
               789.91
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               4.8
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               318.85
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               2.3
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -14363,16 +16523,40 @@
               645.63,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               3.456,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               674.19,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               3.597,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -14506,17 +16690,41 @@
               "X",
               868.24
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               1.6
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               832.99
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               1.5
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -14649,16 +16857,40 @@
               2496.64,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               6.075,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               2416.9,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               6.239,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -14792,16 +17024,40 @@
               2797.82,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               14.874,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               2031.51,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               13.23,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -14935,17 +17191,41 @@
               "X",
               3052.39
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               3.3
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               2430.19
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               2.5
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -15078,16 +17358,40 @@
               3848.7,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               14.513,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               2607.06,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               9.447,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -15221,17 +17525,41 @@
               "X",
               3922.44
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               2.4
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               3366.06
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               3.4
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -15364,16 +17692,40 @@
               4242.33,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               10.722,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               39408.75,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               30.226,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -15560,17 +17912,41 @@
               186.84,
               3411.14
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               2.3,
               3.8
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
+              "NA"
             ],
             "ic50s_WT": [
               296.81,
               3757.51
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               3.0,
               2.3
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -15753,17 +18129,41 @@
               262.437,
               1545.521
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               1.017,
               1.526
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
+              "NA"
             ],
             "ic50s_WT": [
               2042.038,
               587.026
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               2.312,
               0.969
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -15946,16 +18346,40 @@
               392.49,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               2.213,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               1453.47,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               4.462,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -16089,16 +18513,40 @@
               514.61,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               4.7,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               553.96,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               4.9,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -16232,16 +18680,40 @@
               855.38,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               4.555,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               995.27,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               6.681,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -16375,17 +18847,41 @@
               "X",
               870.24
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               1.8
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               1243.48
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               3.1
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -16518,16 +19014,40 @@
               979.08,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               7.7,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               3287.15,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               18.0,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -16661,16 +19181,40 @@
               1037.79,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               3.165,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               5573.27,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               12.951,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -16804,16 +19348,40 @@
               1584.89,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               10.374,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               2722.37,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               13.537,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -16947,17 +19515,41 @@
               2551.25,
               1946.61
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               5.225,
               4.325
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
+              "NA"
             ],
             "ic50s_WT": [
               4576.12,
               2443.19
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               6.354,
               4.567
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -17140,16 +19732,40 @@
               2077.17,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               7.129,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               1709.59,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               6.9,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -17283,17 +19899,41 @@
               4813.71,
               2558.0
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               13.0,
               4.8
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
+              "NA"
             ],
             "ic50s_WT": [
               5146.12,
               2327.56
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               15.0,
               4.4
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -17476,17 +20116,41 @@
               "X",
               3361.84
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               3.1
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               2649.72
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               4.0
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -17619,17 +20283,41 @@
               "X",
               3434.79
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               2.776
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               7143.32
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               2.649
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -17762,17 +20450,41 @@
               "X",
               22.21
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               0.06
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               10.26
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               0.03
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -17958,16 +20670,40 @@
               5590.46,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               13.23,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               5594.53,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               14.874,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -18154,16 +20890,40 @@
               228.29,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               2.6,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               189.88,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               2.3,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -18297,17 +21057,41 @@
               719.41,
               1852.0
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               2.559,
               3.279
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
+              "NA"
             ],
             "ic50s_WT": [
               759.4,
               51361.77
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               3.097,
               44.803
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -18490,16 +21274,40 @@
               751.22,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               2.852,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               1097.07,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               3.097,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -18633,17 +21441,41 @@
               932.72,
               3877.75
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               3.1,
               7.1
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
+              "NA"
             ],
             "ic50s_WT": [
               801.61,
               2901.22
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               3.4,
               5.4
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -18826,17 +21658,41 @@
               2010.83,
               1133.26
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               7.7,
               1.3
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
+              "NA"
             ],
             "ic50s_WT": [
               6128.72,
               2649.72
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               16.0,
               2.6
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -19019,17 +21875,41 @@
               "X",
               1354.88
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               2.5
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               14187.31
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               22.0
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -19162,17 +22042,41 @@
               "X",
               1501.43
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               1.3
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               34610.27
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               37.0
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -19305,17 +22209,41 @@
               1654.99,
               2099.77
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               4.402,
               6.0
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
+              "NA"
             ],
             "ic50s_WT": [
               2314.53,
               1989.19
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               4.945,
               4.6
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -19498,17 +22426,41 @@
               "X",
               2242.02
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               5.9
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               3480.49
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               13.0
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -19641,16 +22593,40 @@
               2615.05,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               16.0,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               11258.49,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               32.0,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -19784,16 +22760,40 @@
               2722.37,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               10.722,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               4151.52,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               6.547,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -19927,16 +22927,40 @@
               29.28,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               0.26,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               42.81,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               0.38,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -20123,17 +23147,41 @@
               "X",
               254.085
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               0.619
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               99.479
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               0.293
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -20266,17 +23314,41 @@
               "X",
               366.35
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               0.7
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               354.73
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               0.28
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -20409,17 +23481,41 @@
               4018.93,
               480.37
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               10.374,
               0.88
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
+              "NA"
             ],
             "ic50s_WT": [
               1437.83,
               174.41
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               5.959,
               0.3
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -20602,16 +23698,40 @@
               659.75,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               6.2,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               592.1,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               5.7,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -20745,16 +23865,40 @@
               871.93,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               5.448,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               581.41,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               3.216,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -20888,16 +24032,40 @@
               1506.03,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               4.0,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               875.87,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               3.0,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -21031,16 +24199,40 @@
               2523.8,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               24.0,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               2216.49,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               23.0,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -21174,16 +24366,40 @@
               3848.7,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               12.433,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               5044.15,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               15.642,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -21317,16 +24533,40 @@
               165.16,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               0.942,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               137.41,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               0.683,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -21513,17 +24753,41 @@
               "X",
               2538.87
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               4.0
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               15799.38
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               15.0
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -21656,17 +24920,41 @@
               "X",
               4242.68
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               2.903
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
               270171.79
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               27.543
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -21799,16 +25087,40 @@
               4482.08,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               10.047,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               6130.28,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               8.106,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -21995,17 +25307,41 @@
               335.611,
               219.046
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               1.131,
               0.56
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
+              "NA"
             ],
             "ic50s_WT": [
               3806.257,
               505.284
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               3.064,
               0.896
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -22188,16 +25524,40 @@
               627.31,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               2.925,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               4211.92,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               7.293,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -22331,17 +25691,41 @@
               4339.9,
               2169.05
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               6.478,
               2.4
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
+              "NA"
             ],
             "ic50s_WT": [
               4533.98,
               3343.7
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               6.296,
               4.3
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -22577,16 +25961,40 @@
               208.2,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               1.4,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               247.45,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               1.6,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -22720,17 +26128,41 @@
               442.1,
               4106.84
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               1.407,
               6.473
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
+              "NA"
             ],
             "ic50s_WT": [
               743.14,
               21269.21
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               2.266,
               26.037
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -22913,16 +26345,40 @@
               592.1,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               5.745,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               953.12,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               6.9,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -23056,16 +26512,40 @@
               719.41,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               5.745,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               6610.93,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               15.25,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -23199,16 +26679,40 @@
               719.64,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               2.498,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               695.62,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               2.522,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -23342,16 +26846,40 @@
               1654.99,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               7.212,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               2664.09,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               8.213,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -23485,16 +27013,40 @@
               2145.7,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               9.5,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               19717.81,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               17.0,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -23628,17 +27180,41 @@
               4695.7,
               2812.19
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               9.7,
               3.4
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
+              "NA"
             ],
             "ic50s_WT": [
               10363.69,
               14564.23
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               14.0,
               21.0
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*02:01",
@@ -23821,16 +27397,40 @@
               4097.13,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               14.0,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               97158.32,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               39.0,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [
@@ -23964,16 +27564,40 @@
               61.544,
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               0.425,
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA",
               "X"
             ],
             "ic50s_WT": [
               65.544,
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               0.447,
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "NA",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA",
               "X"
             ],
             "hla_types": [

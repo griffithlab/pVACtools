@@ -577,7 +577,10 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                     anchor_fails = []
                     for peptide_type, top_score_metric in zip(['MT', 'WT'], [self.mt_top_score_metric, self.wt_top_score_metric]):
                         summary_ic50s = {}
-                        summary_percentiles = {}
+                        summary_combined_percentiles = {}
+                        summary_binding_percentiles = {}
+                        summary_presentation_percentiles = {}
+                        summary_immunogenicity_percentiles = {}
                         ic50_scores = {}
                         binding_scores = {}
                         binding_percentiles = {}
@@ -587,7 +590,10 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                         presentation_percentiles = {}
                         for index, line in included_df_peptide_annotation.to_dict(orient='index').items():
                             summary_ic50s[line['HLA Allele']] = line['{} {} IC50 Score'.format(top_score_metric, peptide_type)]
-                            summary_percentiles[line['HLA Allele']] = line['{} {} Percentile'.format(top_score_metric, peptide_type)]
+                            summary_combined_percentiles[line['HLA Allele']] = line['{} {} Percentile'.format(top_score_metric, peptide_type)]
+                            summary_binding_percentiles[line['HLA Allele']] = line['{} {} IC50 Percentile'.format(top_score_metric, peptide_type)]
+                            summary_presentation_percentiles[line['HLA Allele']] = line['{} {} Presentation Percentile'.format(top_score_metric, peptide_type)]
+                            summary_immunogenicity_percentiles[line['HLA Allele']] = line['{} {} Immunogenicity Percentile'.format(top_score_metric, peptide_type)]
                             ic50_scores[line['HLA Allele']] = self.replace_nas_and_round([line["{} {} IC50 Score".format(algorithm, peptide_type)] for algorithm in self.ic50_algorithms])
                             binding_scores[line['HLA Allele']] = self.replace_nas_and_round([line["{} {} Binding Score".format(algorithm, peptide_type)] for algorithm in self.binding_score_algorithms])
                             binding_percentiles[line['HLA Allele']] = self.replace_nas_and_round([line["{} {} Percentile".format(algorithm, peptide_type)] for algorithm in self.binding_percentile_algorithms])
@@ -600,18 +606,21 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                             if peptide_type == 'MT' and not self.anchor_calculator.is_anchor_residue_pass(line):
                                 anchor_fails.append(line['HLA Allele'])
                         sorted_summary_ic50s = []
-                        sorted_summary_percentiles = []
+                        sorted_summary_combined_percentiles = []
+                        sorted_summary_binding_percentiles = []
+                        sorted_summary_presentation_percentiles = []
+                        sorted_summary_immunogenicity_percentiles = []
                         for hla_type in sorted(self.hla_types):
-                            if hla_type in summary_ic50s:
-                                sorted_summary_ic50s.append(summary_ic50s[hla_type])
-                            else:
-                                sorted_summary_ic50s.append('X')
-                            if hla_type in summary_percentiles:
-                                sorted_summary_percentiles.append(summary_percentiles[hla_type])
-                            else:
-                                sorted_summary_percentiles.append('X')
+                            sorted_summary_ic50s.append(summary_ic50s[hla_type]) if hla_type in summary_ic50s else sorted_summary_ic50s.append('X')
+                            sorted_summary_combined_percentiles.append(summary_combined_percentiles[hla_type]) if hla_type in summary_combined_percentiles else sorted_summary_combined_percentiles.append('X')
+                            sorted_summary_binding_percentiles.append(summary_binding_percentiles[hla_type]) if hla_type in summary_binding_percentiles else sorted_summary_binding_percentiles.append('X')
+                            sorted_summary_presentation_percentiles.append(summary_presentation_percentiles[hla_type]) if hla_type in summary_presentation_percentiles else sorted_summary_presentation_percentiles.append('X')
+                            sorted_summary_immunogenicity_percentiles.append(summary_immunogenicity_percentiles[hla_type]) if hla_type in summary_immunogenicity_percentiles else sorted_summary_immunogenicity_percentiles.append('X')
                         results[peptide]['ic50s_{}'.format(peptide_type)] = self.replace_nas_and_round(sorted_summary_ic50s)
-                        results[peptide]['percentiles_{}'.format(peptide_type)] = self.replace_nas_and_round(sorted_summary_percentiles)
+                        results[peptide]['combined_percentiles_{}'.format(peptide_type)] = self.replace_nas_and_round(sorted_summary_combined_percentiles)
+                        results[peptide]['binding_percentiles_{}'.format(peptide_type)] = self.replace_nas_and_round(sorted_summary_binding_percentiles)
+                        results[peptide]['presentation_percentiles_{}'.format(peptide_type)] = self.replace_nas_and_round(sorted_summary_presentation_percentiles)
+                        results[peptide]['immunogenicity_percentiles_{}'.format(peptide_type)] = self.replace_nas_and_round(sorted_summary_immunogenicity_percentiles)
                         individual_ic50_calls[peptide_type] = ic50_scores
                         individual_binding_score_calls[peptide_type] = binding_scores
                         individual_binding_percentile_calls[peptide_type] = binding_percentiles

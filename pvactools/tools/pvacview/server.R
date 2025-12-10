@@ -440,7 +440,7 @@ server <- shinyServer(function(input, output, session) {
     selectInput(
         "peptide_table_mode",
         "Specify what data to show",
-        c("IC50", "combined percentile"),
+        c("IC50", "combined percentile", "binding percentile", "presentation percentile", "immunogenicity percentile"),
         multiple=FALSE,
         selected="IC50",
         width="200px"
@@ -1085,7 +1085,13 @@ server <- shinyServer(function(input, output, session) {
         if (is.null(input$peptide_table_mode) || input$peptide_table_mode == 'IC50') {
             display_mode <- "ic50s"
         } else if (input$peptide_table_mode == 'combined percentile') {
-            display_mode <- "percentiles"
+            display_mode <- "combined_percentiles"
+        } else if (input$peptide_table_mode == 'binding percentile') {
+            display_mode <- "binding_percentiles"
+        } else if (input$peptide_table_mode == 'presentation percentile') {
+            display_mode <- "presentation_percentiles"
+        } else if (input$peptide_table_mode == 'immunogenicity percentile') {
+            display_mode <- "immunogenicity_percentiles"
         }
         dtable <- datatable(do.call("rbind", lapply(peptide_names, table_formatting, peptide_data, display_mode)), options = list(
           pageLength = 10,
