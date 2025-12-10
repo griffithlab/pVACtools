@@ -58,54 +58,73 @@ Contents
    contact
    mailing_list
 
+
 New in Version |release|
 ------------------------
 
 This is a bugfix release. It fixes the following problem(s):
 
-* Fix an issue where the output parsing of MHCflurryEL in pVACfuse and pVACsplice where only the smallest epitope length would have results. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1320
-* Fix per-allele counts in the aggregated report. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1316
-* Fix a few bugs where standalone commands weren't working with all_epitopes/filtered TSVs. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1324
-* Update ``--top-score-metric2`` parameter help text for clarity and remove unnecessary usage. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1321
+* Remove allele no longer supported by MHCflurry. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1342
 
-New in Version 5
+New in Version 6
 ----------------
 
-This is a major version release. Please note that pVACtools 5.0 is not guaranteed to be
-backwards-compatible and certain changes could break old workflows.
+This is a major version release. Please note that pVACtools 6.0 is not guaranteed to be
+backwards-compatible and certain changes could break old workflows. It also
+removes support for Python 3.7 and 3.8.
 
 New Tools
 _________
 
-This release adds a new tool, pVACsplice, for prediction neoantigens from
-splice sites. Please see the :ref:`full tool documentation <pvacsplice>` for more information.
-by @mrichters in https://github.com/griffithlab/pVACtools/pull/911
+- A new tool, pVACcompare allows users to visualize differences between output
+  files from different pVACtools versions. This tool may be useful when
+  investigating changes to predicted neoantigens between versions in
+  controlled experiments where enumerating and explaning such differences may be
+  crucial, e.g. in clinical trials. The tool can be run using the ``pvactools
+  compare`` command. For more information please see the
+  `Comparison Tool documentation
+  <https://pvactools.readthedocs.io/en/staging/helper_tools/comparison_tool.html>`_.
+- A new standalone command ``pvacseq create_peptide_ordering_form`` generates
+  peptide ordering files (FASTA, annotated ordering Excel spreadsheet,
+  and review template Excel spreadsheet) to streamline preparation of peptides
+  for synthesis and review. For more information please see the `documentation
+  <https://pvactools.readthedocs.io/en/latest/pvacseq/optional_downstream_analysis_tools.html#create-peptide-ordering-form>`_
 
 New Features
 ____________
 
-- This release refactors the pVACvector graph building algorithm in order to increase the probability
-  for finding a solution and reduce the number of iterations needed before a solution is found. Please
-  see the PR describtion for the full details. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1163
-- Add a new ``--aggregate-inclusion-count-limit`` parameter to set the maximum number of epitopes
-  to include in the metrics.json detailed data for variants that have a large number of candidate
-  neoantigens (e.g., frameshifts). by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1147
-- Add a new ``--biotypes`` parameter which defines a list of transcript consequence biotypes that the
-  predictions from pVACseq and pVACsplice should be limited to. by @mrichters in https://github.com/griffithlab/pVACtools/pull/911
-- Add support for additional alleles that weren't previously supported, includings ones for dog,
-  mouse, and MHC class II. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1148
+- pVACseq and pVACsplice now take into account the MANE Select and Canonical status of a transcript
+  for filtering, prioritizing, and tiering a neoantigen candidate. MANE Select, Canonical, and TSL
+  status is evaluated according to the new ``--transcript-prioritization-strategy`` parameter. This
+  parameter allows users to list one or more critieria (``mane_select``, ``canonical``, ``tsl``) to
+  take into consideration. As part of this update the "transcript support level filter" has been
+  renamed to "transcript filter" including the standalone command which is now
+  ``pvacseq|pvacsplice transcript_filer`` instead of ``pvacseq|pvacsplice transcript_support_level_filter``.
+- The aggregate report tiers have been updated to add four new tier:
+
+  - ``PoorBinder``: candidate fails the binding criteria but passes all other critieria.
+  - ``RefMatch``: candidate has a reference match but passes all other criteria.
+  - ``ProbPos``: candidate has a problematic amino acid but passes all other criteria.
+  - ``PoorTranscript``: a candidate's best transcript is neither MANE Select, Canonical, nor meets
+    the TSL cutoff (depending on the specified ``transcript-prioritization-strategy``; only available
+    in pVACseq and pVACsplice).
+
+- A new set of standalone commands, ``pvacseq|fuse|splice|bind update_tiers``,
+  has been added to update the tiering in an aggregate report if different
+  tiering thresholds are desired after the initial pipeline run.
+- By default, transcripts where the FLAGS VEP annotation is set will now be filtered out before processing
+  by pVACseq and pVACsplice. This field identifies transcripts where the CDS 5' or 3' is incomplete. A new
+  parameter ``--allow-incomplete-transcripts`` has been added which can be used to replicate the previous
+  behavior where such transcripts were included.
+- The pVACsplice logic for aggregating variants in the aggregate report creation has been updated to
+  aggregate neoantigen candidates from the same Junction together instead of using the Index.
+- Output file names of the reports have been updated to include MHC_I/MHC_II/Combined prefixes for easier
+  identification of the type of output file.
 
 Bugfixes
 ________
 
-- This relase fixes a bug with the ``--agregate-inclusion-binding-threshold`` which would not be used if
-  the ``--allele-specific-binding-thresholds`` flag was set. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1147
-- The pVACview percentile plots have been updated to include percentiles from elution and immunogenicity
-  algorithms. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1149
-- This release fixes a bug where the incorrect neoantigen fasta entry may be used for the reference proteome
-  search if there were multiple variants or alt alleles located at the same genomic position. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1153
-- Add additional trailing amino acids for frameshift insertions when creating fasta in order to capture a
-  matched wildtype entry in large repetitive regions. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1155
+- This relase fixes a bug with sorting of pVACfuse output files.
 
 Past release notes can be found on our :ref:`releases` page.
 

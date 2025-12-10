@@ -210,6 +210,10 @@ def main(args_input = sys.argv[1:]):
                 sys.exit("IEDB MHC I executable path doesn't exist %s" % iedb_mhc_i_executable)
         else:
             iedb_mhc_i_executable = None
+        
+        if args.use_normalized_percentiles and species != 'human':
+            print("WARNING: Normalized percentiles are only available for human alleles. Option will be ignored.")
+            args.use_normalized_percentiles = False
 
         for x in args.class_i_epitope_length:
             class_i_arguments = copy.deepcopy(junction_arguments)
@@ -230,6 +234,8 @@ def main(args_input = sys.argv[1:]):
             class_i_arguments['output_dir']              = output_len_dir
             class_i_arguments['netmhc_stab']             = args.netmhc_stab
             class_i_arguments['filename_addition']         = "MHC_I"
+            class_i_arguments['use_normalized_percentiles']  = args.use_normalized_percentiles
+            class_i_arguments['reference_scores_path']    = args.reference_scores_path
             pipeline = PvacsplicePipeline(**class_i_arguments)
             pipeline.execute()
 

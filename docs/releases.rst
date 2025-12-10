@@ -27,3 +27,4 @@ Release Notes
    releases/5_3
    releases/5_4
    releases/5_5
+   releases/6_0

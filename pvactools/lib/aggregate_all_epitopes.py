@@ -170,7 +170,7 @@ class AggregateAllEpitopes:
 
     def determine_used_immunogenicity_percentile_algorithms(self):
         headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
-        potential_algorithms = ["PRIME"]
+        potential_algorithms = ["BigMHC_IM", "DeepImmuno", "PRIME"]
         prediction_algorithms = []
         for algorithm in potential_algorithms:
             if "{} MT Percentile".format(algorithm) in headers or "{} Percentile".format(algorithm) in headers:
@@ -197,21 +197,10 @@ class AggregateAllEpitopes:
 
     def determine_used_presentation_percentile_algorithms(self):
         headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
-        potential_algorithms = ["NetMHCpanEL", "MHCflurryEL Presentation", "NetMHCIIpanEL"]
+        potential_algorithms = ["NetMHCpanEL", "NetMHCIIpanEL", "BigMHC_EL", "MHCflurryEL Presentation", "MHCflurryEL Processing"]
         prediction_algorithms = []
         for algorithm in potential_algorithms:
             if "{} MT Percentile".format(algorithm) in headers or "{} Percentile".format(algorithm) in headers:
-                prediction_algorithms.append(algorithm)
-        return prediction_algorithms
-
-    def determine_used_prediction_algorithms(self):
-        headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
-        potential_algorithms = PredictionClass.prediction_methods()
-        prediction_algorithms = []
-        for algorithm in potential_algorithms:
-            if algorithm in ['NetMHCpanEL', 'NetMHCIIpanEL', 'BigMHC_EL', 'BigMHC_IM', 'DeepImmuno']:
-                continue
-            if "{} MT IC50 Score".format(algorithm) in headers or "{} IC50 Score".format(algorithm) in headers:
                 prediction_algorithms.append(algorithm)
         return prediction_algorithms
 
@@ -316,7 +305,6 @@ class AggregateAllEpitopes:
         return dtypes
 
     def execute(self):
-        prediction_algorithms = self.determine_used_prediction_algorithms()
         epitope_lengths = self.determine_used_epitope_lengths()
         used_columns = self.determine_columns_used_for_aggregation()
         dtypes = self.set_column_types()
@@ -393,7 +381,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             percentile_threshold_strategy='conservative',
             allele_specific_binding_thresholds=False,
             top_score_metric="median",
-            top_score_metric2="ic50",
+            top_score_metric2=["ic50", "combined_percentile"],
             allele_specific_anchors=False,
             allow_incomplete_transcripts=False,
             anchor_contribution_threshold=0.8,
@@ -418,6 +406,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         self.transcript_prioritization_strategy = transcript_prioritization_strategy
         self.maximum_transcript_support_level = maximum_transcript_support_level
         self.allow_incomplete_transcripts = allow_incomplete_transcripts
+        self.top_score_metric = top_score_metric
         if top_score_metric == 'median':
             self.mt_top_score_metric = "Median"
             self.wt_top_score_metric = "Median"
@@ -472,8 +461,8 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             self.transcript_prioritization_strategy,
             self.maximum_transcript_support_level,
             self.anchor_calculator,
-            self.mt_top_score_metric,
-            self.top_score_mode,
+            self.top_score_metric,
+            self.top_score_metric2,
             self.allow_incomplete_transcripts,
         ).get(df)
 
@@ -528,6 +517,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             sort_columns.append('problematic_positions_sort')
             sort_order.append(True)
 
+        #TODO update
         if self.top_score_mode == 'IC50 Score':
             primary = "{} MT IC50 Score".format(self.mt_top_score_metric)
             secondary = "{} MT Percentile".format(self.mt_top_score_metric)
@@ -848,7 +838,7 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
             percentile_threshold_strategy='conservative',
             allele_specific_binding_thresholds=False,
             top_score_metric="median",
-            top_score_metric2="ic50",
+            top_score_metric2=["ic50", "combined_percentile"],
             aggregate_inclusion_binding_threshold=5000,
             aggregate_inclusion_count_limit=15,
         ):
@@ -862,10 +852,11 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         self.percentile_threshold_strategy = percentile_threshold_strategy
         self.aggregate_inclusion_binding_threshold = aggregate_inclusion_binding_threshold
         self.aggregate_inclusion_count_limit = aggregate_inclusion_count_limit
+        self.top_score_metric = top_score_metric
         if top_score_metric == 'median':
-            self.top_score_metric = "Median"
+            self.mt_top_score_metric = "Median"
         else:
-            self.top_score_metric = "Best"
+            self.mt_top_score_metric = "Best"
         self.top_score_metric2 = top_score_metric2
         if self.top_score_metric2 == "percentile":
             self.top_score_mode = "Percentile"
@@ -886,8 +877,8 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
 
     def read_input_file(self, used_columns, dtypes):
         df = pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False, na_values="NA", keep_default_na=False, dtype={"Mutation": str})
-        df = df[df["{} IC50 Score".format(self.top_score_metric)] != 'NA']
-        df = df.astype({"{} IC50 Score".format(self.top_score_metric):'float'})
+        df = df[df["{} IC50 Score".format(self.mt_top_score_metric)] != 'NA']
+        df = df.astype({"{} IC50 Score".format(self.mt_top_score_metric):'float'})
         return df
 
     def get_sub_df(self, all_epitopes_df, key):
@@ -895,7 +886,7 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         return (df, key)
 
     def get_included_df(self, df):
-        binding_df = df[df[f"{self.top_score_metric} IC50 Score"] < self.aggregate_inclusion_binding_threshold]
+        binding_df = df[df[f"{self.mt_top_score_metric} IC50 Score"] < self.aggregate_inclusion_binding_threshold]
 
         if binding_df.shape[0] == 0:
             return binding_df
@@ -921,23 +912,23 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
                     binding_threshold = self.allele_specific_binding_thresholds[row['HLA Allele']]
                 else:
                     binding_threshold = self.binding_threshold
-                if row["{} IC50 Score".format(self.top_score_metric)] < binding_threshold:
+                if row["{} IC50 Score".format(self.mt_top_score_metric)] < binding_threshold:
                     selection.append(index)
             good_binders = included_df[included_df.index.isin(selection)]
         else:
-            good_binders = included_df[included_df["{} IC50 Score".format(self.top_score_metric)] < self.binding_threshold]
+            good_binders = included_df[included_df["{} IC50 Score".format(self.mt_top_score_metric)] < self.binding_threshold]
         return good_binders
 
     def sort_included_df(self, df):
         if self.top_score_metric2 == "percentile":
             df.sort_values(by=[
-                "{} Percentile".format(self.top_score_metric),
-                "{} IC50 Score".format(self.top_score_metric),
+                "{} Percentile".format(self.mt_top_score_metric),
+                "{} IC50 Score".format(self.mt_top_score_metric),
             ], inplace=True, ascending=[True, True])
         else:
             df.sort_values(by=[
-                "{} IC50 Score".format(self.top_score_metric),
-                "{} Percentile".format(self.top_score_metric),
+                "{} IC50 Score".format(self.mt_top_score_metric),
+                "{} Percentile".format(self.mt_top_score_metric),
             ], inplace=True, ascending=[True, True])
         return df
 
@@ -980,7 +971,7 @@ class PvacfuseAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
         percentile_threshold_strategy='conservative',
         allele_specific_binding_thresholds=False,
         top_score_metric="median",
-        top_score_metric2="ic50",
+        top_score_metric2=["ic50", "combined_percentile"],
         read_support=5,
         expn_val=0.1,
         aggregate_inclusion_binding_threshold=5000,
@@ -1018,11 +1009,11 @@ class PvacfuseAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
             'Prob Pos': problematic_positions,
             'Num Included Peptides': included_peptide_count,
             'Num Passing Peptides': good_binder_count,
-            'IC50 MT': best["{} IC50 Score".format(self.top_score_metric)],
-            '%ile MT': best["{} Percentile".format(self.top_score_metric)],
-            'IC50 %ile MT': best["{} IC50 Percentile".format(self.top_score_metric)],
-            'IM %ile MT': best["{} Immunogenicity Percentile".format(self.top_score_metric)],
-            'Pres %ile MT': best["{} Presentation Percentile".format(self.top_score_metric)],
+            'IC50 MT': best["{} IC50 Score".format(self.mt_top_score_metric)],
+            '%ile MT': best["{} Percentile".format(self.mt_top_score_metric)],
+            'IC50 %ile MT': best["{} IC50 Percentile".format(self.mt_top_score_metric)],
+            'IM %ile MT': best["{} Immunogenicity Percentile".format(self.mt_top_score_metric)],
+            'Pres %ile MT': best["{} Presentation Percentile".format(self.mt_top_score_metric)],
             'Expr': best['Expression'],
             'Read Support': best['Read Support'],
             'Tier': 'Not Tiered',
@@ -1033,7 +1024,7 @@ class PvacfuseAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
     def get_best_binder(self, df):
         return PvacfuseBestCandidate(
             self.top_score_metric,
-            self.top_score_mode,
+            self.top_score_metric2,
         ).get(df)
 
     def tier_aggregated_report(self):
@@ -1063,11 +1054,11 @@ class PvacbindAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
             'Prob Pos': problematic_positions,
             'Num Included Peptides': included_peptide_count,
             'Num Passing Peptides': good_binder_count,
-            'IC50 MT': best["{} IC50 Score".format(self.top_score_metric)],
-            '%ile MT': best["{} Percentile".format(self.top_score_metric)],
-            'IC50 %ile MT': best["{} IC50 Percentile".format(self.top_score_metric)],
-            'IM %ile MT': best["{} Immunogenicity Percentile".format(self.top_score_metric)],
-            'Pres %ile MT': best["{} Presentation Percentile".format(self.top_score_metric)],
+            'IC50 MT': best["{} IC50 Score".format(self.mt_top_score_metric)],
+            '%ile MT': best["{} Percentile".format(self.mt_top_score_metric)],
+            'IC50 %ile MT': best["{} IC50 Percentile".format(self.mt_top_score_metric)],
+            'IM %ile MT': best["{} Immunogenicity Percentile".format(self.mt_top_score_metric)],
+            'Pres %ile MT': best["{} Presentation Percentile".format(self.mt_top_score_metric)],
             'Tier': 'Not Tiered',
             'Evaluation': 'Pending',
         })
@@ -1076,7 +1067,7 @@ class PvacbindAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
     def get_best_binder(self, df):
         return PvacbindBestCandidate(
             self.top_score_metric,
-            self.top_score_mode,
+            self.top_score_metric2,
         ).get(df)
 
     def tier_aggregated_report(self):
@@ -1107,7 +1098,7 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
         aggregate_inclusion_binding_threshold=5000,
         aggregate_inclusion_count_limit=15,
         top_score_metric="median",
-        top_score_metric2="ic50",
+        top_score_metric2=["ic50", "combined_percentile"],
         trna_vaf=0.25,
         trna_cov=10,
         expn_val=1,
@@ -1179,11 +1170,11 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
             'Prob Pos': problematic_positions,
             'Num Included Peptides': included_peptide_count,
             'Num Passing Peptides': good_binder_count,
-            'IC50 MT': best["{} IC50 Score".format(self.top_score_metric)],
-            '%ile MT': best["{} Percentile".format(self.top_score_metric)],
-            'IC50 %ile MT': best["{} IC50 Percentile".format(self.top_score_metric)],
-            'IM %ile MT': best["{} Immunogenicity Percentile".format(self.top_score_metric)],
-            'Pres %ile MT': best["{} Presentation Percentile".format(self.top_score_metric)],
+            'IC50 MT': best["{} IC50 Score".format(self.mt_top_score_metric)],
+            '%ile MT': best["{} Percentile".format(self.mt_top_score_metric)],
+            'IC50 %ile MT': best["{} IC50 Percentile".format(self.mt_top_score_metric)],
+            'IM %ile MT': best["{} Immunogenicity Percentile".format(self.mt_top_score_metric)],
+            'Pres %ile MT': best["{} Presentation Percentile".format(self.mt_top_score_metric)],
             'RNA Expr': best["Gene Expression"],
             'RNA VAF': best["Tumor RNA VAF"],
             'Allele Expr': allele_expr,
@@ -1199,7 +1190,7 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
             self.transcript_prioritization_strategy,
             self.maximum_transcript_support_level,
             self.top_score_metric,
-            self.top_score_mode,
+            self.top_score_metric2,
             self.allow_incomplete_transcripts,
         ).get(df)
 

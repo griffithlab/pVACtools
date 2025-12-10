@@ -36,16 +36,17 @@ class TopScoreFilter(metaclass=ABCMeta):
             '-m', '--top-score-metric',
             choices=['lowest', 'median'],
             default='median',
-            help="The ic50 scoring metric to use for filtering. "
-                 + "lowest: Use the best MT Score (i.e. the lowest MT ic50 binding score of all chosen prediction methods). "
-                 + "median: Use the median MT Score (i.e. the median MT ic50 binding score of all chosen prediction methods)."
+            help="The kind of scoring metric to use for determining the top scoring peptide and for sorting. "
+                 + "lowest: Use the best MT IC50 Score, Percentile, Binding Percentile, Immunogenicity Percentile and/or Presentation Percentile. "
+                 + "median: Use the median MT IC50 Score, Percentile, Binding Percentile, Immunogenicity Percentile and/or Presentation Percentile. "
+                 + "Which scoring metrics to consider it controlled by the --top-score-metric2 parameter."
         )
         parser.add_argument(
-            '-m2', '--top-score-metric2',
-            choices=['ic50','percentile'],
-            default='ic50',
-            help="Whether to use median/best IC50 or to use median/best percentile score when determining the top scoring peptide. "
-                 + "This parameter is also used to influence the primary sorting criteria for the variants in the output report."
+            '-m2', '--top-score-metric2', type=top_score_metric2(),
+            help="Which metrics to consider when determining the top scoring peptide. All listed metrics will be rank scored and the sum of those rank scores will be used. "
+                 + "Whether the lowest or median is considered for each metric is controlled by the --top-score-metric parameter. "
+                 + "This parameter is also used to control the sorting criteria for the variants in the output report evaluated in the order provided.",
+            default=['ic50', 'combined_percentile'],
         )
         if tool == 'pvacseq' or tool == 'pvacsplice':
             parser.add_argument(
@@ -113,9 +114,9 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
     def __init__(
         self,
         input_file,
-        output_file, 
+        output_file,
         top_score_metric="median",
-        top_score_metric2="ic50",
+        top_score_metric2=["ic50", "combined_percentile"],
         binding_threshold=500,
         allele_specific_binding_thresholds=False,
         transcript_prioritization_strategy=['canonical', 'mane_select', 'tsl'],
@@ -134,10 +135,6 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
         else:
             self.mt_top_score_metric = "Best"
             self.wt_top_score_metric = "Corresponding"
-        if self.top_score_metric2 == "percentile":
-            self.top_score_mode = "Percentile"
-        else:
-            self.top_score_mode = "IC50 Score"
         self.binding_threshold = binding_threshold
         self.use_allele_specific_binding_thresholds = allele_specific_binding_thresholds
         self.allow_incomplete_transcripts= allow_incomplete_transcripts
@@ -196,7 +193,8 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
                             filtered_lines.append(duplicate_variant_line)
 
 
-            sorted_rows = pvactools.lib.sort.default_sort(filtered_lines, self.top_score_metric, self.top_score_metric2)
+            sorted_rows = pvactools.lib.sort.pvacseq_sort(filtered_lines, self.top_score_metric, self.top_score_metric2)
+            sorted_rows = sorted_rows.to_dict('records')
             writer.writerows(sorted_rows)
 
     def find_best_line(self, lines):
@@ -210,14 +208,14 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
             self.transcript_prioritization_strategy,
             self.maximum_transcript_support_level,
             self.anchor_calculator,
-            self.mt_top_score_metric,
-            self.top_score_mode,
+            self.top_score_metric,
+            self.top_score_metric2,
             self.allow_incomplete_transcripts,
         ).get(df)
 
 
 class PvacfuseTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
-    def __init__(self, input_file, output_file, top_score_metric="median", top_score_metric2 = "ic50"):
+    def __init__(self, input_file, output_file, top_score_metric="median", top_score_metric2 = ["ic50", "combined_percentile"]):
         self.input_file = input_file
         self.output_file = output_file
         self.top_score_metric = top_score_metric
@@ -226,10 +224,6 @@ class PvacfuseTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
             self.formatted_top_score_metric = "Median"
         else:
             self.formatted_top_score_metric = "Best"
-        if self.top_score_metric2 == "percentile":
-            self.top_score_mode = "Percentile"
-        else:
-            self.top_score_mode = "IC50 Score"
 
     def execute(self):
         with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh:
@@ -269,19 +263,20 @@ class PvacfuseTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
                             duplicate_variant_line['Mutation'] = "{}.{}".format(variant, best_line_consequence)
                             filtered_lines.append(duplicate_variant_line)
 
-            sorted_rows = pvactools.lib.sort.pvacbind_sort(filtered_lines, self.top_score_metric, self.top_score_metric2)
+            sorted_rows = pvactools.lib.sort.pvacfuse_sort(filtered_lines, self.top_score_metric, self.top_score_metric2)
+            sorted_rows = sorted_rows.to_dict('records')
             writer.writerows(sorted_rows)
 
     def find_best_line(self, lines):
         df = pd.DataFrame(lines)
         df = df.astype({"{} IC50 Score".format(self.formatted_top_score_metric):'float'})
         return PvacfuseBestCandidate(
-            self.formatted_top_score_metric,
-            self.top_score_mode,
+            self.top_score_metric,
+            self.top_score_metric2,
         ).get(df)
 
 class PvacbindTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
-    def __init__(self, input_file, output_file, top_score_metric="median", top_score_metric2 = "ic50"):
+    def __init__(self, input_file, output_file, top_score_metric="median", top_score_metric2 = ["ic50", "combined_percentile"]):
         self.input_file = input_file
         self.output_file = output_file
         self.top_score_metric = top_score_metric
@@ -290,10 +285,6 @@ class PvacbindTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
             self.formatted_top_score_metric = "Median"
         else:
             self.formatted_top_score_metric = "Best"
-        if self.top_score_metric2 == "percentile":
-            self.top_score_mode = "Percentile"
-        else:
-            self.top_score_mode = "IC50 Score"
 
     def execute(self):
         with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh:
@@ -312,14 +303,15 @@ class PvacbindTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
                 filtered_lines.append(best_line)
 
             sorted_rows = pvactools.lib.sort.pvacbind_sort(filtered_lines, self.top_score_metric, self.top_score_metric2)
+            sorted_rows = sorted_rows.to_dict('records')
             writer.writerows(sorted_rows)
 
     def find_best_line(self, lines):
         df = pd.DataFrame(lines)
         df = df.astype({"{} IC50 Score".format(self.formatted_top_score_metric):'float'})
         return PvacbindBestCandidate(
-            self.formatted_top_score_metric,
-            self.top_score_mode,
+            self.top_score_metric,
+            self.top_score_metric2,
         ).get(df)
 
 class PvacspliceTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
@@ -330,7 +322,7 @@ class PvacspliceTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
         top_score_metric="median",
         transcript_prioritization_strategy=['canonical', 'mane_select', 'tsl'],
         maximum_transcript_support_level=1,
-        top_score_metric2="ic50",
+        top_score_metric2=["ic50", "combined_percentile"],
         allow_incomplete_transcripts=False,
     ):
         self.input_file = input_file
@@ -341,10 +333,6 @@ class PvacspliceTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
             self.formatted_top_score_metric = "Median"
         else:
             self.formatted_top_score_metric = "Best"
-        if self.top_score_metric2 == "percentile":
-            self.top_score_mode = "Percentile"
-        else:
-            self.top_score_mode = "IC50 Score"
         self.transcript_prioritization_strategy = transcript_prioritization_strategy
         self.maximum_transcript_support_level = maximum_transcript_support_level
         self.allow_incomplete_transcripts= allow_incomplete_transcripts
@@ -358,7 +346,7 @@ class PvacspliceTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
             for line in reader:
                 if line["{} IC50 Score".format(self.formatted_top_score_metric)] == 'NA':
                     continue
-                lines_per_variant[line['Index']].append(line)
+                lines_per_variant[line['Junction']].append(line)
 
             filtered_lines = []
             for index, lines in lines_per_variant.items():
@@ -366,6 +354,7 @@ class PvacspliceTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
                 filtered_lines.append(best_line)
 
             sorted_rows = pvactools.lib.sort.pvacsplice_sort(filtered_lines, self.top_score_metric, self.top_score_metric2)
+            sorted_rows = sorted_rows.to_dict('records')
             writer.writerows(sorted_rows)
 
     def find_best_line(self, lines):
@@ -374,7 +363,7 @@ class PvacspliceTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
         return PvacspliceBestCandidate(
             self.transcript_prioritization_strategy,
             self.maximum_transcript_support_level,
-            self.formatted_top_score_metric,
-            self.top_score_mode,
+            self.top_score_metric,
+            self.top_score_metric2,
             self.allow_incomplete_transcripts,
         ).get(df)

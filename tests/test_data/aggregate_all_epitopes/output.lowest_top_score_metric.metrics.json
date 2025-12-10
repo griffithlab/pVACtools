@@ -21,7 +21,10 @@
   "use_allele_specific_binding_thresholds": false,
   "mt_top_score_metric": "Best",
   "wt_top_score_metric": "Corresponding",
-  "top_score_metric2": "ic50",
+  "top_score_metric2": [
+    "ic50",
+    "combined_percentile"
+  ],
   "allele_specific_binding_thresholds": {
     "HLA-A*02:01": 255.0,
     "HLA-B*35:01": 348.0
@@ -2819,8 +2822,8 @@
     "DNA VAF": 0.071,
     "RNA VAF": "NA",
     "gene_expr": "NA",
-    "best_peptide_mt": "HVWTHSRDP",
-    "best_peptide_wt": "HVWTRSRDP",
+    "best_peptide_mt": "HSRDPEGSSR",
+    "best_peptide_wt": "RSRDPEGSSR",
     "best_hla_allele": "HLA-B*35:01"
   },
   "22-18644672-18644673-C-T": {
@@ -5456,8 +5459,8 @@
     "DNA VAF": 0.1,
     "RNA VAF": "NA",
     "gene_expr": "NA",
-    "best_peptide_mt": "ALNNLLTEE",
-    "best_peptide_wt": "ALNHLLTEE",
+    "best_peptide_mt": "SVNEALNNLL",
+    "best_peptide_wt": "SVNEALNHLL",
     "best_hla_allele": "HLA-A*02:01"
   },
   "22-20709231-20709232-G-C": {
@@ -10550,8 +10553,8 @@
     "DNA VAF": 0.135,
     "RNA VAF": "NA",
     "gene_expr": "NA",
-    "best_peptide_mt": "NLFNCECDL",
-    "best_peptide_wt": "NPFNCECDL",
+    "best_peptide_mt": "LMVCELAGNL",
+    "best_peptide_wt": "LMVCELAGNP",
     "best_hla_allele": "HLA-A*02:01"
   },
   "22-37966274-37966275-C-G": {
@@ -15544,9 +15547,9 @@
     "DNA VAF": 0.25,
     "RNA VAF": "NA",
     "gene_expr": "NA",
-    "best_peptide_mt": "KFNPQTDYL",
-    "best_peptide_wt": "KFNPETDYL",
-    "best_hla_allele": "HLA-A*02:01"
+    "best_peptide_mt": "NPQTDYLTG",
+    "best_peptide_wt": "NPETDYLTG",
+    "best_hla_allele": "HLA-B*35:01"
   },
   "22-46653595-46653596-G-A": {
     "good_binders": {
@@ -17942,36 +17945,36 @@
     "DNA VAF": 0.233,
     "RNA VAF": "NA",
     "gene_expr": "NA",
-    "best_peptide_mt": "YSYGLLHIYG",
-    "best_peptide_wt": "YSYGLLHTYG",
+    "best_peptide_mt": "HIYGSGGYAL",
+    "best_peptide_wt": "HTYGSGGYAL",
     "best_hla_allele": "HLA-A*02:01"
   },
   "22-50555769-50555770-G-A": {
     "good_binders": {
       "Transcript Set 1": {
         "peptides": {
-          "TTVVVTTQKR": {
+          "TVVVTTQKR": {
             "ic50s_MT": [
-              5574.97,
+              5590.46,
               "X"
             ],
             "percentiles_MT": [
-              19.725,
+              13.23,
               "X"
             ],
             "ic50s_WT": [
-              5581.59,
+              5594.53,
               "X"
             ],
             "percentiles_WT": [
-              18.527,
+              14.874,
               "X"
             ],
             "hla_types": [
               "HLA-A*02:01",
               "HLA-B*35:01"
             ],
-            "mutation_position": "7",
+            "mutation_position": "6",
             "problematic_positions": "None",
             "anchor_fails": "None",
             "individual_ic50_calls": {
@@ -17987,26 +17990,26 @@
               ],
               "MT": {
                 "HLA-A*02:01": [
-                  37574.551,
-                  35483.898,
-                  37132.0,
+                  36796.84,
+                  35883.512,
+                  36337.109,
                   50000.0,
-                  144371.016,
-                  176937.547,
-                  24841.354,
-                  5574.97
+                  336596.812,
+                  402188.844,
+                  21226.711,
+                  5590.46
                 ]
               },
               "WT": {
                 "HLA-A*02:01": [
-                  34773.18,
-                  33212.18,
-                  37333.42,
+                  37162.55,
+                  35079.64,
+                  37132.0,
                   50000.0,
-                  184280.76,
-                  206928.35,
-                  24463.096,
-                  5581.59
+                  485411.43,
+                  584023.07,
+                  22348.674,
+                  5594.53
                 ]
               }
             },
@@ -18032,25 +18035,25 @@
               ],
               "MT": {
                 "HLA-A*02:01": [
-                  64.0,
-                  72.0,
-                  73.0,
-                  54.0,
-                  73.0,
-                  76.0,
-                  19.725,
+                  61.0,
+                  74.0,
+                  86.0,
+                  66.0,
+                  63.0,
+                  65.0,
+                  13.23,
                   "NA"
                 ]
               },
               "WT": {
                 "HLA-A*02:01": [
-                  54.0,
-                  65.0,
-                  74.0,
-                  54.0,
-                  77.0,
-                  78.0,
-                  18.527,
+                  62.0,
+                  71.0,
+                  91.0,
+                  66.0,
+                  68.0,
+                  70.0,
+                  14.874,
                   "NA"
                 ]
               }
@@ -18091,7 +18094,7 @@
                 "HLA-A*02:01": []
               }
             },
-            "wt_peptide": "TTVVVTAQKR"
+            "wt_peptide": "TVVVTAQKR"
           }
         },
         "transcripts": [
@@ -18138,8 +18141,8 @@
     "DNA VAF": 0.042,
     "RNA VAF": "NA",
     "gene_expr": "NA",
-    "best_peptide_mt": "TTVVVTTQKR",
-    "best_peptide_wt": "TTVVVTAQKR",
+    "best_peptide_mt": "TVVVTTQKR",
+    "best_peptide_wt": "TVVVTAQKR",
     "best_hla_allele": "HLA-A*02:01"
   },
   "22-50615580-50615581-C-T": {
@@ -20107,8 +20110,8 @@
     "DNA VAF": 0.959,
     "RNA VAF": "NA",
     "gene_expr": "NA",
-    "best_peptide_mt": "FLAFTRLTSE",
-    "best_peptide_wt": "FLASTRLTSE",
+    "best_peptide_mt": "ALGWEFLAF",
+    "best_peptide_wt": "ALGWEFLAS",
     "best_hla_allele": "HLA-A*02:01"
   },
   "22-50682229-50682230-T-C": {
@@ -21979,8 +21982,8 @@
     "DNA VAF": 0.043,
     "RNA VAF": "NA",
     "gene_expr": "NA",
-    "best_peptide_mt": "YESRVEPPH",
-    "best_peptide_wt": "SESRVEPPH",
+    "best_peptide_mt": "EERTEASGY",
+    "best_peptide_wt": "EERTEASGS",
     "best_hla_allele": "HLA-B*35:01"
   },
   "4-40434704-40434725-AGCGGCTGCGGCGGCTGCGGCC-A": {

@@ -24,7 +24,7 @@ options(shiny.port = 3333)
 server <- shinyServer(function(input, output, session) {
   ## pVACtools version
 
-  output$version <- renderText({"pVACtools version 5.5.4"})
+  output$version <- renderText({"pVACtools version 6.0.3"})
 
   ##############################DATA UPLOAD TAB###################################
   ## helper function defined for generating shinyInputs in mainTable (Evaluation dropdown menus)
@@ -212,7 +212,7 @@ server <- shinyServer(function(input, output, session) {
      ## Class I demo aggregate report
      #session$sendCustomMessage("unbind-DT", "mainTable")
      withProgress(message = "Loading Demo Data", value = 0, {
-       load(url("https://github.com/griffithlab/pVACtools/raw/3bcc0530f5deecae5a241edb2e16b9886bab25e7/pvactools/tools/pvacview/data/HCC1395_demo_data.rda"))
+       load(url("https://github.com/griffithlab/pVACtools/raw/b769d139c332839cbe6fbeb9afd04a33b30d2025/pvactools/tools/pvacview/data/HCC1395_demo_data.rda"))
        incProgress(0.3)
        #data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/3bcc0530f5deecae5a241edb2e16b9886bab25e7/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_I.all_epitopes.aggregated.tsv")
        #mainData <- read.table(text = data, sep = "\t", header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
@@ -281,7 +281,7 @@ server <- shinyServer(function(input, output, session) {
        rownames(df$comments) <- df$mainTable$ID
        incProgress(0.2)
        ## Class II additional demo aggregate report
-       add_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/3bcc0530f5deecae5a241edb2e16b9886bab25e7/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_II.all_epitopes.aggregated.tsv")
+       add_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/b769d139c332839cbe6fbeb9afd04a33b30d2025/pvactools/tools/pvacview/data/H_NJ-HCC1395-HCC1395.Class_II.all_epitopes.aggregated.tsv")
        addData <- read.table(text = add_data, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
        colnames(addData) <- addData[1, ]
        addData <- addData[-1, ]
@@ -578,7 +578,7 @@ server <- shinyServer(function(input, output, session) {
                   df$metricsData$binding_percentile_threshold, df$metricsData$immunogenicity_percentile_threshold, df$metricsData$presentation_percentile_threshold, df$metricsData$percentile_threshold_strategy,
                   df$metricsData$use_allele_specific_binding_thresholds,
                   df$metricsData$mt_top_score_metric, df$metricsData$wt_top_score_metric,
-                  if (is.null(df$metricsData$`top_score_metric2`) || is.na(df$metricsData$`top_score_metric2`)) {"ic50"} else {df$metricsData$`top_score_metric2`},
+                  paste0(df$metricsData$`top_score_metric2`, collapse=", "),
                   df$metricsData$allele_specific_anchors, df$metricsData$anchor_contribution_threshold)
     ), digits = 3
   )
@@ -623,7 +623,7 @@ server <- shinyServer(function(input, output, session) {
         df$use_allele_specific_binding_thresholds,
         df$metricsData$mt_top_score_metric,
         df$metricsData$wt_top_score_metric,
-        if(is.null(df$scoring_candidate_metric) || is.na(df$scoring_candidate_metric)){"ic50"}else{df$scoring_candidate_metric}, #Defaulting to ic50 since that was what everything made prior to this implementation used. That way old metrics.json files will still work
+        paste0(df$metricsData$`top_score_metric2`, collapse=", "),
         df$allele_specific_anchors, df$anchor_contribution)
     ), digits = 3
   )
@@ -687,7 +687,7 @@ server <- shinyServer(function(input, output, session) {
       hla_columns <- which(colnames(filtered_table) %in% df$converted_hla_names)
 
       # Columns where the default value should be 'NA'
-      default_na_targets <- which(colnames(filtered_table) %in% c("POS", "IC50 WT", "%ile MT", "%ile WT", "IC50 %ile MT", "IC50 %ile WT", "IM %ile MT", "IM %ile WT", "Pres %ile MT", "Pres %ile WT",
+      default_na_targets <- which(colnames(filtered_table) %in% c("Pos", "IC50 WT", "%ile MT", "%ile WT", "IC50 %ile MT", "IC50 %ile WT", "IM %ile MT", "IM %ile WT", "Pres %ile MT", "Pres %ile WT",
                                                                   "RNA Expr", "RNA VAF", "Allele Expr", "RNA Depth", "DNA VAF"))
 
       # Columns that should be hidden from the display
@@ -1362,6 +1362,7 @@ server <- shinyServer(function(input, output, session) {
         gather("col", "val", colnames(mt_data)[1]:tail(colnames(wt_data), n = 1)) %>%
         separate(col, c("HLA_allele", "Mutant", "Score"), sep = "\\_") %>%
         spread("Score", val)
+      full_data$type <- 'binding'
       full_data
     } else {
       return()

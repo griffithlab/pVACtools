@@ -72,7 +72,15 @@ Binding affinity is measured by IC50 (peptide concentration required for 50% of 
 
 - ``Binding Threshold``: IC50 value cutoff for a passing neoantigen. (default: 500 nM)
 - ``Binding Threshold for Inclusion Into Metric File``: IC50 value cutoff for neoantigens to be loaded to pVACview. This feature helps limit the number of neoantigens being loaded to pVACview. (default: 5000 nM)
+
+Additionally, users have the option to consider percentile ranks on top of raw IC50 predictions. Percentile rank is a method used to predict binding affinity of a peptide by comparing it to a set of peptides with similar sizes. A lower percentile rank indicates stronger affinity. Percentile rank of less than 2% are generally
+recommended for differentiating binders from non-binders (see `Jurtz, Vanessa et al. 2017 paper <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5679736/>`_). In contrast to IC50 predictions, percentile ranks allow a more normalized comparison across different HLA alleles that may have allele-specific binding cutoffs. This feature is turned off by default but can be turned on by the user and considered when regenerating Tiering across variants.
+
 - ``Percentile Threshold`` : percentile score cutoff. (default: NULL)
+- ``Percentile Threshold Strategy``: if set to ``conservative`` a candidate
+  needs to pass both the binding and percentile threshold. If set to
+  ``exploratory`` a candidate only needs to pass either threshold. (default:
+  conservative)
 
 When using the predicted IC50 values from binding prediction tools, another aspect to consider is the binding threshold of each allele. As stated earlier, different alleles may have allele-specific binding thresholds that vary from the default 500nM cutoff. Users can choose to use allele-specific binding threshold where data is available by turning this option on.
 
@@ -88,14 +96,20 @@ Aditionally, the ``HLA.Alleles`` and respective ``Binding.Cutoffs`` are also dis
 - ``HLA.Alleles`` : is the list of HLA alleles that the sample expresses and given as input when running pVACseq.
 - ``Binding.Cutoffs``: the IC50 cutoff value for the corresponding HLA allele. In the below example screenshots, allele-specific binding thresholds were used (``Allele Specific Binding Threshold: TRUE``). This results in the binding threshold for HLA-A*29:01 being set to the one recommended by `IEDB <https://help.iedb.org/hc/en-us/articles/114094151811-Selecting-thresholds-cut-offs-for-MHC-class-I-and-II-binding-predictions>`_. For the remaining alleles, IEDB does not have an specific binding threshold recommendation so the threshold is set to the basic binding threshold as a fallback, in this case 500 (``Binding Threshold: 500``).
 
-**Transcript Support Level**
+**Transcript-level Features**
 
-(`TSL <https://useast.ensembl.org/info/genome/genebuild/transcript_quality_tags.html>`_) provides information on degree to which transcript isoforms are supported by experimental evidence. The existing TSL levels are: TSL1, TSL2, TSL3, TSL4, TSL5, TSLNA, with TSL1 being the best TSL level.  We suggest users using a higher TSL level cutoff (lower number) for higher confidence in the annotation of the targeted transcript. Default is set to be TSL1. 
+When predicting neoantigen candidates for a somatic variant, multiple transcripts of a gene may code for the same candidate. pVACseq will attempt to select the most likely transcript coding for a candidate (Best Transcript). The MANE Select, Canonical, and Transcript Support Level (TSL) may considered when picking the best transcript. When determining a candidate's tier, these criteria may also be taken into account. `TSL <https://useast.ensembl.org/info/genome/genebuild/transcript_quality_tags.html>`_ provides information on degree to which transcript isoforms are supported by experimental evidence. The existing TSL levels are: TSL1, TSL2, TSL3, TSL4, TSL5, TSLNA, with TSL1 being the best TSL level.  We suggest users using a higher TSL level cutoff (lower number) for higher confidence in the annotation of the targeted transcript. Default is set to be TSL1.
+
+- ``Transcript Prioritization Strategy``: Users can specify up to three
+  different critieria to consider. The best transcript will need to pass
+  at least one of the specified criteria in order for the candidate to pass.
+  (default: mane_select, canonical, tsl)
+
+  - ``mane_select``: transcript is the MANE Select transcript
+  - ``canonical``: transcript is the canonical transcript
+  - ``tsl``: candidate meets the maximum TSL cutoff
 
 - ``Maximum TSL`` : cutoff TSL level for a passing candidate. (default: 1)
-
-Additionally, users have the option to consider percentile ranks on top of raw IC50 predictions. Percentile rank is a method used to predict binding affinity of a peptide by comparing it to a set of peptides with similar sizes. A lower percentile rank indicates stronger affinity. Percentile rank of less than 2% are generally
-recommended for differentiating binders from non-binders (see `Jurtz, Vanessa et al. 2017 paper <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5679736/>`_). In contrast to IC50 predictions, percentile ranks allow a more normalized comparison across different HLA alleles that may have allele-specific binding cutoffs. This feature is turned off by default but can be turned on by the user and considered when regenerating Tiering across variants. 
 
 **Anchor Positions**
 
@@ -107,17 +121,22 @@ Anchor positions can influence whether a neoantigen candidate may be recognized 
 .. rst-class:: three-images-row
 
 .. image:: ../../images/screenshots/vignette/originalParametersForTiering/pvacview-OG_params_1.png
-   :width: 45%
+   :width: 48%
    :align: left
    :alt: pVACview Vignette
 
 .. image:: ../../images/screenshots/vignette/originalParametersForTiering/pvacview-OG_params_2.png
-   :width: 45%
+   :width: 48%
    :align: center
    :alt: pVACview Vignette
 
-.. figure:: ../../images/screenshots/vignette/originalParametersForTiering/pvacview-OG_params_3.png
-   :width: 45%
+.. image:: ../../images/screenshots/vignette/originalParametersForTiering/pvacview-OG_params_3.png
+   :width: 48%
+   :align: left
+   :alt: pVACview Vignette
+
+.. image:: ../../images/screenshots/vignette/originalParametersForTiering/pvacview-OG_params_4.png
+   :width: 48%
    :align: center
    :alt: pVACview Vignette
 
@@ -130,7 +149,7 @@ To set your own Tier-setting parameters, expand the **Advanced Options: Regenera
     :alt: pVACview Vignette
     :figclass: align-left
 
-The second row of the page spans the **Aggregate Report of Best Candidates by Variant** section, which lists all neoantigen candidates in the provided input. Candidates with a higher Tier will be shown first, followed by candidates of lower Tiers (Order of Tiers: ``Pass``, ``Anchor``, ``Subclonal``, ``Low Expr``, ``NoExpr``, ``Poor`` - see `Tiering criteria <https://pvactools.readthedocs.io/en/latest/pvacseq/output_files.html#tiers>`_). Genes that match with the user-input genes of interest list will have a green box around them (for example, ARID1B and MSH6 are covered by a green box in this demo). This feature can be useful for highlighting neoantigens derived from cancer driver genes.
+The second row of the page spans the **Aggregate Report of Best Candidates by Variant** section, which lists all neoantigen candidates in the provided input. Candidates with a higher Tier will be shown first, followed by candidates of lower Tiers (Order of Tiers: ``Pass``, ``PoorBinder``, ``RefMatch``, ``PoorTranscript``, ``LowExpr``, ``Anchor``, ``Subclonal``, ``ProbPos``, ``Poor``, ``NoExpr`` - see `Tiering criteria <https://pvactools.readthedocs.io/en/latest/pvacseq/output_files.html#tiers>`_). Genes that match with the user-input genes of interest list will have a green box around them (for example, TOM4, ARID1B and MSH6 are covered by a green box in this demo). This feature can be useful for highlighting neoantigens derived from cancer driver genes.
 
 To view the variant, transcript, and peptide level information of a desired candidate, click on the candidate's row
 to select it. The candidate currently under investigation will have a grey background. The number of the row
@@ -175,7 +194,7 @@ The predicted best peptide (neoantigen candidate) doesn’t have any match in th
 
 **Transcript-level assessment:**
 
-The variant is detected in only 1 transcript. This transcript has good expression and Transcript Support Level. 
+The variant is detected in only 1 transcript. This transcript has good expression and Transcript Support Level and is the MANE Select and Canonical transcript. It also have a protein_coding biotype and no CDS flags.
 
 .. figure:: ../../images/screenshots/vignette/KIF1C-new/KIF1C_6_TranscriptsInSet.png
     :width: 1000px
@@ -193,7 +212,7 @@ You can see the mutant (MT) and wildtype (WT) peptide sequence for this transcri
 
 **Peptide-level assessment:**
 
-The candidate being investigated has a good binding affinity (median IC50 score is less than 500nM, percentile rank is less than 2%). Elution scores vary with algorithms but overall the mutant peptide has better elution scores than the wildtype peptide, and the elution scores are close to 1.
+The candidate being investigated has a good binding affinity (median IC50 score is less than 500nM, percentile rank is less than 2%). Presentation and immunogenicity percentiles vary with algorithms but overall the mutant peptide has better percentiles than the wildtype peptide, and the percentiles are less than 2%.
 
 .. figure:: ../../images/screenshots/vignette/KIF1C-new/KIF1C_7_IC50plot.png
     :width: 1000px
@@ -232,7 +251,7 @@ Guide, where the neoantigen candidate is favorable and can be accepted.
     :figclass: align-left
 
 
-Beside Class-I peptide, the best predicted Class-II peptide from user-input can also be reviewed, using the **Additional Data** tab.
+Beside the Class-I peptide, the best predicted Class-II peptide from the user-input can also be reviewed, using the **Additional Data** tab.
 
 .. figure:: ../../images/screenshots/vignette/KIF1C-new/KIF1C_3_AdditionalData.png
     :width: 1000px
@@ -268,7 +287,7 @@ The variant has good DNA and RNA VAF (the DNA VAF is 0.302, higher than the Subc
 
 **Transcript-level assessment:**
 
-Here, there are 2 transcript sets matching with the user-provided RNAseq data (**Transcript Sets of Selected Variant** tab shows 2 results). The transcript set highlighted in green (Transcript Set 1 in this case) is suggested as the best neoantigen candidate. Transcript Set 1 has 14 transcripts, all of which encode a stretch of amino acids (AERMGFTVVT) which gives rise to 3 different neoantigen candidates: AERMGFTVV, AERMGFTVVT, AERMGFTV. Transcript Set 2 has 1 transcript that encodes a stretch of amino acids (AERMGFTVLP), which gives rise to 3 different neoantigen candidates: AERMGFTVL, AERMGFTVLP, AERMGFTV.
+Here, there are 2 transcript sets matching with the user-provided RNAseq data (**Transcript Sets of Selected Variant** tab shows 2 results). The transcript set highlighted in green (Transcript Set 2 in this case) is suggested as the one that includes the best neoantigen candidate. Transcript Set 2 has 13 transcripts, all of which give rise to 7 different neoantigen candidates. Transcript Set 1 has 1 transcript which gives rise to 9 different neoantigen candidates.
 
 .. figure:: ../../images/screenshots/vignette/ADAR/TranscriptSet1/ADAR_1_TranscriptSetsOfSelectedVariant_TranscriptSet1.png
     :width: 1000px
@@ -276,7 +295,7 @@ Here, there are 2 transcript sets matching with the user-provided RNAseq data (*
     :alt: pVACview Vignette
     :figclass: align-left
 
-The images below are transcripts in Transcript Set 1 (top-middle, 14 transcripts) and Transcript Set 2 (bottom, 1 transcript). The transcript with the best neoantigen candidate is highlighted in green.
+The images below are transcripts in Transcript Set 2 (top-middle, 13 transcripts) and Transcript Set 1 (bottom, 1 transcript). The transcript with the best neoantigen candidate is highlighted in green.
 
 .. figure:: ../../images/screenshots/vignette/ADAR/TranscriptSet1/ADAR_2_1_TranscriptSet1.png
     :width: 1000px
@@ -296,7 +315,7 @@ The images below are transcripts in Transcript Set 1 (top-middle, 14 transcripts
     :alt: pVACview Vignette
     :figclass: align-left
 
-The images below are the neoantigen candidates from Transcript Set 1 (top) and Transcript Set 2 (bottom). The best neoantigen candidate (AERMGFTVV) is highlighted in green. Here, candidates are ranked based on IC50 score - the best candidate has the lowest IC50 score. The Biotype, TSL, existence of problematic positions, and whether or not the peptide failed the anchor evaluation are also taken into account and candidates failing these criteria are deprioritized over candidates passing these criteria. As a result, a candidate with the lowest IC50 score is not always selected as the best peptide if these criteria aren't met.
+The images below are the neoantigen candidates from Transcript Set 2 (top) and Transcript Set 1 (bottom). The best neoantigen candidate (AERMGFTVV) is highlighted in green. Here, candidates are ranked based on IC50 score - the best candidate has the lowest IC50 score. The transcripts' MANE Select status, Canonical status, Biotype and TSL as well as the existence of problematic positions, and whether or not the peptide failed the anchor evaluation are also taken into account and candidates failing these criteria are deprioritized over candidates passing these criteria. As a result, a candidate with the lowest IC50 score is not always selected as the best peptide if these criteria aren't met.
 
 .. figure:: ../../images/screenshots/vignette/ADAR/TranscriptSet1/ADAR_3_TranscriptSet1.png
     :width: 1000px
@@ -312,7 +331,7 @@ The images below are the neoantigen candidates from Transcript Set 1 (top) and T
 
 **Peptide-level assessment:**
 
-For simplicity, we will review only the best peptide (AERMGFTVV) of the six candidates mentioned above. This candidate has good binding affinity (the median IC50 is 76.11nM, which is less than the 500nM cut-off; the median percentile is 0.125, which is less than recommended value of 2; the predictions from all algorithms are in high agreement with no outliers, as seen in the violin plot).
+For simplicity, we will review only the best peptide (AERMGFTVV). This candidate has good binding affinity (the median IC50 is 76.11nM, which is less than the 500nM cut-off; the median percentile is 0.125, which is less than recommended value of 2; the predictions from all algorithms are in high agreement with no outliers, as seen in the violin plot).
 
 .. figure:: ../../images/screenshots/vignette/ADAR/TranscriptSet1/ADAR_7_IC50plot_TranscriptSet1.png
     :width: 1000px
@@ -326,7 +345,7 @@ For simplicity, we will review only the best peptide (AERMGFTVV) of the six cand
     :alt: pVACview Vignette
     :figclass: align-left
 
-The candidate also has good elution scores (elution scores close to 1). It's unclear whether the candidate is likely to trigger Tcell response, since  immunogenicity percentile scores were not provided (two algorithms BigMHC_IM and DeepImmuno do not predict immunogenicity percentile scores).
+The candidate also has good presentation and immunogenicity scores (percentiles less than 2%). It's unclear whether the candidate is likely to trigger Tcell response, since  immunogenicity percentile scores were not provided (two algorithms BigMHC_IM and DeepImmuno do not predict immunogenicity percentile scores).
 
 .. figure:: ../../images/screenshots/vignette/ADAR/TranscriptSet1/ADAR_10_ElutionAndImmunogenicityData_TranscriptSet1.png
     :width: 1000px
@@ -377,7 +396,7 @@ Furthermore, the candidate peptide KIYTGEKPY matches with a sequence in the huma
     :alt: pVACview Vignette
     :figclass: align-left
 
-These potentially problematic characteristics are also flagged by the red boxes at the **Aggregate Report of Best Candidate by Variant** section.
+These potentially problematic characteristics are also flagged by the red boxes in the **Aggregate Report of Best Candidate by Variant** section.
 
 **Decision:**
 
@@ -441,7 +460,7 @@ To view predictions on pVACview, load the following files:
 Export
 ______
 
-After reviewing candidates, you can download the file with evaluation as a tsv or as an excel sheet.
+After reviewing candidates, you can download the file with evaluation as a TSV or as an Excel sheet.
 
 .. figure:: ../../images/screenshots/vignette/pvacview-export.png
     :width: 1000px

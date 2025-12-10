@@ -404,9 +404,6 @@ class DeepImmuno(MHCI):
             os.unlink(tmp_input_file.name)
             tmp_output_file_name = os.path.join(output_dir.name, "deepimmuno-cnn-result.txt")
             df = pd.read_csv(tmp_output_file_name, sep="\t")
-            df.rename(columns={
-                'HLA': 'allele',
-            }, inplace=True)
             output_dir.cleanup()
             for record in SeqIO.parse(input_file, "fasta"):
                 seq_num = record.id
@@ -416,6 +413,7 @@ class DeepImmuno(MHCI):
                     epitope_df = df[df['peptide'] == epitope]
                     epitope_df['seq_num'] = seq_num
                     epitope_df['start'] = start
+                    epitope_df['allele'] = allele
                     results = pd.concat((results, epitope_df), axis=0)
         return (results, 'pandas')
 
@@ -643,7 +641,9 @@ class PRIME(MHCI):
                 tmp_input_file.write("{}\n".format(epitope))
             tmp_input_file.close()
             tmp_output_file = tempfile.NamedTemporaryFile('r', dir=tmp_dir, delete=False)
-            arguments = ["PRIME", "-i", tmp_input_file.name, "-o", tmp_output_file.name, "-a", allele]
+            if allele.startswith('HLA'):
+                prime_allele = allele.replace("HLA-", "").replace("*", "").replace(":", "")
+            arguments = ["PRIME", "-i", tmp_input_file.name, "-o", tmp_output_file.name, "-a", prime_allele, "-mix", "MixMHCpred"]
             stderr_fh = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
             try:
                 response = run(arguments, check=True, stdout=DEVNULL, stderr=stderr_fh)

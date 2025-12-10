@@ -186,6 +186,11 @@ Mark Genes of Interest
 
 .. program-output:: pvacseq mark_genes_of_interest -h
 
+Update Tiers
+------------
+
+.. program-output:: pvacseq update_tiers -h
+
 Create Peptide Ordering Form
 ----------------------------
 

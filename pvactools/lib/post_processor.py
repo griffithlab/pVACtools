@@ -343,6 +343,7 @@ class PostProcessor:
                     maximum_transcript_support_level=self.maximum_transcript_support_level,
                     allele_specific_anchors=self.allele_specific_anchors,
                     anchor_contribution_threshold=self.anchor_contribution_threshold,
+                    top_score_metric2=self.top_score_metric2,
                 ).execute()
             else:
                 CalculateReferenceProteomeSimilarity(
@@ -367,6 +368,7 @@ class PostProcessor:
                         immunogenicity_percentile_threshold=self.immunogenicity_percentile_threshold,
                         presentation_percentile_threshold=self.presentation_percentile_threshold,
                         percentile_threshold_strategy=self.percentile_threshold_strategy,
+                        top_score_metric2=self.top_score_metric2,
                     ).execute()
                 elif self.file_type == 'pVACfuse':
                     PvacfuseUpdateTiers(
@@ -379,6 +381,7 @@ class PostProcessor:
                         percentile_threshold_strategy=self.percentile_threshold_strategy,
                         read_support=self.read_support,
                         expn_val=self.expn_val,
+                        top_score_metric2=self.top_score_metric2,
                     ).execute()
                 elif self.file_type == 'pVACsplice':
                     PvacspliceUpdateTiers(
@@ -395,6 +398,7 @@ class PostProcessor:
                         expn_val=self.expn_val,
                         transcript_prioritization_strategy=self.transcript_prioritization_strategy,
                         maximum_transcript_support_level=self.maximum_transcript_support_level,
+                        top_score_metric2=self.top_score_metric2,
                     ).execute()
             shutil.move("{}.reference_matches".format(self.reference_similarity_fh.name), "{}.reference_matches".format(self.aggregate_report))
             print("Completed")

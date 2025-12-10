@@ -26,6 +26,9 @@ def status_message(msg):
 
 class Pipeline(metaclass=ABCMeta):
     def __init__(self, **kwargs):
+        self.use_normalized_percentiles = kwargs.pop('use_normalized_percentiles', False)
+        self.reference_scores_path      = kwargs.pop('reference_scores_path', None)
+
         for (k,v) in kwargs.items():
            setattr(self, k, v)
         #We need to make a copy of prediction_algorithms here because get_flurry_state
@@ -415,6 +418,8 @@ class Pipeline(metaclass=ABCMeta):
                             'input_tsv_file'         : split_tsv_file_path,
                             'key_file'               : split_fasta_key_file_path,
                             'output_file'            : split_parsed_file_path,
+                            'use_normalized_percentiles': self.use_normalized_percentiles,
+                            'reference_scores_path'  : self.reference_scores_path,
                         }
                         params['sample_name'] = self.sample_name
                         params['flurry_state'] = self.flurry_state
@@ -439,13 +444,7 @@ class Pipeline(metaclass=ABCMeta):
         params = [
             *split_parsed_output_files,
             self.combined_parsed_path(),
-            '--top-score-metric', self.top_score_metric,
-            '--top-score-metric2', self.top_score_metric2,
         ]
-        if self.input_file_type == 'fasta':
-            params.extend(['--file-type', 'pVACbind'])
-        elif self.input_file_type == 'junctions':
-            params.extend(['--file-type', 'pVACsplice'])
         pvactools.lib.combine_parsed_outputs.main(params)
         status_message("Completed")
 

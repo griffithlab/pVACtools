@@ -78,7 +78,7 @@ class TopScoreFilterTests(unittest.TestCase):
         output_file = tempfile.NamedTemporaryFile()
         output_file_name = output_file.name
 
-        PvacspliceTopScoreFilter(input_file, output_file_name, top_score_metric='median', transcript_prioritization_strategy=['tsl'], top_score_metric2="percentile", allow_incomplete_transcripts=True).execute()
+        PvacspliceTopScoreFilter(input_file, output_file_name, top_score_metric='median', transcript_prioritization_strategy=['tsl'], top_score_metric2=["combined_percentile"], allow_incomplete_transcripts=True).execute()
 
         expected_output_file = os.path.join(self.test_data_dir, 'output_pvacsplice_percentile.tsv')
         self.assertTrue(cmp(output_file_name, expected_output_file))
