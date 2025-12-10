@@ -269,7 +269,7 @@ explore_tab <- tabItem(
                  tabPanel("%ile Plot",
                           h4("Violin Plots showing distribution of MHC percentile predictions for selected peptide pair (MT and WT)."),
                           h5("Showcases individual percentile scores from each algorithm used. A solid line is used to represent the median percentile score."),
-                          plotOutput(outputId = "violinPlot_percentile") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;"
+                          plotOutput(outputId = "violinPlot_percentile", height="450px") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;"
                  ),
                  tabPanel("Binding Plot",
                           h4("Violin Plots showing distribution of MHC IC50 predictions for selected peptide pair (MT and WT)."),
