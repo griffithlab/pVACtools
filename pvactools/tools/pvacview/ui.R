@@ -225,7 +225,8 @@ explore_tab <- tabItem(
             box(width = 12, title = "Transcript and Peptide Set Data", solidHeader = TRUE, collapsible = TRUE, status = "primary",
                 tabBox(width = 12, title = " ",
                     tabPanel("Peptide Candidates from Selected Transcript Set",
-                            DTOutput("peptideTable") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;font-size:100%"),
+                        uiOutput("peptide_table_mode_ui"),
+                        DTOutput("peptideTable") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;font-size:100%"),
                     tabPanel("Anchor Heatmap",
                         fluidRow(
                             column(width = 6,

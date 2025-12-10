@@ -435,6 +435,17 @@ server <- shinyServer(function(input, output, session) {
         width="200px"
     )
   })
+  #Peptide table mode selector
+  output$peptide_table_mode_ui <- renderUI({
+    selectInput(
+        "peptide_table_mode",
+        "Specify what data to show",
+        c("IC50", "combined percentile"),
+        multiple=FALSE,
+        selected="IC50",
+        width="200px"
+    )
+  })
 
   #reactions for once "regenerate table" command is submitted
   observeEvent(input$submit, {
@@ -1071,7 +1082,12 @@ server <- shinyServer(function(input, output, session) {
         incProgress(0.5)
         peptide_data <- as.data.frame(peptide_data)
         incProgress(0.5)
-        dtable <- datatable(do.call("rbind", lapply(peptide_names, table_formatting, peptide_data)), options = list(
+        if (is.null(input$peptide_table_mode) || input$peptide_table_mode == 'IC50') {
+            display_mode <- "ic50s"
+        } else if (input$peptide_table_mode == 'combined percentile') {
+            display_mode <- "percentiles"
+        }
+        dtable <- datatable(do.call("rbind", lapply(peptide_names, table_formatting, peptide_data, display_mode)), options = list(
           pageLength = 10,
           columnDefs = list(list(defaultContent = "X",
                                  targets = hla_columns),
@@ -1186,7 +1202,7 @@ server <- shinyServer(function(input, output, session) {
         }
         incProgress(0.4)
         all_peptides <- do.call(rbind, all_peptides)
-        peptide_table <- do.call("rbind", lapply(peptide_names, table_formatting, peptide_data))
+        peptide_table <- do.call("rbind", lapply(peptide_names, table_formatting, peptide_data, "ic50s"))
         peptide_table_filtered <- Filter(function(x) length(unique(x)) != 1, peptide_table)
         peptide_table_names <- names(peptide_table_filtered)
         hla_list <- df$metricsData$alleles
@@ -1309,7 +1325,7 @@ server <- shinyServer(function(input, output, session) {
   output$violinPlot_percentile <- renderPlot({
     withProgress(message = "Loading Percentile Plot", value = 0, {
       if (length(df$metricsData[[selectedID()]]$sets) != 0) {
-        if (is.null(input$percentile_plot_mode) | input$percentile_plot_mode == 'all') {
+        if (is.null(input$percentile_plot_mode) || input$percentile_plot_mode == 'all') {
             all_percentile_data <- rbind(bindingPercentileData(), presentationPercentileData(), immunogenicityPercentileData())
         } else if (input$percentile_plot_mode == 'binding') {
             all_percentile_data <- bindingPercentileData()
