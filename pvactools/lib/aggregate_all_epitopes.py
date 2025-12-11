@@ -70,7 +70,7 @@ class AggregateAllEpitopes:
         raise Exception("Must implement method in child class")
 
     @abstractmethod
-    def get_included_df_metrics(self, included_df):
+    def get_included_df_metrics(self, included_df, best):
         raise Exception("Must implement method in child class")
 
     @abstractmethod
@@ -122,7 +122,7 @@ class AggregateAllEpitopes:
 
         #get a list of all unique gene/transcript/aa_change combinations
         #store a count of all unique peptides that passed
-        (peptides, anno_count) = self.get_included_df_metrics(included_df)
+        (peptides, anno_count) = self.get_included_df_metrics(included_df, best)
         included_peptide_count = self.calculate_unique_peptide_count(included_df)
         good_binder_count = self.calculate_good_binder_count(good_binders_df)
 
@@ -545,7 +545,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
     def replace_nas(self, items):
         return ["NA" if pd.isna(x) else x for x in items]
 
-    def get_included_df_metrics(self, included_df):
+    def get_included_df_metrics(self, included_df, best):
         peptides = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
         included_peptides = included_df["MT Epitope Seq"].unique()
         included_transcripts = included_df['annotation'].unique()
@@ -652,7 +652,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                         elif variant_type == 'inframe_del':
                             wt_peptide = 'DEL-NA'
                     results[peptide]['wt_peptide'] = wt_peptide
-            peptides[set_name]['peptides'] = self.sort_peptides(results)
+            peptides[set_name]['peptides'] = self.sort_peptides(results, best)
             sorted_transcripts = self.sort_transcripts(annotations, included_df)
             peptides[set_name]['transcripts'] = list(sorted_transcripts.Annotation)
             peptides[set_name]['transcript_expr'] = self.replace_nas_and_round(list(sorted_transcripts.Expr))
@@ -670,13 +670,27 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
 
         return (peptides, anno_count)
 
-    def sort_peptides(self, results):
+    def sort_peptides(self, results, best):
         for k, v in results.items():
+            predicted_alleles = [allele for index, allele in enumerate(v['hla_types']) if v['ic50s_MT'][index] != 'X']
+            anchor_alleles = [] if v['anchor_fails'] == "None" else v['anchor_fails'].split(", ")
+            anchor_fails_all = sorted(predicted_alleles) == sorted(anchor_alleles)
+            v['is_best_sort'] = 1 if k == best['MT Epitope Seq'] else 2
             v['problematic_positions_sort'] = 1 if v['problematic_positions'] == 'None' else 2
-            v['anchor_fail_sort'] = 1 if v['anchor_fails'] == 'None' else 2
-            v['best_ic50s_MT'] = min([ic50 for ic50 in v['ic50s_MT'] if ic50 != 'X'])
-        sorted_results = dict(sorted(results.items(), key=lambda x:(x[1]['problematic_positions_sort'],x[1]['anchor_fail_sort'],x[1]['best_ic50s_MT'])))
+            v['anchor_fail_sort'] = 2 if v['anchor_fails'] != 'None' and anchor_fails_all else 1
+            #v['best_ic50s_MT'] = min([ic50 for index, ic50 in enumerate(v['ic50s_MT']) if ic50 != 'X'])
+            if anchor_fails_all:
+                v['best_ic50s_MT'] = min([ic50 for index, ic50 in enumerate(v['ic50s_MT']) if ic50 != 'X'])
+            else:
+                v['best_ic50s_MT'] = min([ic50 for index, ic50 in enumerate(v['ic50s_MT']) if ic50 != 'X' and v['hla_types'][index] not in anchor_alleles])
+        sorted_results = dict(sorted(results.items(), key=lambda x:(
+            x[1]['is_best_sort'],
+            x[1]['problematic_positions_sort'],
+            x[1]['anchor_fail_sort'],
+            x[1]['best_ic50s_MT']
+        )))
         for k, v in sorted_results.items():
+            v.pop('is_best_sort')
             v.pop('problematic_positions_sort')
             v.pop('anchor_fail_sort')
             v.pop('best_ic50s_MT')
@@ -944,7 +958,7 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
     def get_unique_peptide_hla_counts(self, good_binders_df):
         return pd.DataFrame(good_binders_df.groupby(['HLA Allele', 'Epitope Seq']).size().reset_index())
 
-    def get_included_df_metrics(self, included_df):
+    def get_included_df_metrics(self, included_df, best):
         return (None, "NA")
 
     def calculate_unique_peptide_count(self, included_df):
