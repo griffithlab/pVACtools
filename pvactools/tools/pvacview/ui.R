@@ -281,7 +281,7 @@ explore_tab <- tabItem(
                  tabPanel("Binding Data",
                           h4("Prediction score table showing exact MHC binding values and percentiles."),
                           DTOutput(outputId = "bindingDatatable"),
-                          strong("Note"), span(": The MixMHCpred score does not respresent IC50 binding affinity."),
+                          strong("Note"), span(": The MixMHCpred score does not represent IC50 binding affinity."),
                           style = "overflow-x: scroll;"
                  ),
                  tabPanel("Presentation Data",
