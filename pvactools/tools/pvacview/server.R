@@ -1281,11 +1281,12 @@ server <- shinyServer(function(input, output, session) {
     if (is.null(df$metricsData)) {
       return()
     }
-    if (length(df$metricsData[[selectedID()]]$sets) != 0 && length(selectedPeptideData()$individual_ic50_calls$algorithms) != 0) {
-      algorithm_names <- data.frame(algorithms = selectedPeptideData()$individual_ic50_calls$algorithms)
-      wt_data <- as.data.frame(selectedPeptideData()$individual_ic50_calls$WT, check.names = FALSE)
+    selected_peptide_data <- selectedPeptideData()
+    if (length(df$metricsData[[selectedID()]]$sets) != 0 && length(selected_peptide_data$individual_ic50_calls$algorithms) != 0) {
+      algorithm_names <- data.frame(algorithms = selected_peptide_data$individual_ic50_calls$algorithms)
+      wt_data <- as.data.frame(selected_peptide_data$individual_ic50_calls$WT, check.names = FALSE)
       colnames(wt_data) <- paste(colnames(wt_data), "_WT_Score", sep = "")
-      mt_data <- as.data.frame(selectedPeptideData()$individual_ic50_calls$MT, check.names = FALSE)
+      mt_data <- as.data.frame(selected_peptide_data$individual_ic50_calls$MT, check.names = FALSE)
       colnames(mt_data) <- paste(colnames(mt_data), "_MT_Score", sep = "")
       full_data <- cbind(algorithm_names, mt_data, wt_data) %>%
         gather("col", "val", colnames(mt_data)[1]:tail(colnames(wt_data), n = 1)) %>%
@@ -1411,8 +1412,22 @@ server <- shinyServer(function(input, output, session) {
     withProgress(message = "Loading binding datatable", value = 0, {
       if (length(df$metricsData[[selectedID()]]$sets) != 0) {
         binding_data <- right_join(rbind(bindingDataIC50(), bindingDataScore()), bindingPercentileData(), by=c("algorithms", "HLA_allele", "Mutant"))
-        binding_data["Score"] <- paste(round(as.numeric(binding_data$`Score`), 3), " (%: ", round(as.numeric(binding_data$`Percentile`), 3), ")", sep = "")
+        binding_data["Score"] <- paste(round(as.numeric(binding_data$`Score`), 1), " (%: ", round(as.numeric(binding_data$`Percentile`), 1), ")", sep = "")
         binding_reformat <- reshape2::dcast(binding_data, HLA_allele + Mutant ~ algorithms, value.var = "Score")
+        selected_peptide_data <- selectedPeptideData()
+        binding_reformat <- add_column(binding_reformat, Median = 0, .after = "Mutant")
+        for (i in 1:nrow(binding_reformat)) {
+          row <- binding_reformat[i, ]
+          allele_index <- match(row$HLA_allele, selected_peptide_data$hla_types)
+          if (row$Mutant == 'MT') {
+            median_ic50 <- selected_peptide_data$ic50s_MT[allele_index]
+            median_percentile <- selected_peptide_data$binding_percentiles_MT[allele_index]
+          } else {
+            median_ic50 <- selected_peptide_data$ic50s_WT[allele_index]
+            median_percentile <- selected_peptide_data$binding_percentiles_WT[allele_index]
+          }
+          binding_reformat[i, "Median"] <- paste0(round(as.numeric(median_ic50), 2), " (%: ", round(as.numeric(median_percentile), 2), ")")
+        }
         incProgress(1)
         dtable <- datatable(binding_reformat, options = list(
           pageLength = 10,
@@ -1473,6 +1488,18 @@ server <- shinyServer(function(input, output, session) {
         immunogenicity_data <- merge(immunogenicityDataScore(), immunogenicityPercentileData(), by=c("algorithms", "HLA_allele", "Mutant"), all=TRUE)
         immunogenicity_data["Score"] <- paste(round(as.numeric(immunogenicity_data$`Score`), 3), " (%: ", round(as.numeric(immunogenicity_data$`Percentile`), 3), ")", sep = "")
         immunogenicity_reformat <- reshape2::dcast(immunogenicity_data, HLA_allele + Mutant ~ algorithms, value.var = "Score")
+        selected_peptide_data <- selectedPeptideData()
+        immunogenicity_reformat <- add_column(immunogenicity_reformat, "Median %ile" = 0, .after = "Mutant")
+        for (i in 1:nrow(immunogenicity_reformat)) {
+          row <- immunogenicity_reformat[i, ]
+          allele_index <- match(row$HLA_allele, selected_peptide_data$hla_types)
+          if (row$Mutant == 'MT') {
+            median_percentile <- selected_peptide_data$immunogenicity_percentiles_MT[allele_index]
+          } else {
+            median_percentile <- selected_peptide_data$immunogenicity_percentiles_WT[allele_index]
+          }
+          immunogenicity_reformat[i, "Median %ile"] <- round(as.numeric(median_percentile), 2)
+        }
         incProgress(1)
         dtable <- datatable(immunogenicity_reformat, options = list(
           pageLength = 10,
@@ -1536,6 +1563,18 @@ server <- shinyServer(function(input, output, session) {
         presentation_data <- merge(presentationDataScore(), presentationPercentileData(), by=c("algorithms", "HLA_allele", "Mutant"), all=TRUE)
         presentation_data["Score"] <- paste(round(as.numeric(presentation_data$`Score`), 3), " (%: ", round(as.numeric(presentation_data$`Percentile`), 3), ")", sep = "")
         presentation_reformat <- reshape2::dcast(presentation_data, HLA_allele + Mutant ~ algorithms, value.var = "Score")
+        selected_peptide_data <- selectedPeptideData()
+        presentation_reformat <- add_column(presentation_reformat, "Median %ile" = 0, .after = "Mutant")
+        for (i in 1:nrow(presentation_reformat)) {
+          row <- presentation_reformat[i, ]
+          allele_index <- match(row$HLA_allele, selected_peptide_data$hla_types)
+          if (row$Mutant == 'MT') {
+            median_percentile <- selected_peptide_data$presentation_percentiles_MT[allele_index]
+          } else {
+            median_percentile <- selected_peptide_data$presentation_percentiles_WT[allele_index]
+          }
+          presentation_reformat[i, "Median %ile"] <- round(as.numeric(median_percentile), 2)
+        }
         incProgress(1)
         dtable <- datatable(presentation_reformat, options = list(
           pageLength = 10,
