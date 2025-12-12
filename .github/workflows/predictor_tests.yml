@@ -24,6 +24,11 @@ jobs:
           remove-dotnet: 'true'
           remove-haskell: 'true'
           remove-codeql: 'true'
+      - name: Remove unused SDKs to free up space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/share/boost
+          sudo rm -rf /opt/ghc
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
@@ -35,14 +40,17 @@ jobs:
           sudo apt-get install -y ghostscript
           sudo apt-get install -y gcc
           sudo apt-get install -y pandoc
+          sudo apt-get install -y mafft
+          sudo apt-get install -y build-essential
+          sudo apt-get clean
           pip install pypandoc==1.7.2
-          pip install coverage
-          pip install coveralls
       - name: Install Python dependencies
         run: |
           pip install polars==0.16.18
           pip install pypandoc==1.7.2
           pip install "tensorflow<2.16"
+          pip install torch
+          pip cache purge
           pip install git+https://github.com/griffithlab/bigmhc.git#egg=bigmhc
           pip install git+https://github.com/griffithlab/deepimmuno.git#egg=deepimmuno
           pip install -e .
