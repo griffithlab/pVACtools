@@ -208,15 +208,16 @@ class OutputParser(metaclass=ABCMeta):
         file_path = os.path.join(self.reference_scores_path, allele_file)
 
         key = f"{method}/{length}mer"
-        if key in self.reference_scores:
-            ref_scores = self.reference_scores[key]
+        cache_key = f"{normalized}_{key}"
+        if cache_key in self.reference_scores:
+            ref_scores = self.reference_scores[cache_key]
         else:
             try:
                 with h5py.File(file_path, "r") as f:
                     if key not in f:
                         return 'NA'  # algorithm or length not present
                     ref_scores = f[key][...]
-                    self.reference_scores[key] = ref_scores
+                    self.reference_scores[cache_key] = ref_scores
             except Exception:
                 return 'NA'
 

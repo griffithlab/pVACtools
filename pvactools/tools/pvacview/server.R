@@ -424,6 +424,28 @@ server <- shinyServer(function(input, output, session) {
       selected = current_maximum_transcript_support_level
     )
   })
+  #%ile Plot mode selector
+  output$percentile_plot_mode_ui <- renderUI({
+    selectInput(
+        "percentile_plot_mode",
+        "Specify what data to show",
+        c("all", "binding", "presentation", "immunogenicity"),
+        multiple=FALSE,
+        selected="all",
+        width="200px"
+    )
+  })
+  #Peptide table mode selector
+  output$peptide_table_mode_ui <- renderUI({
+    selectInput(
+        "peptide_table_mode",
+        "Specify what data to show",
+        c("IC50", "combined percentile", "binding percentile", "presentation percentile", "immunogenicity percentile"),
+        multiple=FALSE,
+        selected="IC50",
+        width="200px"
+    )
+  })
 
   #reactions for once "regenerate table" command is submitted
   observeEvent(input$submit, {
@@ -1060,7 +1082,18 @@ server <- shinyServer(function(input, output, session) {
         incProgress(0.5)
         peptide_data <- as.data.frame(peptide_data)
         incProgress(0.5)
-        dtable <- datatable(do.call("rbind", lapply(peptide_names, table_formatting, peptide_data)), options = list(
+        if (is.null(input$peptide_table_mode) || input$peptide_table_mode == 'IC50') {
+            display_mode <- "ic50s"
+        } else if (input$peptide_table_mode == 'combined percentile') {
+            display_mode <- "combined_percentiles"
+        } else if (input$peptide_table_mode == 'binding percentile') {
+            display_mode <- "binding_percentiles"
+        } else if (input$peptide_table_mode == 'presentation percentile') {
+            display_mode <- "presentation_percentiles"
+        } else if (input$peptide_table_mode == 'immunogenicity percentile') {
+            display_mode <- "immunogenicity_percentiles"
+        }
+        dtable <- datatable(do.call("rbind", lapply(peptide_names, table_formatting, peptide_data, display_mode)), options = list(
           pageLength = 10,
           columnDefs = list(list(defaultContent = "X",
                                  targets = hla_columns),
@@ -1143,15 +1176,15 @@ server <- shinyServer(function(input, output, session) {
         peptide_names <- names(peptide_data)
         for (i in 1:length(peptide_names)) {
           peptide_data[[peptide_names[[i]]]]$individual_ic50_calls <- NULL
-          peptide_data[[peptide_names[[i]]]]$individual_ic50_percentile_calls <- NULL
-          peptide_data[[peptide_names[[i]]]]$individual_el_calls <- NULL
-          peptide_data[[peptide_names[[i]]]]$individual_el_percentile_calls <- NULL
-          peptide_data[[peptide_names[[i]]]]$individual_percentile_calls <- NULL
+          peptide_data[[peptide_names[[i]]]]$individual_binding_score_calls <- NULL
+          peptide_data[[peptide_names[[i]]]]$individual_binding_percentile_calls <- NULL
+          peptide_data[[peptide_names[[i]]]]$individual_presentation_calls <- NULL
+          peptide_data[[peptide_names[[i]]]]$individual_presentation_percentile_calls <- NULL
+          peptide_data[[peptide_names[[i]]]]$individual_immunogenicity_calls <- NULL
+          peptide_data[[peptide_names[[i]]]]$individual_immunogenicity_percentile_calls <- NULL
         }
         peptide_data <- as.data.frame(peptide_data)
-        p1 <- ggplot() + scale_x_continuous(limits = c(0, 80)) + scale_y_continuous(limits = c((length(peptide_names) * 2 + 1) * -1, 1))
         all_peptides <- list()
-        incProgress(0.1)
         for (i in 1:length(peptide_names)) {
           #set & constrain mutation_pos' to not exceed length of peptide (may happen if mutation range goes off end)
           mutation_pos <- pos_str_to_seq(df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$peptides[[peptide_names[i]]]$`mutation_position`)
@@ -1175,7 +1208,7 @@ server <- shinyServer(function(input, output, session) {
         }
         incProgress(0.4)
         all_peptides <- do.call(rbind, all_peptides)
-        peptide_table <- do.call("rbind", lapply(peptide_names, table_formatting, peptide_data))
+        peptide_table <- do.call("rbind", lapply(peptide_names, table_formatting, peptide_data, "ic50s"))
         peptide_table_filtered <- Filter(function(x) length(unique(x)) != 1, peptide_table)
         peptide_table_names <- names(peptide_table_filtered)
         hla_list <- df$metricsData$alleles
@@ -1198,6 +1231,8 @@ server <- shinyServer(function(input, output, session) {
         h_line_pos <- data.frame(y_pos = seq(min(all_peptides_multiple_hla["y_pos"]) - 0.5, max(all_peptides_multiple_hla["y_pos"]) - 1.5, 2), x_pos = c(min(all_peptides_multiple_hla["x_pos"]) - 1))
         h_line_pos <- rbind(h_line_pos, data.frame(x_pos = max(all_peptides_multiple_hla["x_pos"]) + 1, y_pos = seq(min(all_peptides_multiple_hla["y_pos"]) - 0.5, max(all_peptides_multiple_hla["y_pos"]) - 1.5, 2)))
         incProgress(0.2)
+        p1 <- ggplot() + scale_x_continuous(limits = c(0, max(h_line_pos$x_pos))) + scale_y_continuous(limits = c((length(peptide_names) * 2 + 1) * -1, 1))
+        incProgress(0.1)
         p1 <- p1 +
           geom_rect(data = all_peptides_multiple_hla, aes(xmin = x_pos - 0.5, xmax = 1 + x_pos - 0.5, ymin = .5 + y_pos, ymax = -.5 + y_pos), fill = all_peptides_multiple_hla$color_value) +
           geom_text(data = all_peptides_multiple_hla, aes(x = x_pos, y = y_pos, label = aa, color = mutation), size = 4) +
@@ -1269,7 +1304,10 @@ server <- shinyServer(function(input, output, session) {
         line.data <- data.frame(yintercept = c(500, 1000), cutoffs = c("500nM", "1000nM"), color = c("#28B463", "#28B463"))
         hla_allele_count <- length(unique(bindingDataIC50()$HLA_allele))
         incProgress(0.5)
-        p <- ggplot(data = bindingDataIC50(), aes(x = Mutant, y = Score, color = Mutant), trim = FALSE) + geom_violin() + facet_grid(cols = vars(HLA_allele)) + scale_y_continuous(trans = "log10") + #coord_trans(y = "log10") +
+        p <- ggplot(data = bindingDataIC50(), aes(x = Mutant, y = Score, color = Mutant), trim = FALSE) +
+          geom_violin() +
+          facet_grid(cols = vars(HLA_allele)) +
+          scale_y_continuous(trans = "log10") + #coord_trans(y = "log10") +
           stat_summary(fun = mean, fun.min = mean, fun.max = mean, geom = "crossbar", width = 0.25, position = position_dodge(width = .25)) +
           geom_jitter(data = bindingDataIC50(), aes(shape = algorithms, color = type), size = 5, stroke = 1, position = position_jitter(0.3)) +
           scale_shape_manual(values = 0:8) +
@@ -1293,12 +1331,23 @@ server <- shinyServer(function(input, output, session) {
   output$violinPlot_percentile <- renderPlot({
     withProgress(message = "Loading Percentile Plot", value = 0, {
       if (length(df$metricsData[[selectedID()]]$sets) != 0) {
-        all_percentile_data <- rbind(bindingPercentileData(), presentationPercentileData(), immunogenicityPercentileData())
+        if (is.null(input$percentile_plot_mode) || input$percentile_plot_mode == 'all') {
+            all_percentile_data <- rbind(bindingPercentileData(), presentationPercentileData(), immunogenicityPercentileData())
+        } else if (input$percentile_plot_mode == 'binding') {
+            all_percentile_data <- bindingPercentileData()
+        } else if (input$percentile_plot_mode == 'presentation') {
+            all_percentile_data <- presentationPercentileData()
+        } else if (input$percentile_plot_mode == 'immunogenicity') {
+            all_percentile_data <- immunogenicityPercentileData()
+        }
         line.data <- data.frame(yintercept = c(0.5, 2), cutoffs = c("0.5%", "2%"), color = c("#28B463", "#28B463"))
         hla_allele_count <- length(unique(all_percentile_data$HLA_allele))
         incProgress(0.5)
         algorithm_count <- length(unique(all_percentile_data$algorithms))
-        p <- ggplot(data = all_percentile_data, aes(x = Mutant, y = Percentile, color = Mutant), trim = FALSE) + geom_violin() + facet_grid(cols = vars(HLA_allele)) + scale_y_continuous(trans = "log10") + #coord_trans(y = "log10") +
+        p <- ggplot(data = all_percentile_data, aes(x = Mutant, y = Percentile, color = Mutant), trim = FALSE) +
+          geom_violin() +
+          facet_grid(cols = vars(HLA_allele)) +
+          scale_y_continuous(trans = "log10") + #coord_trans(y = "log10") +
           stat_summary(fun = mean, fun.min = mean, fun.max = mean, geom = "crossbar", width = 0.25, position = position_dodge(width = .25)) +
           geom_jitter(data = all_percentile_data, aes(shape = algorithms, color = type), size = 5, stroke = 1, position = position_jitter(0.3)) +
           scale_shape_manual(values = 0:(algorithm_count-1)) +

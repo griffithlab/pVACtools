@@ -60,13 +60,37 @@
               "X",
               4137.932
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               0.095,
               "X",
               "X",
               "X",
               5.07
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
@@ -76,7 +100,31 @@
               "X",
               "NA"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "NA"
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
               "X",
               "NA",
               "X",
@@ -303,9 +351,33 @@
               "X",
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               0.395,
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA",
               "X",
               "X",
               "X",
@@ -319,7 +391,31 @@
               "X",
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
               "X",
               "NA",
               "X",
@@ -484,9 +580,33 @@
               "X",
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               1.55,
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA",
               "X",
               "X",
               "X",
@@ -500,7 +620,31 @@
               "X",
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
               "X",
               "NA",
               "X",
@@ -665,13 +809,37 @@
               "X",
               229.956
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               "X",
               "X",
               "X",
               "X",
               1.17
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "X",
+              "X",
+              "X",
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "X",
+              "X",
+              "X",
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "X",
+              "X",
+              "X",
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
@@ -681,7 +849,31 @@
               "X",
               "NA"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
+              "X",
+              "X",
+              "X",
+              "X",
+              "X",
+              "NA"
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "X",
+              "X",
+              "X",
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "X",
+              "X",
+              "X",
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
               "X",
               "X",
               "X",
@@ -846,13 +1038,37 @@
               "X",
               242.758
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               "X",
               "X",
               "X",
               "X",
               0.915
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "X",
+              "X",
+              "X",
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "X",
+              "X",
+              "X",
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "X",
+              "X",
+              "X",
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
@@ -862,13 +1078,37 @@
               "X",
               229.956
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
               "X",
               "X",
               "X",
               "X",
               "X",
               1.17
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "X",
+              "X",
+              "X",
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "X",
+              "X",
+              "X",
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "X",
+              "X",
+              "X",
+              "X",
+              "X",
+              "NA"
             ],
             "hla_types": [
               "HLA-A*26:01",
@@ -1027,10 +1267,34 @@
               "X",
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               "X",
               0.917,
+              "X",
+              "X",
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "X",
+              "NA",
               "X",
               "X",
               "X"
@@ -1043,7 +1307,31 @@
               "X",
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
+              "X",
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
               "X",
               "X",
               "NA",
@@ -1208,9 +1496,33 @@
               "X",
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               1.625,
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA",
               "X",
               "X",
               "X",
@@ -1224,7 +1536,31 @@
               "X",
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
               "X",
               "NA",
               "X",
@@ -1389,9 +1725,33 @@
               "X",
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               3.4,
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA",
               "X",
               "X",
               "X",
@@ -1405,7 +1765,31 @@
               "X",
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
               "X",
               "NA",
               "X",
@@ -1570,9 +1954,33 @@
               "X",
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               1.65,
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA",
               "X",
               "X",
               "X",
@@ -1586,7 +1994,31 @@
               "X",
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
               "X",
               "NA",
               "X",
@@ -1751,13 +2183,37 @@
               "X",
               938.25
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               "X",
               "X",
               "X",
               "X",
               0.89
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "X",
+              "X",
+              "X",
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "X",
+              "X",
+              "X",
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "X",
+              "X",
+              "X",
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
@@ -1767,7 +2223,31 @@
               "X",
               "NA"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
+              "X",
+              "X",
+              "X",
+              "X",
+              "X",
+              "NA"
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "X",
+              "X",
+              "X",
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "X",
+              "X",
+              "X",
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
               "X",
               "X",
               "X",
@@ -1932,9 +2412,33 @@
               "X",
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               3.45,
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA",
               "X",
               "X",
               "X",
@@ -1948,7 +2452,31 @@
               "X",
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
               "X",
               "NA",
               "X",
@@ -2113,10 +2641,34 @@
               "X",
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               "X",
               2.552,
+              "X",
+              "X",
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "X",
+              "NA",
               "X",
               "X",
               "X"
@@ -2129,7 +2681,31 @@
               "X",
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
+              "X",
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
               "X",
               "X",
               "NA",
@@ -2294,13 +2870,37 @@
               "X",
               1474.199
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               "X",
               "X",
               "X",
               "X",
               1.746
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "X",
+              "X",
+              "X",
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "X",
+              "X",
+              "X",
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "X",
+              "X",
+              "X",
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
@@ -2310,7 +2910,31 @@
               "X",
               "NA"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
+              "X",
+              "X",
+              "X",
+              "X",
+              "X",
+              "NA"
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "X",
+              "X",
+              "X",
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "X",
+              "X",
+              "X",
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
               "X",
               "X",
               "X",
@@ -2475,10 +3099,34 @@
               "X",
               "X"
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               "X",
               2.539,
+              "X",
+              "X",
+              "X"
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "X",
+              "NA",
               "X",
               "X",
               "X"
@@ -2491,7 +3139,31 @@
               "X",
               "X"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
+              "X",
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X"
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X"
+            ],
+            "immunogenicity_percentiles_WT": [
               "X",
               "X",
               "NA",
@@ -2656,13 +3328,37 @@
               "X",
               2474.347
             ],
-            "percentiles_MT": [
+            "combined_percentiles_MT": [
               "X",
               2.4,
               "X",
               "X",
               "X",
               2.105
+            ],
+            "binding_percentiles_MT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_MT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "NA"
             ],
             "ic50s_WT": [
               "X",
@@ -2672,7 +3368,31 @@
               "X",
               "NA"
             ],
-            "percentiles_WT": [
+            "combined_percentiles_WT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "NA"
+            ],
+            "binding_percentiles_WT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "X",
+              "NA",
+              "X",
+              "X",
+              "X",
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
               "X",
               "NA",
               "X",
