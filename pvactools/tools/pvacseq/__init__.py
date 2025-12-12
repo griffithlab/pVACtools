@@ -12,6 +12,7 @@ __all__ = [
     'install_vep_plugin',
     'top_score_filter',
     'mark_genes_of_interest',
+    'add_ml_predictions',
     'net_chop',
     'netmhc_stab',
     'valid_netmhciipan_versions',
