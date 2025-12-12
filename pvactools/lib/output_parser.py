@@ -196,7 +196,8 @@ class OutputParser(metaclass=ABCMeta):
     def transform_empty_percentiles(self,p):
         return float(p) if p != 'None' and p is not None and p != "" else 'NA'
 
-    def calculate_normalized_percentile(self, allele, length, score, method, is_reversed=False):
+    #def calculate_normalized_percentile(self, allele, length, score, method, is_reversed=False, mode="per_length"):
+    def calculate_normalized_percentile(self, allele, length, score, method, is_reversed=False, mode="length_agnostic"):
         if allele is None or length is None or score is None or score == 'NA':
             return 'NA'
 
@@ -207,7 +208,10 @@ class OutputParser(metaclass=ABCMeta):
         allele_file = f"{normalized}_percentiles.h5"
         file_path = os.path.join(self.reference_scores_path, allele_file)
 
-        key = f"{method}/{length}mer"
+        if mode == "per_length":
+            key = f"{method}/{length}mer"
+        elif mode == "length_agnostic":
+            key = method
         cache_key = f"{normalized}_{key}"
         if cache_key in self.reference_scores:
             ref_scores = self.reference_scores[cache_key]
@@ -216,9 +220,15 @@ class OutputParser(metaclass=ABCMeta):
                 with h5py.File(file_path, "r") as f:
                     if key not in f:
                         return 'NA'  # algorithm or length not present
-                    ref_scores = f[key][...]
+                    if mode == "per_length":
+                        ref_scores = f[key][...]
+                    elif mode == "length_agnostic":
+                        scores = []
+                        for length in f[key].keys():
+                            scores.extend(f[key][length][...])
+                        ref_scores = np.array(scores)
                     self.reference_scores[cache_key] = ref_scores
-            except Exception:
+            except Exception as e:
                 return 'NA'
 
         if ref_scores.size == 0:
