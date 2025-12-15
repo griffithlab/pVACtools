@@ -446,6 +446,17 @@ server <- shinyServer(function(input, output, session) {
         width="200px"
     )
   })
+  #Binding table mode selector
+  output$binding_table_mode_ui <- renderUI({
+    selectInput(
+        "binding_table_mode",
+        "Cell heatmap background coloring",
+        c("IC50", "binding percentile"),
+        multiple=FALSE,
+        selected="IC50",
+        width="200px"
+    )
+  })
 
   #reactions for once "regenerate table" command is submitted
   observeEvent(input$submit, {
@@ -1416,6 +1427,7 @@ server <- shinyServer(function(input, output, session) {
         binding_reformat <- reshape2::dcast(binding_data, HLA_allele + Mutant ~ algorithms, value.var = "Score")
         selected_peptide_data <- selectedPeptideData()
         binding_reformat <- add_column(binding_reformat, Median = 0, .after = "Mutant")
+        original_length <- ncol(binding_reformat)
         for (i in 1:nrow(binding_reformat)) {
           row <- binding_reformat[i, ]
           allele_index <- match(row$HLA_allele, selected_peptide_data$hla_types)
@@ -1428,14 +1440,46 @@ server <- shinyServer(function(input, output, session) {
           }
           binding_reformat[i, "Median"] <- paste0(round(as.numeric(median_ic50), 2), " (%: ", round(as.numeric(median_percentile), 2), ")")
         }
+        for (col_name in colnames(binding_reformat)[3:original_length]) {
+          scaled_col_name <- paste0("Scaled_", col_name)
+          if (is.null(input$binding_table_mode) || input$binding_table_mode == 'IC50') {
+            binding_reformat[, scaled_col_name] <- apply(binding_reformat, 1, function(x) scale_binding_affinity(
+              df$allele_specific_binding_thresholds,
+              df$use_allele_specific_binding_thresholds,
+              df$binding_threshold,
+              x["HLA_allele"],
+              as.numeric(strsplit(x[col_name], " ")[[1]][1])
+            ))
+          } else if (input$binding_table_mode == 'binding percentile') {
+            binding_reformat[, scaled_col_name] <- apply(binding_reformat, 1, function(x) {
+              parts <- strsplit(x[col_name], " ")
+              value <- sub(")", "", tail(parts[[1]], 1))
+              as.numeric(value) / (df$binding_percentile_threshold)
+            })
+          }
+        }
         incProgress(1)
         dtable <- datatable(binding_reformat, options = list(
           pageLength = 10,
           lengthChange = FALSE,
           rowCallback = JS("function(row, data, index, rowId) {",
                            "if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {",
-                           'row.style.backgroundColor = "#E0E0E0";', "}", "}")
+                           'row.style.backgroundColor = "#E0E0E0";', "}", "}"),
+          columnDefs = list(list(visible = FALSE, targets = seq(original_length+1, ncol(binding_reformat))))
         )) %>% formatStyle("Mutant", fontWeight = styleEqual("MT", "bold"), color = styleEqual("MT", "#E74C3C"))
+        for (col_name in colnames(binding_reformat)[3:original_length]) {
+          scaled_col_name <- paste0("Scaled_", col_name)
+          if (is.null(input$binding_table_mode) || input$binding_table_mode == 'IC50') {
+            if (col_name == 'MixMHCpred') {
+              next
+            }
+            dtable <- dtable %>% formatStyle(col_name, scaled_col_name,
+              backgroundColor = styleInterval(c(0.1, 0.2, 0.4, 0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#3F9750", "#F3F171", "#F3E770", "#F3DD6F", "#F0CD5B", "#F1C664", "#FF9999")))
+          } else if (input$binding_table_mode == 'binding percentile') {
+            dtable <- dtable %>% formatStyle(col_name, scaled_col_name,
+              backgroundColor = styleInterval(c(0.2, 0.4, 0.6, 0.8, 1, 1.25, 1.5, 1.75, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#F3F171", "#F3E770", "#F3DD6F", "#F1C664", "#FF9999")))
+          }
+        }
         dtable
       }else {
         incProgress(1)
@@ -1490,6 +1534,7 @@ server <- shinyServer(function(input, output, session) {
         immunogenicity_reformat <- reshape2::dcast(immunogenicity_data, HLA_allele + Mutant ~ algorithms, value.var = "Score")
         selected_peptide_data <- selectedPeptideData()
         immunogenicity_reformat <- add_column(immunogenicity_reformat, "Median %ile" = 0, .after = "Mutant")
+        original_length <- ncol(immunogenicity_reformat)
         for (i in 1:nrow(immunogenicity_reformat)) {
           row <- immunogenicity_reformat[i, ]
           allele_index <- match(row$HLA_allele, selected_peptide_data$hla_types)
@@ -1500,14 +1545,28 @@ server <- shinyServer(function(input, output, session) {
           }
           immunogenicity_reformat[i, "Median %ile"] <- round(as.numeric(median_percentile), 2)
         }
+        for (col_name in colnames(immunogenicity_reformat)[3:original_length]) {
+          scaled_col_name <- paste0("Scaled_", col_name)
+          immunogenicity_reformat[, scaled_col_name] <- apply(immunogenicity_reformat, 1, function(x) {
+            parts <- strsplit(x[col_name], " ")
+            value <- sub(")", "", tail(parts[[1]], 1))
+            as.numeric(value) / (df$immunogenicity_percentile_threshold)
+          })
+        }
         incProgress(1)
         dtable <- datatable(immunogenicity_reformat, options = list(
           pageLength = 10,
           lengthChange = FALSE,
           rowCallback = JS("function(row, data, index, rowId) {",
                            "if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {",
-                           'row.style.backgroundColor = "#E0E0E0";', "}", "}")
+                           'row.style.backgroundColor = "#E0E0E0";', "}", "}"),
+          columnDefs = list(list(visible = FALSE, targets = seq(original_length+1, ncol(immunogenicity_reformat))))
         )) %>% formatStyle("Mutant", fontWeight = styleEqual("MT", "bold"), color = styleEqual("MT", "#E74C3C"))
+        for (col_name in colnames(immunogenicity_reformat)[3:original_length]) {
+          scaled_col_name <- paste0("Scaled_", col_name)
+          dtable <- dtable %>% formatStyle(col_name, scaled_col_name,
+            backgroundColor = styleInterval(c(0.2, 0.4, 0.6, 0.8, 1, 1.25, 1.5, 1.75, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#F3F171", "#F3E770", "#F3DD6F", "#F1C664", "#FF9999")))
+        }
         dtable
       }else {
         incProgress(1)
@@ -1565,6 +1624,7 @@ server <- shinyServer(function(input, output, session) {
         presentation_reformat <- reshape2::dcast(presentation_data, HLA_allele + Mutant ~ algorithms, value.var = "Score")
         selected_peptide_data <- selectedPeptideData()
         presentation_reformat <- add_column(presentation_reformat, "Median %ile" = 0, .after = "Mutant")
+        original_length <- ncol(presentation_reformat)
         for (i in 1:nrow(presentation_reformat)) {
           row <- presentation_reformat[i, ]
           allele_index <- match(row$HLA_allele, selected_peptide_data$hla_types)
@@ -1575,14 +1635,28 @@ server <- shinyServer(function(input, output, session) {
           }
           presentation_reformat[i, "Median %ile"] <- round(as.numeric(median_percentile), 2)
         }
+        for (col_name in colnames(presentation_reformat)[3:original_length]) {
+          scaled_col_name <- paste0("Scaled_", col_name)
+          presentation_reformat[, scaled_col_name] <- apply(presentation_reformat, 1, function(x) {
+            parts <- strsplit(x[col_name], " ")
+            value <- sub(")", "", tail(parts[[1]], 1))
+            as.numeric(value) / (df$presentation_percentile_threshold)
+          })
+        }
         incProgress(1)
         dtable <- datatable(presentation_reformat, options = list(
           pageLength = 10,
           lengthChange = FALSE,
           rowCallback = JS("function(row, data, index, rowId) {",
                            "if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {",
-                           'row.style.backgroundColor = "#E0E0E0";', "}", "}")
+                           'row.style.backgroundColor = "#E0E0E0";', "}", "}"),
+          columnDefs = list(list(visible = FALSE, targets = seq(original_length+1, ncol(presentation_reformat))))
         )) %>% formatStyle("Mutant", fontWeight = styleEqual("MT", "bold"), color = styleEqual("MT", "#E74C3C"))
+        for (col_name in colnames(presentation_reformat)[3:original_length]) {
+          scaled_col_name <- paste0("Scaled_", col_name)
+          dtable <- dtable %>% formatStyle(col_name, scaled_col_name,
+            backgroundColor = styleInterval(c(0.2, 0.4, 0.6, 0.8, 1, 1.25, 1.5, 1.75, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#F3F171", "#F3E770", "#F3DD6F", "#F1C664", "#FF9999")))
+        }
         dtable
       }else {
         incProgress(1)
