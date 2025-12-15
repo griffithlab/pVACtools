@@ -390,10 +390,11 @@ server <- shinyServer(function(input, output, session) {
   })
   output$scoring_candidate_metric_ui <- renderUI({
     current_metric <- df$scoring_candidate_metric
-    radioButtons(
+    selectInput(
       "scoring_candidate_metric",
       "Specify which metric to prioritize for sorting candidates within each Tier. The 'ic50' option will prioritize sorting by IC50 MT, while the 'percentile' option will priritize sorting by %ile MT. Either choice will be considered in combination with the Allele Expr for final sort order.",
-      c("ic50", "percentile"),
+      c("ic50", "combined_percentile", "binding_percentile", "presentation_percentile", "immunogenicity_percentile"),
+      multiple=TRUE,
       selected = current_metric
     )
   })
@@ -500,21 +501,23 @@ server <- shinyServer(function(input, output, session) {
     df$mainTable$`MANE Select Fail` <- apply(df$mainTable, 1, function(x) {'mane_select' %in% df$transcript_prioritization_strategy && !is_mane_select_pass(x["MANE Select"])})
     df$mainTable$`Canonical Fail` <- apply(df$mainTable, 1, function(x) {'canonical' %in% df$transcript_prioritization_strategy && !is_canonical_pass(x["Canonical"])})
     tier_sorter <- c("Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "PoorTranscript", "LowExpr", "Anchor", "Subclonal", "ProbPos", "Poor", "NoExpr")
-    df$mainTable$`Rank_ic50` <- NA
-    df$mainTable$`Rank_expr` <- NA
-    if(is.null(df$scoring_candidate_metric) || is.na(df$scoring_candidate_metric) || df$scoring_candidate_metric == "ic50"){
-      df$mainTable$`Rank_ic50` <- rank(as.numeric(df$mainTable$`IC50 MT`), ties.method = "first")
-    } else {
-      print("Using percentile")
-      df$mainTable$`Rank_ic50` <- rank(as.numeric(df$mainTable$`%ile MT`), ties.method = "first")
+    df$mainTable$`Rank` <- rank(desc(as.numeric(df$mainTable$`Allele Expr`)), ties.method = "first")
+    for (metric in df$scoring_candidate_metric) {
+        if (metric == "ic50") {
+            df$mainTable$`Rank` <- df$mainTable$`Rank` + rank(as.numeric(df$mainTable$`IC50 MT`), ties.method = "first")
+        } else if (metric == "combined_percentile") {
+            df$mainTable$`Rank` <- df$mainTable$`Rank` + rank(as.numeric(df$mainTable$`%ile MT`), ties.method = "first")
+        } else if (metric == "binding_percentile") {
+            df$mainTable$`Rank` <- df$mainTable$`Rank` + rank(as.numeric(df$mainTable$`IC50 %ile MT`), ties.method = "first")
+        } else if (metric == "presentation_percentile") {
+            df$mainTable$`Rank` <- df$mainTable$`Rank` + rank(as.numeric(df$mainTable$`Pres %ile MT`), ties.method = "first")
+        } else if (metric == "immunogenicity_percentile") {
+            df$mainTable$`Rank` <- df$mainTable$`Rank` + rank(as.numeric(df$mainTable$`IM %ile MT`), ties.method = "first")
+        }
     }
-    df$mainTable$`Rank_expr` <- rank(desc(as.numeric(df$mainTable$`Allele Expr`)), ties.method = "first")
-    df$mainTable$`Rank` <- df$mainTable$`Rank_ic50` + df$mainTable$`Rank_expr`
     df$mainTable <- df$mainTable %>%
       arrange(factor(Tier, levels = tier_sorter), Rank)
     df$mainTable$`Rank` <- NULL
-    df$mainTable$`Rank_ic50` <- NULL
-    df$mainTable$`Rank_expr` <- NULL
   })
   #reset tier-ing with original parameters
   observeEvent(input$reset_params, {
@@ -555,21 +558,22 @@ server <- shinyServer(function(input, output, session) {
     df$mainTable$`MANE Select Fail` <- apply(df$mainTable, 1, function(x) {'mane_select' %in% df$transcript_prioritization_strategy && !is_mane_select_pass(x["MANE Select"])})
     df$mainTable$`Canonical Fail` <- apply(df$mainTable, 1, function(x) {'canonical' %in% df$transcript_prioritization_strategy && !is_canonical_pass(x["Canonical"])})
     tier_sorter <- c("Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "PoorTranscript", "LowExpr", "Anchor", "Subclonal", "ProbPos", "Poor", "NoExpr")
-    df$mainTable$`Rank_ic50` <- NA
-    df$mainTable$`Rank_expr` <- NA
-    if(is.null(df$scoring_candidate_metric) || is.na(df$scoring_candidate_metric) || df$scoring_candidate_metric == "ic50"){
-      df$mainTable$`Rank_ic50` <- rank(as.numeric(df$mainTable$`IC50 MT`), ties.method = "first")
-    } else {
-      print("Using percentile reset params")
-      df$mainTable$`Rank_ic50` <- rank(as.numeric(df$mainTable$`%ile MT`), ties.method = "first")
+    for (metric in df$scoring_candidate_metric) {
+        if (metric == "ic50") {
+            df$mainTable$`Rank` <- df$mainTable$`Rank` + rank(as.numeric(df$mainTable$`IC50 MT`), ties.method = "first")
+        } else if (metric == "combined_percentile") {
+            df$mainTable$`Rank` <- df$mainTable$`Rank` + rank(as.numeric(df$mainTable$`%ile MT`), ties.method = "first")
+        } else if (metric == "binding_percentile") {
+            df$mainTable$`Rank` <- df$mainTable$`Rank` + rank(as.numeric(df$mainTable$`IC50 %ile MT`), ties.method = "first")
+        } else if (metric == "presentation_percentile") {
+            df$mainTable$`Rank` <- df$mainTable$`Rank` + rank(as.numeric(df$mainTable$`Pres %ile MT`), ties.method = "first")
+        } else if (metric == "immunogenicity_percentile") {
+            df$mainTable$`Rank` <- df$mainTable$`Rank` + rank(as.numeric(df$mainTable$`IM %ile MT`), ties.method = "first")
+        }
     }
-    df$mainTable$`Rank_expr` <- rank(desc(as.numeric(df$mainTable$`Allele Expr`)), ties.method = "first")
-    df$mainTable$`Rank` <- df$mainTable$`Rank_ic50` + df$mainTable$`Rank_expr`
     df$mainTable <- df$mainTable %>%
       arrange(factor(Tier, levels = tier_sorter), Rank)
     df$mainTable$`Rank` <- NULL
-    df$mainTable$`Rank_ic50` <- NULL
-    df$mainTable$`Rank_expr` <- NULL
   })
   #determine hla allele count in order to generate column tooltip locations correctly
   hla_count <- reactive({
@@ -639,7 +643,7 @@ server <- shinyServer(function(input, output, session) {
         df$allele_expr,
         df$binding_threshold,
         df$metricsData$`aggregate_inclusion_binding_threshold`,
-        paste0(df$metricsData$transcript_prioritization_strategy, collapse=", "), df$metricsData$maximum_transcript_support_level,
+        paste0(df$transcript_prioritization_strategy, collapse=", "), df$maximum_transcript_support_level,
         df$binding_percentile_threshold,
         df$immunogenicity_percentile_threshold,
         df$presentation_percentile_threshold,
@@ -647,7 +651,7 @@ server <- shinyServer(function(input, output, session) {
         df$use_allele_specific_binding_thresholds,
         df$metricsData$mt_top_score_metric,
         df$metricsData$wt_top_score_metric,
-        paste0(df$metricsData$`top_score_metric2`, collapse=", "),
+        paste0(df$scoring_candidate_metric, collapse=", "),
         df$allele_specific_anchors, df$anchor_contribution)
     ), digits = 3
   )
