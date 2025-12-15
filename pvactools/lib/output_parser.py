@@ -226,7 +226,7 @@ class OutputParser(metaclass=ABCMeta):
                         scores = []
                         for length in f[key].keys():
                             scores.extend(f[key][length][...])
-                        ref_scores = np.array(scores)
+                        ref_scores = np.array(sorted(scores))
                     self.reference_scores[cache_key] = ref_scores
             except Exception as e:
                 return 'NA'
