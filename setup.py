@@ -118,7 +118,7 @@ setup(
         'XlsxWriter',
         'openpyxl',
         'deepdiff',
-        'scikit-learn>=1.6.0,<1.8.0',
+        'scikit-learn>=1.6.0,<1.8.0',  # Allows 1.7.2 but also compatible versions
     ],
     package_data={
         'pvactools.tools.pvacseq': pvacseq_data_files,

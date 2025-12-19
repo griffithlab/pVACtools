@@ -406,8 +406,10 @@ thumbs-down button.
 ML-Based Neoantigen Evaluation Predictions
 __________________________________________
 
+This ML prediction output file contains ML-based evaluation predictions that can help prioritize neoantigen candidates by presetting the evaluation status for each candidate. 
 When pVACseq is run with both MHC Class I and Class II predictions and the ``--run-ml-predictions`` flag enabled, or when using the :ref:`add_ml_predictions <optional_downstream_analysis_tools_label>` 
-tool, the ML prediction output file (``<sample_name>_predict_pvacview.tsv``) can be loaded into pVACview. 
+tool, a aggregate report file with ML predictions (``<sample_name>_predict_pvacview.tsv``) is generated. This file can be loaded into pVACview in combination with the Class I metrics.json file generated during the original run. 
+This metrics.json file is copied next to the ML prediction output file for convenience.  
 This file contains ML-based evaluation predictions that can help prioritize neoantigen candidates by presetting the evaluation status for each candidate.
 
 The ML prediction file includes all columns from the Class I aggregated file with two columns different:
@@ -447,14 +449,31 @@ including binding affinity plots, anchor position analysis, and reference proteo
 
 To view predictions on pVACview, load the following files: 
 1. The ML prediction file (``<sample_name>_predict_pvacview.tsv``) in place of the Class I tsv file. 
-2. The json file of Class I data. 
-3. The Class II tsv file.
+2. The metrics.json file of Class I data. 
+3. The Class II aggregated.tsv file.  
 4. A list of genes of interest (optional).
 
 .. figure:: ../../images/screenshots/vignette/pvacview-ml-predictions-example.png
     :width: 1000px
     :align: right
     :alt: pVACview ML Predictions Example
+    :figclass: align-left
+
+
+In the pVACview interface shown above, the ML prediction file is loaded in place of the standard Class I TSV file, with all 
+other inputs as described. Candidate evaluation statuses are automatically pre-populated based on the ML predictions, as shown in the “Acpt,” 
+“Rej,” and “Rev” columns, with prediction scores displayed in the “ML Prediction (score)” column. Users may review and override these assignments 
+as needed.
+
+In this example, MAU2 is classified in the Pass tier by pVACseq and predicted as Accept by the ML model, providing concordant support for its 
+selection. In contrast, TUBGCP6 is labeled as a PoorBinder by pVACseq but predicted as Accept by the ML model, likely due to favorable features 
+such as high expression and variant allele frequency (VAF), as well as potential Class II binding indicated in the Additional Data table (shown below). While 
+this candidate may be provisionally accepted, further evaluation is needed to confirm that all Class II selection criteria are met.
+
+.. figure:: ../../images/screenshots/vignette/pvacview-ml-predictions-example2.png
+    :width: 1000px
+    :align: right
+    :alt: pVACview ML Predictions Example TUBGCP6 Class II Additional Data
     :figclass: align-left
 
 Export

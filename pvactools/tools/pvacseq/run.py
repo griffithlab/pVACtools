@@ -60,8 +60,9 @@ def locate_ml_input_files(base_output_dir, sample_name):
     file1 = os.path.join(base_output_dir, 'MHC_Class_I', "{}.MHC_I.all_epitopes.aggregated.tsv".format(sample_name))
     file2 = os.path.join(base_output_dir, 'MHC_Class_I', "{}.MHC_I.all_epitopes.tsv".format(sample_name))
     file3 = os.path.join(base_output_dir, 'MHC_Class_II', "{}.MHC_II.all_epitopes.aggregated.tsv".format(sample_name))
+    file4 = os.path.join(base_output_dir, 'MHC_Class_I', "{}.MHC_I.all_epitopes.aggregated.metrics.json".format(sample_name))
     
-    return file1, file2, file3
+    return file1, file2, file3, file4
 
 def run_ml_predictions(base_output_dir, args):
     """
@@ -77,10 +78,10 @@ def run_ml_predictions(base_output_dir, args):
     print("Running standalone ML predictions...")
     
     # Locate input files
-    file1, file2, file3 = locate_ml_input_files(base_output_dir, args.sample_name)
+    file1, file2, file3, file4 = locate_ml_input_files(base_output_dir, args.sample_name)
     
     # Check if all required files exist
-    required_files = [file1, file2, file3]
+    required_files = [file1, file2, file3, file4]
     missing_files = [f for f in required_files if not os.path.exists(f)]
     if missing_files:
         print(f"Warning: Missing required files for ML predictions: {missing_files}")
@@ -104,6 +105,9 @@ def run_ml_predictions(base_output_dir, args):
             threshold=args.ml_threshold
         )
         print(f"ML predictions completed successfully using Class I and Class II files. Results saved to: {output_file}")
+        
+        # Copy the metrics.json file to the ML output directory
+        shutil.copy(file4, os.path.join(ml_output_dir, "{}.MHC_I.all_epitopes.aggregated.metrics.json".format(args.sample_name)))
         
     except Exception as e:
         print(f"Error during standalone ML predictions: {str(e)}")

@@ -72,21 +72,22 @@ It uses a trained random forest model to predict whether neoantigen candidates s
 expression data, and variant characteristics.
 
 This tool requires that you have already generated both MHC Class I and Class II aggregated reports using 
-the ``generate_aggregated_report`` command. It takes as input the Class I aggregated TSV, Class I all epitopes TSV, 
-and Class II aggregated TSV files from a pVACseq run. The tool merges these files, performs data cleaning and 
-imputation, and applies the ML model to generate evaluation predictions for each variant.
+the ``generate_aggregated_report`` command or by running the pVACseq pipeline (``pvacseq run``). It takes as input 
+the Class I aggregated TSV, Class I all epitopes TSV, and Class II aggregated TSV files from a pVACseq run. 
+The tool merges these files, performs data cleaning and imputation, and applies the ML model to generate evaluation predictions for each variant.
 
 The output file is named ``<sample_name>_predict_pvacview.tsv`` and contains all columns from the original 
-Class I aggregated file with two differentcolumns:
+Class I aggregated file with two additional columns:  
+
 
 .. list-table::
 
  * - ``Evaluation``
    - The ML-predicted evaluation status: "Accept", "Reject", or "Pending", based on the prediction probability score.
  * - ``ML Prediction (score)``
-   - A formatted string combining the evaluation status with the prediction probability score (e.g., 
-     "Accept (0.72)"). Shows "NA" for variants where the model could not make a prediction, which may be due to a candidate 
-     not present in either the Class I or Class II aggregated reports.
+   - A formatted string combining the model-predicted evaluation with the prediction probability score (e.g., 
+     "Accept (0.72)"). It shows "NA" for variants where the model could not make a prediction, which may be due to a candidate 
+     not being present in either the Class I or Class II aggregated reports.
 
 The ``--threshold`` parameter controls the probability threshold for Accept predictions (default: 0.55). 
 Variants with prediction probabilities above this threshold are evaluated as "Accept", while those below 
