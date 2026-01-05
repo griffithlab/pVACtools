@@ -11,12 +11,13 @@ def define_parser():
     )
     parser.add_argument('pvacseq_dir', help='pVACseq results directory path (e.g. ~/Downloads/pvacseq_run/MHC_Class_I/)')
     parser.add_argument('--r_path', default='R', help='Location of R to be used for launching the app (e.g. /usr/local/bin/R)')
+    parser.add_argument('--port', default='3333', help='The port to serve the application to')
     return parser
 
 def main(args_input = sys.argv[1:]):
     parser = define_parser()
     args = parser.parse_args(args_input)
-    arguments = ['{}'.format(args.r_path), "-e", "shiny::runApp('{}', port=3333)".format(args.pvacseq_dir)]
+    arguments = ['{}'.format(args.r_path), "-e", "shiny::runApp('{}', port={})".format(args.pvacseq_dir, args.port)]
     response = run(arguments, check=True)
 
 if __name__ == '__main__':
