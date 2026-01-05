@@ -241,6 +241,8 @@ class FastaGenerator(metaclass=ABCMeta):
 
             if variant_type == 'FS':
                 full_mutant_sequence = line['frameshift_amino_acid_sequence']
+                if full_wildtype_sequence.startswith(full_mutant_sequence):
+                    continue
                 wildtype_subsequence, mutant_subsequence, left_flanking_subsequence = self.get_frameshift_subsequences(position, full_wildtype_sequence, full_mutant_sequence)
                 mutation_start_position = len(left_flanking_subsequence)
                 wildtype_subsequence = self.add_proximal_variants(line['index'], wildtype_subsequence, mutation_start_position, position, True)
