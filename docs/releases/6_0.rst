@@ -82,3 +82,16 @@ Version 6.0.3
 This is a bugfix release. It fixes the following problem(s):
 
 * Remove allele no longer supported by MHCflurry. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1342
+
+Version 6.0.4
+-------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+* Fix a couple of FASTA creation bugs. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1352
+
+  * Some frameshift mutations have no VEP-predicted downstream tail. This may occur when the transcript amino acid sequence contains a U (unknown).
+    If this happens while the somatic mutation occurs after the U, the mutant sequence extracted by pVACseq will be empty, which results in downstream
+    errors. These types of variants are now skipped since they don't produce any novel neoantigen candidates.
+  * In the process of evaluating the issue above, another bug was discovered. When restarting a run that had failed during the fasta creation step
+    the restart would no longer incorporate proximal variants into the predicted wildtypes and mutant sequences. This issue has been fixed.
