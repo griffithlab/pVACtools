@@ -390,10 +390,11 @@ server <- shinyServer(function(input, output, session) {
   })
   output$scoring_candidate_metric_ui <- renderUI({
     current_metric <- df$scoring_candidate_metric
-    radioButtons(
+    selectInput(
       "scoring_candidate_metric",
       "Specify which metric to prioritize for sorting candidates within each Tier. The 'ic50' option will prioritize sorting by IC50 MT, while the 'percentile' option will priritize sorting by %ile MT. Either choice will be considered in combination with the Allele Expr for final sort order.",
-      c("ic50", "percentile"),
+      c("ic50", "combined_percentile", "binding_percentile", "presentation_percentile", "immunogenicity_percentile"),
+      multiple=TRUE,
       selected = current_metric
     )
   })
@@ -422,6 +423,39 @@ server <- shinyServer(function(input, output, session) {
       "The threshold to use for prioritizing epitopes on the Ensembl transcript support level (TSL). Prioritize all epitopes with a transcript support level <= this cutoff.",
       c(1, 2, 3, 4, 5),
       selected = current_maximum_transcript_support_level
+    )
+  })
+  #%ile Plot mode selector
+  output$percentile_plot_mode_ui <- renderUI({
+    selectInput(
+        "percentile_plot_mode",
+        "Specify what data to show",
+        c("all", "binding", "presentation", "immunogenicity"),
+        multiple=FALSE,
+        selected="all",
+        width="200px"
+    )
+  })
+  #Peptide table mode selector
+  output$peptide_table_mode_ui <- renderUI({
+    selectInput(
+        "peptide_table_mode",
+        "Specify what data to show",
+        c("IC50", "combined percentile", "binding percentile", "presentation percentile", "immunogenicity percentile"),
+        multiple=FALSE,
+        selected="IC50",
+        width="200px"
+    )
+  })
+  #Binding table mode selector
+  output$binding_table_mode_ui <- renderUI({
+    selectInput(
+        "binding_table_mode",
+        "Cell heatmap background coloring",
+        c("IC50", "binding percentile"),
+        multiple=FALSE,
+        selected="IC50",
+        width="200px"
     )
   })
 
@@ -467,21 +501,23 @@ server <- shinyServer(function(input, output, session) {
     df$mainTable$`MANE Select Fail` <- apply(df$mainTable, 1, function(x) {'mane_select' %in% df$transcript_prioritization_strategy && !is_mane_select_pass(x["MANE Select"])})
     df$mainTable$`Canonical Fail` <- apply(df$mainTable, 1, function(x) {'canonical' %in% df$transcript_prioritization_strategy && !is_canonical_pass(x["Canonical"])})
     tier_sorter <- c("Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "PoorTranscript", "LowExpr", "Anchor", "Subclonal", "ProbPos", "Poor", "NoExpr")
-    df$mainTable$`Rank_ic50` <- NA
-    df$mainTable$`Rank_expr` <- NA
-    if(is.null(df$scoring_candidate_metric) || is.na(df$scoring_candidate_metric) || df$scoring_candidate_metric == "ic50"){
-      df$mainTable$`Rank_ic50` <- rank(as.numeric(df$mainTable$`IC50 MT`), ties.method = "first")
-    } else {
-      print("Using percentile")
-      df$mainTable$`Rank_ic50` <- rank(as.numeric(df$mainTable$`%ile MT`), ties.method = "first")
+    df$mainTable$`Rank` <- rank(desc(as.numeric(df$mainTable$`Allele Expr`)), ties.method = "first")
+    for (metric in df$scoring_candidate_metric) {
+        if (metric == "ic50") {
+            df$mainTable$`Rank` <- df$mainTable$`Rank` + rank(as.numeric(df$mainTable$`IC50 MT`), ties.method = "first")
+        } else if (metric == "combined_percentile") {
+            df$mainTable$`Rank` <- df$mainTable$`Rank` + rank(as.numeric(df$mainTable$`%ile MT`), ties.method = "first")
+        } else if (metric == "binding_percentile") {
+            df$mainTable$`Rank` <- df$mainTable$`Rank` + rank(as.numeric(df$mainTable$`IC50 %ile MT`), ties.method = "first")
+        } else if (metric == "presentation_percentile") {
+            df$mainTable$`Rank` <- df$mainTable$`Rank` + rank(as.numeric(df$mainTable$`Pres %ile MT`), ties.method = "first")
+        } else if (metric == "immunogenicity_percentile") {
+            df$mainTable$`Rank` <- df$mainTable$`Rank` + rank(as.numeric(df$mainTable$`IM %ile MT`), ties.method = "first")
+        }
     }
-    df$mainTable$`Rank_expr` <- rank(desc(as.numeric(df$mainTable$`Allele Expr`)), ties.method = "first")
-    df$mainTable$`Rank` <- df$mainTable$`Rank_ic50` + df$mainTable$`Rank_expr`
     df$mainTable <- df$mainTable %>%
       arrange(factor(Tier, levels = tier_sorter), Rank)
     df$mainTable$`Rank` <- NULL
-    df$mainTable$`Rank_ic50` <- NULL
-    df$mainTable$`Rank_expr` <- NULL
   })
   #reset tier-ing with original parameters
   observeEvent(input$reset_params, {
@@ -522,21 +558,22 @@ server <- shinyServer(function(input, output, session) {
     df$mainTable$`MANE Select Fail` <- apply(df$mainTable, 1, function(x) {'mane_select' %in% df$transcript_prioritization_strategy && !is_mane_select_pass(x["MANE Select"])})
     df$mainTable$`Canonical Fail` <- apply(df$mainTable, 1, function(x) {'canonical' %in% df$transcript_prioritization_strategy && !is_canonical_pass(x["Canonical"])})
     tier_sorter <- c("Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "PoorTranscript", "LowExpr", "Anchor", "Subclonal", "ProbPos", "Poor", "NoExpr")
-    df$mainTable$`Rank_ic50` <- NA
-    df$mainTable$`Rank_expr` <- NA
-    if(is.null(df$scoring_candidate_metric) || is.na(df$scoring_candidate_metric) || df$scoring_candidate_metric == "ic50"){
-      df$mainTable$`Rank_ic50` <- rank(as.numeric(df$mainTable$`IC50 MT`), ties.method = "first")
-    } else {
-      print("Using percentile reset params")
-      df$mainTable$`Rank_ic50` <- rank(as.numeric(df$mainTable$`%ile MT`), ties.method = "first")
+    for (metric in df$scoring_candidate_metric) {
+        if (metric == "ic50") {
+            df$mainTable$`Rank` <- df$mainTable$`Rank` + rank(as.numeric(df$mainTable$`IC50 MT`), ties.method = "first")
+        } else if (metric == "combined_percentile") {
+            df$mainTable$`Rank` <- df$mainTable$`Rank` + rank(as.numeric(df$mainTable$`%ile MT`), ties.method = "first")
+        } else if (metric == "binding_percentile") {
+            df$mainTable$`Rank` <- df$mainTable$`Rank` + rank(as.numeric(df$mainTable$`IC50 %ile MT`), ties.method = "first")
+        } else if (metric == "presentation_percentile") {
+            df$mainTable$`Rank` <- df$mainTable$`Rank` + rank(as.numeric(df$mainTable$`Pres %ile MT`), ties.method = "first")
+        } else if (metric == "immunogenicity_percentile") {
+            df$mainTable$`Rank` <- df$mainTable$`Rank` + rank(as.numeric(df$mainTable$`IM %ile MT`), ties.method = "first")
+        }
     }
-    df$mainTable$`Rank_expr` <- rank(desc(as.numeric(df$mainTable$`Allele Expr`)), ties.method = "first")
-    df$mainTable$`Rank` <- df$mainTable$`Rank_ic50` + df$mainTable$`Rank_expr`
     df$mainTable <- df$mainTable %>%
       arrange(factor(Tier, levels = tier_sorter), Rank)
     df$mainTable$`Rank` <- NULL
-    df$mainTable$`Rank_ic50` <- NULL
-    df$mainTable$`Rank_expr` <- NULL
   })
   #determine hla allele count in order to generate column tooltip locations correctly
   hla_count <- reactive({
@@ -606,7 +643,7 @@ server <- shinyServer(function(input, output, session) {
         df$allele_expr,
         df$binding_threshold,
         df$metricsData$`aggregate_inclusion_binding_threshold`,
-        paste0(df$metricsData$transcript_prioritization_strategy, collapse=", "), df$metricsData$maximum_transcript_support_level,
+        paste0(df$transcript_prioritization_strategy, collapse=", "), df$maximum_transcript_support_level,
         df$binding_percentile_threshold,
         df$immunogenicity_percentile_threshold,
         df$presentation_percentile_threshold,
@@ -614,7 +651,7 @@ server <- shinyServer(function(input, output, session) {
         df$use_allele_specific_binding_thresholds,
         df$metricsData$mt_top_score_metric,
         df$metricsData$wt_top_score_metric,
-        paste0(df$metricsData$`top_score_metric2`, collapse=", "),
+        paste0(df$scoring_candidate_metric, collapse=", "),
         df$allele_specific_anchors, df$anchor_contribution)
     ), digits = 3
   )
@@ -1060,7 +1097,18 @@ server <- shinyServer(function(input, output, session) {
         incProgress(0.5)
         peptide_data <- as.data.frame(peptide_data)
         incProgress(0.5)
-        dtable <- datatable(do.call("rbind", lapply(peptide_names, table_formatting, peptide_data)), options = list(
+        if (is.null(input$peptide_table_mode) || input$peptide_table_mode == 'IC50') {
+            display_mode <- "ic50s"
+        } else if (input$peptide_table_mode == 'combined percentile') {
+            display_mode <- "combined_percentiles"
+        } else if (input$peptide_table_mode == 'binding percentile') {
+            display_mode <- "binding_percentiles"
+        } else if (input$peptide_table_mode == 'presentation percentile') {
+            display_mode <- "presentation_percentiles"
+        } else if (input$peptide_table_mode == 'immunogenicity percentile') {
+            display_mode <- "immunogenicity_percentiles"
+        }
+        dtable <- datatable(do.call("rbind", lapply(peptide_names, table_formatting, peptide_data, display_mode)), options = list(
           pageLength = 10,
           columnDefs = list(list(defaultContent = "X",
                                  targets = hla_columns),
@@ -1143,15 +1191,15 @@ server <- shinyServer(function(input, output, session) {
         peptide_names <- names(peptide_data)
         for (i in 1:length(peptide_names)) {
           peptide_data[[peptide_names[[i]]]]$individual_ic50_calls <- NULL
-          peptide_data[[peptide_names[[i]]]]$individual_ic50_percentile_calls <- NULL
-          peptide_data[[peptide_names[[i]]]]$individual_el_calls <- NULL
-          peptide_data[[peptide_names[[i]]]]$individual_el_percentile_calls <- NULL
-          peptide_data[[peptide_names[[i]]]]$individual_percentile_calls <- NULL
+          peptide_data[[peptide_names[[i]]]]$individual_binding_score_calls <- NULL
+          peptide_data[[peptide_names[[i]]]]$individual_binding_percentile_calls <- NULL
+          peptide_data[[peptide_names[[i]]]]$individual_presentation_calls <- NULL
+          peptide_data[[peptide_names[[i]]]]$individual_presentation_percentile_calls <- NULL
+          peptide_data[[peptide_names[[i]]]]$individual_immunogenicity_calls <- NULL
+          peptide_data[[peptide_names[[i]]]]$individual_immunogenicity_percentile_calls <- NULL
         }
         peptide_data <- as.data.frame(peptide_data)
-        p1 <- ggplot() + scale_x_continuous(limits = c(0, 80)) + scale_y_continuous(limits = c((length(peptide_names) * 2 + 1) * -1, 1))
         all_peptides <- list()
-        incProgress(0.1)
         for (i in 1:length(peptide_names)) {
           #set & constrain mutation_pos' to not exceed length of peptide (may happen if mutation range goes off end)
           mutation_pos <- pos_str_to_seq(df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$peptides[[peptide_names[i]]]$`mutation_position`)
@@ -1175,7 +1223,7 @@ server <- shinyServer(function(input, output, session) {
         }
         incProgress(0.4)
         all_peptides <- do.call(rbind, all_peptides)
-        peptide_table <- do.call("rbind", lapply(peptide_names, table_formatting, peptide_data))
+        peptide_table <- do.call("rbind", lapply(peptide_names, table_formatting, peptide_data, "ic50s"))
         peptide_table_filtered <- Filter(function(x) length(unique(x)) != 1, peptide_table)
         peptide_table_names <- names(peptide_table_filtered)
         hla_list <- df$metricsData$alleles
@@ -1198,6 +1246,8 @@ server <- shinyServer(function(input, output, session) {
         h_line_pos <- data.frame(y_pos = seq(min(all_peptides_multiple_hla["y_pos"]) - 0.5, max(all_peptides_multiple_hla["y_pos"]) - 1.5, 2), x_pos = c(min(all_peptides_multiple_hla["x_pos"]) - 1))
         h_line_pos <- rbind(h_line_pos, data.frame(x_pos = max(all_peptides_multiple_hla["x_pos"]) + 1, y_pos = seq(min(all_peptides_multiple_hla["y_pos"]) - 0.5, max(all_peptides_multiple_hla["y_pos"]) - 1.5, 2)))
         incProgress(0.2)
+        p1 <- ggplot() + scale_x_continuous(limits = c(0, max(h_line_pos$x_pos))) + scale_y_continuous(limits = c((length(peptide_names) * 2 + 1) * -1, 1))
+        incProgress(0.1)
         p1 <- p1 +
           geom_rect(data = all_peptides_multiple_hla, aes(xmin = x_pos - 0.5, xmax = 1 + x_pos - 0.5, ymin = .5 + y_pos, ymax = -.5 + y_pos), fill = all_peptides_multiple_hla$color_value) +
           geom_text(data = all_peptides_multiple_hla, aes(x = x_pos, y = y_pos, label = aa, color = mutation), size = 4) +
@@ -1246,11 +1296,12 @@ server <- shinyServer(function(input, output, session) {
     if (is.null(df$metricsData)) {
       return()
     }
-    if (length(df$metricsData[[selectedID()]]$sets) != 0 && length(selectedPeptideData()$individual_ic50_calls$algorithms) != 0) {
-      algorithm_names <- data.frame(algorithms = selectedPeptideData()$individual_ic50_calls$algorithms)
-      wt_data <- as.data.frame(selectedPeptideData()$individual_ic50_calls$WT, check.names = FALSE)
+    selected_peptide_data <- selectedPeptideData()
+    if (length(df$metricsData[[selectedID()]]$sets) != 0 && length(selected_peptide_data$individual_ic50_calls$algorithms) != 0) {
+      algorithm_names <- data.frame(algorithms = selected_peptide_data$individual_ic50_calls$algorithms)
+      wt_data <- as.data.frame(selected_peptide_data$individual_ic50_calls$WT, check.names = FALSE)
       colnames(wt_data) <- paste(colnames(wt_data), "_WT_Score", sep = "")
-      mt_data <- as.data.frame(selectedPeptideData()$individual_ic50_calls$MT, check.names = FALSE)
+      mt_data <- as.data.frame(selected_peptide_data$individual_ic50_calls$MT, check.names = FALSE)
       colnames(mt_data) <- paste(colnames(mt_data), "_MT_Score", sep = "")
       full_data <- cbind(algorithm_names, mt_data, wt_data) %>%
         gather("col", "val", colnames(mt_data)[1]:tail(colnames(wt_data), n = 1)) %>%
@@ -1269,7 +1320,10 @@ server <- shinyServer(function(input, output, session) {
         line.data <- data.frame(yintercept = c(500, 1000), cutoffs = c("500nM", "1000nM"), color = c("#28B463", "#28B463"))
         hla_allele_count <- length(unique(bindingDataIC50()$HLA_allele))
         incProgress(0.5)
-        p <- ggplot(data = bindingDataIC50(), aes(x = Mutant, y = Score, color = Mutant), trim = FALSE) + geom_violin() + facet_grid(cols = vars(HLA_allele)) + scale_y_continuous(trans = "log10") + #coord_trans(y = "log10") +
+        p <- ggplot(data = bindingDataIC50(), aes(x = Mutant, y = Score, color = Mutant), trim = FALSE) +
+          geom_violin() +
+          facet_grid(cols = vars(HLA_allele)) +
+          scale_y_continuous(trans = "log10") + #coord_trans(y = "log10") +
           stat_summary(fun = mean, fun.min = mean, fun.max = mean, geom = "crossbar", width = 0.25, position = position_dodge(width = .25)) +
           geom_jitter(data = bindingDataIC50(), aes(shape = algorithms, color = type), size = 5, stroke = 1, position = position_jitter(0.3)) +
           scale_shape_manual(values = 0:8) +
@@ -1293,12 +1347,23 @@ server <- shinyServer(function(input, output, session) {
   output$violinPlot_percentile <- renderPlot({
     withProgress(message = "Loading Percentile Plot", value = 0, {
       if (length(df$metricsData[[selectedID()]]$sets) != 0) {
-        all_percentile_data <- rbind(bindingPercentileData(), presentationPercentileData(), immunogenicityPercentileData())
+        if (is.null(input$percentile_plot_mode) || input$percentile_plot_mode == 'all') {
+            all_percentile_data <- rbind(bindingPercentileData(), presentationPercentileData(), immunogenicityPercentileData())
+        } else if (input$percentile_plot_mode == 'binding') {
+            all_percentile_data <- bindingPercentileData()
+        } else if (input$percentile_plot_mode == 'presentation') {
+            all_percentile_data <- presentationPercentileData()
+        } else if (input$percentile_plot_mode == 'immunogenicity') {
+            all_percentile_data <- immunogenicityPercentileData()
+        }
         line.data <- data.frame(yintercept = c(0.5, 2), cutoffs = c("0.5%", "2%"), color = c("#28B463", "#28B463"))
         hla_allele_count <- length(unique(all_percentile_data$HLA_allele))
         incProgress(0.5)
         algorithm_count <- length(unique(all_percentile_data$algorithms))
-        p <- ggplot(data = all_percentile_data, aes(x = Mutant, y = Percentile, color = Mutant), trim = FALSE) + geom_violin() + facet_grid(cols = vars(HLA_allele)) + scale_y_continuous(trans = "log10") + #coord_trans(y = "log10") +
+        p <- ggplot(data = all_percentile_data, aes(x = Mutant, y = Percentile, color = Mutant), trim = FALSE) +
+          geom_violin() +
+          facet_grid(cols = vars(HLA_allele)) +
+          scale_y_continuous(trans = "log10") + #coord_trans(y = "log10") +
           stat_summary(fun = mean, fun.min = mean, fun.max = mean, geom = "crossbar", width = 0.25, position = position_dodge(width = .25)) +
           geom_jitter(data = all_percentile_data, aes(shape = algorithms, color = type), size = 5, stroke = 1, position = position_jitter(0.3)) +
           scale_shape_manual(values = 0:(algorithm_count-1)) +
@@ -1362,16 +1427,63 @@ server <- shinyServer(function(input, output, session) {
     withProgress(message = "Loading binding datatable", value = 0, {
       if (length(df$metricsData[[selectedID()]]$sets) != 0) {
         binding_data <- right_join(rbind(bindingDataIC50(), bindingDataScore()), bindingPercentileData(), by=c("algorithms", "HLA_allele", "Mutant"))
-        binding_data["Score"] <- paste(round(as.numeric(binding_data$`Score`), 3), " (%: ", round(as.numeric(binding_data$`Percentile`), 3), ")", sep = "")
+        binding_data["Score"] <- paste(round(as.numeric(binding_data$`Score`), 1), " (%: ", round(as.numeric(binding_data$`Percentile`), 1), ")", sep = "")
         binding_reformat <- reshape2::dcast(binding_data, HLA_allele + Mutant ~ algorithms, value.var = "Score")
+        selected_peptide_data <- selectedPeptideData()
+        binding_reformat <- add_column(binding_reformat, Median = 0, .after = "Mutant")
+        original_length <- ncol(binding_reformat)
+        for (i in 1:nrow(binding_reformat)) {
+          row <- binding_reformat[i, ]
+          allele_index <- match(row$HLA_allele, selected_peptide_data$hla_types)
+          if (row$Mutant == 'MT') {
+            median_ic50 <- selected_peptide_data$ic50s_MT[allele_index]
+            median_percentile <- selected_peptide_data$binding_percentiles_MT[allele_index]
+          } else {
+            median_ic50 <- selected_peptide_data$ic50s_WT[allele_index]
+            median_percentile <- selected_peptide_data$binding_percentiles_WT[allele_index]
+          }
+          binding_reformat[i, "Median"] <- paste0(round(as.numeric(median_ic50), 2), " (%: ", round(as.numeric(median_percentile), 2), ")")
+        }
+        for (col_name in colnames(binding_reformat)[3:original_length]) {
+          scaled_col_name <- paste0("Scaled_", col_name)
+          if (is.null(input$binding_table_mode) || input$binding_table_mode == 'IC50') {
+            binding_reformat[, scaled_col_name] <- apply(binding_reformat, 1, function(x) scale_binding_affinity(
+              df$allele_specific_binding_thresholds,
+              df$use_allele_specific_binding_thresholds,
+              df$binding_threshold,
+              x["HLA_allele"],
+              as.numeric(strsplit(x[col_name], " ")[[1]][1])
+            ))
+          } else if (input$binding_table_mode == 'binding percentile') {
+            binding_reformat[, scaled_col_name] <- apply(binding_reformat, 1, function(x) {
+              parts <- strsplit(x[col_name], " ")
+              value <- sub(")", "", tail(parts[[1]], 1))
+              as.numeric(value) / (df$binding_percentile_threshold)
+            })
+          }
+        }
         incProgress(1)
         dtable <- datatable(binding_reformat, options = list(
           pageLength = 10,
           lengthChange = FALSE,
           rowCallback = JS("function(row, data, index, rowId) {",
                            "if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {",
-                           'row.style.backgroundColor = "#E0E0E0";', "}", "}")
+                           'row.style.backgroundColor = "#E0E0E0";', "}", "}"),
+          columnDefs = list(list(visible = FALSE, targets = seq(original_length+1, ncol(binding_reformat))))
         )) %>% formatStyle("Mutant", fontWeight = styleEqual("MT", "bold"), color = styleEqual("MT", "#E74C3C"))
+        for (col_name in colnames(binding_reformat)[3:original_length]) {
+          scaled_col_name <- paste0("Scaled_", col_name)
+          if (is.null(input$binding_table_mode) || input$binding_table_mode == 'IC50') {
+            if (col_name == 'MixMHCpred') {
+              next
+            }
+            dtable <- dtable %>% formatStyle(col_name, scaled_col_name,
+              backgroundColor = styleInterval(c(0.1, 0.2, 0.4, 0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#3F9750", "#F3F171", "#F3E770", "#F3DD6F", "#F0CD5B", "#F1C664", "#FF9999")))
+          } else if (input$binding_table_mode == 'binding percentile') {
+            dtable <- dtable %>% formatStyle(col_name, scaled_col_name,
+              backgroundColor = styleInterval(c(0.2, 0.4, 0.6, 0.8, 1, 1.25, 1.5, 1.75, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#F3F171", "#F3E770", "#F3DD6F", "#F1C664", "#FF9999")))
+          }
+        }
         dtable
       }else {
         incProgress(1)
@@ -1424,14 +1536,41 @@ server <- shinyServer(function(input, output, session) {
         immunogenicity_data <- merge(immunogenicityDataScore(), immunogenicityPercentileData(), by=c("algorithms", "HLA_allele", "Mutant"), all=TRUE)
         immunogenicity_data["Score"] <- paste(round(as.numeric(immunogenicity_data$`Score`), 3), " (%: ", round(as.numeric(immunogenicity_data$`Percentile`), 3), ")", sep = "")
         immunogenicity_reformat <- reshape2::dcast(immunogenicity_data, HLA_allele + Mutant ~ algorithms, value.var = "Score")
+        selected_peptide_data <- selectedPeptideData()
+        immunogenicity_reformat <- add_column(immunogenicity_reformat, "Median %ile" = 0, .after = "Mutant")
+        original_length <- ncol(immunogenicity_reformat)
+        for (i in 1:nrow(immunogenicity_reformat)) {
+          row <- immunogenicity_reformat[i, ]
+          allele_index <- match(row$HLA_allele, selected_peptide_data$hla_types)
+          if (row$Mutant == 'MT') {
+            median_percentile <- selected_peptide_data$immunogenicity_percentiles_MT[allele_index]
+          } else {
+            median_percentile <- selected_peptide_data$immunogenicity_percentiles_WT[allele_index]
+          }
+          immunogenicity_reformat[i, "Median %ile"] <- round(as.numeric(median_percentile), 2)
+        }
+        for (col_name in colnames(immunogenicity_reformat)[3:original_length]) {
+          scaled_col_name <- paste0("Scaled_", col_name)
+          immunogenicity_reformat[, scaled_col_name] <- apply(immunogenicity_reformat, 1, function(x) {
+            parts <- strsplit(x[col_name], " ")
+            value <- sub(")", "", tail(parts[[1]], 1))
+            as.numeric(value) / (df$immunogenicity_percentile_threshold)
+          })
+        }
         incProgress(1)
         dtable <- datatable(immunogenicity_reformat, options = list(
           pageLength = 10,
           lengthChange = FALSE,
           rowCallback = JS("function(row, data, index, rowId) {",
                            "if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {",
-                           'row.style.backgroundColor = "#E0E0E0";', "}", "}")
+                           'row.style.backgroundColor = "#E0E0E0";', "}", "}"),
+          columnDefs = list(list(visible = FALSE, targets = seq(original_length+1, ncol(immunogenicity_reformat))))
         )) %>% formatStyle("Mutant", fontWeight = styleEqual("MT", "bold"), color = styleEqual("MT", "#E74C3C"))
+        for (col_name in colnames(immunogenicity_reformat)[3:original_length]) {
+          scaled_col_name <- paste0("Scaled_", col_name)
+          dtable <- dtable %>% formatStyle(col_name, scaled_col_name,
+            backgroundColor = styleInterval(c(0.2, 0.4, 0.6, 0.8, 1, 1.25, 1.5, 1.75, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#F3F171", "#F3E770", "#F3DD6F", "#F1C664", "#FF9999")))
+        }
         dtable
       }else {
         incProgress(1)
@@ -1487,14 +1626,41 @@ server <- shinyServer(function(input, output, session) {
         presentation_data <- merge(presentationDataScore(), presentationPercentileData(), by=c("algorithms", "HLA_allele", "Mutant"), all=TRUE)
         presentation_data["Score"] <- paste(round(as.numeric(presentation_data$`Score`), 3), " (%: ", round(as.numeric(presentation_data$`Percentile`), 3), ")", sep = "")
         presentation_reformat <- reshape2::dcast(presentation_data, HLA_allele + Mutant ~ algorithms, value.var = "Score")
+        selected_peptide_data <- selectedPeptideData()
+        presentation_reformat <- add_column(presentation_reformat, "Median %ile" = 0, .after = "Mutant")
+        original_length <- ncol(presentation_reformat)
+        for (i in 1:nrow(presentation_reformat)) {
+          row <- presentation_reformat[i, ]
+          allele_index <- match(row$HLA_allele, selected_peptide_data$hla_types)
+          if (row$Mutant == 'MT') {
+            median_percentile <- selected_peptide_data$presentation_percentiles_MT[allele_index]
+          } else {
+            median_percentile <- selected_peptide_data$presentation_percentiles_WT[allele_index]
+          }
+          presentation_reformat[i, "Median %ile"] <- round(as.numeric(median_percentile), 2)
+        }
+        for (col_name in colnames(presentation_reformat)[3:original_length]) {
+          scaled_col_name <- paste0("Scaled_", col_name)
+          presentation_reformat[, scaled_col_name] <- apply(presentation_reformat, 1, function(x) {
+            parts <- strsplit(x[col_name], " ")
+            value <- sub(")", "", tail(parts[[1]], 1))
+            as.numeric(value) / (df$presentation_percentile_threshold)
+          })
+        }
         incProgress(1)
         dtable <- datatable(presentation_reformat, options = list(
           pageLength = 10,
           lengthChange = FALSE,
           rowCallback = JS("function(row, data, index, rowId) {",
                            "if(((rowId+1) % 4) == 3 || ((rowId+1) % 4) == 0) {",
-                           'row.style.backgroundColor = "#E0E0E0";', "}", "}")
+                           'row.style.backgroundColor = "#E0E0E0";', "}", "}"),
+          columnDefs = list(list(visible = FALSE, targets = seq(original_length+1, ncol(presentation_reformat))))
         )) %>% formatStyle("Mutant", fontWeight = styleEqual("MT", "bold"), color = styleEqual("MT", "#E74C3C"))
+        for (col_name in colnames(presentation_reformat)[3:original_length]) {
+          scaled_col_name <- paste0("Scaled_", col_name)
+          dtable <- dtable %>% formatStyle(col_name, scaled_col_name,
+            backgroundColor = styleInterval(c(0.2, 0.4, 0.6, 0.8, 1, 1.25, 1.5, 1.75, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#F3F171", "#F3E770", "#F3DD6F", "#F1C664", "#FF9999")))
+        }
         dtable
       }else {
         incProgress(1)
