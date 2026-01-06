@@ -212,6 +212,7 @@ class PvacspliceBestCandidate:
         prob_pos_df['tsl_sort'] = prob_pos_df["Transcript Support Level"].apply(lambda x: 6 if x in ['NA', 'Not Supported'] or pd.isna(x) else int(x))
         sort_columns = [
             "rank",
+            f"rank_{self.top_score_metric2[0]}",
             "mane_select_sort",
             "canonical_sort",
             "tsl_sort",
@@ -219,6 +220,7 @@ class PvacspliceBestCandidate:
             "Transcript Expression"
         ]
         sort_orders = [
+            True,
             True,
             True,
             True,
