@@ -157,6 +157,10 @@ class PvacspliceTests(unittest.TestCase):
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'results', 'run', 'MHC_Class_I', file_name)
+                if file_name == 'HCC1395_TUMOR_DNA.MHC_I.all_epitopes.aggregated.tsv':
+                    with open(output_file, 'r') as file:
+                        file_content = file.read()
+                        print(file_content)
                 self.assertTrue(cmp(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
 
             for length in [9, 10]:
@@ -339,6 +343,10 @@ class PvacspliceTests(unittest.TestCase):
             ):
                 output_file   = os.path.join(output_dir.name, 'combined', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'results', 'run_combined', file_name)
+                if file_name == 'HCC1395_TUMOR_DNA.Combined.all_epitopes.aggregated.tsv':
+                    with open(output_file, 'r') as file:
+                        file_content = file.read()
+                        print(file_content)
                 self.assertTrue(cmp(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
             output_dir.cleanup()
             os.unlink(unzipped_fasta_file)
