@@ -11,10 +11,10 @@ def pvacseq_sort(rows, top_score_metric, top_score_metric2, file_type='full'):
         tier_sorter = ["Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "PoorTranscript", "LowExpr", "Anchor", "Subclonal", "ProbPos", "Poor", "NoExpr"]
         sorter_index = dict(zip(tier_sorter,range(len(tier_sorter))))
         rows["rank_tier"] = rows['Tier'].map(sorter_index)
-        sort_columns = ["rank_tier", "rank", "Gene", "AA Change"]
+        sort_columns = ["rank_tier", "rank", f"rank_{top_score_metric2[0]}", "Gene", "AA Change"]
         expression_column = 'Allele Expr'
     elif file_type == 'full':
-        sort_columns = ["rank", "Gene Name", "Mutation"]
+        sort_columns = ["rank", f"rank_{top_score_metric2[0]}", "Gene Name", "Mutation"]
         expression_column = 'Gene Expression'
 
     rows["rank_expr"] = pd.to_numeric(rows[expression_column], errors='coerce').rank(ascending=False, method='dense', na_option="bottom")
@@ -50,10 +50,10 @@ def pvacfuse_sort(rows, top_score_metric, top_score_metric2, file_type='full'):
         tier_sorter = ["Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "LowReadSupport", "LowExpr", "ProbPos", "Poor"]
         sorter_index = dict(zip(tier_sorter,range(len(tier_sorter))))
         rows["rank_tier"] = rows['Tier'].map(sorter_index)
-        sort_columns = ["rank_tier", "rank", "ID"]
+        sort_columns = ["rank_tier", "rank", f"rank_{top_score_metric2[0]}", "ID"]
         expression_column = 'Expr'
     elif file_type == 'full':
-        sort_columns = ["rank", "Mutation"]
+        sort_columns = ["rank", f"rank_{top_score_metric2[0]}", "Mutation"]
         expression_column = 'Expression'
 
     rows["rank_expr"] = pd.to_numeric(rows[expression_column], errors='coerce').rank(ascending=False, method='dense', na_option="bottom")
@@ -89,10 +89,10 @@ def pvacsplice_sort(rows, top_score_metric, top_score_metric2, file_type='full')
         tier_sorter = ["Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "PoorTranscript", "LowExpr", "Subclonal", "ProbPos", "Poor", "NoExpr"]
         sorter_index = dict(zip(tier_sorter,range(len(tier_sorter))))
         rows["rank_tier"] = rows['Tier'].map(sorter_index)
-        sort_columns = ["rank_tier", "rank", "Gene", "Transcript", "AA Change"]
+        sort_columns = ["rank_tier", "rank", f"rank_{top_score_metric2[0]}", "Gene", "Transcript", "AA Change"]
         expression_column = 'Allele Expr'
     elif file_type == 'full':
-        sort_columns = ["rank", "Gene Name", "Transcript", "Amino Acid Change"]
+        sort_columns = ["rank", f"rank_{top_score_metric2[0]}", "Gene Name", "Transcript", "Amino Acid Change"]
         expression_column = 'Gene Expression'
 
     rows["rank_expr"] = pd.to_numeric(rows[expression_column], errors='coerce').rank(ascending=False, method='dense', na_option="bottom")
@@ -128,9 +128,9 @@ def pvacbind_sort(rows, top_score_metric, top_score_metric2, file_type='full'):
         tier_sorter = ["Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "ProbPos", "Poor"]
         sorter_index = dict(zip(tier_sorter,range(len(tier_sorter))))
         rows["rank_tier"] = rows['Tier'].map(sorter_index)
-        sort_columns = ["rank_tier", "rank", "ID"]
+        sort_columns = ["rank_tier", "rank", f"rank_{top_score_metric2[0]}", "ID"]
     elif file_type == 'full':
-        sort_columns = ["rank", "Mutation"]
+        sort_columns = ["rank", f"rank_{top_score_metric2[0]}", "Mutation"]
 
     rows["rank"] = 0
     if file_type == 'aggregated':
