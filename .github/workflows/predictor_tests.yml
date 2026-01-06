@@ -1,4 +1,4 @@
-name: pVACtools tests
+name: pVACtools prediction algorithm tests
 
 on:
   push:

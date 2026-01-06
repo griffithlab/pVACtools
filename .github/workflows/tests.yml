@@ -1,4 +1,4 @@
-name: pVACtools tests
+name: pVACtools unittests
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
   pull_request:
     types: [opened, synchronize, edited, reopened]
     branches: [ master, staging, hotfix]
+  workflow_dispatch:
 
 jobs:
   run_tests:
