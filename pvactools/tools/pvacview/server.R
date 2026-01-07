@@ -501,23 +501,28 @@ server <- shinyServer(function(input, output, session) {
     df$mainTable$`MANE Select Fail` <- apply(df$mainTable, 1, function(x) {'mane_select' %in% df$transcript_prioritization_strategy && !is_mane_select_pass(x["MANE Select"])})
     df$mainTable$`Canonical Fail` <- apply(df$mainTable, 1, function(x) {'canonical' %in% df$transcript_prioritization_strategy && !is_canonical_pass(x["Canonical"])})
     tier_sorter <- c("Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "PoorTranscript", "LowExpr", "Anchor", "Subclonal", "ProbPos", "Poor", "NoExpr")
-    df$mainTable$`Rank` <- rank(desc(as.numeric(df$mainTable$`Allele Expr`)), ties.method = "first")
+    df$mainTable$`Rank` <- rank(desc(as.numeric(replace(df$mainTable$`Allele Expr`, is.na(df$mainTable$`Allele Expr`), 0))), ties.method = "first")
     for (metric in df$scoring_candidate_metric) {
         if (metric == "ic50") {
-            df$mainTable$`Rank` <- df$mainTable$`Rank` + rank(as.numeric(df$mainTable$`IC50 MT`), ties.method = "first")
+            rank_list <- rank(as.numeric(df$mainTable$`IC50 MT`), ties.method = "first")
         } else if (metric == "combined_percentile") {
-            df$mainTable$`Rank` <- df$mainTable$`Rank` + rank(as.numeric(df$mainTable$`%ile MT`), ties.method = "first")
+            rank_list <- rank(as.numeric(df$mainTable$`%ile MT`), ties.method = "first")
         } else if (metric == "binding_percentile") {
-            df$mainTable$`Rank` <- df$mainTable$`Rank` + rank(as.numeric(df$mainTable$`IC50 %ile MT`), ties.method = "first")
+            rank_list <- rank(as.numeric(df$mainTable$`IC50 %ile MT`), ties.method = "first")
         } else if (metric == "presentation_percentile") {
-            df$mainTable$`Rank` <- df$mainTable$`Rank` + rank(as.numeric(df$mainTable$`Pres %ile MT`), ties.method = "first")
+            rank_list <- rank(as.numeric(df$mainTable$`Pres %ile MT`), ties.method = "first")
         } else if (metric == "immunogenicity_percentile") {
-            df$mainTable$`Rank` <- df$mainTable$`Rank` + rank(as.numeric(df$mainTable$`IM %ile MT`), ties.method = "first")
+            rank_list <- rank(as.numeric(df$mainTable$`IM %ile MT`), ties.method = "first")
+        }
+        df$mainTable$`Rank` <- df$mainTable$`Rank` + rank_list
+        if (metric == df$scoring_candidate_metric[[1]]) {
+            df$mainTable$SecondaryRank <- rank_list
         }
     }
     df$mainTable <- df$mainTable %>%
-      arrange(factor(Tier, levels = tier_sorter), Rank)
+      arrange(factor(Tier, levels = tier_sorter), Rank, SecondaryRank)
     df$mainTable$`Rank` <- NULL
+    df$mainTable$SecondaryRank <- NULL
   })
   #reset tier-ing with original parameters
   observeEvent(input$reset_params, {
@@ -558,22 +563,28 @@ server <- shinyServer(function(input, output, session) {
     df$mainTable$`MANE Select Fail` <- apply(df$mainTable, 1, function(x) {'mane_select' %in% df$transcript_prioritization_strategy && !is_mane_select_pass(x["MANE Select"])})
     df$mainTable$`Canonical Fail` <- apply(df$mainTable, 1, function(x) {'canonical' %in% df$transcript_prioritization_strategy && !is_canonical_pass(x["Canonical"])})
     tier_sorter <- c("Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "PoorTranscript", "LowExpr", "Anchor", "Subclonal", "ProbPos", "Poor", "NoExpr")
+    df$mainTable$`Rank` <- rank(desc(as.numeric(replace(df$mainTable$`Allele Expr`, is.na(df$mainTable$`Allele Expr`), 0))), ties.method = "first")
     for (metric in df$scoring_candidate_metric) {
         if (metric == "ic50") {
-            df$mainTable$`Rank` <- df$mainTable$`Rank` + rank(as.numeric(df$mainTable$`IC50 MT`), ties.method = "first")
+            rank_list <- rank(as.numeric(df$mainTable$`IC50 MT`), ties.method = "first")
         } else if (metric == "combined_percentile") {
-            df$mainTable$`Rank` <- df$mainTable$`Rank` + rank(as.numeric(df$mainTable$`%ile MT`), ties.method = "first")
+            rank_list <- rank(as.numeric(df$mainTable$`%ile MT`), ties.method = "first")
         } else if (metric == "binding_percentile") {
-            df$mainTable$`Rank` <- df$mainTable$`Rank` + rank(as.numeric(df$mainTable$`IC50 %ile MT`), ties.method = "first")
+            rank_list <- rank(as.numeric(df$mainTable$`IC50 %ile MT`), ties.method = "first")
         } else if (metric == "presentation_percentile") {
-            df$mainTable$`Rank` <- df$mainTable$`Rank` + rank(as.numeric(df$mainTable$`Pres %ile MT`), ties.method = "first")
+            rank_list <- rank(as.numeric(df$mainTable$`Pres %ile MT`), ties.method = "first")
         } else if (metric == "immunogenicity_percentile") {
-            df$mainTable$`Rank` <- df$mainTable$`Rank` + rank(as.numeric(df$mainTable$`IM %ile MT`), ties.method = "first")
+            rank_list <- rank(as.numeric(df$mainTable$`IM %ile MT`), ties.method = "first")
+        }
+        df$mainTable$`Rank` <- df$mainTable$`Rank` + rank_list
+        if (metric == df$scoring_candidate_metric[[1]]) {
+            df$mainTable$SecondaryRank <- rank_list
         }
     }
     df$mainTable <- df$mainTable %>%
-      arrange(factor(Tier, levels = tier_sorter), Rank)
+      arrange(factor(Tier, levels = tier_sorter), Rank, SecondaryRank)
     df$mainTable$`Rank` <- NULL
+    df$mainTable$SecondaryRank <- NULL
   })
   #determine hla allele count in order to generate column tooltip locations correctly
   hla_count <- reactive({
