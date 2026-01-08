@@ -61,6 +61,41 @@ epitopes are well-binding to. Lastly, the report will bin variants into tiers
 that offer suggestions as to the suitability of variants for use in vaccines.
 For a full definition of these tiers, see the pVACseq :ref:`output file documentation <aggregated>`.
 
+Add ML Predictions
+------------------
+
+.. program-output:: pvacseq add_ml_predictions -h
+
+This tool adds machine learning (ML)-based neoantigen prioritization predictions to existing pVACseq output files. 
+It uses a trained random forest model to predict whether neoantigen candidates should be evaluated as "Accept", 
+"Reject", or "Pending" based on a comprehensive set of features derived from binding affinity predictions, 
+expression data, and variant characteristics.
+
+This tool requires that you have already generated both MHC Class I and Class II aggregated reports using 
+the ``generate_aggregated_report`` command or by running the pVACseq pipeline (``pvacseq run``). It takes as input 
+the Class I aggregated TSV, Class I all epitopes TSV, and Class II aggregated TSV files from a pVACseq run. 
+The tool merges these files, performs data cleaning and imputation, and applies the ML model to generate evaluation predictions for each variant.
+
+The output file is named ``<sample_name>_predict_pvacview.tsv`` and contains all columns from the original 
+Class I aggregated file with two additional columns:  
+
+
+.. list-table::
+
+ * - ``Evaluation``
+   - The ML-predicted evaluation status: "Accept", "Reject", or "Pending", based on the prediction probability score.
+ * - ``ML Prediction (score)``
+   - A formatted string combining the model-predicted evaluation with the prediction probability score (e.g., 
+     "Accept (0.72)"). It shows "NA" for variants where the model could not make a prediction, which may be due to a candidate 
+     not being present in either the Class I or Class II aggregated reports.
+
+The ``--threshold_accept`` parameter controls the probability threshold for Accept predictions (default: 0.55). 
+Variants with prediction probabilities >= this threshold are evaluated as "Accept". The ``--threshold_reject`` parameter 
+controls the probability threshold for Reject predictions (default: 0.30). Variants with prediction probabilities <= 
+this threshold are evaluated as "Reject". Everything in between is set to "Pending" for manual review. 
+The ``--artifacts_path`` parameter allows you to specify a custom directory 
+containing ML model artifacts, though by default the tool uses the model artifacts included with the pvactools package.
+
 Calculate Reference Proteome Similarity
 ---------------------------------------
 
