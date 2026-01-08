@@ -102,7 +102,8 @@ def run_ml_predictions(base_output_dir, args):
             model_artifacts_path=None,  # None uses default package location
             output_dir=ml_output_dir,
             sample_name=args.sample_name,
-            threshold=args.ml_threshold
+            threshold_accept=args.ml_threshold_accept,
+            threshold_reject=args.ml_threshold_reject
         )
         print(f"ML predictions completed successfully using Class I and Class II files. Results saved to: {output_file}")
         
@@ -198,7 +199,8 @@ def main(args_input = sys.argv[1:]):
         'aggregate_inclusion_count_limit': args.aggregate_inclusion_count_limit,
         'genes_of_interest_file': args.genes_of_interest_file,
         'run_ml_predictions': args.run_ml_predictions,
-        'ml_threshold': args.ml_threshold,
+        'ml_threshold_accept': args.ml_threshold_accept,
+        'ml_threshold_reject': args.ml_threshold_reject,
     }
 
     if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0:

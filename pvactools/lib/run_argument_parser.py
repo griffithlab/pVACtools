@@ -388,9 +388,14 @@ class RunArgumentParser(metaclass=ABCMeta):
             action='store_true',
         )
         self.parser.add_argument(
-            "--ml-threshold", type=float,
+            "--ml-threshold-accept", type=float,
             default=0.55,
             help="Threshold for Accept predictions in ML model (default: 0.55).",
+        )
+        self.parser.add_argument(
+            "--ml-threshold-reject", type=float,
+            default=0.30,
+            help="Threshold for Reject predictions in ML model (default: 0.30).",
         )        
 
     def pvacsplice(self):

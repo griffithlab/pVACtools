@@ -55,9 +55,9 @@ created):
    * - ``ui.R``, ``app.R``, ``server.R``, ``styling.R``, ``anchor_and_helper_functions.R``
      - pVACview R Shiny application files. Not generated when running only with presentation and immunogenicity algorithms.
    * - ``www`` (directory)
-     - Directory containing image files for pVACview. Not generated when running with elution algorithms only.
+     - Directory containing image files for pVACview. Not generated when running with presentation and immunogenicity algorithms only.  
    * - ``ml_predict/<sample_name>_predict_pvacview.tsv`` (optional)
-     - ML-based neoantigen evaluation predictions file. Generated when both MHC Class I and Class II predictions are run and the ``--run-ml-predictions`` flag is set, or when using the :ref:`add_ml_predictions <optional_downstream_analysis_tools_label>` tool.
+     - ML-based neoantigen evaluation predictions file. Generated when both MHC Class I and Class II predictions are run and the ``--run-ml-predictions`` flag is set.
      - Directory containing image files for pVACview. Not generated when running only with presentation and immunogenicity algorithms only.
 
 
@@ -395,7 +395,9 @@ included epitopes, selecting the best-scoring epitope, and which values are outp
 <sample_name>_predict_pvacview.tsv Report Columns
 --------------------------------------------------
 
-The ``<sample_name>_predict_pvacview.tsv`` file is generated when using the :ref:`add_ml_predictions <optional_downstream_analysis_tools_label>` tool or when running pVACseq with both MHC Class I and Class II predictions and the ``--run-ml-predictions`` flag enabled. This file contains all columns from the Class I aggregated file (``all_epitopes.aggregated.tsv``) with one additional ML prediction columns added.
+The ``<sample_name>_predict_pvacview.tsv`` file is generated when using the :ref:`add_ml_predictions <optional_downstream_analysis_tools_label>` 
+tool or when running pVACseq with both MHC Class I and Class II predictions and the ``--run-ml-predictions`` flag enabled. 
+This file contains all columns from the Class I aggregated file (``all_epitopes.aggregated.tsv``) with one additional ML prediction column added.  
 
 The file is written to the ``ml_predict`` subdirectory within the output directory.
 
@@ -405,7 +407,7 @@ The file is written to the ``ml_predict`` subdirectory within the output directo
    * - All columns from ``all_epitopes.aggregated.tsv``
      - All columns described in the :ref:`aggregated` section above are included in this file.
    * - ``Evaluation``
-     - Populated with ML-predicted evaluation status for each candidate. Values: ``Accept`` for variants with prediction probability >= threshold (default: 0.55), ``Reject`` for variants with prediction probability <= 0.30, and ``Pending`` for variants with prediction probability between 0.30 and the threshold or when the ML model cannot make a prediction due to missing data.
+     - Populated with ML-predicted evaluation status for each candidate. Values: ``Accept`` for variants with prediction probability >= threshold_accept (default: 0.55), ``Reject`` for variants with prediction probability <= threshold_reject (default: 0.30), and ``Pending`` for variants with prediction probability between threshold_reject and threshold_accept or when the ML model cannot make a prediction due to missing data.
    * - ``ML Prediction (score)``
      - ML-based prediction evaluation with probability score. Format: ``"<Evaluation> (<probability_score>)"`` (e.g., ``"Accept (0.72)"``, ``"Reject (0.15)"``, ``"Review (0.48)"``). Shows ``"NA"`` when the ML model cannot make a prediction due to missing data (e.g., when Class I and Class II aggregated files have different numbers of rows).
 

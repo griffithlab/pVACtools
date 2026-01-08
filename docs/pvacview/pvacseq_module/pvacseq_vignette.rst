@@ -418,9 +418,9 @@ The ML prediction file includes all columns from the Class I aggregated file wit
 
 The ``Evaluation`` column is pre-populated with ML-predicted evaluation status for each candidate:
 
-- ``Accept``: Variants with prediction probability >= threshold (default: 0.55). These candidates are predicted to be favorable neoantigen candidates to be included in a vaccine. 
-- ``Reject``: Variants with prediction probability <= 0.30. These candidates are predicted to be unfavorable.
-- ``Pending``: Variants with prediction probability between 0.30 and the threshold, or when the ML model cannot make a prediction due to missing data. These candidates require manual review.
+- ``Accept``: Variants with prediction probability >= threshold_accept (default: 0.55). These candidates are predicted to be favorable neoantigen candidates to be included in a vaccine. 
+- ``Reject``: Variants with prediction probability <= threshold_reject (default: 0.30). These candidates are predicted to be unfavorable. threshold_reject should be set to a value less than threshold_accept.
+- ``Pending``: Variants with prediction probability between threshold_reject and threshold_accept, or when the ML model cannot make a prediction due to missing data. These candidates require manual review.
 
 **ML Prediction (score) Column**
 

@@ -100,7 +100,8 @@ class MLPredictorTests(unittest.TestCase):
             self.model_artifacts_path,
             output_dir,
             'HCC1395',
-            0.55
+            0.55,
+            0.30
         )
         
         # Check that output file was created
@@ -138,13 +139,13 @@ class MLPredictorTests(unittest.TestCase):
                 # Run with low threshold
                 result_low = run_ml_predictions(
                     mhc1_agg_file, mhc1_all_file, mhc2_agg_file,
-                    self.model_artifacts_path, output_dir_low, 'HCC1395', 0.30
+                    self.model_artifacts_path, output_dir_low, 'HCC1395', 0.30, 0.30
                 )
                 
                 # Run with high threshold
                 result_high = run_ml_predictions(
                     mhc1_agg_file, mhc1_all_file, mhc2_agg_file,
-                    self.model_artifacts_path, output_dir_high, 'HCC1395', 0.80
+                    self.model_artifacts_path, output_dir_high, 'HCC1395', 0.80, 0.30
                 )
                 
                 df_low = pd.read_csv(result_low, sep='\t')
@@ -167,7 +168,7 @@ class MLPredictorTests(unittest.TestCase):
             
             result = run_ml_predictions(
                 mhc1_agg_file, mhc1_all_file, mhc2_agg_file,
-                self.model_artifacts_path, output_dir, 'HCC1395', 0.55
+                self.model_artifacts_path, output_dir, 'HCC1395', 0.55, 0.30
             )
             
             df = pd.read_csv(result, sep='\t')
@@ -213,7 +214,7 @@ class MLPredictorTests(unittest.TestCase):
             
             result = run_ml_predictions(
                 mhc1_agg_file, mhc1_all_file, mhc2_agg_file,
-                self.model_artifacts_path, output_dir, 'HCC1395', 0.55
+                self.model_artifacts_path, output_dir, 'HCC1395', 0.55, 0.30
             )
             
             output_df = pd.read_csv(result, sep='\t')
@@ -232,7 +233,7 @@ class MLPredictorTests(unittest.TestCase):
             
             result = run_ml_predictions(
                 mhc1_agg_file, mhc1_all_file, mhc2_agg_file,
-                self.model_artifacts_path, output_dir, 'HCC1395', 0.55
+                self.model_artifacts_path, output_dir, 'HCC1395', 0.55, 0.30
             )
             
             df = pd.read_csv(result, sep='\t')
@@ -266,7 +267,7 @@ class MLPredictorTests(unittest.TestCase):
             
             result = run_ml_predictions(
                 mhc1_agg_file, mhc1_all_file, mhc2_agg_file,
-                self.model_artifacts_path, output_dir, 'HCC1395', 0.55
+                self.model_artifacts_path, output_dir, 'HCC1395', 0.55, 0.30
             )
             
             df = pd.read_csv(result, sep='\t')
@@ -278,6 +279,27 @@ class MLPredictorTests(unittest.TestCase):
     # ERROR HANDLING TESTS
     # ============================================================================
 
+    def test_invalid_threshold_parameters_error(self):
+        """Test that invalid threshold parameters raise appropriate errors."""
+        with tempfile.TemporaryDirectory() as output_dir:
+            mhc1_agg_file = os.path.join(self.test_data_path, "MHC_Class_I", "HCC1395_TUMOR_DNA.MHC_I.all_epitopes.aggregated.tsv")
+            mhc1_all_file = os.path.join(self.test_data_path, "MHC_Class_I", "HCC1395_TUMOR_DNA.MHC_I.all_epitopes.tsv")
+            mhc2_agg_file = os.path.join(self.test_data_path, "MHC_Class_II", "HCC1395_TUMOR_DNA.MHC_II.all_epitopes.aggregated.tsv")
+            
+            # Test that threshold_reject > threshold_accept raises ValueError
+            with self.assertRaises(ValueError) as context:
+                run_ml_predictions(
+                    mhc1_agg_file, mhc1_all_file, mhc2_agg_file,
+                    self.model_artifacts_path, output_dir, 'HCC1395', 0.55, 0.60
+                )
+            
+            # Verify the error message contains relevant information
+            error_message = str(context.exception)
+            self.assertIn("threshold_reject", error_message)
+            self.assertIn("threshold_accept", error_message)
+            self.assertIn("0.6", error_message)
+            self.assertIn("0.55", error_message)
+
     def test_missing_input_file_error(self):
         """Test that missing input files raise appropriate errors."""
         with tempfile.TemporaryDirectory() as output_dir:
@@ -288,7 +310,7 @@ class MLPredictorTests(unittest.TestCase):
             with self.assertRaises(Exception):
                 run_ml_predictions(
                     mhc1_agg_file, mhc1_all_file, mhc2_agg_file,
-                    self.model_artifacts_path, output_dir, 'HCC1395', 0.55
+                    self.model_artifacts_path, output_dir, 'HCC1395', 0.55, 0.30
                 )
 
     def test_missing_model_artifacts_error(self):
@@ -302,7 +324,7 @@ class MLPredictorTests(unittest.TestCase):
                 with self.assertRaises(Exception):
                     run_ml_predictions(
                         mhc1_agg_file, mhc1_all_file, mhc2_agg_file,
-                        fake_artifacts_dir, output_dir, 'HCC1395', 0.55
+                        fake_artifacts_dir, output_dir, 'HCC1395', 0.55, 0.30
                     )
 
     # ============================================================================
@@ -318,7 +340,7 @@ class MLPredictorTests(unittest.TestCase):
             
             result = run_ml_predictions(
                 mhc1_agg_file, mhc1_all_file, mhc2_agg_file,
-                self.model_artifacts_path, output_dir, 'HCC1395', 0.55
+                self.model_artifacts_path, output_dir, 'HCC1395', 0.55, 0.30
             )
             
             # Read the output file and extract probabilities
@@ -344,7 +366,7 @@ class MLPredictorTests(unittest.TestCase):
             
             result = run_ml_predictions(
                 mhc1_agg_file, mhc1_all_file, mhc2_agg_file,
-                self.model_artifacts_path, output_dir, 'HCC1395', 0.55
+                self.model_artifacts_path, output_dir, 'HCC1395', 0.55, 0.30
             )
             
             output_df = pd.read_csv(result, sep='\t')
@@ -367,7 +389,7 @@ class MLPredictorTests(unittest.TestCase):
             sample_name = "TEST_SAMPLE"
             result = run_ml_predictions(
                 mhc1_agg_file, mhc1_all_file, mhc2_agg_file,
-                self.model_artifacts_path, output_dir, sample_name, 0.55
+                self.model_artifacts_path, output_dir, sample_name, 0.55, 0.30
             )
             
             self.assertIn(sample_name, result)

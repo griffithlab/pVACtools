@@ -252,14 +252,15 @@ def clean_and_impute_data(merged_all, model_artifacts_path):
     
     return post_imputed_data
 
-def make_ml_predictions(post_imputed_data, model_artifacts_path, threshold=0.55):
+def make_ml_predictions(post_imputed_data, model_artifacts_path, threshold_accept=0.55, threshold_reject=0.30):
     """
     Make ML predictions using the trained model.
     
     Args:
         post_imputed_data (pd.DataFrame): Cleaned and imputed data
         model_path (str): Path to the trained ML model
-        threshold (float): Threshold for Accept predictions (default: 0.55)
+        threshold_accept (float): Threshold for Accept predictions (default: 0.55)
+        threshold_reject (float): Threshold for Reject predictions (default: 0.30)
         
     Returns:
         pd.DataFrame: Data with ML predictions added
@@ -282,9 +283,9 @@ def make_ml_predictions(post_imputed_data, model_artifacts_path, threshold=0.55)
     post_imputed_data['Evaluation_pred'] = np.where(
         post_imputed_data['Accept_pred_prob'].isna(), "Pending", # Set to "Pending" if the ML model is unable to make a prediction due to missing data
         np.where(
-            post_imputed_data['Accept_pred_prob'] >= threshold, "Accept",
+            post_imputed_data['Accept_pred_prob'] >= threshold_accept, "Accept",
             np.where(
-                post_imputed_data['Accept_pred_prob'] > 0.30, "Review", "Reject" # keep "Review" as "Review", change to Pending in a later step
+                post_imputed_data['Accept_pred_prob'] > threshold_reject, "Review", "Reject" # keep "Review" as "Review", change to Pending in a later step
             )
         )
     )
@@ -349,7 +350,7 @@ def create_final_output(post_imputed_data, original_agg_file_path, output_dir, s
     print(f"ML predictions saved to: {output_file}")
     return output_file
 
-def run_ml_predictions(class1_aggregated_path, class1_all_epitopes_path, class2_aggregated_path, model_artifacts_path=None, output_dir=None, sample_name=None, threshold=0.55):
+def run_ml_predictions(class1_aggregated_path, class1_all_epitopes_path, class2_aggregated_path, model_artifacts_path=None, output_dir=None, sample_name=None, threshold_accept=0.55, threshold_reject=0.30):
     """
     Main function to run ML predictions on pVACtools output files.
     
@@ -361,11 +362,19 @@ def run_ml_predictions(class1_aggregated_path, class1_all_epitopes_path, class2_
             If None, uses the default artifacts directory from the pvactools package.
         output_dir (str, optional): Output directory for results
         sample_name (str, optional): Sample name for output file
-        threshold (float): Threshold for Accept predictions (default: 0.55)
+        threshold_accept (float): Threshold for Accept predictions (default: 0.55)
+        threshold_reject (float): Threshold for Reject predictions (default: 0.30)
         
     Returns:
         str: Path to the final output file
     """
+    # Validate threshold parameters
+    if threshold_reject > threshold_accept:
+        raise ValueError(
+            f"threshold_reject ({threshold_reject}) must be less than or equal to "
+            f"threshold_accept ({threshold_accept}). Please adjust your thresholds."
+        )
+    
     print("Starting ML prediction pipeline...")
     
     try:
@@ -376,7 +385,7 @@ def run_ml_predictions(class1_aggregated_path, class1_all_epitopes_path, class2_
         post_imputed_data = clean_and_impute_data(merged_all, model_artifacts_path)
         
         # Step 3: Make ML predictions
-        post_imputed_data = make_ml_predictions(post_imputed_data, model_artifacts_path, threshold)
+        post_imputed_data = make_ml_predictions(post_imputed_data, model_artifacts_path, threshold_accept, threshold_reject)
         
         # Step 4: Create final output
         output_files = create_final_output(post_imputed_data, class1_aggregated_path, output_dir, sample_name)
@@ -424,10 +433,16 @@ def define_add_ml_predictions_parser(tool='pvacseq'):
         help="Sample name prefix to use for the output files."
     )
     parser.add_argument(
-        "--threshold",
+        "--threshold_accept",
         type=float,
         default=0.55,
-        help="Prediction threshold for evaluating Accept vs Reject (default: 0.55)."
+        help="Prediction threshold for Accept predictions (default: 0.55)."
+    )
+    parser.add_argument(
+        "--threshold_reject",
+        type=float,
+        default=0.30,
+        help="Prediction threshold for Reject predictions (default: 0.30)."
     )
     return parser
 
@@ -443,5 +458,6 @@ if __name__ == "__main__":
         args.artifacts_path,
         args.output_dir,
         args.sample_name,
-        args.threshold
+        args.threshold_accept,
+        args.threshold_reject
     )

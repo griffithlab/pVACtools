@@ -89,9 +89,10 @@ Class I aggregated file with two additional columns:
      "Accept (0.72)"). It shows "NA" for variants where the model could not make a prediction, which may be due to a candidate 
      not being present in either the Class I or Class II aggregated reports.
 
-The ``--threshold`` parameter controls the probability threshold for Accept predictions (default: 0.55). 
-Variants with prediction probabilities above this threshold are evaluated as "Accept", while those below 
-0.30 are evaluated as "Reject". Everything in between is set to "Pending" for manual review. 
+The ``--threshold_accept`` parameter controls the probability threshold for Accept predictions (default: 0.55). 
+Variants with prediction probabilities >= this threshold are evaluated as "Accept". The ``--threshold_reject`` parameter 
+controls the probability threshold for Reject predictions (default: 0.30). Variants with prediction probabilities <= 
+this threshold are evaluated as "Reject". Everything in between is set to "Pending" for manual review. 
 The ``--artifacts_path`` parameter allows you to specify a custom directory 
 containing ML model artifacts, though by default the tool uses the model artifacts included with the pvactools package.
 
