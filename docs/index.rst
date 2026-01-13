@@ -64,7 +64,7 @@ New in Version |release|
 
 This is a bugfix release. It fixes the following problem(s):
 
-* Remove allele no longer supported by MHCflurry. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1342
+* Fix bug with allele specific binding filter not working correctly in pVACsplice. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1359
 
 New in Version 6
 ----------------

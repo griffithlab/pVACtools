@@ -167,6 +167,8 @@ class Pipeline(metaclass=ABCMeta):
         status_message("Converting .%s to TSV" % self.input_file_type)
         if os.path.exists(self.tsv_file_path()):
             status_message("TSV file already exists. Skipping.")
+            if self.phased_proximal_variants_vcf is not None:
+                self.proximal_variants_file = os.path.join(self.output_dir, self.sample_name + '.proximal_variants.tsv')
             return
 
         convert_params = {
