@@ -95,3 +95,10 @@ This is a bugfix release. It fixes the following problem(s):
     errors. These types of variants are now skipped since they don't produce any novel neoantigen candidates.
   * In the process of evaluating the issue above, another bug was discovered. When restarting a run that had failed during the fasta creation step
     the restart would no longer incorporate proximal variants into the predicted wildtypes and mutant sequences. This issue has been fixed.
+
+Version 6.0.5
+-------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+* Fix bug with allele specific binding filter not working correctly in pVACsplice. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1359
