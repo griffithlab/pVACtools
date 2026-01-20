@@ -89,12 +89,40 @@ def merge_and_prepare_data(class1_aggregated_path, class1_all_epitopes_path, cla
         'SMMPMBEC WT IC50 Score',
         'SMMPMBEC WT Percentile'
     ]
-    # --- Read the three input files ---
-    mhc1_agg_df = pd.read_csv(class1_aggregated_path, sep='\t', na_values=["NA", "NaN", ""], keep_default_na=False, usecols=mhc1_agg_columns)
-    mhc1_allepi_df = pd.read_csv(class1_all_epitopes_path, sep='\t', na_values=["NA", "NaN", ""], keep_default_na=False, usecols=mhc1_allepi_columns+predictor_columns)
-    mhc2_agg_df = pd.read_csv(class2_aggregated_path, sep='\t', na_values=["NA", "NaN", ""], keep_default_na=False, usecols=mhc2_agg_columns)
     
-    # Rename columns in mhc1_agg_df
+    # Helper function to get available and missing columns from a file
+    def get_column_info(file_path, requested_columns):
+        """Get available and missing columns from the file."""
+        available_cols = pd.read_csv(file_path, sep='\t', nrows=0).columns.tolist()
+        filtered_cols = [col for col in requested_columns if col in available_cols]
+        missing_cols = [col for col in requested_columns if col not in available_cols]
+        if missing_cols:
+            print(f"Caution: The following columns are missing in {file_path} and will be filled with NA: {missing_cols}. Highly recommend running pvacseq with the relevant feature enabled for accurate ML predictions.")
+        return filtered_cols, missing_cols, available_cols
+    
+    # Helper function to add missing columns with NaN values
+    def add_missing_columns(df, missing_cols):
+        """Add missing columns to dataframe filled with NaN (for sklearn imputer compatibility)."""
+        if missing_cols:
+            for col in missing_cols:
+                df[col] = np.nan  # Use np.nan instead of pd.NA for sklearn imputer compatibility
+        return df
+    
+    # --- Read the three input files ---
+    # Get available and missing columns for each file
+    mhc1_agg_cols_available, mhc1_agg_cols_missing, mhc1_agg_original_cols = get_column_info(class1_aggregated_path, mhc1_agg_columns)
+    mhc1_agg_df = pd.read_csv(class1_aggregated_path, sep='\t', na_values=["NA", "NaN", ""], keep_default_na=False, usecols=mhc1_agg_cols_available)
+    mhc1_agg_df = add_missing_columns(mhc1_agg_df, mhc1_agg_cols_missing)
+
+    mhc1_allepi_cols_available, mhc1_allepi_cols_missing, mhc1_allepi_original_cols = get_column_info(class1_all_epitopes_path, mhc1_allepi_columns+predictor_columns)
+    mhc1_allepi_df = pd.read_csv(class1_all_epitopes_path, sep='\t', na_values=["NA", "NaN", ""], keep_default_na=False, usecols=mhc1_allepi_cols_available)
+    mhc1_allepi_df = add_missing_columns(mhc1_allepi_df, mhc1_allepi_cols_missing)
+    
+    mhc2_agg_cols_available, mhc2_agg_cols_missing, mhc2_agg_original_cols = get_column_info(class2_aggregated_path, mhc2_agg_columns)
+    mhc2_agg_df = pd.read_csv(class2_aggregated_path, sep='\t', na_values=["NA", "NaN", ""], keep_default_na=False, usecols=mhc2_agg_cols_available)
+    mhc2_agg_df = add_missing_columns(mhc2_agg_df, mhc2_agg_cols_missing)
+    
+        # Rename columns in mhc1_agg_df
     mhc1_agg_df.rename(columns={ 
         "IC50 MT": "IC50 MT class1", 
         "IC50 WT": "IC50 WT class1", 
@@ -109,7 +137,7 @@ def merge_and_prepare_data(class1_aggregated_path, class1_all_epitopes_path, cla
         "%ile MT": "%ile MT class2", 
         "%ile WT": "%ile WT class2"
     }, inplace=True)
-
+    
     # Compare the number of rows
     if mhc1_agg_df.shape[0] != mhc2_agg_df.shape[0]:
         print("Warning: Class 1 aggregated file DOES NOT have the same number of rows as Class 2 aggregated file.\n May cause \"NA\" in ML predictions.")
@@ -129,17 +157,24 @@ def merge_and_prepare_data(class1_aggregated_path, class1_all_epitopes_path, cla
     # --- Transformations ---
     # NOTE: Pos may take form "#-#" or "#,#", so we need to extract the first integer
     # NOTE: the "#-#" format is from older version of pVACtools that I encountered during training the model, it might not be needed anymore
+    # Note: Pos column will exist (either from file or added with NA)
     if merged_all["Pos"].dtype == "object":
         # Extract the first integer (handles formats like "5", "5-10", "5,10", etc.)
-        merged_all["Pos"] = merged_all["Pos"].astype(str).str.extract(r"^(\d+)").astype("Int64")
-        # Convert Pos to float64
+        # Handle NA values: pd.NA values will become "<NA>" string, which won't match regex
+        # This is fine - they'll become NaN after extraction, then stay as NaN/NA through conversions
+        # Convert to string, extract first integer pattern
+        pos_extracted = merged_all["Pos"].astype(str).str.extract(r"^(\d+)")
+        # Convert to Int64 (nullable integer) - preserves NA/NaN from extraction
+        merged_all["Pos"] = pos_extracted[0].astype("Int64")
+        # Convert Pos to float64 (Int64 NA/NaN becomes float NaN, which will be imputed later)
         merged_all['Pos'] = merged_all['Pos'].astype(float)
     else:
-        # Convert Pos to float64
+        # If already numeric, just ensure it's float64 (preserves NaN/NA as NaN)
         merged_all['Pos'] = merged_all['Pos'].astype(float)
 
     # NOTE: Prob Pos may take form "#,#", so we need to extract the first integer
     # NOTE: these formats might also be from older version of pVACtools 
+    # NOTE: Prob Pos column will exist (either from file or added with NA)
     merged_all["Prob Pos"] = (
         merged_all["Prob Pos"]
         .fillna("0")  # Replace NaN with "0"
@@ -149,6 +184,7 @@ def merge_and_prepare_data(class1_aggregated_path, class1_all_epitopes_path, cla
     )
 
     # Create a new column `Prob.match` based on whether the integer(s) in `Prob.Pos` match the value in the `Pos` column
+    # Note: Both Pos and Prob Pos columns will exist (either from file or added with NA)
     merged_all["Prob match"] = merged_all.apply(
         lambda row: "True" if pd.notna(row["Pos"]) and row["Pos"] in [int(x) for x in str(row["Prob Pos"]).split(",") if x.replace('.', '', 1).isdigit()] else "False",
         axis=1
@@ -156,10 +192,25 @@ def merge_and_prepare_data(class1_aggregated_path, class1_all_epitopes_path, cla
     
     # If they are currently strings "True"/"False", convert them:
     merged_all['Prob match'] = merged_all['Prob match'].map({'True': True, 'False': False}).astype(bool)
-    merged_all['Gene of Interest'] = merged_all['Gene of Interest'].map({'True': True, 'False': False}).astype(bool)
+    
+    # Note: Gene of Interest column will exist (either from file or added with NA)
+    # Handle NA values by converting them to False
+    merged_all['Gene of Interest'] = merged_all['Gene of Interest'].fillna('False').map({'True': True, 'False': False}).astype(bool)
     
     # Replace NA in TSL with 6, change into int (updated to match merge_data_predict_ml.py)
-    merged_all["TSL"] = merged_all["TSL"].fillna(6).astype(int)
+    # Note: TSL column will exist (either from file or added with NA)
+    # Handle "Not Supported" and other non-numeric values by converting them to 6 (default)
+    def convert_tsl_to_int(value):
+        if pd.isna(value):
+            return 6
+        if isinstance(value, str) and value.lower() in ['not supported', 'na', 'n/a', '']:
+            return 6
+        try:
+            return int(float(value))
+        except (ValueError, TypeError):
+            return 6
+    
+    merged_all["TSL"] = merged_all["TSL"].apply(convert_tsl_to_int).astype(int)
 
     # --- Rename columns for pvactools v7, otherwise I will need to retrain the model to use new column names (will do this in the future) ---
     rename_map_v7 = {
@@ -252,15 +303,15 @@ def clean_and_impute_data(merged_all, model_artifacts_path):
     
     return post_imputed_data
 
-def make_ml_predictions(post_imputed_data, model_artifacts_path, threshold_accept=0.55, threshold_reject=0.30):
+def make_ml_predictions(post_imputed_data, model_artifacts_path, ml_threshold_accept=0.55, ml_threshold_reject=0.30):
     """
     Make ML predictions using the trained model.
     
     Args:
         post_imputed_data (pd.DataFrame): Cleaned and imputed data
         model_path (str): Path to the trained ML model
-        threshold_accept (float): Threshold for Accept predictions (default: 0.55)
-        threshold_reject (float): Threshold for Reject predictions (default: 0.30)
+        ml_threshold_accept (float): Threshold for Accept predictions (default: 0.55)
+        ml_threshold_reject (float): Threshold for Reject predictions (default: 0.30)
         
     Returns:
         pd.DataFrame: Data with ML predictions added
@@ -283,9 +334,9 @@ def make_ml_predictions(post_imputed_data, model_artifacts_path, threshold_accep
     post_imputed_data['Evaluation_pred'] = np.where(
         post_imputed_data['Accept_pred_prob'].isna(), "Pending", # Set to "Pending" if the ML model is unable to make a prediction due to missing data
         np.where(
-            post_imputed_data['Accept_pred_prob'] >= threshold_accept, "Accept",
+            post_imputed_data['Accept_pred_prob'] >= ml_threshold_accept, "Accept",
             np.where(
-                post_imputed_data['Accept_pred_prob'] > threshold_reject, "Review", "Reject" # keep "Review" as "Review", change to Pending in a later step
+                post_imputed_data['Accept_pred_prob'] > ml_threshold_reject, "Review", "Reject" # keep "Review" as "Review", change to Pending in a later step
             )
         )
     )
@@ -343,14 +394,14 @@ def create_final_output(post_imputed_data, original_agg_file_path, output_dir, s
     final_df[cols_to_preserve] = orig_df[cols_to_preserve]
     
     # Save output file
-    output_file = os.path.join(output_dir, f"{sample_name}_predict_pvacview.tsv")
+    output_file = os.path.join(output_dir, f"{sample_name}.MHC_I.all_epitopes.aggregated.ML_predicted.tsv") 
 
     final_df.to_csv(output_file, float_format='%.3f', sep="\t", index=False, na_rep="NA")
     
     print(f"ML predictions saved to: {output_file}")
     return output_file
 
-def run_ml_predictions(class1_aggregated_path, class1_all_epitopes_path, class2_aggregated_path, model_artifacts_path=None, output_dir=None, sample_name=None, threshold_accept=0.55, threshold_reject=0.30):
+def run_ml_predictions(class1_aggregated_path, class1_all_epitopes_path, class2_aggregated_path, model_artifacts_path=None, output_dir=None, sample_name=None, ml_threshold_accept=0.55, ml_threshold_reject=0.30):
     """
     Main function to run ML predictions on pVACtools output files.
     
@@ -362,17 +413,17 @@ def run_ml_predictions(class1_aggregated_path, class1_all_epitopes_path, class2_
             If None, uses the default artifacts directory from the pvactools package.
         output_dir (str, optional): Output directory for results
         sample_name (str, optional): Sample name for output file
-        threshold_accept (float): Threshold for Accept predictions (default: 0.55)
-        threshold_reject (float): Threshold for Reject predictions (default: 0.30)
+        ml_threshold_accept (float): Threshold for Accept predictions (default: 0.55)
+        ml_threshold_reject (float): Threshold for Reject predictions (default: 0.30)
         
     Returns:
         str: Path to the final output file
     """
     # Validate threshold parameters
-    if threshold_reject > threshold_accept:
+    if ml_threshold_reject > ml_threshold_accept:
         raise ValueError(
-            f"threshold_reject ({threshold_reject}) must be less than or equal to "
-            f"threshold_accept ({threshold_accept}). Please adjust your thresholds."
+            f"ml_threshold_reject ({ml_threshold_reject}) must be less than or equal to "
+            f"ml_threshold_accept ({ml_threshold_accept}). Please adjust your thresholds."
         )
     
     print("Starting ML prediction pipeline...")
@@ -385,7 +436,7 @@ def run_ml_predictions(class1_aggregated_path, class1_all_epitopes_path, class2_
         post_imputed_data = clean_and_impute_data(merged_all, model_artifacts_path)
         
         # Step 3: Make ML predictions
-        post_imputed_data = make_ml_predictions(post_imputed_data, model_artifacts_path, threshold_accept, threshold_reject)
+        post_imputed_data = make_ml_predictions(post_imputed_data, model_artifacts_path, ml_threshold_accept, ml_threshold_reject)
         
         # Step 4: Create final output
         output_files = create_final_output(post_imputed_data, class1_aggregated_path, output_dir, sample_name)
@@ -420,7 +471,7 @@ def define_add_ml_predictions_parser(tool='pvacseq'):
         help="Path to the MHC Class II aggregated epitopes TSV."
     )
     parser.add_argument(
-        "--artifacts_path",
+        "--artifacts-path",
         dest="artifacts_path",
         help="Optional path to a directory containing ML model artifacts. Defaults to the package-provided artifacts."
     )
@@ -433,13 +484,13 @@ def define_add_ml_predictions_parser(tool='pvacseq'):
         help="Sample name prefix to use for the output files."
     )
     parser.add_argument(
-        "--threshold_accept",
+        "--ml-threshold-accept",
         type=float,
         default=0.55,
         help="Prediction threshold for Accept predictions (default: 0.55)."
     )
     parser.add_argument(
-        "--threshold_reject",
+        "--ml-threshold-reject",
         type=float,
         default=0.30,
         help="Prediction threshold for Reject predictions (default: 0.30)."
@@ -458,6 +509,6 @@ if __name__ == "__main__":
         args.artifacts_path,
         args.output_dir,
         args.sample_name,
-        args.threshold_accept,
-        args.threshold_reject
+        args.ml_threshold_accept,
+        args.ml_threshold_reject
     )

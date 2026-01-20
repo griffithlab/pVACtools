@@ -61,7 +61,7 @@ epitopes are well-binding to. Lastly, the report will bin variants into tiers
 that offer suggestions as to the suitability of variants for use in vaccines.
 For a full definition of these tiers, see the pVACseq :ref:`output file documentation <aggregated>`.
 
-Add ML Predictions
+Add Evaluation Predictions Using a Pre-Trained Machine Learning Model
 ------------------
 
 .. program-output:: pvacseq add_ml_predictions -h
@@ -76,8 +76,10 @@ the ``generate_aggregated_report`` command or by running the pVACseq pipeline (`
 the Class I aggregated TSV, Class I all epitopes TSV, and Class II aggregated TSV files from a pVACseq run. 
 The tool merges these files, performs data cleaning and imputation, and applies the ML model to generate evaluation predictions for each variant.
 
-The output file is named ``<sample_name>_predict_pvacview.tsv`` and contains all columns from the original 
-Class I aggregated file with two additional columns:  
+Note that the built-in ML model was trained with most of the features listed under :doc:`Features <features>`. It is STRONGLY recommended to use the `all` option for the `prediction_algorithms` parameter when running the pVACseq pipeline for the best predictions.
+
+The output file is written to the ``ml_predict`` subdirectory as ``<sample_name>.MHC_I.all_epitopes.aggregated.ML_predicted.tsv``, along with other necessary files for pVACview to load the predictions. The output file contains all columns from the original 
+Class I aggregated file with some changes:  
 
 
 .. list-table::
@@ -85,16 +87,16 @@ Class I aggregated file with two additional columns:
  * - ``Evaluation``
    - The ML-predicted evaluation status: "Accept", "Reject", or "Pending", based on the prediction probability score.
  * - ``ML Prediction (score)``
-   - A formatted string combining the model-predicted evaluation with the prediction probability score (e.g., 
-     "Accept (0.72)"). It shows "NA" for variants where the model could not make a prediction, which may be due to a candidate 
-     not being present in either the Class I or Class II aggregated reports.
+   - A formatted output combining the model-predicted evaluation with the prediction probability score (e.g., 
+     "Accept (0.72)"). It shows "NA" for variants where the model could not make a prediction, which may be due to a candidate having Class I 
+     algorithm predictions but not Class II algorithm predictions, causing the Class I and Class II aggregated reports to have different numbers of rows.
 
-The ``--threshold_accept`` parameter controls the probability threshold for Accept predictions (default: 0.55). 
-Variants with prediction probabilities >= this threshold are evaluated as "Accept". The ``--threshold_reject`` parameter 
+The ``--ml-threshold-accept`` parameter controls the probability threshold for Accept predictions (default: 0.55). 
+Variants with prediction probabilities >= this threshold are evaluated as "Accept". The ``--ml-threshold-reject`` parameter 
 controls the probability threshold for Reject predictions (default: 0.30). Variants with prediction probabilities <= 
 this threshold are evaluated as "Reject". Everything in between is set to "Pending" for manual review. 
-The ``--artifacts_path`` parameter allows you to specify a custom directory 
-containing ML model artifacts, though by default the tool uses the model artifacts included with the pvactools package.
+The ``--artifacts-path`` parameter allows you to specify a custom directory containing ML model artifacts. By default 
+the tool uses the model artifacts included with the pvactools package.
 
 Calculate Reference Proteome Similarity
 ---------------------------------------

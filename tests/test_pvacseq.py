@@ -1,5 +1,6 @@
 import unittest
 import unittest.mock
+from unittest.mock import patch
 import os
 import re
 import sys
@@ -10,10 +11,9 @@ from subprocess import run as subprocess_run
 from filecmp import cmp
 import yaml
 import datetime
-from mock import patch
 import argparse
 from urllib.request import urlopen
-from shutil import copyfileobj
+from shutil import copyfileobj, copyfile
 from tempfile import NamedTemporaryFile
 
 from pvactools.tools.pvacseq import *
@@ -416,4 +416,66 @@ class PvacseqTests(unittest.TestCase):
             output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
             expected_file = os.path.join(self.test_data_directory, 'problematic_amino_acids', 'MHC_Class_I', file_name)
             self.assertTrue(compare(output_file, expected_file))
+        output_dir.cleanup()
+
+    def test_pvacseq_run_with_ml_predictions(self):
+        with patch('pvactools.lib.call_iedb.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+            data,
+            files,
+            test_data_directory()
+        ))) as mock_request, patch('pvactools.lib.net_chop.NetChop.post_query', unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: mock_netchop_netmhcstabpan(
+            data,
+            files,
+            self.test_data_directory,
+            'net_chop.html'
+        ))), patch('pvactools.lib.netmhc_stab.NetMHCStab.query_netmhcstabpan_server',  unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: mock_netchop_netmhcstabpan(
+            data,
+            files,
+            self.test_data_directory,
+            'Netmhcstab.html'
+        ))):
+            output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
+
+            run.main([
+                os.path.join(self.test_data_directory, "input.vcf"),
+                'Test',
+                'HLA-G*01:09,HLA-E*01:01,DRB1*11:01',
+                'NetMHC',
+                'PickPocket',
+                'NNalign',
+                output_dir.name,
+                '-e1', '9,10',
+                '-e2', '15',
+                '--top-score-metric=lowest',
+                '--top-score-metric2=ic50',
+                '--keep-tmp-files',
+                '--net-chop-method', 'cterm',
+                '--netmhc-stab',
+                '--tdna-vaf', '0.2',
+                '-d', 'full',
+                '--pass-only',
+                '--run-reference-proteome-similarity',
+                '--peptide-fasta', self.peptide_fasta,
+                '--biotypes', 'IG_V_gene,protein_coding',
+                '--run-ml-predictions'
+            ])
+            close_mock_fhs()
+
+        # Check that ML prediction output file exists
+        ml_output_file = os.path.join(output_dir.name, 'ml_predict', 'Test.MHC_I.all_epitopes.aggregated.ML_predicted.tsv')
+        
+        # Check if all required pvacview files exist in ml_predict directory
+        pvacview_files = [
+            'Test.MHC_I.all_epitopes.aggregated.ML_predicted.tsv',
+            'Test.MHC_I.all_epitopes.aggregated.metrics.json',
+            'Test.MHC_II.all_epitopes.aggregated.tsv',
+        ]
+        for file in pvacview_files:
+            file_path = os.path.join(output_dir.name, 'ml_predict', file)
+            self.assertTrue(os.path.exists(file_path), f"pvacview file not found: {file_path}")
+
+        # Check that the ML prediction output file matches the expected file
+        expected_file = os.path.join(self.test_data_directory, 'ml_predictor', 'Test.MHC_I.all_epitopes.aggregated.ML_predicted.tsv')
+        self.assertTrue(compare(ml_output_file, expected_file))
+        
         output_dir.cleanup()

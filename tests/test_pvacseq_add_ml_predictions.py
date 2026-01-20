@@ -19,13 +19,13 @@ def test_data_directory():
         'ml_predictor'
     )
 
-
 class PvacseqAddMlPredictionsTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.pvactools_directory = pvactools_directory()
         cls.test_data_directory = test_data_directory()
 
+    # Checks that the CLI entrypoint for pvacseq add_ml_predictions is wired up correctly and shows help text.
     def test_command(self):
         pvac_script_path = os.path.join(
             self.pvactools_directory,
@@ -44,6 +44,7 @@ class PvacseqAddMlPredictionsTests(unittest.TestCase):
         self.assertFalse(result.returncode, "Failed `pvacseq add_ml_predictions -h`")
         self.assertRegex(result.stdout.decode(), usage_search)
 
+    # A sanity check that the script compiles and is free of basic syntax errors.
     def test_compiles(self):
         compiled_run_path = py_compile.compile(os.path.join(
             self.pvactools_directory,
@@ -54,6 +55,8 @@ class PvacseqAddMlPredictionsTests(unittest.TestCase):
         ))
         self.assertTrue(compiled_run_path)
 
+    # Verifies that the pvacseq add_ml_predictions subcommand actually runs end‑to‑end without error when given real example input files and explicit thresholds.
+    # ΝΟΤΕ: It does not inspect the contents of the ML output files
     def test_runs(self):
         input_file_I_aggregated = os.path.join(self.test_data_directory, 'MHC_Class_I', 'HCC1395_TUMOR_DNA.MHC_I.all_epitopes.aggregated.tsv')
         input_file_I_all_epitopes = os.path.join(self.test_data_directory, 'MHC_Class_I', 'HCC1395_TUMOR_DNA.MHC_I.all_epitopes.tsv')
@@ -64,5 +67,7 @@ class PvacseqAddMlPredictionsTests(unittest.TestCase):
             input_file_I_all_epitopes,
             input_file_II_aggregated,
             output_dir.name,
-            'HCC1395'
-        ]))
+            'HCC1395', 
+            '--ml-threshold-accept', '0.55',
+            '--ml-threshold-reject', '0.30'
+        ])) # runs add_ml_predictions.main(), which returns nothing if successful --> False if successful, True if not

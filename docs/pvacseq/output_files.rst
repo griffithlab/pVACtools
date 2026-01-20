@@ -14,8 +14,7 @@ which prediction algorithms were chosen:
 - ``MHC_Class_II``: for MHC class II prediction algorithms
 - ``combined``: If both MHC class I and MHC class II prediction algorithms were run, this folder combines the neoepitope predictions from both
 
-Each folder will contain the same list of output files (listed in the order
-created):
+Each folder will contain the same list of output files (listed in the order created):
 
 .. list-table::
    :header-rows: 1
@@ -56,9 +55,8 @@ created):
      - pVACview R Shiny application files. Not generated when running only with presentation and immunogenicity algorithms.
    * - ``www`` (directory)
      - Directory containing image files for pVACview. Not generated when running with presentation and immunogenicity algorithms only.  
-   * - ``ml_predict/<sample_name>_predict_pvacview.tsv`` (optional)
-     - ML-based neoantigen evaluation predictions file. Generated when both MHC Class I and Class II predictions are run and the ``--run-ml-predictions`` flag is set.
-     - Directory containing image files for pVACview. Not generated when running only with presentation and immunogenicity algorithms only.
+   * - ``ml_predict/<sample_name>.MHC_I.all_epitopes.aggregated.ML_predicted.tsv`` (optional)
+     - A version of the ``<sample_name>.MHC_I.all_epitopes.aggregated.tsv`` with ML-based neoantigen evaluation predictions. Generated when both MHC Class I and Class II predictions are run and the ``--run-ml-predictions`` flag is set.
 
 
 Filters applied to the filtered.tsv file
@@ -392,10 +390,10 @@ included epitopes, selecting the best-scoring epitope, and which values are outp
 
 .. _ml_prediction_output:
 
-<sample_name>_predict_pvacview.tsv Report Columns
+<sample_name>.MHC_I.all_epitopes.aggregated.ML_predicted.tsv Report Columns
 --------------------------------------------------
 
-The ``<sample_name>_predict_pvacview.tsv`` file is generated when using the :ref:`add_ml_predictions <optional_downstream_analysis_tools_label>` 
+The ``<sample_name>.MHC_I.all_epitopes.aggregated.ML_predicted.tsv`` file is generated when using the :ref:`add_ml_predictions <optional_downstream_analysis_tools_label>` 
 tool or when running pVACseq with both MHC Class I and Class II predictions and the ``--run-ml-predictions`` flag enabled. 
 This file contains all columns from the Class I aggregated file (``all_epitopes.aggregated.tsv``) with one additional ML prediction column added.  
 
@@ -404,10 +402,12 @@ The file is written to the ``ml_predict`` subdirectory within the output directo
 .. list-table::
    :header-rows: 1
 
-   * - All columns from ``all_epitopes.aggregated.tsv``
+   * - Column Name
+     - Description
+   * - All columns from ``<sample_name>.MHC_I.all_epitopes.aggregated.tsv``
      - All columns described in the :ref:`aggregated` section above are included in this file.
    * - ``Evaluation``
-     - Populated with ML-predicted evaluation status for each candidate. Values: ``Accept`` for variants with prediction probability >= threshold_accept (default: 0.55), ``Reject`` for variants with prediction probability <= threshold_reject (default: 0.30), and ``Pending`` for variants with prediction probability between threshold_reject and threshold_accept or when the ML model cannot make a prediction due to missing data.
+     - Populated with ML-predicted evaluation status for each candidate. Values: ``Accept`` for variants with prediction probability >= ``ml-threshold-accept`` (default: 0.55), ``Reject`` for variants with prediction probability <= ``ml-threshold-reject`` (default: 0.30), and ``Pending`` for variants with prediction probability between ``ml-threshold-reject`` and ``ml-threshold-accept`` or when the ML model cannot make a prediction due to missing data.
    * - ``ML Prediction (score)``
      - ML-based prediction evaluation with probability score. Format: ``"<Evaluation> (<probability_score>)"`` (e.g., ``"Accept (0.72)"``, ``"Reject (0.15)"``, ``"Review (0.48)"``). Shows ``"NA"`` when the ML model cannot make a prediction due to missing data (e.g., when Class I and Class II aggregated files have different numbers of rows).
 

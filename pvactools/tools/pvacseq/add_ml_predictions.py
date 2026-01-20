@@ -21,8 +21,8 @@ def main(args_input=sys.argv[1:]):
         args.artifacts_path,
         args.output_dir,
         args.sample_name,
-        args.threshold_accept,
-        args.threshold_reject,
+        args.ml_threshold_accept,
+        args.ml_threshold_reject,
     )
 
 

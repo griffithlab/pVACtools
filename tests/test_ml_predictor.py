@@ -83,8 +83,7 @@ class MLPredictorTests(unittest.TestCase):
     # ============================================================================
 
     def test_ml_predictions_output_basic(self):
-        """Test that ML predictions produce expected output files with correct structure.
-        This test saves output to a fixed directory for inspection."""
+        """Test that ML predictions produce expected output files with correct structure."""
         # Use a fixed output directory for inspection
         output_dir = os.path.join(self.test_data_path, "ml_predictor_test_output")
         os.makedirs(output_dir, exist_ok=True)
@@ -108,7 +107,7 @@ class MLPredictorTests(unittest.TestCase):
         self.assertTrue(os.path.exists(result))
         
         # Check file path matches expected naming convention
-        self.assertIn("_predict_pvacview.tsv", result)
+        self.assertIn(".MHC_I.all_epitopes.aggregated.ML_predicted.tsv", result)
         
         # Check that file contains data
         df = pd.read_csv(result, sep='\t')
@@ -125,8 +124,6 @@ class MLPredictorTests(unittest.TestCase):
         
         # Print file path for easy inspection
         print(f"\nTest output file saved to: {result}")
-        
-        #df.to_csv(os.path.join(output_dir, "HCC1395_predict_pvacview.tsv"), sep='\t', index=False)
 
     def test_ml_predictions_different_threshold(self):
         """Test that different threshold values produce different results."""
@@ -286,7 +283,7 @@ class MLPredictorTests(unittest.TestCase):
             mhc1_all_file = os.path.join(self.test_data_path, "MHC_Class_I", "HCC1395_TUMOR_DNA.MHC_I.all_epitopes.tsv")
             mhc2_agg_file = os.path.join(self.test_data_path, "MHC_Class_II", "HCC1395_TUMOR_DNA.MHC_II.all_epitopes.aggregated.tsv")
             
-            # Test that threshold_reject > threshold_accept raises ValueError
+            # Test that ml_threshold_reject > ml_threshold_accept raises ValueError
             with self.assertRaises(ValueError) as context:
                 run_ml_predictions(
                     mhc1_agg_file, mhc1_all_file, mhc2_agg_file,
@@ -295,8 +292,8 @@ class MLPredictorTests(unittest.TestCase):
             
             # Verify the error message contains relevant information
             error_message = str(context.exception)
-            self.assertIn("threshold_reject", error_message)
-            self.assertIn("threshold_accept", error_message)
+            self.assertIn("ml_threshold_reject", error_message)
+            self.assertIn("ml_threshold_accept", error_message)
             self.assertIn("0.6", error_message)
             self.assertIn("0.55", error_message)
 
@@ -393,6 +390,47 @@ class MLPredictorTests(unittest.TestCase):
             )
             
             self.assertIn(sample_name, result)
+
+    def test_missing_required_columns_error(self):
+        """Test that missing non-critical columns are handled gracefully in full pipeline."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # Create temporary copies of input files
+            mhc1_agg_file = os.path.join(self.test_data_path, "MHC_Class_I", "HCC1395_TUMOR_DNA.MHC_I.all_epitopes.aggregated.tsv")
+            mhc1_all_file = os.path.join(self.test_data_path, "MHC_Class_I", "HCC1395_TUMOR_DNA.MHC_I.all_epitopes.tsv")
+            mhc2_agg_file = os.path.join(self.test_data_path, "MHC_Class_II", "HCC1395_TUMOR_DNA.MHC_II.all_epitopes.aggregated.tsv")
+            
+            # Read the all_epitopes file and remove the specified columns
+            mhc1_all_df = pd.read_csv(mhc1_all_file, sep='\t')
+            mhc1_agg_df = pd.read_csv(mhc1_agg_file, sep='\t')
+            
+            # Remove the specified columns (for testing purposes)
+            mhc1_all_df_modified = mhc1_all_df.drop(columns=['MHCflurry MT IC50 Score'])
+            mhc1_agg_file_modified = mhc1_agg_df.drop(columns=['Pos', 'Prob Pos'])
+            
+            # Save the modified file to a temporary location
+            modified_mhc1_all_file = os.path.join(temp_dir, "HCC1395_TUMOR_DNA.MHC_I.all_epitopes.tsv")
+            mhc1_all_df_modified.to_csv(modified_mhc1_all_file, sep='\t', index=False)
+            modified_mhc1_agg_file = os.path.join(temp_dir, "HCC1395_TUMOR_DNA.MHC_I.all_epitopes.aggregated.tsv")
+            mhc1_agg_file_modified.to_csv(modified_mhc1_agg_file, sep='\t', index=False)
+            
+            # Test that running ML predictions with missing non-critical columns works
+            # (it should handle gracefully and print warnings)
+            with tempfile.TemporaryDirectory() as output_dir:
+                result = run_ml_predictions(
+                    modified_mhc1_agg_file, modified_mhc1_all_file, mhc2_agg_file,
+                    self.model_artifacts_path, output_dir, 'HCC1395', 0.55, 0.30
+                )
+                
+                # Verify that output file was created successfully
+                self.assertTrue(os.path.exists(result))
+                
+                # Verify that file contains data
+                df = pd.read_csv(result, sep='\t')
+                self.assertGreater(df.shape[0], 0)
+                
+                # Verify required columns exist
+                self.assertIn('Evaluation', df.columns)
+                self.assertIn('ML Prediction (score)', df.columns)
 
 
 if __name__ == '__main__':
