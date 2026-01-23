@@ -228,7 +228,8 @@ explore_tab <- tabItem(
             box(width = 12, title = "Transcript and Peptide Set Data", solidHeader = TRUE, collapsible = TRUE, status = "primary",
                 tabBox(width = 12, title = " ",
                     tabPanel("Peptide Candidates from Selected Transcript Set",
-                            DTOutput("peptideTable") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;font-size:100%"),
+                        uiOutput("peptide_table_mode_ui"),
+                        DTOutput("peptideTable") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;font-size:100%"),
                     tabPanel("Anchor Heatmap",
                         fluidRow(
                             column(width = 6,
@@ -272,7 +273,8 @@ explore_tab <- tabItem(
                  tabPanel("%ile Plot",
                           h4("Violin Plots showing distribution of MHC percentile predictions for selected peptide pair (MT and WT)."),
                           h5("Showcases individual percentile scores from each algorithm used. A solid line is used to represent the median percentile score."),
-                          plotOutput(outputId = "violinPlot_percentile") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;"
+                          uiOutput("percentile_plot_mode_ui"),
+                          plotOutput(outputId = "violinPlot_percentile", height="450px") %>% withSpinner(color = "#8FCCFA"), style = "overflow-x: scroll;"
                  ),
                  tabPanel("Binding Plot",
                           h4("Violin Plots showing distribution of MHC IC50 predictions for selected peptide pair (MT and WT)."),
@@ -281,8 +283,9 @@ explore_tab <- tabItem(
                  ),
                  tabPanel("Binding Data",
                           h4("Prediction score table showing exact MHC binding values and percentiles."),
+                          uiOutput("binding_table_mode_ui"),
                           DTOutput(outputId = "bindingDatatable"),
-                          strong("Note"), span(": The MixMHCpred score does not respresent IC50 binding affinity."),
+                          strong("Note"), span(": The MixMHCpred score does not represent IC50 binding affinity."),
                           style = "overflow-x: scroll;"
                  ),
                  tabPanel("Presentation Data",

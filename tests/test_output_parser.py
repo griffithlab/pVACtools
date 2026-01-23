@@ -17,9 +17,14 @@ class OutputParserTests(unittest.TestCase):
         url = f"https://raw.githubusercontent.com/griffithlab/pvactools_percentiles_data/main/hdf5/HLA-A_02_01_percentiles.h5"
         response = requests.get(url, stream=True)
         response.raise_for_status()
-        f = tempfile.NamedTemporaryFile(mode='wb', delete=False, prefix='HLA-A_29_02_percentiles', suffix='.h5')
-        for chunk in response.iter_content(chunk_size=8192):
-            f.write(chunk)
+        cls.reference_file = "/tmp/HLA-A_02_01_percentiles.h5"
+        with open(cls.reference_file, "wb") as fh:
+            for chunk in response.iter_content(chunk_size=8192):
+                fh.write(chunk)
+
+    @classmethod
+    def tearDownClass(cls):
+        os.unlink(cls.reference_file)
 
     def test_source_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))
@@ -43,6 +48,43 @@ class OutputParserTests(unittest.TestCase):
         self.assertEqual(parser._normalize_allele("HLA-A*02:122"), "HLA-A_02_122")
         self.assertEqual(parser._normalize_allele("HLA-A*02:125N"), "HLA-A_02_125N")
         self.assertEqual(parser._normalize_allele("HLA-A*02:53N"), "HLA-A_02_53N")
+
+    def test_normalized_percentile(self):
+        parse_output_input_iedb_file = [os.path.join(self.test_data_dir, "input_peptide_sequence_length_21.ann.HLA-A*29:02.9.tsv")]
+        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "input_peptide_sequence_length_21.tsv")
+        parse_output_key_file = os.path.join(self.test_data_dir, "input_peptide_sequence_length_21.key")
+        parse_output_output_file = tempfile.NamedTemporaryFile()
+
+        parse_output_params = {
+            'input_iedb_files'       : parse_output_input_iedb_file,
+            'input_tsv_file'         : parse_output_input_tsv_file,
+            'key_file'               : parse_output_key_file,
+            'output_file'            : parse_output_output_file.name,
+            'sample_name'            : 'input_peptide_sequence_length_21',
+            'use_normalized_percentiles': True,
+            'reference_scores_path': '/tmp',
+        }
+        parser = DefaultOutputParser(**parse_output_params)
+
+        ####Per-Length Tests####
+        #test specific percentile
+        self.assertEqual(parser.calculate_normalized_percentile("HLA-A_02_01", 8, 500, "NetMHC", mode="per_length"), 0.658)
+        #test percentile for a different length should differ
+        self.assertNotEqual(parser.calculate_normalized_percentile("HLA-A_02_01", 8, 500, "NetMHC", mode="per_length"), parser.calculate_normalized_percentile("HLA-A_02_01", 9, 500, "NetMHC", mode="per_length"))
+        #test for unsupported length should yield "NA"
+        self.assertEqual(parser.calculate_normalized_percentile("HLA-A_02_01", 17, 500, "NetMHC", mode="per_length"), "NA")
+        #test is_reversed
+        self.assertEqual(parser.calculate_normalized_percentile("HLA-A_02_01", 9, 0.9, "DeepImmuno", is_reversed=True, mode="per_length"), 2.084)
+
+        ####Length-Agnostic Tests####
+        #test specific percentile
+        self.assertEqual(parser.calculate_normalized_percentile("HLA-A_02_01", 8, 500, "NetMHC", mode="length_agnostic"), 2.348)
+        #test percentile for a different length should be the same
+        self.assertEqual(parser.calculate_normalized_percentile("HLA-A_02_01", 8, 500, "NetMHC", mode="length_agnostic"), parser.calculate_normalized_percentile("HLA-A_02_01", 9, 500, "NetMHC", mode="length_agnostic"))
+        #test for unsupported length should yield a value
+        self.assertEqual(parser.calculate_normalized_percentile("HLA-A_02_01", 17, 500, "NetMHC", mode="length_agnostic"), 2.348)
+        #test is_reversed
+        self.assertEqual(parser.calculate_normalized_percentile("HLA-A_02_01", 9, 0.9, "DeepImmuno", is_reversed=True, mode="length_agnostic"), 2.078)
 
     def test_parse_output_runs_and_produces_expected_output(self):
         parse_output_input_iedb_file = [os.path.join(self.test_data_dir, "input_peptide_sequence_length_21.ann.HLA-A*29:02.9.tsv")]

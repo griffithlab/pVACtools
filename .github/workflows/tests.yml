@@ -1,4 +1,4 @@
-name: pVACtools tests
+name: pVACtools unittests
 
 on:
   push:
@@ -7,6 +7,7 @@ on:
     types: [opened, synchronize, edited, reopened]
     branches:
       - '**'
+  workflow_dispatch:
 
 jobs:
   run_tests:
@@ -14,6 +15,7 @@ jobs:
 
     runs-on: ubuntu-22.04
     strategy:
+      fail-fast: false
       matrix:
         python-version: ['3.9', '3.10', '3.11']
 

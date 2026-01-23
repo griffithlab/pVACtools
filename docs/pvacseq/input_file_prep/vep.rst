@@ -34,6 +34,8 @@ Installing VEP
 
    pvacseq install_vep_plugin <VEP plugins directory>
 
+The plugins can also be downloaded from the `pVACtools GitHub respository <https://github.com/griffithlab/pVACtools/tree/master/pvactools/tools/pvacseq/VEP_plugins>`_ directly.
+
 Running VEP
 -----------
 

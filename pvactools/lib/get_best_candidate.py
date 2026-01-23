@@ -67,6 +67,7 @@ class PvacseqBestCandidate:
         anchor_residue_pass_df['tsl_sort'] = anchor_residue_pass_df["Transcript Support Level"].apply(lambda x: 6 if x in ['NA', 'Not Supported'] or pd.isna(x) else int(x))
         sort_columns = [
             "rank",
+            f"rank_{self.top_score_metric2[0]}",
             "mane_select_sort",
             "canonical_sort",
             "tsl_sort",
@@ -74,6 +75,7 @@ class PvacseqBestCandidate:
             "Transcript Expression"
         ]
         sort_orders = [
+            True,
             True,
             True,
             True,
@@ -111,8 +113,14 @@ class PvacfuseBestCandidate:
             prob_pos_df[f"rank_{metric2}"] = pd.to_numeric(prob_pos_df[metrics_to_column('pvacfuse', self.top_score_metric, metric2)], errors='coerce').rank(ascending=True, method='dense', na_option='bottom')
             prob_pos_df["rank"] += prob_pos_df[f"rank_{metric2}"]
         #sort by metrics included in top_score_metric2 in the order specified
-        sort_columns = ['rank']
-        sort_orders = [True]
+        sort_columns = [
+            'rank',
+            f"rank_{self.top_score_metric2[0]}",
+        ]
+        sort_orders = [
+            True,
+            True,
+        ]
 
         if 'Expression' in prob_pos_df:
             prob_pos_df['Expression Sort'] = prob_pos_df['Expression']
@@ -146,8 +154,14 @@ class PvacbindBestCandidate:
             prob_pos_df[f"rank_{metric2}"] = pd.to_numeric(prob_pos_df[metrics_to_column('pvacbind', self.top_score_metric, metric2)], errors='coerce').rank(ascending=True, method='dense', na_option='bottom')
             prob_pos_df["rank"] += prob_pos_df[f"rank_{metric2}"]
         #sort by metrics included in top_score_metric2 in the order specified
-        sort_columns = ['rank']
-        sort_orders = [True]
+        sort_columns = [
+            'rank',
+            f"rank_{self.top_score_metric2[0]}",
+        ]
+        sort_orders = [
+            True,
+            True,
+        ]
 
         prob_pos_df.sort_values(
             by=sort_columns,
@@ -212,6 +226,7 @@ class PvacspliceBestCandidate:
         prob_pos_df['tsl_sort'] = prob_pos_df["Transcript Support Level"].apply(lambda x: 6 if x in ['NA', 'Not Supported'] or pd.isna(x) else int(x))
         sort_columns = [
             "rank",
+            f"rank_{self.top_score_metric2[0]}",
             "mane_select_sort",
             "canonical_sort",
             "tsl_sort",
@@ -219,6 +234,7 @@ class PvacspliceBestCandidate:
             "Transcript Expression"
         ]
         sort_orders = [
+            True,
             True,
             True,
             True,

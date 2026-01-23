@@ -70,7 +70,7 @@ class AggregateAllEpitopes:
         raise Exception("Must implement method in child class")
 
     @abstractmethod
-    def get_included_df_metrics(self, included_df):
+    def get_included_df_metrics(self, included_df, best):
         raise Exception("Must implement method in child class")
 
     @abstractmethod
@@ -122,7 +122,7 @@ class AggregateAllEpitopes:
 
         #get a list of all unique gene/transcript/aa_change combinations
         #store a count of all unique peptides that passed
-        (peptides, anno_count) = self.get_included_df_metrics(included_df)
+        (peptides, anno_count) = self.get_included_df_metrics(included_df, best)
         included_peptide_count = self.calculate_unique_peptide_count(included_df)
         good_binder_count = self.calculate_good_binder_count(good_binders_df)
 
@@ -545,7 +545,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
     def replace_nas(self, items):
         return ["NA" if pd.isna(x) else x for x in items]
 
-    def get_included_df_metrics(self, included_df):
+    def get_included_df_metrics(self, included_df, best):
         peptides = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
         included_peptides = included_df["MT Epitope Seq"].unique()
         included_transcripts = included_df['annotation'].unique()
@@ -577,7 +577,10 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                     anchor_fails = []
                     for peptide_type, top_score_metric in zip(['MT', 'WT'], [self.mt_top_score_metric, self.wt_top_score_metric]):
                         summary_ic50s = {}
-                        summary_percentiles = {}
+                        summary_combined_percentiles = {}
+                        summary_binding_percentiles = {}
+                        summary_presentation_percentiles = {}
+                        summary_immunogenicity_percentiles = {}
                         ic50_scores = {}
                         binding_scores = {}
                         binding_percentiles = {}
@@ -587,7 +590,10 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                         presentation_percentiles = {}
                         for index, line in included_df_peptide_annotation.to_dict(orient='index').items():
                             summary_ic50s[line['HLA Allele']] = line['{} {} IC50 Score'.format(top_score_metric, peptide_type)]
-                            summary_percentiles[line['HLA Allele']] = line['{} {} Percentile'.format(top_score_metric, peptide_type)]
+                            summary_combined_percentiles[line['HLA Allele']] = line['{} {} Percentile'.format(top_score_metric, peptide_type)]
+                            summary_binding_percentiles[line['HLA Allele']] = line['{} {} IC50 Percentile'.format(top_score_metric, peptide_type)]
+                            summary_presentation_percentiles[line['HLA Allele']] = line['{} {} Presentation Percentile'.format(top_score_metric, peptide_type)]
+                            summary_immunogenicity_percentiles[line['HLA Allele']] = line['{} {} Immunogenicity Percentile'.format(top_score_metric, peptide_type)]
                             ic50_scores[line['HLA Allele']] = self.replace_nas_and_round([line["{} {} IC50 Score".format(algorithm, peptide_type)] for algorithm in self.ic50_algorithms])
                             binding_scores[line['HLA Allele']] = self.replace_nas_and_round([line["{} {} Binding Score".format(algorithm, peptide_type)] for algorithm in self.binding_score_algorithms])
                             binding_percentiles[line['HLA Allele']] = self.replace_nas_and_round([line["{} {} Percentile".format(algorithm, peptide_type)] for algorithm in self.binding_percentile_algorithms])
@@ -600,18 +606,21 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                             if peptide_type == 'MT' and not self.anchor_calculator.is_anchor_residue_pass(line):
                                 anchor_fails.append(line['HLA Allele'])
                         sorted_summary_ic50s = []
-                        sorted_summary_percentiles = []
+                        sorted_summary_combined_percentiles = []
+                        sorted_summary_binding_percentiles = []
+                        sorted_summary_presentation_percentiles = []
+                        sorted_summary_immunogenicity_percentiles = []
                         for hla_type in sorted(self.hla_types):
-                            if hla_type in summary_ic50s:
-                                sorted_summary_ic50s.append(summary_ic50s[hla_type])
-                            else:
-                                sorted_summary_ic50s.append('X')
-                            if hla_type in summary_percentiles:
-                                sorted_summary_percentiles.append(summary_percentiles[hla_type])
-                            else:
-                                sorted_summary_percentiles.append('X')
+                            sorted_summary_ic50s.append(summary_ic50s[hla_type]) if hla_type in summary_ic50s else sorted_summary_ic50s.append('X')
+                            sorted_summary_combined_percentiles.append(summary_combined_percentiles[hla_type]) if hla_type in summary_combined_percentiles else sorted_summary_combined_percentiles.append('X')
+                            sorted_summary_binding_percentiles.append(summary_binding_percentiles[hla_type]) if hla_type in summary_binding_percentiles else sorted_summary_binding_percentiles.append('X')
+                            sorted_summary_presentation_percentiles.append(summary_presentation_percentiles[hla_type]) if hla_type in summary_presentation_percentiles else sorted_summary_presentation_percentiles.append('X')
+                            sorted_summary_immunogenicity_percentiles.append(summary_immunogenicity_percentiles[hla_type]) if hla_type in summary_immunogenicity_percentiles else sorted_summary_immunogenicity_percentiles.append('X')
                         results[peptide]['ic50s_{}'.format(peptide_type)] = self.replace_nas_and_round(sorted_summary_ic50s)
-                        results[peptide]['percentiles_{}'.format(peptide_type)] = self.replace_nas_and_round(sorted_summary_percentiles)
+                        results[peptide]['combined_percentiles_{}'.format(peptide_type)] = self.replace_nas_and_round(sorted_summary_combined_percentiles)
+                        results[peptide]['binding_percentiles_{}'.format(peptide_type)] = self.replace_nas_and_round(sorted_summary_binding_percentiles)
+                        results[peptide]['presentation_percentiles_{}'.format(peptide_type)] = self.replace_nas_and_round(sorted_summary_presentation_percentiles)
+                        results[peptide]['immunogenicity_percentiles_{}'.format(peptide_type)] = self.replace_nas_and_round(sorted_summary_immunogenicity_percentiles)
                         individual_ic50_calls[peptide_type] = ic50_scores
                         individual_binding_score_calls[peptide_type] = binding_scores
                         individual_binding_percentile_calls[peptide_type] = binding_percentiles
@@ -643,7 +652,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
                         elif variant_type == 'inframe_del':
                             wt_peptide = 'DEL-NA'
                     results[peptide]['wt_peptide'] = wt_peptide
-            peptides[set_name]['peptides'] = self.sort_peptides(results)
+            peptides[set_name]['peptides'] = self.sort_peptides(results, best)
             sorted_transcripts = self.sort_transcripts(annotations, included_df)
             peptides[set_name]['transcripts'] = list(sorted_transcripts.Annotation)
             peptides[set_name]['transcript_expr'] = self.replace_nas_and_round(list(sorted_transcripts.Expr))
@@ -661,13 +670,27 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
 
         return (peptides, anno_count)
 
-    def sort_peptides(self, results):
+    def sort_peptides(self, results, best):
         for k, v in results.items():
+            predicted_alleles = [allele for index, allele in enumerate(v['hla_types']) if v['ic50s_MT'][index] != 'X']
+            anchor_alleles = [] if v['anchor_fails'] == "None" else v['anchor_fails'].split(", ")
+            anchor_fails_all = sorted(predicted_alleles) == sorted(anchor_alleles)
+            v['is_best_sort'] = 1 if k == best['MT Epitope Seq'] else 2
             v['problematic_positions_sort'] = 1 if v['problematic_positions'] == 'None' else 2
-            v['anchor_fail_sort'] = 1 if v['anchor_fails'] == 'None' else 2
-            v['best_ic50s_MT'] = min([ic50 for ic50 in v['ic50s_MT'] if ic50 != 'X'])
-        sorted_results = dict(sorted(results.items(), key=lambda x:(x[1]['problematic_positions_sort'],x[1]['anchor_fail_sort'],x[1]['best_ic50s_MT'])))
+            v['anchor_fail_sort'] = 2 if v['anchor_fails'] != 'None' and anchor_fails_all else 1
+            #v['best_ic50s_MT'] = min([ic50 for index, ic50 in enumerate(v['ic50s_MT']) if ic50 != 'X'])
+            if anchor_fails_all:
+                v['best_ic50s_MT'] = min([ic50 for index, ic50 in enumerate(v['ic50s_MT']) if ic50 != 'X'])
+            else:
+                v['best_ic50s_MT'] = min([ic50 for index, ic50 in enumerate(v['ic50s_MT']) if ic50 != 'X' and v['hla_types'][index] not in anchor_alleles])
+        sorted_results = dict(sorted(results.items(), key=lambda x:(
+            x[1]['is_best_sort'],
+            x[1]['problematic_positions_sort'],
+            x[1]['anchor_fail_sort'],
+            x[1]['best_ic50s_MT']
+        )))
         for k, v in sorted_results.items():
+            v.pop('is_best_sort')
             v.pop('problematic_positions_sort')
             v.pop('anchor_fail_sort')
             v.pop('best_ic50s_MT')
@@ -935,7 +958,7 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
     def get_unique_peptide_hla_counts(self, good_binders_df):
         return pd.DataFrame(good_binders_df.groupby(['HLA Allele', 'Epitope Seq']).size().reset_index())
 
-    def get_included_df_metrics(self, included_df):
+    def get_included_df_metrics(self, included_df, best):
         return (None, "NA")
 
     def calculate_unique_peptide_count(self, included_df):

@@ -46,7 +46,7 @@ get_current_group_info <- function(peptide_features, metricsData, fullData, sele
 }
 
 #reformat table for display
-table_formatting <- function(x, y) {
+table_formatting <- function(x, y, mode) {
   y[y == "X"] <- NA
   peptide_ind <- grepl(x, colnames(y))
   peptide_columns <- y[, peptide_ind]
@@ -55,7 +55,7 @@ table_formatting <- function(x, y) {
   colnames(peptide_columns) <- gsub("\\.", "", colnames(peptide_columns))
   peptide_columns_mt <- peptide_columns
   peptide_columns_mt$wt_peptide <- NULL
-  ic50_mt <- reshape2::dcast(peptide_columns_mt, Mutant ~ hla_types, value.var = "ic50s_MT")
+  ic50_mt <- reshape2::dcast(peptide_columns_mt, Mutant ~ hla_types, value.var = paste0(mode, "_MT"))
   ic50_mt[, !names(ic50_mt) == "Mutant"] <- round(as.numeric(ic50_mt[, !names(ic50_mt) == "Mutant"]), 2)
   colnames(ic50_mt)[colnames(ic50_mt) == "Mutant"] <- "Peptide Sequence"
   ic50_mt <- add_column(ic50_mt, Type = "MT", .after = "Peptide Sequence")
@@ -63,7 +63,7 @@ table_formatting <- function(x, y) {
   ic50_mt <- add_column(ic50_mt, `Anchor Residue Fail` = peptide_columns$anchor_fails[[1]])
   peptide_columns_wt <- peptide_columns
   peptide_columns_wt$Mutant <- NULL
-  ic50_wt <- reshape2::dcast(peptide_columns_wt, wt_peptide ~ hla_types, value.var = "ic50s_WT")
+  ic50_wt <- reshape2::dcast(peptide_columns_wt, wt_peptide ~ hla_types, value.var = paste0(mode, "_WT"))
   ic50_wt[, !names(ic50_wt) == "wt_peptide"] <- round(as.numeric(ic50_wt[, !names(ic50_wt) == "wt_peptide"]), 2)
   colnames(ic50_wt)[colnames(ic50_wt) == "wt_peptide"] <- "Peptide Sequence"
   ic50_wt <- add_column(ic50_wt, Type = "WT", .after = "Peptide Sequence")
@@ -459,7 +459,7 @@ tier <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cuto
       lowexpr <- TRUE
     }
   }
-  if (binding_pass && lowexpr && vaf_clonal_pass && transcript_pass && anchor_residue_pass && refmatch_pass && probaa_pass) {
+  if (scores_pass && lowexpr && vaf_clonal_pass && transcript_pass && anchor_residue_pass && refmatch_pass && probaa_pass) {
     return("LowExpr")
   }
   if (((!is.na(gene_expr) && (gene_expr == 0)) || (!is.na(rna_vaf) && rna_vaf == 0)) && !lowexpr) {
