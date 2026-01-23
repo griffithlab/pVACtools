@@ -380,6 +380,23 @@ class RunArgumentParser(metaclass=ABCMeta):
             default=1.0,
             help="Gene and Transcript Expression cutoff. Only sites above this cutoff will be considered.",
         )
+        # ML prediction arguments
+        self.parser.add_argument(
+            "--run-ml-predictions",
+            help="Enable ML-based neoantigen evaluation predictions.",
+            default=False,
+            action='store_true',
+        )
+        self.parser.add_argument(
+            "--ml-threshold-accept", type=float,
+            default=0.55,
+            help="Threshold for Accept predictions in ML model (default: 0.55).",
+        )
+        self.parser.add_argument(
+            "--ml-threshold-reject", type=float,
+            default=0.30,
+            help="Threshold for Reject predictions in ML model (default: 0.30).",
+        )        
 
     def pvacsplice(self):
         self.parser.add_argument(

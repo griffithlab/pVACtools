@@ -162,6 +162,9 @@ server <- shinyServer(function(input, output, session) {
     }else {
       df$comments <- data.frame(matrix("No comments", nrow = nrow(df$mainTable)), ncol = 1)
     }
+    if ("ML Prediction (score)" %in% colnames(df$mainTable)) {
+    columns_needed <- c(columns_needed, "ML Prediction (score)")
+    }
     df$mainTable <- df$mainTable[, columns_needed]
     df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
     rownames(df$comments) <- df$mainTable$ID
@@ -262,6 +265,12 @@ server <- shinyServer(function(input, output, session) {
        columns_needed <- c("ID", "Index", df$converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "MANE Select", "Canonical", "TSL", "Allele", "Pos", "Prob Pos",
                            "Num Included Peptides", "Num Passing Peptides", "IC50 MT", "IC50 WT", "%ile MT", "%ile WT", "IC50 %ile MT", "IC50 %ile WT", "Pres %ile MT", "Pres %ile WT", "IM %ile MT", "IM %ile WT",
                            "RNA Expr", "RNA VAF", "Allele Expr", "RNA Depth", "DNA VAF", "Tier", "Ref Match", "Acpt", "Rej", "Rev")
+       if ("Comments" %in% colnames(df$mainTable)) {
+         columns_needed <- c(columns_needed, "Comments")
+       }
+       if ("ML Prediction (score)" %in% colnames(df$mainTable)) {
+         columns_needed <- c(columns_needed, "ML Prediction (score)")
+       }
        df$mainTable <- df$mainTable[, columns_needed]
        df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
        if ("Comments" %in% colnames(df$mainTable)) {
@@ -696,6 +705,16 @@ server <- shinyServer(function(input, output, session) {
     print(val)
   })
   outputOptions(output, "filesUploaded", suspendWhenHidden = FALSE)
+  ## Display footnote when ML Prediction column is present
+  output$ml_prediction_footnote <- renderText({
+    if (is.null(df$mainTable) | is.null(df$metricsData)) {
+      return("")
+    }
+    if ("ML Prediction (score)" %in% colnames(df$mainTable)) {
+      return("NA or empty ML Prediction: Unable to make prediction with ML model due to missing data")
+    }
+    return("")
+  })
   ##############################PEPTIDE EXPLORATION TAB################################
   ##main table display with color/background/font/border configurations
   render_na <- JS(
@@ -997,6 +1016,16 @@ server <- shinyServer(function(input, output, session) {
   output$addData_transcript <- renderText({
     df$additionalData[df$additionalData$ID == selectedID(), ]$`Best Transcript`
   })
+  output$ml_prediction_score <- renderText({
+  if (is.null(df$additionalData)) {
+    return()
+  }
+  row <- df$additionalData[df$additionalData$ID == selectedID(), ]
+  if (nrow(row) == 0 || !("ML Prediction (score)" %in% colnames(df$additionalData))) {
+    return("N/A")
+  }
+  row$`ML Prediction (score)`
+})
   ##transcript sets table displaying sets of transcripts with the same consequence
   output$transcriptSetsTable <- renderDT({
     withProgress(message = "Loading Transcript Sets Table", value = 0, {

@@ -167,6 +167,8 @@ explore_tab <- tabItem(
                 dropdownMenu = boxDropdown(boxDropdownItem("Help", id = "help", icon = icon("question-circle"))),
                 DTOutput("mainTable") %>% withSpinner(color = "#8FCCFA"),
                 span("Currently investigating row: ", verbatimTextOutput("selected")),
+                br(),
+                div(textOutput("ml_prediction_footnote", inline = TRUE), style = "font-style: italic; color: #666; font-size: 90%; text-align: right;"),
                 style = "overflow-x: scroll;font-size:100%")
         ),
 
@@ -215,6 +217,7 @@ explore_tab <- tabItem(
                     span("RNA VAF", verbatimTextOutput("metricsTextRNA")),
                     span("Gene Expression", verbatimTextOutput("metricsTextGene")),
                     span("Genomic Information (chromosome - start - stop - ref - alt)", verbatimTextOutput("metricsTextGenomicCoord")),
+                    span("ML Prediction", verbatimTextOutput("ml_prediction_score")),
                     h5("Additional variant information:"),
                     uiOutput("url"), style = "overflow-x: scroll;font-size:100%"),
                 box(width = 2, solidHeader = TRUE, title = "Peptide Evaluation Overview",

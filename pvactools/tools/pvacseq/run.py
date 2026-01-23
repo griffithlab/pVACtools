@@ -46,6 +46,77 @@ def create_combined_reports(base_output_dir, args):
 
     PostProcessor(**post_processing_params).execute()
 
+def locate_ml_input_files(base_output_dir, sample_name):
+    """
+    Locate the three input files required for ML predictions.
+    
+    Args:
+        base_output_dir (str): Base output directory
+        sample_name (str): Sample name
+        
+    Returns:
+        tuple: Paths to the three required files (file1, file2, file3)
+    """
+    file1 = os.path.join(base_output_dir, 'MHC_Class_I', "{}.MHC_I.all_epitopes.aggregated.tsv".format(sample_name))
+    file2 = os.path.join(base_output_dir, 'MHC_Class_I', "{}.MHC_I.all_epitopes.tsv".format(sample_name))
+    file3 = os.path.join(base_output_dir, 'MHC_Class_II', "{}.MHC_II.all_epitopes.aggregated.tsv".format(sample_name))
+    file4 = os.path.join(base_output_dir, 'MHC_Class_I', "{}.MHC_I.all_epitopes.aggregated.metrics.json".format(sample_name))
+    
+    return file1, file2, file3, file4
+
+def run_ml_predictions(base_output_dir, args):
+    """
+    Run ML predictions as a standalone process when both Class I and Class II predictions are available.
+    
+    Args:
+        base_output_dir (str): Base output directory
+        args: Command line arguments
+    """
+    if not args.run_ml_predictions:
+        return
+        
+    print("Running standalone ML predictions...")
+    
+    # Locate input files
+    file1, file2, file3, file4 = locate_ml_input_files(base_output_dir, args.sample_name)
+    
+    # Check if all required files exist
+    required_files = [file1, file2, file3, file4]
+    missing_files = [f for f in required_files if not os.path.exists(f)]
+    if missing_files:
+        print(f"Warning: Missing required files for ML predictions: {missing_files}")
+        print("Skipping ML predictions.")
+        return
+    
+    # Define output directory
+    ml_output_dir = os.path.join(base_output_dir, 'ml_predict')
+    
+    try:
+        # Import and run ML predictions
+        from pvactools.lib.ml_predictor import run_ml_predictions
+        
+        output_file = run_ml_predictions(
+            class1_aggregated_path=file1,
+            class1_all_epitopes_path=file2,
+            class2_aggregated_path=file3,
+            model_artifacts_path=None,  # None uses default package location
+            output_dir=ml_output_dir,
+            sample_name=args.sample_name,
+            ml_threshold_accept=args.ml_threshold_accept,
+            ml_threshold_reject=args.ml_threshold_reject
+        )
+        print(f"ML predictions completed successfully using Class I and Class II files. Results saved to: {output_file}")
+        
+        # To have all files available in one place to load into pVACview:
+        # Copy the metrics.json file to the ML output directory
+        shutil.copy(file4, os.path.join(ml_output_dir, "{}.MHC_I.all_epitopes.aggregated.metrics.json".format(args.sample_name)))
+        # Copy the Class II aggregated file to the ML output directory
+        shutil.copy(file3, os.path.join(ml_output_dir, "{}.MHC_II.all_epitopes.aggregated.tsv".format(args.sample_name)))
+        
+    except Exception as e:
+        print(f"Error during standalone ML predictions: {str(e)}")
+        print("Continuing with pipeline without ML predictions.")
+
 def main(args_input = sys.argv[1:]):
     parser = define_parser()
     args = parser.parse_args(args_input)
@@ -130,6 +201,9 @@ def main(args_input = sys.argv[1:]):
         'aggregate_inclusion_binding_threshold': args.aggregate_inclusion_binding_threshold,
         'aggregate_inclusion_count_limit': args.aggregate_inclusion_count_limit,
         'genes_of_interest_file': args.genes_of_interest_file,
+        'run_ml_predictions': args.run_ml_predictions,
+        'ml_threshold_accept': args.ml_threshold_accept,
+        'ml_threshold_reject': args.ml_threshold_reject,
     }
 
     if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0:
@@ -198,6 +272,14 @@ def main(args_input = sys.argv[1:]):
     if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0 and len(class_ii_prediction_algorithms) > 0 and len(class_ii_alleles) > 0:
         print("Creating combined reports")
         create_combined_reports(base_output_dir, args)
+        
+        # Run ML predictions 
+        if 'all' in args.prediction_algorithms:
+            print("Running ML predictions...")
+            run_ml_predictions(base_output_dir, args)
+        else:
+            print("Caution: Use 'all' in prediction_algorithms is strongly recommended. Missing features will be filled with NA and will cause predictions to be inaccurate. Running ML predictions regardless...")
+            run_ml_predictions(base_output_dir, args)
 
     change_permissions_recursive(base_output_dir, 0o755, 0o644)
 
