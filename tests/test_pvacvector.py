@@ -464,6 +464,36 @@ class TestPvacvector(unittest.TestCase):
 
         output_dir.cleanup()
 
+    def test_find_optimal_path_single_peptide_without_edges_does_not_crash(self):
+        with tempfile.TemporaryDirectory() as output_dir:
+            seq_dict = {"MT.TEST.1": "SYFPEITHI"}
+            graph = run.initialize_graph(seq_dict.keys())
+            distance_matrix = run.create_distance_matrix(graph)
+            junctions_file = run.write_junctions_file(graph, output_dir)
+            args = argparse.Namespace(
+                spacers=["None"],
+                sample_name="single_peptide_no_edges",
+            )
+
+            results_file, error = run.find_optimal_path(
+                graph,
+                distance_matrix,
+                seq_dict,
+                output_dir,
+                junctions_file,
+                args,
+            )
+
+            self.assertIsNone(error)
+            self.assertIsNotNone(results_file)
+            self.assertTrue(os.path.exists(results_file))
+            with open(results_file, "r") as fh:
+                contents = fh.read()
+            self.assertIn("|Median_Junction_Score:", contents)
+            self.assertIn("|Lowest_Junction_Score:", contents)
+            self.assertIn("|All_Junction_Scores:", contents)
+            self.assertIn("SYFPEITHI", contents)
+
     def test_prevent_clipping_best_peptide(self):
         output_dir = tempfile.TemporaryDirectory()
         input_file = os.path.join(self.test_data_dir, 'Test.vector.prevent_clipping_best_peptide.input.fa')

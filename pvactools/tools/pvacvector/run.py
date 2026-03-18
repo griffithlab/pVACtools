@@ -313,16 +313,22 @@ def find_optimal_path(graph, distance_matrix, seq_dict, base_output_dir, junctio
     for id in state:
         print("\t", id)
 
-    median_score = str(cumulative_weight/len(all_scores))
+    if len(all_scores) > 0:
+        median_score = str(cumulative_weight/len(all_scores))
+        lowest_score = str(min_score)
+        score_list = ','.join(all_scores)
+    else:
+        median_score = 'NA'
+        lowest_score = 'NA'
+        score_list = 'NA'
     peptide_id_list = ','.join(names)
-    score_list = ','.join(all_scores)
     output = list()
     output.append(">")
     output.append(peptide_id_list)
     output.append("|Median_Junction_Score:")
     output.append(median_score)
     output.append("|Lowest_Junction_Score:")
-    output.append(str(min_score))
+    output.append(lowest_score)
     output.append("|All_Junction_Scores:")
     output.append(score_list)
     output.append("\n")
