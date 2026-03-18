@@ -257,6 +257,10 @@ def create_distance_matrix(Paths):
     return distance_matrix
 
 def find_optimal_path(graph, distance_matrix, seq_dict, base_output_dir, junctions_file, args):
+    (valid, error) = check_graph_valid(graph, seq_dict)
+    if not valid:
+        raise Exception("Invalid graph passed to find_optimal_path: {}".format(error))
+
     init_state = sorted(graph.nodes())
     if not os.environ.get('TEST_FLAG') or os.environ.get('TEST_FLAG') == '0':
         random.shuffle(init_state)
@@ -313,22 +317,16 @@ def find_optimal_path(graph, distance_matrix, seq_dict, base_output_dir, junctio
     for id in state:
         print("\t", id)
 
-    if len(all_scores) > 0:
-        median_score = str(cumulative_weight/len(all_scores))
-        lowest_score = str(min_score)
-        score_list = ','.join(all_scores)
-    else:
-        median_score = 'NA'
-        lowest_score = 'NA'
-        score_list = 'NA'
+    median_score = str(cumulative_weight/len(all_scores))
     peptide_id_list = ','.join(names)
+    score_list = ','.join(all_scores)
     output = list()
     output.append(">")
     output.append(peptide_id_list)
     output.append("|Median_Junction_Score:")
     output.append(median_score)
     output.append("|Lowest_Junction_Score:")
-    output.append(lowest_score)
+    output.append(str(min_score))
     output.append("|All_Junction_Scores:")
     output.append(score_list)
     output.append("\n")
