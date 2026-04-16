@@ -6,6 +6,7 @@ import re
 from itertools import islice
 import argparse
 import pandas as pd
+from math import ceil
 
 def combine_reports(input_files, output_file):
     fieldnames = []
@@ -272,3 +273,31 @@ def metric2_to_aggregate_column(metric2):
         'presentation_percentile': 'Pres %ile MT'
     }
     return pretty_metric2[metric2]
+
+def min_match_count(peptide_length):
+    return ceil(peptide_length / 2)
+
+def determine_consecutive_matches_from_left(mt_epitope_seq, wt_epitope_seq):
+    consecutive_matches = 0
+    for a, b in zip(mt_epitope_seq, wt_epitope_seq):
+        if a == b:
+            consecutive_matches += 1
+        else:
+            break
+    return consecutive_matches
+
+def determine_consecutive_matches_from_right(mt_epitope_seq, wt_epitope_seq):
+    consecutive_matches = 0
+    for a, b in zip(reversed(mt_epitope_seq), reversed(wt_epitope_seq)):
+        if a == b:
+            consecutive_matches += 1
+        else:
+            break
+    return consecutive_matches
+
+def determine_total_matches(mt_epitope_seq, wt_epitope_seq):
+    matches = 0
+    for a, b in zip(mt_epitope_seq, wt_epitope_seq):
+        if a == b:
+            matches += 1
+    return matches
