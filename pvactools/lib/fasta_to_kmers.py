@@ -32,60 +32,80 @@ class FastaToKmers:
                 logging.warning("Record {} contains unsupported amino acids. Skipping.".format(k))
                 continue
             # add entry to dictionary
-            kmer_dict[k] = final_seq_name
+            kmer_dict[i] = k
 
         return kmer_dict
 
-    def create_unique_kmer_dict(self, wt_name, mt_name):
+    def create_kmer_dict(self, splice_site_name):
         # wt and mut each get kmer dict
-        wt_dict = self.create_kmers(wt_name)
-        mut_dict = self.create_kmers(mt_name)
-        # all kmers not in wt kmers
-        final_kmers = {k: v.replace('ALT.', '') for k, v in mut_dict.items() if k not in list(wt_dict.keys())}
-        if len(final_kmers) == 0:
-            final_kmers = {}
+        wt_dict = self.create_kmers(f'WT.{splice_site_name}')
+        mut_dict = self.create_kmers(f'ALT.{splice_site_name}')
+        splice_type = splice_site_name.rsplit('.', 1)[1]
+        final_kmers = {}
+        for i in range(len(mut_dict)):
+            mt_seq = mut_dict[i]
+            wt_seq = wt_dict[i]
+            min_match = min_match_count(len(mt_seq))
+            diff = len(wt_dict) - len(mut_dict)
+            alt_i = i + diff
+            if alt_i < 0:
+                alt_wt_seq = ""
+            else:
+                alt_wt_seq = wt_dict[i+diff]
+            #Skip MT kmer if it occurs in the WT dict
+            if mt_seq in wt_dict.values():
+                continue
+            else:
+                left_match_count = determine_consecutive_matches_from_left(mt_seq, wt_seq)
+                if splice_type == 'inframe_splice_site':
+                    right_match_count = determine_consecutive_matches_from_right(mt_seq, alt_wt_seq)
+                    if left_match_count >= right_match_count:
+                        wt_seq_to_consider = wt_seq
+                    else:
+                        wt_seq_to_consider = alt_wt_seq
+                    total_match_count = determine_total_matches(mt_seq, wt_seq_to_consider)
+                    if total_match_count >= min_match:
+                        final_wt_seq = wt_seq_to_consider
+                    else:
+                        final_wt_seq = None
+                elif splice_type == 'frameshift_splice_site':
+                    total_match_count = determine_total_matches(mt_seq, wt_seq)
+                    if total_match_count >= min_match:
+                        final_wt_seq = wt_seq
+                    else:
+                        final_wt_seq = None
+                final_kmers[f'ALT.{splice_site_name}|{i}'] = mt_seq
+                if final_wt_seq is not None:
+                    final_kmers[f'WT.{splice_site_name}|{i}'] = final_wt_seq
         return final_kmers
 
     def loop_through_tscripts(self):
         unique_kmers = {}
-        # all fasta headers (WT and ALT)
-        fasta_keys = list(self.tscript_fasta.keys())
-        # take off WT. and ALT. prefixes from fasta_keys to de-duplicate
-        unique_keys = sorted(set([x.split('.', 1)[1] for x in fasta_keys]))
-        for key in unique_keys:
-            # selecting WT and ALT for each seq pair (bc calling fasta_keys not unique_keys)
-            wt_name, alt_name = [x for x in fasta_keys if key in x]
+        # all MT fasta headers
+        alt_fasta_keys = [k for k in self.tscript_fasta.keys() if k.startswith('ALT.')]
+        for alt_name in alt_fasta_keys:
+            splice_site_name = alt_name.removeprefix("ALT.")
             # get final mutated kmer list from save_kmer_dicts()
-            final_kmers = self.create_unique_kmer_dict(wt_name, alt_name)
+            final_kmers = self.create_kmer_dict(splice_site_name)
             if not final_kmers:
-                print(f'No unique kmers found for {key}')
+                print(f'No unique kmers found for {splice_site_name}')
                 continue
             # create master dict of unique kmers: index(es)
-            for k,v in final_kmers.items():
-                if k not in unique_kmers.keys():
-                    unique_kmers[k] = [v]
+            for index, kmer in final_kmers.items():
+                if kmer not in unique_kmers.keys():
+                    unique_kmers[kmer] = [index]
                 else:
-                    unique_kmers[k].append(v)
+                    unique_kmers[kmer].append(index)
         return unique_kmers
 
 
-    def create_index_file(self, kmers_dict):
+    def create_fasta_df(self, kmers_dict):
         # joined indexes for each unique kmer - to format for df since lists are dif sizes
         fasta_info = {k:','.join(sorted(v)) for k,v in kmers_dict.items()}
         # add header cols
         headers_dict = {'peptide': fasta_info.keys(), 'name': fasta_info.values()} # maybe sort here before turned into df
         # convert to df
         fasta_df = pd.DataFrame.from_dict(headers_dict) # peptide, name made into a df
-        # save to sep dictionary
-        index_df = fasta_df.copy()
-        # convert string to list and explode so each index is on a sep line
-        index_df['name'] = index_df['name'].str.split(',')
-        index_df = index_df.explode('name')
-        # now split each index into index, pos, len
-        index_df[['junction_index', 'transcript_position']] = index_df['name'].str.split(';', expand=True)
-        index_df['name'] = index_df['name'].str.replace(';', '.')
-        # create a tsv file
-
         return fasta_df
 
     def create_epitope_fastas(self, fasta_df):
@@ -112,5 +132,5 @@ class FastaToKmers:
         unique_kmers = self.loop_through_tscripts()
         if len(unique_kmers) > 0:
             # key: peptide value: list of ids
-            fasta_df = self.create_index_file(unique_kmers)
+            fasta_df = self.create_fasta_df(unique_kmers)
             self.create_epitope_fastas(fasta_df)
