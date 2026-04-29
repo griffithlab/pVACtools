@@ -1366,8 +1366,8 @@ class UnmatchedSequencesOutputParser(OutputParser):
         os.replace(tmp_output_file, self.output_file)
 
 
-class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
-    def parse_iedb_file(self):
+class PvacspliceOutputParser(DefaultOutputParser):
+    def parse_iedb_file(self, tsv_entries=None):
         # input key file
         protein_identifiers_from_label = {}
         for key_file in self.key_files:
@@ -1376,6 +1376,7 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
                 protein_identifiers_from_label[chunk] = yaml.load(key_file_reader, Loader=yaml.FullLoader)
         # final output
         iedb_results = {}
+        wt_iedb_results = {}
         for input_iedb_file in self.input_iedb_files:
             # input iedb file
             with open(input_iedb_file, 'r') as reader:
@@ -1401,17 +1402,42 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
                         protein_label = protein_identifiers_from_label[chunk][fasta_label][0]
                         # one index at a time
                         for key in protein_label.split(','):
+                            (protein_type, rest) = key.split('.', 1)
+                            (tsv_index, position) = rest.rsplit('|', 1)
+                            if protein_type == 'ALT':
+                                if rest not in iedb_results:
+                                    iedb_results[rest]                   = {}
+                                    iedb_results[rest]['mt_scores']      = {}
+                                    iedb_results[rest]['mt_epitope_seq'] = epitope
+                                    iedb_results[rest]['fasta_id']       = fasta_label
+                                    iedb_results[rest]['tsv_index']      = tsv_index
+                                    iedb_results[rest]['allele']         = allele
+                                    iedb_results[rest]['peptide_length'] = peptide_length
+                                    iedb_results[rest]['position']       = int(position) + 1
+                                iedb_results[rest]['mt_scores'].update(scores)
+                            else:
+                                if tsv_index not in wt_iedb_results:
+                                    wt_iedb_results[tsv_index] = {}
+                                if position not in wt_iedb_results[tsv_index]:
+                                    wt_iedb_results[tsv_index][position] = {}
+                                    wt_iedb_results[tsv_index][position]['wt_scores'] = {}
+                                wt_iedb_results[tsv_index][position]['wt_epitope_seq'] = epitope
+                                wt_iedb_results[tsv_index][position]['wt_scores'].update(scores)
 
-                            if key not in iedb_results:
-                                iedb_results[key]                   = {}
-                                iedb_results[key]['mt_scores']      = {}
-                                iedb_results[key]['mt_epitope_seq'] = epitope
-                                iedb_results[key]['fasta_id']       = fasta_label
-                                iedb_results[key]['tsv_index']      = key
-                                iedb_results[key]['allele']         = allele
-                                iedb_results[key]['peptide_length'] = peptide_length
-                            iedb_results[key]['mt_scores'].update(scores)
+        return self.match_wildtype_and_mutant_entries(iedb_results, wt_iedb_results)
 
+    def match_wildtype_and_mutant_entries(self, iedb_results, wt_iedb_results):
+        for key, mt_result in iedb_results.items():
+            (tsv_index, position) = key.rsplit('|', 1)
+            if position in wt_iedb_results[tsv_index]:
+                wt_result = wt_iedb_results[tsv_index][position]
+                mt_result['wt_epitope_seq'] = wt_result['wt_epitope_seq']
+                mt_result['wt_scores']      = wt_result['wt_scores']
+                mt_result['mutation_position'] = self.find_mutation_positions(wt_result['wt_epitope_seq'], mt_result['mt_epitope_seq'])
+            else:
+                mt_result['wt_epitope_seq'] = 'NA'
+                mt_result['wt_scores']      = self.format_match_na(mt_result, 'score')
+                mt_result['mutation_position'] = 'NA'
         return iedb_results
 
     def base_headers(self):
@@ -1426,8 +1452,10 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
             'Junction Stop',
             'Junction Score',
             'Junction Anchor',
+            'Junction Type',
             'Transcript',
             'Transcript Support Level',
+            'Transcript Length',
             'Canonical',
             'MANE Select',
             'Biotype',
@@ -1442,24 +1470,27 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
             'ALT Protein Length',
             'Frameshift Event',
             'Protein Position', # start position of peptide in alt protein
+            'Mutation Position',
             'HLA Allele',
             'Peptide Length',
-            'Epitope Seq',
-            'Median IC50 Score',
-            'Best IC50 Score',
-            'Best IC50 Score Method',
-            'Median Percentile',
-            'Best Percentile',
-            'Best Percentile Method',
-            'Median IC50 Percentile',
-            'Best IC50 Percentile',
-            'Best IC50 Percentile Method',
-            'Median Immunogenicity Percentile',
-            'Best Immunogenicity Percentile',
-            'Best Immunogenicity Percentile Method',
-            'Median Presentation Percentile',
-            'Best Presentation Percentile',
-            'Best Presentation Percentile Method',
+            'MT Epitope Seq',
+            'WT Epitope Seq',
+            'Best MT IC50 Score Method',
+            'Best MT IC50 Score',
+            'Corresponding WT IC50 Score',
+            'Corresponding Fold Change',
+            'Best MT Percentile Method',
+            'Best MT Percentile',
+            'Corresponding WT Percentile',
+            'Best MT IC50 Percentile Method',
+            'Best MT IC50 Percentile',
+            'Corresponding WT IC50 Percentile',
+            'Best MT Immunogenicity Percentile Method',
+            'Best MT Immunogenicity Percentile',
+            'Corresponding WT Immunogenicity Percentile',
+            'Best MT Presentation Percentile Method',
+            'Best MT Presentation Percentile',
+            'Corresponding WT Presentation Percentile',
             'Tumor DNA Depth',
             'Tumor DNA VAF',
             'Tumor RNA Depth',
@@ -1468,7 +1499,17 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
             'Normal VAF',
             'Gene Expression',
             'Transcript Expression',
-            'Index', # this is junction index
+            'Median MT IC50 Score',
+            'Median WT IC50 Score',
+            'Median Fold Change',
+            'Median MT Percentile',
+            'Median WT Percentile',
+            'Median MT IC50 Percentile',
+            'Median WT IC50 Percentile',
+            'Median MT Immunogenicity Percentile',
+            'Median WT Immunogenicity Percentile',
+            'Median MT Presentation Percentile',
+            'Median WT Presentation Percentile',
             'Fasta Key', # unique num for traceback to correct sequence - key to combined fasta header
         ]
 
@@ -1482,13 +1523,27 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
         tsv_entries = self.parse_input_tsv_file()
 
         # get binding info from iedb files
-        iedb_results = self.process_input_iedb_file()
+        iedb_results = self.process_input_iedb_file(None)
 
         # from input iedb files
         for result in iedb_results.values():
             # get unique index
-            (final_index, protein_position) = result['tsv_index'].rsplit('.', 1)
-            tsv_entry = tsv_entries[final_index]
+            tsv_index = result['tsv_index']
+            tsv_entry = tsv_entries[tsv_index]
+
+            if result['corresponding_wt_ic50'] == 'NA':
+                corresponding_fold_change = 'NA'
+            elif result['best_mt_ic50'] == 0:
+                corresponding_fold_change = inf
+            else:
+                corresponding_fold_change = round((result['corresponding_wt_ic50']/result['best_mt_ic50']), 3)
+
+            if result['median_wt_ic50'] == 'NA':
+                median_fold_change = 'NA'
+            elif result['median_mt_ic50'] == 0:
+                median_fold_change = inf
+            else:
+                median_fold_change = round((result['median_wt_ic50']/result['median_mt_ic50']), 3)
             row = {
                 'Chromosome'          : tsv_entry['chromosome_name'],
                 'Start'               : tsv_entry['start'],
@@ -1501,56 +1556,72 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
                 'MANE Select'         : tsv_entry['mane_select'],
                 'Biotype'             : tsv_entry['biotype'],
                 'Transcript CDS Flags': tsv_entry['transcript_cds_flags'],
+                'Transcript Length'   : tsv_entry['transcript_length'],
                 ### junction info from RegTools
                 'Junction'            : tsv_entry['name'],
                 'Junction Start'      : tsv_entry['junction_start'],
                 'Junction Stop'       : tsv_entry['junction_stop'],
                 'Junction Score'      : tsv_entry['score'],
                 'Junction Anchor'     : tsv_entry['anchor'],
+                'Junction Type'       : tsv_entry['junction_type'],
                 ###
                 'Ensembl Gene ID'     : tsv_entry['gene_name'],
                 'Variant Type'        : tsv_entry['variant_type'],
                 'Amino Acid Change'   : tsv_entry['amino_acid_change'],
-                'Protein Position' : protein_position,
+                'Protein Position'    : result['position'],
                 'Gene Name'           : tsv_entry['gene_name'],
                 'HGVSc'               : tsv_entry['hgvsc'],
                 'HGVSp'               : tsv_entry['hgvsp'],
-                'Index'               : final_index,
+                'Index'               : tsv_index,
                 'Fasta Key'           : result['fasta_id'],
-                'WT Protein Length' : tsv_entry['wt_protein_length'],
-                'ALT Protein Length': tsv_entry['alt_protein_length'],
-                'Frameshift Event'     : tsv_entry['frameshift_event'],
+                'WT Protein Length'   : tsv_entry['wt_protein_length'],
+                'ALT Protein Length'  : tsv_entry['alt_protein_length'],
+                'Frameshift Event'    : tsv_entry['frameshift_event'],
                 ### pvacbind info
                 'HLA Allele'          : result['allele'],
                 'Peptide Length'      : len(result['mt_epitope_seq']),
-                'Epitope Seq'         : result['mt_epitope_seq'],
+                'MT Epitope Seq'      : result['mt_epitope_seq'],
+                'WT Epitope Seq'      : result['wt_epitope_seq'],
+                'Mutation Position'   : result['mutation_position'] if 'mutation_position' in result else 'NA',
                 #Median IC50 Score
-                'Median IC50 Score': self.rounded_score_or_na(result['median_mt_ic50']),
+                'Median MT IC50 Score': self.rounded_score_or_na(result['median_mt_ic50']),
+                'Median WT IC50 Score': self.rounded_score_or_na(result['median_wt_ic50']),
+                'Median Fold Change': median_fold_change,
                 #Median Percentile
-                'Median Percentile': self.rounded_score_or_na(result['median_mt_percentile']),
+                'Median MT Percentile': self.rounded_score_or_na(result['median_mt_percentile']),
+                'Median WT Percentile': self.rounded_score_or_na(result['median_wt_percentile']),
                 #Median IC50 Percentile
-                'Median IC50 Percentile': self.rounded_score_or_na(result['median_mt_ic50_percentile']),
+                'Median MT IC50 Percentile': self.rounded_score_or_na(result['median_mt_ic50_percentile']),
+                'Median WT IC50 Percentile': self.rounded_score_or_na(result['median_wt_ic50_percentile']),
                 #Median Immunogenicity Percentile
-                'Median Immunogenicity Percentile': self.rounded_score_or_na(result['median_mt_immunogenicity_percentile']),
+                'Median MT Immunogenicity Percentile': self.rounded_score_or_na(result['median_mt_immunogenicity_percentile']),
+                'Median WT Immunogenicity Percentile': self.rounded_score_or_na(result['median_wt_immunogenicity_percentile']),
                 #Median Presentation Percentile
-                'Median Presentation Percentile': self.rounded_score_or_na(result['median_mt_presentation_percentile']),
+                'Median MT Presentation Percentile': self.rounded_score_or_na(result['median_mt_presentation_percentile']),
+                'Median WT Presentation Percentile': self.rounded_score_or_na(result['median_wt_presentation_percentile']),
                 #Best IC50 Score
-                'Best IC50 Score': self.rounded_score_or_na(result['best_mt_ic50']),
-                'Best IC50 Score Method': result['best_mt_ic50_method'],
+                'Best MT IC50 Score': self.rounded_score_or_na(result['best_mt_ic50']),
+                'Best MT IC50 Score Method': result['best_mt_ic50_method'],
+                'Corresponding WT IC50 Score': self.rounded_score_or_na(result['corresponding_wt_ic50']),
+                'Corresponding Fold Change': corresponding_fold_change,
                 #Best Percentile
-                'Best Percentile': self.rounded_score_or_na(result['best_mt_percentile']),
-                'Best Percentile Method': result['best_mt_percentile_method'],
+                'Best MT Percentile': self.rounded_score_or_na(result['best_mt_percentile']),
+                'Best MT Percentile Method': result['best_mt_percentile_method'],
+                'Corresponding WT Percentile': self.rounded_score_or_na(result['corresponding_wt_percentile']),
                 #Best IC50 Percentile
-                'Best IC50 Percentile': self.rounded_score_or_na(result['best_mt_ic50_percentile']),
-                'Best IC50 Percentile Method': result['best_mt_ic50_percentile_method'],
+                'Best MT IC50 Percentile': self.rounded_score_or_na(result['best_mt_ic50_percentile']),
+                'Best MT IC50 Percentile Method': result['best_mt_ic50_percentile_method'],
+                'Corresponding WT IC50 Percentile': self.rounded_score_or_na(result['corresponding_wt_ic50_percentile']),
                 #Best Immunogenicity Percentile
-                'Best Immunogenicity Percentile': self.rounded_score_or_na(result['best_mt_immunogenicity_percentile']),
-                'Best Immunogenicity Percentile Method': result['best_mt_immunogenicity_percentile_method'],
+                'Best MT Immunogenicity Percentile': self.rounded_score_or_na(result['best_mt_immunogenicity_percentile']),
+                'Best MT Immunogenicity Percentile Method': result['best_mt_immunogenicity_percentile_method'],
+                'Corresponding WT Immunogenicity Percentile': self.rounded_score_or_na(result['corresponding_wt_immunogenicity_percentile']),
                 #Best Presentation Percentile
-                'Best Presentation Percentile': self.rounded_score_or_na(result['best_mt_presentation_percentile']),
-                'Best Presentation Percentile Method': result['best_mt_presentation_percentile_method'],
+                'Best MT Presentation Percentile': self.rounded_score_or_na(result['best_mt_presentation_percentile']),
+                'Best MT Presentation Percentile Method': result['best_mt_presentation_percentile_method'],
+                'Corresponding WT Presentation Percentile': self.rounded_score_or_na(result['corresponding_wt_presentation_percentile']),
             }
-            row = self.add_prediction_scores(row, result['mt_scores'])
+            row = self.add_prediction_scores(row, result['mt_scores'], result['wt_scores'])
 
             for (tsv_key, row_key) in zip(['gene_expression', 'transcript_expression', 'normal_vaf', 'tdna_vaf', 'trna_vaf'], ['Gene Expression', 'Transcript Expression', 'Normal VAF', 'Tumor DNA VAF', 'Tumor RNA VAF']):
                 if tsv_key in tsv_entry:
