@@ -192,8 +192,10 @@ class JunctionPipeline:
                         continue
                     # creates output transcript fasta
                     if alt_fs == 'yes':
+                        combined_df.loc[i, 'junction_type'] = 'frameshift_splice_site'
                         updated_index = "{}.frameshift_splice_site".format(combined_df.loc[i, 'index'])
                     else:
+                        combined_df.loc[i, 'junction_type'] = 'inframe_splice_site'
                         updated_index = "{}.inframe_splice_site".format(combined_df.loc[i, 'index'])
                     combined_df.loc[i, 'index'] = updated_index
                     junctions.fasta_index = updated_index

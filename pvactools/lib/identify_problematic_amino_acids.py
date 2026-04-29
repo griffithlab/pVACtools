@@ -47,7 +47,7 @@ class IdentifyProblematicAminoAcids:
                 if self.is_aggregated:
                     sequence = line['Best Peptide']
                     output_header = 'Prob Pos'
-                elif self.file_type == 'pVACbind' or self.file_type == 'pVACfuse' or self.file_type == 'pVACsplice':
+                elif self.file_type == 'pVACbind' or self.file_type == 'pVACfuse':
                     sequence = line['Epitope Seq']
                     output_header = 'Problematic Positions'
                 else:
