@@ -6,7 +6,8 @@ import platform
 import copy
 
 from pvactools.lib.prediction_class import *
-from pvactools.lib.pipeline import PvacbindPipeline
+from pvactools.lib.pipeline import PvacsplicePipeline
+from pvactools.lib.fusion_pipeline import FusionPipeline
 from pvactools.lib.run_argument_parser import PvacfuseRunArgumentParser
 from pvactools.lib.post_processor import PostProcessor
 import pvactools.tools.pvacfuse.generate_protein_fasta
@@ -140,8 +141,26 @@ def main(args_input = sys.argv[1:]):
     alleles = combine_class_ii_alleles(args.allele)
     (class_i_alleles, class_ii_alleles, species) = split_alleles(alleles)
 
+    fusions_dir = os.path.abspath(args.output_dir)
+    os.makedirs(fusions_dir, exist_ok=True)
+
+    fusion_arguments = {
+        'output_dir'              : fusions_dir,
+        'input_file'              : args.input_file,
+        'sample_name'             : args.sample_name,
+        'transcript_fasta'        : args.ref_fasta,
+        'starfusion_file'         : args.starfusion_file,
+        'class_i_epitope_length'  : args.class_i_epitope_length,
+        'class_ii_epitope_length' : args.class_ii_epitope_length,
+        'class_i_hla'             : class_i_alleles,
+        'class_ii_hla'            : class_ii_alleles,
+    }
+
+    pipeline = FusionPipeline(**fusion_arguments)
+    pipeline.execute()
+
     shared_arguments = {
-        'input_file_type'           : 'fasta',
+        'input_file_type'           : 'fusions',
         'sample_name'               : args.sample_name,
         'top_score_metric'          : args.top_score_metric,
         'top_score_metric2'         : args.top_score_metric2,
@@ -184,7 +203,7 @@ def main(args_input = sys.argv[1:]):
     else:
         iedb_mhc_i_executable = None
         iedb_mhc_ii_executable = None
-    
+
     if args.use_normalized_percentiles and species != 'human':
         print("WARNING: Normalized percentiles are only available for human alleles. Option will be ignored.")
         args.use_normalized_percentiles = False
@@ -236,20 +255,20 @@ def main(args_input = sys.argv[1:]):
 
             for epitope_length in epitope_lengths:
                 per_length_run_arguments = copy.deepcopy(run_arguments)
-                (input_file, per_epitope_output_dir) = generate_fasta(args, output_dir, epitope_length)
+                per_epitope_output_dir = os.path.join(output_dir, str(epitope_length))
+                os.makedirs(per_epitope_output_dir, exist_ok=True)
+                input_file = os.path.join(args.output_dir, f'{args.sample_name}.{epitope_length}.fa')
                 if os.path.getsize(input_file) == 0:
                     print("The intermediate FASTA file for epitope length {} is empty. No processable fusions found.")
                     continue
 
                 per_length_run_arguments['input_file']      = input_file
-                per_length_run_arguments['epitope_lengths'] = [epitope_length]
+                per_length_run_arguments['epitope_lengths'] = epitope_length
                 per_length_run_arguments['output_dir']      = per_epitope_output_dir
-                pipeline = PvacbindPipeline(**per_length_run_arguments)
+                pipeline = PvacsplicePipeline(**per_length_run_arguments)
                 pipeline.execute()
-                intermediate_output_file = os.path.join(per_epitope_output_dir, "{}.all_epitopes.tsv".format(args.sample_name))
-                if os.path.exists(intermediate_output_file):
-                    output_file = os.path.join(per_epitope_output_dir, "{}.all_epitopes.final.tsv".format(args.sample_name))
-                    append_columns(intermediate_output_file, "{}.tsv".format(input_file), output_file)
+                output_file = os.path.join(per_epitope_output_dir, "{}.all_epitopes.tsv".format(args.sample_name))
+                if os.path.exists(output_file):
                     output_files.append(output_file)
             if len(output_files) > 0:
                 # copy fasta to output dir
@@ -268,7 +287,7 @@ def main(args_input = sys.argv[1:]):
                 all_epitopes_file = os.path.join(output_dir, "{}.MHC_{}.all_epitopes.tsv".format(args.sample_name,mhc_class))
                 filtered_file = os.path.join(output_dir, "{}.MHC_{}.filtered.tsv".format(args.sample_name,mhc_class))
                 #!!! make below call to create_net_class_report
-                #create_combined_reports(output_files, all_epitopes_file, filtered_file, True, args)
+                create_combined_reports(output_files, all_epitopes_file, filtered_file, True, args)
                 post_processing_params = vars(args).copy()
                 post_processing_params["filename_addition"] = "MHC_{}".format(mhc_class)
                 create_net_class_report(output_files, all_epitopes_file, filtered_file, post_processing_params, run_arguments)

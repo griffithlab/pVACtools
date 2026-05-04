@@ -13,7 +13,7 @@ from Bio.SeqRecord import SeqRecord
 from pvactools.lib.prediction_class import *
 from pvactools.lib.input_file_converter import VcfConverter
 from pvactools.lib.fasta_generator import FastaGenerator, VectorFastaGenerator
-from pvactools.lib.output_parser import DefaultOutputParser, UnmatchedSequencesOutputParser, PvacspliceOutputParser
+from pvactools.lib.output_parser import DefaultOutputParser, UnmatchedSequencesOutputParser, PvacspliceOutputParser, PvacfuseOutputParser
 from pvactools.lib.post_processor import PostProcessor
 from pvactools.lib.run_utils import *
 import pvactools.lib.call_iedb
@@ -37,7 +37,6 @@ class Pipeline(metaclass=ABCMeta):
         #modify the variable that was passed in. Using a copy will prevent this.
         self.prediction_algorithms  = kwargs['prediction_algorithms'].copy()
         self.flurry_state           = self.get_flurry_state()
-        self.starfusion_file        = kwargs.pop('starfusion_file', None)
         self.proximal_variants_file = None
         self.tmp_dir = os.path.join(self.output_dir, 'tmp')
         os.makedirs(self.tmp_dir, exist_ok=True)
@@ -100,6 +99,8 @@ class Pipeline(metaclass=ABCMeta):
             return self.input_file
         elif self.input_file_type == 'junctions':
             return os.path.join(self.junctions_dir, f'{self.sample_name}_combined.tsv')
+        elif self.input_file_type == 'fusions':
+            return os.path.abspath(os.path.join(self.output_dir, '..', '..', f'{self.sample_name}.tsv'))
         else:
             tsv_file = self.sample_name + '.tsv'
             return os.path.join(self.output_dir, tsv_file)
@@ -136,6 +137,7 @@ class Pipeline(metaclass=ABCMeta):
             'pvacvector_input_fasta': 'UnmatchedSequencesOutputParser',
             'fasta': 'UnmatchedSequencesOutputParser',
             'junctions': 'PvacspliceOutputParser',
+            'fusions': 'PvacfuseOutputParser',
         }
         parser_type = parser_types[self.input_file_type]
         parser = getattr(sys.modules[__name__], parser_type)
@@ -676,7 +678,7 @@ class PvacbindPipeline(Pipeline):
         warning_messages = []
         for (split_start, split_end) in chunks:
             tsv_chunk = "%d-%d" % (split_start, split_end)
-            if self.input_file_type == 'fasta' or self.input_file_type == 'junctions':
+            if self.input_file_type in ['fasta', 'junctions', 'fusions']:
                 fasta_chunk = tsv_chunk
             else:
                 fasta_chunk = "%d-%d" % (split_start*2-1, split_end*2)

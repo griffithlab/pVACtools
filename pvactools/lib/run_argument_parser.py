@@ -354,6 +354,10 @@ class RunArgumentParser(metaclass=ABCMeta):
 
     def pvacfuse(self):
         self.parser.add_argument(
+            "ref_fasta",
+            help="A reference CDS FASTA file. Note: this input should match the build and Ensembl version used to create the fusion annotations."
+        )
+        self.parser.add_argument(
             '--starfusion-file',
             help="Path to a star-fusion.fusion_predictions.tsv or star-fusion.fusion_predictions.abridged.tsv to extract "
                  + "read support and expression information from. When running with AGFusion data, both read support and "

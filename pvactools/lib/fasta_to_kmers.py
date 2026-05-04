@@ -4,6 +4,9 @@ import pandas as pd
 import numpy as np
 from pyfaidx import Fasta
 import logging
+from Bio import SeqIO
+from Bio.SeqRecord import SeqRecord
+from Bio.Seq import Seq, translate
 
 from pvactools.lib.run_utils import *
 
@@ -79,24 +82,18 @@ class FastaToKmers:
                     final_kmers[f'WT.{splice_site_name}|{i}'] = final_wt_seq
         return final_kmers
 
+    def prefix(self):
+        return "ALT."
+
     def loop_through_tscripts(self):
-        unique_kmers = {}
+        all_kmers = {}
         # all MT fasta headers
-        alt_fasta_keys = [k for k in self.tscript_fasta.keys() if k.startswith('ALT.')]
+        alt_fasta_keys = [k for k in self.tscript_fasta.keys() if k.startswith(self.prefix())]
         for alt_name in alt_fasta_keys:
-            splice_site_name = alt_name.removeprefix("ALT.")
+            splice_site_name = alt_name.removeprefix(self.prefix())
             # get final mutated kmer list from save_kmer_dicts()
-            final_kmers = self.create_kmer_dict(splice_site_name)
-            if not final_kmers:
-                print(f'No unique kmers found for {splice_site_name}')
-                continue
-            # create master dict of unique kmers: index(es)
-            for index, kmer in final_kmers.items():
-                if kmer not in unique_kmers.keys():
-                    unique_kmers[kmer] = [index]
-                else:
-                    unique_kmers[kmer].append(index)
-        return unique_kmers
+            all_kmers.update(self.create_kmer_dict(splice_site_name))
+        return all_kmers
 
 
     def create_fasta_df(self, kmers_dict):
@@ -108,29 +105,96 @@ class FastaToKmers:
         fasta_df = pd.DataFrame.from_dict(headers_dict) # peptide, name made into a df
         return fasta_df
 
-    def create_epitope_fastas(self, fasta_df):
-        fasta_df['name'] = fasta_df['name'].str.replace(';', '.')
-        # sort the names
-        len_subset = fasta_df.sort_values(by=['name'])
-        # 1 file per kmer length
+    def create_epitope_fasta(self, all_kmers):
+        records = []
+        for index, seq in all_kmers.items():
+            records.append(SeqRecord(Seq(seq), id=index, description=""))
         output_file = f'{self.output_dir}/{self.sample_name}.{self.epitope_length}.fa'
-        # loop over rows in subset df
-        for row in len_subset.itertuples():
-            # fasta entry
-            write_str = f'>{row.name}\n{row.peptide}\n'
-            # don't duplicate entries
-            if os.path.exists(output_file):
-                with open(output_file, "r+") as f:
-                    dup_content = re.search(row.peptide, f.read())
-                    if not dup_content:
-                        f.write(write_str)
-            else:
-                with open(output_file, "w") as e:
-                    e.write(write_str)
+        SeqIO.write(records, output_file, "fasta")
+    #def create_epitope_fastas(self, fasta_df):
+    #    fasta_df['name'] = fasta_df['name'].str.replace(';', '.')
+    #    # sort the names
+    #    len_subset = fasta_df.sort_values(by=['name'])
+    #    # 1 file per kmer length
+    #    output_file = f'{self.output_dir}/{self.sample_name}.{self.epitope_length}.fa'
+    #    # loop over rows in subset df
+    #    for row in len_subset.itertuples():
+    #        # fasta entry
+    #        write_str = f'>{row.name}\n{row.peptide}\n'
+    #        # don't duplicate entries
+    #        if os.path.exists(output_file):
+    #            with open(output_file, "r+") as f:
+    #                dup_content = re.search(row.peptide, f.read())
+    #                if not dup_content:
+    #                    f.write(write_str)
+    #        else:
+    #            with open(output_file, "w") as e:
+    #                e.write(write_str)
 
     def execute(self):
-        unique_kmers = self.loop_through_tscripts()
-        if len(unique_kmers) > 0:
+        all_kmers = self.loop_through_tscripts()
+        if len(all_kmers) > 0:
+            self.create_epitope_fasta(all_kmers)
             # key: peptide value: list of ids
-            fasta_df = self.create_fasta_df(unique_kmers)
-            self.create_epitope_fastas(fasta_df)
+            #fasta_df = self.create_fasta_df(unique_kmers)
+            #self.create_epitope_fastas(fasta_df)
+
+class FusionFastaToKmers(FastaToKmers):
+    def prefix(self):
+        return "MT."
+
+    def create_kmer_dict(self, index):
+        # wt and mut each get kmer dict
+        five_wt_dict = self.create_kmers(f'WT5.{index}')
+        fusion_type = index.rsplit('.', 2)[1]
+        if fusion_type == 'inframe_fusion':
+            three_wt_dict = self.create_kmers(f'WT3.{index}')
+        mut_dict = self.create_kmers(f'MT.{index}')
+
+        final_kmers = {}
+        for i in range(len(mut_dict)):
+            mt_seq = mut_dict[i]
+            if mt_seq in five_wt_dict.values():
+                continue
+            if fusion_type == 'inframe_fusion' and mt_seq in three_wt_dict.values():
+                continue
+
+            min_match = min_match_count(len(mt_seq))
+            if fusion_type == 'frameshift_fusion':
+                if i in five_wt_dict:
+                    five_wt_seq = five_wt_dict[i]
+                    total_match_count = determine_total_matches(mt_seq, five_wt_seq)
+                    if total_match_count >= min_match:
+                        final_wt_seq = five_wt_seq
+                    else:
+                        final_wt_seq = None
+                else:
+                    final_wt_seq = None
+            else:
+                if i in five_wt_dict:
+                    five_wt_seq = five_wt_dict[i]
+                    left_match_count = determine_consecutive_matches_from_left(mt_seq, five_wt_seq)
+                else:
+                    left_match_count = 0
+                alt_i = list(three_wt_dict.keys())[-1] - list(mut_dict.keys())[-1] + i
+                if alt_i in three_wt_dict:
+                    three_wt_seq = three_wt_dict[alt_i]
+                    right_match_count = determine_consecutive_matches_from_right(mt_seq, three_wt_seq)
+                else:
+                    right_match_count = 0
+                if left_match_count >= right_match_count:
+                    wt_seq_to_consider = five_wt_seq
+                else:
+                    wt_seq_to_consider = three_wt_seq
+                total_match_count = determine_total_matches(mt_seq, wt_seq_to_consider)
+                if total_match_count >= min_match:
+                    final_wt_seq = wt_seq_to_consider
+                else:
+                    final_wt_seq = None
+
+            final_kmers[f'MT.{index}|{i}'] = mt_seq
+            if final_wt_seq is not None:
+                final_kmers[f'WT.{index}|{i}'] = final_wt_seq
+
+        return final_kmers
+
