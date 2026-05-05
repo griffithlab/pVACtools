@@ -250,7 +250,7 @@ class PvacfuseTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
                 transcripts_with_same_epitopes = defaultdict(list)
                 for transcript, transcript_lines in groupby(lines, key = itemgetter('Index')):
                     transcript_lines = list(transcript_lines)
-                    epitopes = ','.join(sorted([x['Epitope Seq'] for x in transcript_lines]))
+                    epitopes = ','.join(sorted([x['MT Epitope Seq'] for x in transcript_lines]))
                     transcripts_with_same_epitopes[epitopes].append(transcript)
                 for transcripts in transcripts_with_same_epitopes.values():
                     transcript_set_lines = [x for x in lines if x['Index'] in transcripts]
@@ -271,7 +271,7 @@ class PvacfuseTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
     def find_best_line(self, lines):
         df = pd.DataFrame(lines)
         df.replace("NA", np.nan, inplace=True)
-        df = df.astype({"{} IC50 Score".format(self.formatted_top_score_metric):'float'})
+        df = df.astype({"{} MT IC50 Score".format(self.formatted_top_score_metric):'float'})
         return PvacfuseBestCandidate(
             self.top_score_metric,
             self.top_score_metric2,

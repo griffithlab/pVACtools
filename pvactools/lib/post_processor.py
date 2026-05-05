@@ -275,7 +275,7 @@ class PostProcessor:
     def calculate_reference_proteome_similarity(self):
         if self.run_reference_proteome_similarity:
             print("Calculating Reference Proteome Similarity")
-            if self.file_type in ['pVACseq', 'pVACsplice']:
+            if self.file_type in ['pVACseq', 'pVACsplice', 'pVACfuse']:
                 aggregate_metrics_file = self.aggregate_report.replace('.tsv', '.metrics.json')
                 CalculateReferenceProteomeSimilarity(
                     self.aggregate_report,

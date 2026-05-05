@@ -23,7 +23,7 @@ class NetMHCStab:
     def __init__(self, input_file, output_file, file_type='pVACseq', top_score_metric='median', top_score_metric2=["ic50"]):
         self.input_file = input_file
         self.output_file = output_file
-        if file_type in ['pVACseq', 'pVACsplice']:
+        if file_type in ['pVACseq', 'pVACsplice', 'pVACfuse']:
             self.epitope_seq_column_name = 'MT Epitope Seq'
         else:
             self.epitope_seq_column_name = 'Epitope Seq'

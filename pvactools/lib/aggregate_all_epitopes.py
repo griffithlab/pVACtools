@@ -952,7 +952,7 @@ class PvacfuseAggregateAllEpitopes(MatchedSequenceAggregateAllEpitopes, metaclas
             return 'INFRAME-NA'
 
     def assemble_result_line(self, best, key, hla, anno_count, included_peptide_count, good_binder_count):
-        out_dict = { 'ID': key }
+        out_dict = { 'ID': key, 'Index': best['Index'] }
         out_dict.update({ k.replace('HLA-', ''):v for k,v in sorted(hla.items()) })
         gene = best['Gene Name'] if 'Gene Name' in best else 'NA'
         transcript = best['Transcript'] if 'Transcript' in best else 'NA'
