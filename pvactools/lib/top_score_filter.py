@@ -361,7 +361,7 @@ class PvacspliceTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
     def find_best_line(self, lines):
         df = pd.DataFrame(lines)
         df.replace("NA", np.nan, inplace=True)
-        df = df.astype({"{} IC50 Score".format(self.formatted_top_score_metric):'float'})
+        df = df.astype({"{} MT IC50 Score".format(self.formatted_top_score_metric):'float'})
         return PvacspliceBestCandidate(
             self.transcript_prioritization_strategy,
             self.maximum_transcript_support_level,

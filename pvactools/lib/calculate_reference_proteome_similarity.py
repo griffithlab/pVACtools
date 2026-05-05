@@ -302,28 +302,25 @@ class CalculateReferenceProteomeSimilarity:
             wt_peptide = None
         elif self.file_type == 'pVACsplice':
             if self._input_tsv_type(line) == 'aggregated':
-                identifier = line['ID']
                 epitope = line['Best Peptide']
-                subpeptide_position = int(line['Pos'])
+                (rest_record_id, variant_type) = line['Index'].rsplit(".", 1)
             else:
-                identifier = line['Index']
-                epitope = line['Epitope Seq']
-                subpeptide_position = int(line['Protein Position'])
+                epitope = line['MT Epitope Seq']
+                variant_type = line['Variant Type']
+            identifier = line['Index']
             if identifier in mt_records_dict and identifier in wt_records_dict:
+                full_peptide = mt_records_dict[identifier]
                 wt_peptide = wt_records_dict[identifier]
-                mt_peptide = mt_records_dict[identifier]
             else:
                 logging.warning("Record {} not found in input FASTA. Skipping.".format(identifier))
                 return None, None, None
-            _, frameshift_status = identifier.rsplit('.', 1)
-            if frameshift_status == 'inframe_splice_site':
-                peptide = get_mutated_peptide_with_flanking_sequence(wt_peptide, mt_peptide, self.match_length-1)
-            elif frameshift_status == 'frameshift_splice_site':
-                peptide = get_mutated_frameshift_peptide_with_flanking_sequence(wt_peptide, mt_peptide, self.match_length-1)
+
+            # get peptide
+            subpeptide_position = full_peptide.index(epitope)
+            if variant_type == 'frameshift_splice_site':
+                peptide = self.extract_n_mer_from_fs(full_peptide, wt_peptide, epitope, subpeptide_position)
             else:
-                raise Exception("Unexpected frameshift status {} for record {}. Skipping".format(frameshift_status, identifier))
-            full_peptide = peptide
-            wt_peptide = None
+                peptide = self.extract_n_mer(full_peptide, wt_peptide)
         else:
             if self._input_tsv_type(line) == 'aggregated':
                 epitope = line['Best Peptide']
