@@ -259,7 +259,7 @@ def metrics_to_column(tool, metric1, metric2):
         'presentation_percentile': 'Presentation Percentile'
     }
 
-    if tool in ['pvacseq', 'pvacsplice']:
+    if tool in ['pvacseq', 'pvacsplice', 'pvacfuse']:
         return f"{pretty_metric1[metric1]} MT {pretty_metric2[metric2]}"
     else:
         return f"{pretty_metric1[metric1]} {pretty_metric2[metric2]}"

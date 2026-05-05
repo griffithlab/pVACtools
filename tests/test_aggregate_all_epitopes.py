@@ -186,15 +186,20 @@ class AggregateAllEpitopesTests(unittest.TestCase):
         ))
 
         metrics_file = output_file.name.replace('.tsv', '.metrics.json')
-        self.assertFalse(os.path.isfile(metrics_file))
+        self.assertTrue(cmp(
+            metrics_file,
+            os.path.join(self.test_data_dir, "output.pvacfuse.metrics.json"),
+        ))
 
         for i in self.pvacview_r_files:
             pvacview_file = os.path.join(os.path.dirname(output_file.name), i)
-            self.assertFalse(os.path.isfile(pvacview_file))
+            self.assertTrue(os.path.isfile(pvacview_file))
+            os.remove(pvacview_file)
 
         for i in ["anchor.jpg", "pVACview_logo.png", "pVACview_logo_mini.png"]:
             pvacview_file = os.path.join(os.path.dirname(output_file.name), "www", i)
-            self.assertFalse(os.path.isfile(pvacview_file))
+            self.assertTrue(os.path.isfile(pvacview_file))
+            os.remove(pvacview_file)
 
     def test_aggregate_all_epitopes_pvacbind_runs_and_produces_expected_output(self):
         self.assertTrue(py_compile.compile(self.executable))
