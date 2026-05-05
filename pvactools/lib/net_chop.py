@@ -86,7 +86,7 @@ class NetChop:
                     sequence_id = ('%010x'%x)[-10:]
                     staging_file.write('>'+sequence_id+'\n')
                     index = line['Index']
-                    if self.file_type == 'pVACseq':
+                    if self.file_type in ['pVACseq', 'pVACsplice']:
                         epitope = line['MT Epitope Seq']
                     else:
                         epitope = line['Epitope Seq']

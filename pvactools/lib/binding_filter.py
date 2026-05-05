@@ -41,7 +41,7 @@ class BindingFilter:
             writer.writeheader()
 
             for entry in reader:
-                if self.file_type in ['pVACbind', 'pVACfuse', 'pVACsplice']:
+                if self.file_type in ['pVACbind', 'pVACfuse']:
                     if self.top_score_metric == 'median':
                         score = entry['Median IC50 Score']
                         binding_percentile = entry['Median IC50 Percentile']
