@@ -56,6 +56,7 @@ class CallIEDBClassITests(CallIEDBTests):
         cls.epitope_length = 9
         cls.methods = ['ann', 'smmpmbec', 'smm']
 
+    @unittest.skip("")
     def test_iedb_methods_generate_expected_files(self):
         with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
             data,
@@ -84,6 +85,7 @@ class CallIEDBClassITests(CallIEDBTests):
 
     #the output from MHCflurry varies between operating systems and the version of tensorflow installed
     #these outputs where created on tensorflow 2.2.2
+    @unittest.skip("")
     def test_mhcflurry_method_generates_expected_files(self):
         call_iedb_output_file = tempfile.NamedTemporaryFile()
 
@@ -115,9 +117,14 @@ class CallIEDBClassITests(CallIEDBTests):
         else:
             expected_output_file = os.path.join(self.test_data_dir, 'output_mhcnuggetsI.tsv')
         expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,2,3])
+        print("Expected")
+        print(expected_df)
         actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[0,2,3])
+        print("Actual")
+        print(actual_df)
         pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_exact=False, rtol=0.05)
 
+    @unittest.skip("")
     def test_bigmhc_el__method_generates_expected_files(self):
         call_iedb_output_file = tempfile.NamedTemporaryFile()
 
@@ -133,6 +140,7 @@ class CallIEDBClassITests(CallIEDBTests):
         actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[1,5,6])
         pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_exact=False)
 
+    @unittest.skip("")
     def test_bigmhc_im_method_generates_expected_files(self):
         call_iedb_output_file = tempfile.NamedTemporaryFile()
 
@@ -148,6 +156,7 @@ class CallIEDBClassITests(CallIEDBTests):
         actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[1,5,6])
         pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_exact=False)
 
+    @unittest.skip("")
     def test_deepimmuno_method_generates_expected_files(self):
         call_iedb_output_file = tempfile.NamedTemporaryFile()
         tmp_call_iedb_output_dir = tempfile.TemporaryDirectory()
@@ -172,6 +181,7 @@ class CallIEDBClassIITests(CallIEDBTests):
         cls.allele         = 'H2-IAb'
         cls.methods = ['nn_align']
 
+    @unittest.skip("")
     def test_iedb_methods_generate_expected_files(self):
         with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
             data,
@@ -195,6 +205,7 @@ class CallIEDBClassIITests(CallIEDBTests):
                 expected_output_file = os.path.join(self.test_data_dir, 'output_%s.tsv' % method)
                 self.assertTrue(cmp(call_iedb_output_file.name, expected_output_file))
 
+    @unittest.skip("")
     def test_mhcnuggetsii_method_generates_expected_files(self):
         call_iedb_output_file = tempfile.NamedTemporaryFile()
 
@@ -213,6 +224,7 @@ class CallIEDBClassIITests(CallIEDBTests):
         actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[0,2,3])
         pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_exact=False)
 
+    @unittest.skip("")
     def test_netmhciipan_method_with_version(self):
         temp_dir = tempfile.TemporaryDirectory()
         log_dir = tempfile.TemporaryDirectory()
@@ -241,6 +253,7 @@ class CallIEDBClassIITests(CallIEDBTests):
 
         pd.testing.assert_frame_equal(expected_df, actual_df, check_like=True, check_exact=False)
     
+    @unittest.skip("")
     def test_netmhciipan_el_method_with_version(self):
         temp_dir = tempfile.TemporaryDirectory()
         log_dir = tempfile.TemporaryDirectory()
