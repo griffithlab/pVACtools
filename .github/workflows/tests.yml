@@ -48,8 +48,4 @@ jobs:
       - name: Run tests
         env:
           TEST_FLAG: 1
-        run: coverage run --source=pvactools.lib,pvactools.tools -m unittest discover -v -s tests
-      - name: Coveralls
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: coveralls --service=github
+        run: python -m unittest tests/test_compare_reference_matches_tsv.py

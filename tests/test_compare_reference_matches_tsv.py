@@ -115,4 +115,9 @@ class TestRunCompareReferenceMatchesTSV(unittest.TestCase):
         expected_output.pop("input_file1", None)
         expected_output.pop("input_file2", None)
 
+        print("Actual output:")
+        print(output_json_data)
+        print("Expected output:")
+        print(expected_output)
+
         self.assertEqual(output_json_data, expected_output)
