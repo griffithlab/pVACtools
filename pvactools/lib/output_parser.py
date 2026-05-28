@@ -49,7 +49,7 @@ class OutputParser(metaclass=ABCMeta):
     def __init__(self, **kwargs):
         self.input_iedb_files        = kwargs['input_iedb_files']
         self.input_tsv_file          = kwargs['input_tsv_file']
-        self.key_file                = kwargs['key_file']
+        self.key_files               = kwargs['key_files']
         self.output_file             = kwargs['output_file']
         self.sample_name             = kwargs['sample_name']
         self.add_sample_name         = kwargs.get('add_sample_name_column')
@@ -57,6 +57,8 @@ class OutputParser(metaclass=ABCMeta):
         self.use_normalized_percentiles = kwargs.get('use_normalized_percentiles', False)
         self.reference_scores_path   = kwargs.get('reference_scores_path', None)
         self.reference_scores        = {}
+        self.pipeline_type           = kwargs.get('pipeline_type', None)
+        self.input_file_type         = kwargs.get('input_file_type')
 
     def parse_input_tsv_file(self):
         with open(self.input_tsv_file, 'r') as reader:
@@ -1090,12 +1092,16 @@ class OutputParser(metaclass=ABCMeta):
 class DefaultOutputParser(OutputParser):
 
     def parse_iedb_file(self, tsv_entries):
-        with open(self.key_file, 'r') as key_file_reader:
-            protein_identifiers_from_label = yaml.load(key_file_reader, Loader=yaml.FullLoader)
+        protein_identifiers_from_label = {}
+        for key_file in self.key_files:
+            with open(key_file, 'r') as key_file_reader:
+                chunk = key_file.rsplit('.', 2)[1].split('_')[1]
+                protein_identifiers_from_label[chunk] = yaml.load(key_file_reader, Loader=yaml.FullLoader)
         iedb_results = {}
         wt_iedb_results = {}
         for input_iedb_file in self.input_iedb_files:
             with open(input_iedb_file, 'r') as reader:
+                chunk = input_iedb_file.rsplit('_', 1)[1]
                 iedb_tsv_reader = csv.DictReader(reader, delimiter='\t')
                 filename = os.path.basename(input_iedb_file)
 
@@ -1118,8 +1124,8 @@ class DefaultOutputParser(OutputParser):
                     allele         = line['allele']
                     peptide_length = len(epitope)
 
-                    if protein_identifiers_from_label[protein_label] is not None:
-                        protein_identifiers = protein_identifiers_from_label[protein_label]
+                    if protein_identifiers_from_label[chunk][protein_label] is not None:
+                        protein_identifiers = protein_identifiers_from_label[chunk][protein_label]
 
                     for protein_identifier in protein_identifiers:
                         (protein_type, tsv_index) = protein_identifier.split('.', 1)
@@ -1152,11 +1158,21 @@ class DefaultOutputParser(OutputParser):
 
 class UnmatchedSequencesOutputParser(OutputParser):
     def parse_iedb_file(self):
-        with open(self.key_file, 'r') as key_file_reader:
-            tsv_indices_from_label = yaml.load(key_file_reader, Loader=yaml.FullLoader)
+        protein_identifiers_from_label = {}
+        for key_file in self.key_files:
+            with open(key_file, 'r') as key_file_reader:
+                if self.input_file_type == 'pvacvector_input_fasta':
+                    chunk = 1
+                else:
+                    chunk = key_file.rsplit('.', 2)[1].split('_')[1]
+                protein_identifiers_from_label[chunk] = yaml.load(key_file_reader, Loader=yaml.FullLoader)
         iedb_results = {}
         for input_iedb_file in self.input_iedb_files:
             with open(input_iedb_file, 'r') as reader:
+                if self.input_file_type == 'pvacvector_input_fasta':
+                    chunk = 1
+                else:
+                    chunk = input_iedb_file.rsplit('_', 1)[1]
                 iedb_tsv_reader = csv.DictReader(reader, delimiter='\t')
                 filename = os.path.basename(input_iedb_file)
 
@@ -1179,8 +1195,8 @@ class UnmatchedSequencesOutputParser(OutputParser):
                     allele         = line['allele']
                     peptide_length = len(epitope)
 
-                    if tsv_indices_from_label[protein_label] is not None:
-                        tsv_indices = tsv_indices_from_label[protein_label]
+                    if protein_identifiers_from_label[chunk][protein_label] is not None:
+                        tsv_indices = protein_identifiers_from_label[chunk][protein_label]
 
                     for index in tsv_indices:
                         key = '|'.join([index, position])
@@ -1353,13 +1369,17 @@ class UnmatchedSequencesOutputParser(OutputParser):
 class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
     def parse_iedb_file(self):
         # input key file
-        with open(self.key_file, 'r') as key_file_reader:
-            protein_identifiers_from_label = yaml.load(key_file_reader, Loader=yaml.FullLoader)
+        protein_identifiers_from_label = {}
+        for key_file in self.key_files:
+            with open(key_file, 'r') as key_file_reader:
+                chunk = key_file.rsplit('.', 2)[1].split('_')[1]
+                protein_identifiers_from_label[chunk] = yaml.load(key_file_reader, Loader=yaml.FullLoader)
         # final output
         iedb_results = {}
         for input_iedb_file in self.input_iedb_files:
             # input iedb file
             with open(input_iedb_file, 'r') as reader:
+                chunk = input_iedb_file.rsplit('_', 1)[1]
                 iedb_tsv_reader = csv.DictReader(reader, delimiter='\t')
                 filename = os.path.basename(input_iedb_file)
                 pattern = re.compile(rf"{re.escape(self.sample_name)}\.(\w+(?:-\d+\.\d+)?)")
@@ -1376,9 +1396,9 @@ class PvacspliceOutputParser(UnmatchedSequencesOutputParser):
                     peptide_length = len(epitope)
                     scores         = self.get_scores(line, method)
                     # get fasta_id/combined_name from fasta key file
-                    if protein_identifiers_from_label[fasta_label] is not None:
+                    if protein_identifiers_from_label[chunk][fasta_label] is not None:
                         # comma-separated string (1 or more ids) as 1 entry in list
-                        protein_label = protein_identifiers_from_label[fasta_label][0]
+                        protein_label = protein_identifiers_from_label[chunk][fasta_label][0]
                         # one index at a time
                         for key in protein_label.split(','):
 

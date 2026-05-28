@@ -434,7 +434,7 @@ class VectorFastaGenerator():
                     continue
                 fasta_sequences.setdefault(sequence, []).append(seq_id)
 
-            output_file = "{}.{}.tsv".format(self.output_file_prefix, length)
+            output_file = "{}.{}.fa".format(self.output_file_prefix, length)
             self.output_files.append(output_file)
             output_key_file = "{}.key".format(output_file)
             writer = open(output_file, 'w')

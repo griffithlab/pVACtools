@@ -117,7 +117,7 @@ class PvacfuseTests(unittest.TestCase):
 
             for file_name in (
                 'sample.name.ann.HLA-A*29:02.9.tsv_1-44',
-                'sample.name.HLA-A*29:02.9.parsed.tsv_1-44',
+                'sample.name.HLA-A*29:02.9.parsed.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', '9', 'tmp', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', '9', 'tmp', file_name.replace('sample.name', 'Test'))
@@ -162,7 +162,7 @@ class PvacfuseTests(unittest.TestCase):
 
             for file_name in (
                 'sample.name.ann.HLA-A*29:02.9.tsv_1-30',
-                'sample.name.HLA-A*29:02.9.parsed.tsv_1-30',
+                'sample.name.HLA-A*29:02.9.parsed.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', '9', 'tmp', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'fusions_agfusion_starfusion', 'MHC_Class_I', '9', 'tmp', file_name.replace('sample.name', 'Test'))
