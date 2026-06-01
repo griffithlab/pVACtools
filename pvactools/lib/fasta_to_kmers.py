@@ -96,48 +96,17 @@ class FastaToKmers:
         return all_kmers
 
 
-    def create_fasta_df(self, kmers_dict):
-        # joined indexes for each unique kmer - to format for df since lists are dif sizes
-        fasta_info = {k:','.join(sorted(v)) for k,v in kmers_dict.items()}
-        # add header cols
-        headers_dict = {'peptide': fasta_info.keys(), 'name': fasta_info.values()} # maybe sort here before turned into df
-        # convert to df
-        fasta_df = pd.DataFrame.from_dict(headers_dict) # peptide, name made into a df
-        return fasta_df
-
     def create_epitope_fasta(self, all_kmers):
         records = []
         for index, seq in all_kmers.items():
             records.append(SeqRecord(Seq(seq), id=index, description=""))
         output_file = f'{self.output_dir}/{self.sample_name}.{self.epitope_length}.fa'
         SeqIO.write(records, output_file, "fasta")
-    #def create_epitope_fastas(self, fasta_df):
-    #    fasta_df['name'] = fasta_df['name'].str.replace(';', '.')
-    #    # sort the names
-    #    len_subset = fasta_df.sort_values(by=['name'])
-    #    # 1 file per kmer length
-    #    output_file = f'{self.output_dir}/{self.sample_name}.{self.epitope_length}.fa'
-    #    # loop over rows in subset df
-    #    for row in len_subset.itertuples():
-    #        # fasta entry
-    #        write_str = f'>{row.name}\n{row.peptide}\n'
-    #        # don't duplicate entries
-    #        if os.path.exists(output_file):
-    #            with open(output_file, "r+") as f:
-    #                dup_content = re.search(row.peptide, f.read())
-    #                if not dup_content:
-    #                    f.write(write_str)
-    #        else:
-    #            with open(output_file, "w") as e:
-    #                e.write(write_str)
 
     def execute(self):
         all_kmers = self.loop_through_tscripts()
         if len(all_kmers) > 0:
             self.create_epitope_fasta(all_kmers)
-            # key: peptide value: list of ids
-            #fasta_df = self.create_fasta_df(unique_kmers)
-            #self.create_epitope_fastas(fasta_df)
 
 class FusionFastaToKmers(FastaToKmers):
     def prefix(self):

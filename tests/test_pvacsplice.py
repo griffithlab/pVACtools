@@ -130,6 +130,7 @@ class PvacspliceTests(unittest.TestCase):
                 '--problematic-amino-acids', 'C',
                 '-b', '2000',
                 '--maximum-transcript-support-level', '3',
+                '--fasta-size', '400'
             ])
 
             close_mock_fhs()
@@ -178,10 +179,10 @@ class PvacspliceTests(unittest.TestCase):
             for method in methods.keys():
                 for allele in methods[method].keys():
                     mock_request.assert_has_calls([
-                        generate_class_i_call(method, allele, 9, os.path.join(output_dir.name, "MHC_Class_I", "MHC_Class_I_9", "tmp", "HCC1395_TUMOR_DNA.9.fa.split_1-60"))
+                        generate_class_i_call(method, allele, 9, os.path.join(output_dir.name, "MHC_Class_I", "MHC_Class_I_9", "tmp", "HCC1395_TUMOR_DNA.9.fa.split_1-190"))
                     ])
                     mock_request.assert_has_calls([
-                        generate_class_i_call(method, allele, 10, os.path.join(output_dir.name, "MHC_Class_I", "MHC_Class_I_10", "tmp", "HCC1395_TUMOR_DNA.10.fa.split_1-65"))
+                        generate_class_i_call(method, allele, 10, os.path.join(output_dir.name, "MHC_Class_I", "MHC_Class_I_10", "tmp", "HCC1395_TUMOR_DNA.10.fa.split_1-210"))
                     ])
 
             with self.assertRaises(SystemExit) as cm:
@@ -245,6 +246,7 @@ class PvacspliceTests(unittest.TestCase):
                 '--problematic-amino-acids', 'C',
                 '--maximum-transcript-support-level', '3',
                 '-b', '2000',
+                '--fasta-size', '400'
             ])
 
             close_mock_fhs()
@@ -290,7 +292,7 @@ class PvacspliceTests(unittest.TestCase):
                 self.assertTrue(cmp(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
 
             mock_request.assert_has_calls([
-                generate_class_ii_call('nn_align', 'DRB1*11:01', 15, os.path.join(output_dir.name, "MHC_Class_II", "MHC_Class_II_15", "tmp", "HCC1395_TUMOR_DNA.15.fa.split_1-85"))
+                generate_class_ii_call('nn_align', 'DRB1*11:01', 15, os.path.join(output_dir.name, "MHC_Class_II", "MHC_Class_II_15", "tmp", "HCC1395_TUMOR_DNA.15.fa.split_1-298"))
             ])
 
             output_dir.cleanup()
@@ -324,6 +326,7 @@ class PvacspliceTests(unittest.TestCase):
                 '-g',
                 '--maximum-transcript-support-level', '3',
                 '-b', '2000',
+                '--fasta-size', '400'
             ])
 
             for file_name in (

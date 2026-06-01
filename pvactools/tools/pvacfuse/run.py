@@ -17,7 +17,7 @@ from pvactools.lib.prediction_class_utils import *
 def define_parser():
     return PvacfuseRunArgumentParser().parser
 
-def create_net_class_report(files, all_epitopes_output_file, filtered_report_file, post_processing_params, run_params):
+def create_per_class_report(files, all_epitopes_output_file, filtered_report_file, post_processing_params, run_params):
     for file_name in files:
         if not os.path.exists(file_name):
             print("File {} doesn't exist. Aborting.".format(file_name))
@@ -286,11 +286,9 @@ def main(args_input = sys.argv[1:]):
                     run_arguments['net_chop_fasta'] = net_chop_fasta
                 all_epitopes_file = os.path.join(output_dir, "{}.MHC_{}.all_epitopes.tsv".format(args.sample_name,mhc_class))
                 filtered_file = os.path.join(output_dir, "{}.MHC_{}.filtered.tsv".format(args.sample_name,mhc_class))
-                #!!! make below call to create_net_class_report
-                create_combined_reports(output_files, all_epitopes_file, filtered_file, True, args)
                 post_processing_params = vars(args).copy()
                 post_processing_params["filename_addition"] = "MHC_{}".format(mhc_class)
-                create_net_class_report(output_files, all_epitopes_file, filtered_file, post_processing_params, run_arguments)
+                create_per_class_report(output_files, all_epitopes_file, filtered_file, post_processing_params, run_arguments)
             else:
                 print("\nNo processable fusions found. Aborting.\n")
         elif len(prediction_algorithms) == 0:

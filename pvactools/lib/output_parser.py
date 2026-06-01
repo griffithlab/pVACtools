@@ -1399,9 +1399,9 @@ class PvacspliceOutputParser(DefaultOutputParser):
                     # get fasta_id/combined_name from fasta key file
                     if protein_identifiers_from_label[chunk][fasta_label] is not None:
                         # comma-separated string (1 or more ids) as 1 entry in list
-                        protein_label = protein_identifiers_from_label[chunk][fasta_label][0]
+                        protein_labels = protein_identifiers_from_label[chunk][fasta_label]
                         # one index at a time
-                        for key in protein_label.split(','):
+                        for key in protein_labels:
                             (protein_type, rest) = key.split('.', 1)
                             (tsv_index, position) = rest.rsplit('|', 1)
                             if protein_type in ['ALT', 'MT']:
@@ -1648,65 +1648,6 @@ class PvacspliceOutputParser(DefaultOutputParser):
         os.replace(tmp_output_file, self.output_file)
 
 class PvacfuseOutputParser(PvacspliceOutputParser):
-    def parse_iedb_file(self, tsv_entries=None):
-        # input key file
-        protein_identifiers_from_label = {}
-        for key_file in self.key_files:
-            with open(key_file, 'r') as key_file_reader:
-                chunk = key_file.rsplit('.', 2)[1].split('_')[1]
-                protein_identifiers_from_label[chunk] = yaml.load(key_file_reader, Loader=yaml.FullLoader)
-        # final output
-        iedb_results = {}
-        wt_iedb_results = {}
-        for input_iedb_file in self.input_iedb_files:
-            # input iedb file
-            with open(input_iedb_file, 'r') as reader:
-                chunk = input_iedb_file.rsplit('_', 1)[1]
-                iedb_tsv_reader = csv.DictReader(reader, delimiter='\t')
-                filename = os.path.basename(input_iedb_file)
-                pattern = re.compile(rf"{re.escape(self.sample_name)}\.(\w+(?:-\d+\.\d+)?)")
-                match = pattern.match(filename)
-                method = match.group(1)
-
-                # header: allele, seq_num, start, end, length, peptide, ic50, percentile_rank
-                for line in iedb_tsv_reader:
-                    if "Warning: Potential DNA sequence(s)" in line['allele']:
-                        continue
-                    allele         = line['allele']
-                    fasta_label    = int(line['seq_num'])
-                    epitope        = line['peptide']
-                    peptide_length = len(epitope)
-                    scores         = self.get_scores(line, method)
-                    # get fasta_id/combined_name from fasta key file
-                    if protein_identifiers_from_label[chunk][fasta_label] is not None:
-                        # comma-separated string (1 or more ids) as 1 entry in list
-                        protein_labels = protein_identifiers_from_label[chunk][fasta_label]
-                        # one index at a time
-                        for key in protein_labels:
-                            (protein_type, rest) = key.split('.', 1)
-                            (tsv_index, position) = rest.rsplit('|', 1)
-                            if protein_type in ['ALT', 'MT']:
-                                if rest not in iedb_results:
-                                    iedb_results[rest]                   = {}
-                                    iedb_results[rest]['mt_scores']      = {}
-                                    iedb_results[rest]['mt_epitope_seq'] = epitope
-                                    iedb_results[rest]['fasta_id']       = fasta_label
-                                    iedb_results[rest]['tsv_index']      = tsv_index
-                                    iedb_results[rest]['allele']         = allele
-                                    iedb_results[rest]['peptide_length'] = peptide_length
-                                    iedb_results[rest]['position']       = int(position) + 1
-                                iedb_results[rest]['mt_scores'].update(scores)
-                            else:
-                                if tsv_index not in wt_iedb_results:
-                                    wt_iedb_results[tsv_index] = {}
-                                if position not in wt_iedb_results[tsv_index]:
-                                    wt_iedb_results[tsv_index][position] = {}
-                                    wt_iedb_results[tsv_index][position]['wt_scores'] = {}
-                                wt_iedb_results[tsv_index][position]['wt_epitope_seq'] = epitope
-                                wt_iedb_results[tsv_index][position]['wt_scores'].update(scores)
-
-        return self.match_wildtype_and_mutant_entries(iedb_results, wt_iedb_results)
-
     def base_headers(self):
         return[
             'Chromosome',

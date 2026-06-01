@@ -104,6 +104,7 @@ class PvacfuseTests(unittest.TestCase):
                 '--keep-tmp-files',
                 '--run-reference-proteome-similarity',
                 '--peptide-fasta', self.peptide_fasta,
+                '--fasta-size', '600',
             ])
             close_mock_fhs()
 
@@ -119,7 +120,7 @@ class PvacfuseTests(unittest.TestCase):
                 self.assertTrue(compare(output_file, expected_file),  "files don't match %s - %s" %(output_file, expected_file))
 
             for file_name in (
-                'sample.name.ann.HLA-A*29:02.9.tsv_1-44',
+                'sample.name.ann.HLA-A*29:02.9.tsv_1-594',
                 'sample.name.HLA-A*29:02.9.parsed.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', '9', 'tmp', file_name)
@@ -127,7 +128,7 @@ class PvacfuseTests(unittest.TestCase):
                 self.assertTrue(compare(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
 
             mock_request.assert_has_calls([
-                generate_class_i_call('ann', 'HLA-A*29:02', 9, os.path.join(output_dir.name, "MHC_Class_I", "9", "tmp", "sample.name.9.fa.split_1-44"))
+                generate_class_i_call('ann', 'HLA-A*29:02', 9, os.path.join(output_dir.name, "MHC_Class_I", "9", "tmp", "sample.name.9.fa.split_1-594"))
             ])
 
             output_dir.cleanup()
@@ -147,9 +148,11 @@ class PvacfuseTests(unittest.TestCase):
                 'HLA-A*29:02',
                 'NetMHC',
                 output_dir.name,
+                self.unzipped_transcript_fasta,
                 '-e1', '9',
                 '--keep-tmp-files',
-                '--starfusion-file', os.path.join(self.test_data_directory, 'star-fusion.fusion_predictions.abridged.tsv')
+                '--starfusion-file', os.path.join(self.test_data_directory, 'star-fusion.fusion_predictions.abridged.tsv'),
+                '--fasta-size', '600',
             ])
             close_mock_fhs()
 
@@ -164,7 +167,7 @@ class PvacfuseTests(unittest.TestCase):
                 self.assertTrue(compare(output_file, expected_file),  "files don't match %s - %s" %(output_file, expected_file))
 
             for file_name in (
-                'sample.name.ann.HLA-A*29:02.9.tsv_1-30',
+                'sample.name.ann.HLA-A*29:02.9.tsv_1-430',
                 'sample.name.HLA-A*29:02.9.parsed.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', '9', 'tmp', file_name)
@@ -188,7 +191,9 @@ class PvacfuseTests(unittest.TestCase):
                 'HLA-A*29:02',
                 'NetMHC',
                 output_dir.name,
+                self.unzipped_transcript_fasta,
                 '-e1', '9',
+                '--fasta-size', '2000',
             ])
             close_mock_fhs()
 
@@ -219,12 +224,14 @@ class PvacfuseTests(unittest.TestCase):
                 'HLA-A*29:02,DRB1*11:01',
                 'NetMHC', 'NNalign',
                 output_dir.name,
+                self.unzipped_transcript_fasta,
                 '-e1', '9',
                 '-e2', '15',
                 '--top-score-metric=lowest',
                 '--keep-tmp-files',
                 '--run-reference-proteome-similarity',
                 '--peptide-fasta', self.peptide_fasta,
+                '--fasta-size', '800',
             ])
             close_mock_fhs()
 
