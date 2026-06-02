@@ -414,10 +414,6 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             self.mt_top_score_metric = "Best"
             self.wt_top_score_metric = "Corresponding"
         self.top_score_metric2 = top_score_metric2
-        if self.top_score_metric2 == "percentile":
-            self.top_score_mode = "Percentile"
-        else:
-            self.top_score_mode = "IC50 Score"
         self.metrics_file = output_file.replace('.tsv', '.metrics.json')
         super().__init__()
         self.anchor_calculator = AnchorResiduePass(binding_threshold, self.use_allele_specific_binding_thresholds, self.allele_specific_binding_thresholds, allele_specific_anchors, anchor_contribution_threshold, self.wt_top_score_metric)
@@ -500,41 +496,14 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
         return good_binders
 
     def sort_included_df(self, df):
-        df['biotype_sort'] = df['Biotype'].apply(lambda x: 1 if x == 'protein_coding' else 2)
-        df['tsl_sort'] = df['Transcript Support Level'].apply(lambda x: 6 if pd.isnull(x) or x == 'Not Supported' else int(x))
-        df['anchor_residue_pass_sort'] = df.apply(lambda x: 1 if self.anchor_calculator.is_anchor_residue_pass(x) else 2, axis=1)
-
-        sort_columns = ["biotype_sort", "tsl_sort", "anchor_residue_pass_sort"]
-        sort_order = [True, True, True]
-
-        if self.allow_incomplete_transcripts:
-            df['transcript_cds_flags_sort'] = df['Transcript CDS Flags'].apply(lambda x: 1 if x == "None" else (2 if any(flag in str(x) for flag in ["cds_start_nf", "cds_end_nf"]) else 1))
-            sort_columns.append('transcript_cds_flags_sort')
-            sort_order.append(True)
-
-        if self.problematic_positions_exist():
-            df['problematic_positions_sort'] = df['Problematic Positions'].apply(lambda x: 1 if x == "None" else 2)
-            sort_columns.append('problematic_positions_sort')
-            sort_order.append(True)
-
-        #TODO update
-        if self.top_score_mode == 'IC50 Score':
-            primary = "{} MT IC50 Score".format(self.mt_top_score_metric)
-            secondary = "{} MT Percentile".format(self.mt_top_score_metric)
-        else:
-            primary = "{} MT Percentile".format(self.mt_top_score_metric)
-            secondary = "{} MT IC50 Score".format(self.mt_top_score_metric)
-        sort_columns.extend([primary, "Transcript Length", secondary])
-        sort_order.extend([True, False, True])
-        df.sort_values(by=sort_columns, inplace=True, ascending=sort_order)
-        df.drop(columns=[
-            'biotype_sort',
-            'tsl_sort',
-            'anchor_residue_pass_sort',
-            'transcript_cds_flags_sort',
-            'problematic_positions_sort'
-        ], inplace=True, errors='ignore')
-        return df
+        return PvacseqBestCandidate(
+            self.transcript_prioritization_strategy,
+            self.maximum_transcript_support_level,
+            self.anchor_calculator,
+            self.top_score_metric,
+            self.top_score_metric2,
+            self.allow_incomplete_transcripts,
+        ).sort(df)
 
     def get_unique_peptide_hla_counts(self, good_binders_df):
         return pd.DataFrame(good_binders_df.groupby(['HLA Allele', 'MT Epitope Seq']).size().reset_index())
@@ -881,10 +850,6 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         else:
             self.mt_top_score_metric = "Best"
         self.top_score_metric2 = top_score_metric2
-        if self.top_score_metric2 == "percentile":
-            self.top_score_mode = "Percentile"
-        else:
-            self.top_score_mode = "IC50 Score"
         self.metrics_file = output_file.replace('.tsv', '.metrics.json')
         super().__init__()
 
@@ -941,19 +906,6 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         else:
             good_binders = included_df[included_df["{} IC50 Score".format(self.mt_top_score_metric)] < self.binding_threshold]
         return good_binders
-
-    def sort_included_df(self, df):
-        if self.top_score_metric2 == "percentile":
-            df.sort_values(by=[
-                "{} Percentile".format(self.mt_top_score_metric),
-                "{} IC50 Score".format(self.mt_top_score_metric),
-            ], inplace=True, ascending=[True, True])
-        else:
-            df.sort_values(by=[
-                "{} IC50 Score".format(self.mt_top_score_metric),
-                "{} Percentile".format(self.mt_top_score_metric),
-            ], inplace=True, ascending=[True, True])
-        return df
 
     def get_unique_peptide_hla_counts(self, good_binders_df):
         return pd.DataFrame(good_binders_df.groupby(['HLA Allele', 'Epitope Seq']).size().reset_index())
@@ -1044,6 +996,12 @@ class PvacfuseAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
         })
         return out_dict
 
+    def sort_included_df(self, df):
+        return PvacfuseBestCandidate(
+            self.top_score_metric,
+            self.top_score_metric2,
+        ).sort(df)
+
     def get_best_binder(self, df):
         return PvacfuseBestCandidate(
             self.top_score_metric,
@@ -1086,6 +1044,12 @@ class PvacbindAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
             'Evaluation': 'Pending',
         })
         return out_dict
+
+    def sort_included_df(self, df):
+        return PvacbindBestCandidate(
+            self.top_score_metric,
+            self.top_score_metric2,
+        ).sort(df)
 
     def get_best_binder(self, df):
         return PvacbindBestCandidate(
@@ -1162,6 +1126,15 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
     def read_input_file(self, used_columns, dtypes):
         return pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False,
                            na_values="NA", keep_default_na=False, dtype={"Index": str})
+
+    def sort_included_df(self, df):
+        return PvacspliceBestCandidate(
+            self.transcript_prioritization_strategy,
+            self.maximum_transcript_support_level,
+            self.top_score_metric,
+            self.top_score_metric2,
+            self.allow_incomplete_transcripts,
+        ).sort(df)
 
     # pvacbind w/ Index instead of Mutation
     def get_sub_df(self, all_epitopes_df, df_key):
