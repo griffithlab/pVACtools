@@ -200,6 +200,8 @@ def main(args_input = sys.argv[1:]):
         'maximum_transcript_support_level' : args.maximum_transcript_support_level,
         'run_post_processor'        : True,
         'genes_of_interest_file': args.genes_of_interest_file,
+        'allele_specific_anchors'   : args.allele_specific_anchors,
+        'anchor_contribution_threshold' : args.anchor_contribution_threshold,
     }
     junction_arguments.update(additional_args)
 

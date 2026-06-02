@@ -47,7 +47,7 @@ def pvacfuse_sort(rows, top_score_metric, top_score_metric2, file_type='full'):
         return rows
 
     if file_type == 'aggregated':
-        tier_sorter = ["Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "LowReadSupport", "LowExpr", "ProbPos", "Poor"]
+        tier_sorter = ["Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "LowReadSupport", "LowExpr", "Anchor", "ProbPos", "Poor"]
         sorter_index = dict(zip(tier_sorter,range(len(tier_sorter))))
         rows["rank_tier"] = rows['Tier'].map(sorter_index)
         sort_columns = ["rank_tier", "rank", f"rank_{top_score_metric2[0]}", "ID"]
@@ -86,7 +86,7 @@ def pvacsplice_sort(rows, top_score_metric, top_score_metric2, file_type='full')
         return rows
 
     if file_type == 'aggregated':
-        tier_sorter = ["Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "PoorTranscript", "LowExpr", "Subclonal", "ProbPos", "Poor", "NoExpr"]
+        tier_sorter = ["Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "PoorTranscript", "LowExpr", "Anchor", "Subclonal", "ProbPos", "Poor", "NoExpr"]
         sorter_index = dict(zip(tier_sorter,range(len(tier_sorter))))
         rows["rank_tier"] = rows['Tier'].map(sorter_index)
         sort_columns = ["rank_tier", "rank", f"rank_{top_score_metric2[0]}", "Gene", "Best Transcript", "AA Change"]

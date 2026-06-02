@@ -360,7 +360,6 @@ class MatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMet
         self.metrics_file = output_file.replace('.tsv', '.metrics.json')
         super().__init__()
         self.anchor_calculator = AnchorResiduePass(binding_threshold, self.use_allele_specific_binding_thresholds, self.allele_specific_binding_thresholds, allele_specific_anchors, anchor_contribution_threshold, self.wt_top_score_metric)
-        super().__init__()
 
     def execute(self):
         epitope_lengths = self.determine_used_epitope_lengths()
@@ -898,6 +897,7 @@ class PvacspliceAggregateAllEpitopes(MatchedSequenceAggregateAllEpitopes, metacl
             self.top_score_metric,
             self.top_score_metric2,
             self.allow_incomplete_transcripts,
+            self.anchor_calculator,
         ).get(df)
 
     def sort_included_df(self, df):
@@ -907,6 +907,7 @@ class PvacspliceAggregateAllEpitopes(MatchedSequenceAggregateAllEpitopes, metacl
             self.top_score_metric,
             self.top_score_metric2,
             self.allow_incomplete_transcripts,
+            self.anchor_calculator,
         ).sort(df)
 
     def tier_aggregated_report(self):
@@ -988,12 +989,14 @@ class PvacfuseAggregateAllEpitopes(MatchedSequenceAggregateAllEpitopes, metaclas
         return PvacfuseBestCandidate(
             self.top_score_metric,
             self.top_score_metric2,
+            self.anchor_calculator,
         ).get(df)
 
     def sort_included_df(self, df):
         return PvacfuseBestCandidate(
             self.top_score_metric,
             self.top_score_metric2,
+            self.anchor_calculator,
         ).sort(df)
 
     def tier_aggregated_report(self):

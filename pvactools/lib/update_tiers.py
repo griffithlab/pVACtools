@@ -164,7 +164,7 @@ class UpdateTiers:
                 default=1,
                 choices=[1, 2, 3, 4, 5]
             )
-        if tool == 'pvacseq':
+        if tool in ['pvacseq', 'pvacsplice', 'pvacfuse']:
             parser.add_argument(
                 "--allele-specific-anchors",
                 help="Use allele-specific anchor positions when evaluating the anchor criteria for tiering epitopes in the aggregate report. This option "
@@ -428,6 +428,8 @@ class PvacfuseUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         presentation_percentile_threshold=2.0,
         percentile_threshold_strategy='conservative',
         allele_specific_binding_thresholds=False,
+        allele_specific_anchors=False,
+        anchor_contribution_threshold=0.8,
         read_support=5,
         expn_val=0.1,
         top_score_metric2=["ic50", "combined_percentile"],
@@ -444,6 +446,7 @@ class PvacfuseUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         self.expn_val = expn_val
         self.top_score_metric2 = top_score_metric2
         super().__init__()
+        self.anchor_calculator = AnchorResiduePass(binding_threshold, self.use_allele_specific_binding_thresholds, self.allele_specific_binding_thresholds, allele_specific_anchors, anchor_contribution_threshold)
 
     def get_tier(self, mutation):
         if self.use_allele_specific_binding_thresholds and mutation['Allele'] in self.allele_specific_binding_thresholds:
@@ -474,6 +477,8 @@ class PvacfuseUpdateTiers(UpdateTiers, metaclass=ABCMeta):
             scores_pass = any(all_scores)
             binding_pass = any(binding_scores)
 
+        anchor_residue_pass = self.anchor_calculator.is_anchor_residue_pass(mutation)
+
         low_read_support = False
         if mutation['Read Support'] != 'NA' and float(mutation['Read Support']) < self.read_support:
             low_read_support = True
@@ -493,6 +498,7 @@ class PvacfuseUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         if (scores_pass and
           not low_read_support and
           not low_expr and
+          anchor_residue_pass and
           refmatch_pass and
           probaa_pass):
             return "Pass"
@@ -501,6 +507,7 @@ class PvacfuseUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         if (not binding_pass and immunogenicity_percentile_pass and presentation_percentile_pass and
           not low_read_support and
           not low_expr and
+          anchor_residue_pass and
           refmatch_pass and
           probaa_pass):
             return "PoorBinder"
@@ -509,6 +516,7 @@ class PvacfuseUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         if (binding_pass and not immunogenicity_percentile_pass and presentation_percentile_pass and
           not low_read_support and
           not low_expr and
+          anchor_residue_pass and
           refmatch_pass and
           probaa_pass):
             return "PoorImmunogenicity"
@@ -517,6 +525,7 @@ class PvacfuseUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         if (binding_pass and immunogenicity_percentile_pass and not presentation_percentile_pass and
           not low_read_support and
           not low_expr and
+          anchor_residue_pass and
           refmatch_pass and
           probaa_pass):
             return "PoorPresentation"
@@ -525,6 +534,7 @@ class PvacfuseUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         if (scores_pass and
           not low_read_support and
           not low_expr and
+          anchor_residue_pass and
           not refmatch_pass and
           probaa_pass):
             return "RefMatch"
@@ -533,14 +543,25 @@ class PvacfuseUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         if (scores_pass and
           not low_read_support and
           not low_expr and
+          anchor_residue_pass and
           refmatch_pass and
           not probaa_pass):
             return "ProbPos"
+
+        #anchor residues
+        if (scores_pass and
+          not low_read_support and
+          not low_expr and
+          not anchor_residue_pass and
+          refmatch_pass and
+          probaa_pass):
+            return "Anchor"
 
         #low read support
         if (scores_pass and
           low_read_support and
           not low_expr and
+          anchor_residue_pass and
           refmatch_pass and
           probaa_pass):
             return "LowReadSupport"
@@ -549,6 +570,7 @@ class PvacfuseUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         if (scores_pass and
           not low_read_support and
           low_expr and
+          anchor_residue_pass and
           refmatch_pass and
           probaa_pass):
             return "LowExpr"
@@ -574,6 +596,8 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         expn_val=1,
         transcript_prioritization_strategy=['mane_select', 'canonical', 'tsl'],
         maximum_transcript_support_level=1,
+        allele_specific_anchors=False,
+        anchor_contribution_threshold=0.8,
         top_score_metric2=["ic50", "combined_percentile"],
     ):
         self.input_file = input_file
@@ -593,6 +617,7 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         self.maximum_transcript_support_level = maximum_transcript_support_level
         self.top_score_metric2 = top_score_metric2
         super().__init__()
+        self.anchor_calculator = AnchorResiduePass(binding_threshold, self.use_allele_specific_binding_thresholds, self.allele_specific_binding_thresholds, allele_specific_anchors, anchor_contribution_threshold)
 
     def get_tier(self, mutation):
         if self.use_allele_specific_binding_thresholds and mutation['Allele'] in self.allele_specific_binding_thresholds:
@@ -623,6 +648,8 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
             scores_pass = any(all_scores)
             binding_pass = any(binding_scores)
 
+        anchor_residue_pass = self.anchor_calculator.is_anchor_residue_pass(mutation)
+
         transcript_pass = is_preferred_transcript(mutation, self.transcript_prioritization_strategy, self.maximum_transcript_support_level)
 
         refmatch_pass = True
@@ -646,6 +673,7 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
            allele_expr_pass and
            vaf_clonal_pass and
            transcript_pass and
+           anchor_residue_pass and
            refmatch_pass and
            probaa_pass):
             return "Pass"
@@ -655,6 +683,7 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
            allele_expr_pass and
            vaf_clonal_pass and
            transcript_pass and
+           anchor_residue_pass and
            refmatch_pass and
            probaa_pass):
             return "PoorBinder"
@@ -664,6 +693,7 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
            allele_expr_pass and
            vaf_clonal_pass and
            transcript_pass and
+           anchor_residue_pass and
            refmatch_pass and
            probaa_pass):
             return "PoorImmunogenicity"
@@ -673,6 +703,7 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
            allele_expr_pass and
            vaf_clonal_pass and
            transcript_pass and
+           anchor_residue_pass and
            refmatch_pass and
            probaa_pass):
             return "PoorPresentation"
@@ -682,6 +713,7 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
            allele_expr_pass and
            vaf_clonal_pass and
            transcript_pass and
+           anchor_residue_pass and
            not refmatch_pass and
            probaa_pass):
             return "RefMatch"
@@ -691,6 +723,7 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
            allele_expr_pass and
            vaf_clonal_pass and
            transcript_pass and
+           anchor_residue_pass and
            refmatch_pass and
            not probaa_pass):
             return "ProbPos"
@@ -700,15 +733,27 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
            allele_expr_pass and
            vaf_clonal_pass and
            not transcript_pass and
+           anchor_residue_pass and
            refmatch_pass and
            probaa_pass):
             return "PoorTranscript"
+
+        #anchor residues
+        if (scores_pass and
+           allele_expr_pass and
+           vaf_clonal_pass and
+           transcript_pass and
+           not anchor_residue_pass and
+           refmatch_pass and
+           probaa_pass):
+            return "Anchor"
 
         #not in founding clone
         if (scores_pass and
            allele_expr_pass and
            not vaf_clonal_pass and
            transcript_pass and
+           anchor_residue_pass and
            refmatch_pass and
            probaa_pass):
             return "Subclonal"
@@ -727,6 +772,7 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
            lowexpr and
            vaf_clonal_pass and
            transcript_pass and
+           anchor_residue_pass and
            refmatch_pass and
            probaa_pass):
             return "LowExpr"

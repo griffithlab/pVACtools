@@ -100,9 +100,10 @@ class PvacseqBestCandidate:
         return anchor_residue_pass_df
 
 class PvacfuseBestCandidate:
-    def __init__(self, top_score_metric, top_score_metric2):
+    def __init__(self, top_score_metric, top_score_metric2, anchor_calculator):
         self.top_score_metric = top_score_metric
         self.top_score_metric2 = top_score_metric2
+        self.anchor_calculator = anchor_calculator
 
     def get(self, df):
         sorted_df = self.sort(df)
@@ -123,6 +124,13 @@ class PvacfuseBestCandidate:
         for metric2 in self.top_score_metric2:
             prob_pos_df[f"rank_{metric2}"] = pd.to_numeric(prob_pos_df[metrics_to_column('pvacfuse', self.top_score_metric, metric2)], errors='coerce').rank(ascending=True, method='dense', na_option='bottom')
             prob_pos_df["rank"] += prob_pos_df[f"rank_{metric2}"]
+
+        #subset prob_pos dataframe to only include entries that pass the anchor position check
+        prob_pos_df['anchor_residue_pass'] = prob_pos_df.apply(lambda x: self.anchor_calculator.is_anchor_residue_pass(x), axis=1)
+        anchor_residue_pass_df = prob_pos_df[prob_pos_df['anchor_residue_pass']]
+        if anchor_residue_pass_df.shape[0] == 0:
+            anchor_residue_pass_df = prob_pos_df
+
         #sort by metrics included in top_score_metric2 in the order specified
         sort_columns = [
             'rank',
@@ -134,20 +142,20 @@ class PvacfuseBestCandidate:
         ]
 
         if 'Expression' in prob_pos_df:
-            prob_pos_df['Expression Sort'] = prob_pos_df['Expression']
-            prob_pos_df['Expression Sort'].replace({'NA': 0})
+            anchor_residue_pass_df['Expression Sort'] = anchor_residue_pass_df['Expression']
+            anchor_residue_pass_df['Expression Sort'].replace({'NA': 0})
             sort_columns.append('Expression Sort')
             sort_orders.append(False)
 
-        prob_pos_df.sort_values(
+        anchor_residue_pass_df.sort_values(
             by=sort_columns,
             inplace=True,
             ascending=sort_orders
         )
-        prob_pos_df.drop(labels='rank', axis=1, inplace=True)
+        anchor_residue_pass_df.drop(labels='rank', axis=1, inplace=True)
         for metric2 in self.top_score_metric2:
-            prob_pos_df.drop(labels=f"rank_{metric2}", axis=1, inplace=True)
-        return prob_pos_df
+            anchor_residue_pass_df.drop(labels=f"rank_{metric2}", axis=1, inplace=True)
+        return anchor_residue_pass_df
 
 class PvacbindBestCandidate:
     def __init__(self, top_score_metric, top_score_metric2):
@@ -199,12 +207,14 @@ class PvacspliceBestCandidate:
         top_score_metric,
         top_score_metric2,
         allow_incomplete_transcripts,
+        anchor_calculator,
     ):
         self.transcript_prioritization_strategy = transcript_prioritization_strategy
         self.maximum_transcript_support_level = maximum_transcript_support_level
         self.top_score_metric = top_score_metric
         self.top_score_metric2 = top_score_metric2
         self.allow_incomplete_transcripts=allow_incomplete_transcripts
+        self.anchor_calculator = anchor_calculator
 
     def get(self, df):
         sorted_df = self.sort(df)
@@ -241,14 +251,20 @@ class PvacspliceBestCandidate:
         else:
             prob_pos_df = transcript_df
 
+        #subset prob_pos dataframe to only include entries that pass the anchor position check
+        prob_pos_df['anchor_residue_pass'] = prob_pos_df.apply(lambda x: self.anchor_calculator.is_anchor_residue_pass(x), axis=1)
+        anchor_residue_pass_df = prob_pos_df[prob_pos_df['anchor_residue_pass']]
+        if anchor_residue_pass_df.shape[0] == 0:
+            anchor_residue_pass_df = prob_pos_df
+
         #set up sorting criteria
-        prob_pos_df["rank"] = 0
+        anchor_residue_pass_df["rank"] = 0
         for metric2 in self.top_score_metric2:
-            prob_pos_df[f"rank_{metric2}"] = pd.to_numeric(prob_pos_df[metrics_to_column('pvacsplice', self.top_score_metric, metric2)], errors='coerce').rank(ascending=True, method='dense', na_option='bottom')
-            prob_pos_df["rank"] += prob_pos_df[f"rank_{metric2}"]
-        prob_pos_df['mane_select_sort'] = prob_pos_df["MANE Select"].apply(lambda x: 1 if x else 2)
-        prob_pos_df['canonical_sort'] = prob_pos_df["Canonical"].apply(lambda x: 1 if x else 2)
-        prob_pos_df['tsl_sort'] = prob_pos_df["Transcript Support Level"].apply(lambda x: 6 if x in ['NA', 'Not Supported'] or pd.isna(x) else int(x))
+            anchor_residue_pass_df[f"rank_{metric2}"] = pd.to_numeric(anchor_residue_pass_df[metrics_to_column('pvacsplice', self.top_score_metric, metric2)], errors='coerce').rank(ascending=True, method='dense', na_option='bottom')
+            anchor_residue_pass_df["rank"] += anchor_residue_pass_df[f"rank_{metric2}"]
+        anchor_residue_pass_df['mane_select_sort'] = anchor_residue_pass_df["MANE Select"].apply(lambda x: 1 if x else 2)
+        anchor_residue_pass_df['canonical_sort'] = anchor_residue_pass_df["Canonical"].apply(lambda x: 1 if x else 2)
+        anchor_residue_pass_df['tsl_sort'] = anchor_residue_pass_df["Transcript Support Level"].apply(lambda x: 6 if x in ['NA', 'Not Supported'] or pd.isna(x) else int(x))
         sort_columns = [
             "rank",
             f"rank_{self.top_score_metric2[0]}",
@@ -271,12 +287,12 @@ class PvacspliceBestCandidate:
         ]
 
         #Sort the dataframe according to the criteria and pick the first (best) one
-        prob_pos_df.sort_values(
+        anchor_residue_pass_df.sort_values(
             by=sort_columns,
             ascending=sort_orders,
             inplace=True
         )
-        prob_pos_df.drop(labels='rank', axis=1, inplace=True)
+        anchor_residue_pass_df.drop(labels='rank', axis=1, inplace=True)
         for metric2 in self.top_score_metric2:
-            prob_pos_df.drop(labels=f"rank_{metric2}", axis=1, inplace=True)
-        return prob_pos_df
+            anchor_residue_pass_df.drop(labels=f"rank_{metric2}", axis=1, inplace=True)
+        return anchor_residue_pass_df

@@ -93,6 +93,25 @@ def define_parser():
         help="Expression Cutoff. Expression is meassured as FFPM (fusion fragments per million total reads). When failing this cutoff sites will be binned in the \"LowExpr\" tier.",
         default=0.1
     )
+    parser.add_argument(
+        "--allele-specific-anchors",
+        help="Use allele-specific anchor positions when tiering epitopes in the aggregate report. This option "
+             + "is available for 8, 9, 10, and 11mers and only for HLA-A, B, and C alleles. If this option is "
+             + "not enabled or as a fallback for unsupported lengths and alleles, the default positions of 1, "
+             + "2, epitope length - 1, and epitope length are used. Please see https://doi.org/10.1101/2020.12.08.416271 "
+             + "for more details.",
+        default=False,
+        action='store_true',
+    )
+    parser.add_argument(
+        "--anchor-contribution-threshold", type=float_range(0.5,0.9),
+        help="For determining allele-specific anchors, each position is assigned a score based on how binding is "
+             + "influenced by mutations. From these scores, the relative contribution of each position to the "
+             + "overall binding is calculated. Starting with the highest relative contribution, positions whose "
+             + "scores together account for the selected contribution threshold are assigned as anchor locations. "
+             + " As a result, a higher threshold leads to the inclusion of more positions to be considered anchors.",
+        default=0.8
+    )
 
     return parser
 
@@ -116,6 +135,8 @@ def main(args_input = sys.argv[1:]):
         top_score_metric2=args.top_score_metric2,
         read_support=args.read_support,
         expn_val=args.expn_val,
+        allele_specific_anchors=args.allele_specific_anchors,
+        anchor_contribution_threshold=args.anchor_contribution_threshold,
         aggregate_inclusion_binding_threshold=args.aggregate_inclusion_binding_threshold,
         aggregate_inclusion_count_limit=args.aggregate_inclusion_count_limit,
     ).execute()
