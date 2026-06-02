@@ -21,6 +21,10 @@ class PvacseqBestCandidate:
         self.allow_incomplete_transcripts = allow_incomplete_transcripts
 
     def get(self, df):
+        sorted_df = self.sort(df)
+        return sorted_df.iloc[0]
+
+    def sort(self, df):
         #get all entries that don't have CDS Flags
         if self.allow_incomplete_transcripts:
             cds_df = df[df['Transcript CDS Flags'] == 'None']
@@ -90,7 +94,10 @@ class PvacseqBestCandidate:
             ascending=sort_orders,
             inplace=True
         )
-        return anchor_residue_pass_df.iloc[0]
+        anchor_residue_pass_df.drop(labels='rank', axis=1, inplace=True)
+        for metric2 in self.top_score_metric2:
+            anchor_residue_pass_df.drop(labels=f"rank_{metric2}", axis=1, inplace=True)
+        return anchor_residue_pass_df
 
 class PvacfuseBestCandidate:
     def __init__(self, top_score_metric, top_score_metric2):
@@ -98,6 +105,10 @@ class PvacfuseBestCandidate:
         self.top_score_metric2 = top_score_metric2
 
     def get(self, df):
+        sorted_df = self.sort(df)
+        return sorted_df.iloc[0]
+
+    def sort(self, df):
         #subset dataframe to only include entries with no problematic positions
         if 'Problematic Positions' in df:
             prob_pos_df = df[df['Problematic Positions'] == "None"]
@@ -133,7 +144,10 @@ class PvacfuseBestCandidate:
             inplace=True,
             ascending=sort_orders
         )
-        return prob_pos_df.iloc[0]
+        prob_pos_df.drop(labels='rank', axis=1, inplace=True)
+        for metric2 in self.top_score_metric2:
+            prob_pos_df.drop(labels=f"rank_{metric2}", axis=1, inplace=True)
+        return prob_pos_df
 
 class PvacbindBestCandidate:
     def __init__(self, top_score_metric, top_score_metric2):
@@ -141,6 +155,10 @@ class PvacbindBestCandidate:
         self.top_score_metric2 = top_score_metric2
 
     def get(self, df):
+        sorted_df = self.sort(df)
+        return sorted_df.iloc[0]
+
+    def sort(self, df):
         if 'Problematic Positions' in df:
             prob_pos_df = df[df['Problematic Positions'] == "None"]
             #if this results in an empty dataframe, reset to previous dataframe
@@ -168,7 +186,10 @@ class PvacbindBestCandidate:
             inplace=True,
             ascending=sort_orders
         )
-        return prob_pos_df.iloc[0]
+        prob_pos_df.drop(labels='rank', axis=1, inplace=True)
+        for metric2 in self.top_score_metric2:
+            prob_pos_df.drop(labels=f"rank_{metric2}", axis=1, inplace=True)
+        return prob_pos_df
 
 class PvacspliceBestCandidate:
     def __init__(
@@ -186,6 +207,10 @@ class PvacspliceBestCandidate:
         self.allow_incomplete_transcripts=allow_incomplete_transcripts
 
     def get(self, df):
+        sorted_df = self.sort(df)
+        return sorted_df.iloc[0]
+
+    def sort(self, df):
         #get all entries that don't have CDS Flags
         if self.allow_incomplete_transcripts:
             cds_df = df[df['Transcript CDS Flags'] == 'None']
@@ -251,4 +276,7 @@ class PvacspliceBestCandidate:
             ascending=sort_orders,
             inplace=True
         )
-        return prob_pos_df.iloc[0]
+        prob_pos_df.drop(labels='rank', axis=1, inplace=True)
+        for metric2 in self.top_score_metric2:
+            prob_pos_df.drop(labels=f"rank_{metric2}", axis=1, inplace=True)
+        return prob_pos_df

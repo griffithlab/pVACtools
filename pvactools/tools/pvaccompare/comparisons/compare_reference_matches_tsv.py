@@ -59,10 +59,16 @@ class CompareReferenceMatchesTSV:
                     "ERROR: Duplicate unique records were found in file 2. Writing number of hits only."
                 )
             self.hits_file1 = dict(
-                sorted(self.hits_file1.items(), key=lambda x: extract_id_parts(x[0]))
+                sorted(
+                    self.hits_file1.items(),
+                    key=lambda x: (*extract_id_parts(x[0]), x[0]),
+                )
             )
             self.hits_file2 = dict(
-                sorted(self.hits_file2.items(), key=lambda x: extract_id_parts(x[0]))
+                sorted(
+                    self.hits_file2.items(),
+                    key=lambda x: (*extract_id_parts(x[0]), x[0]),
+                )
             )
             return True
         else:
