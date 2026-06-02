@@ -284,43 +284,43 @@ class TestPvacvector(unittest.TestCase):
         ))
 
         self.assertTrue(compare(
-            os.path.join(output_dir.name, "0", "None", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.fa.split_1-2.8.tsv"),
+            os.path.join(output_dir.name, "0", "None", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.8.fa"),
             os.path.join(self.test_data_dir, "clipped.0.None.fa")
         ))
         self.assertTrue(compare(
-            os.path.join(output_dir.name, "0", "None", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.fa.split_1-2.8.tsv.key"),
+            os.path.join(output_dir.name, "0", "None", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.8.fa.key"),
             os.path.join(self.test_data_dir, "clipped.0.None.fa.key")
         ))
         self.assertTrue(compare(
-            os.path.join(output_dir.name, "0", "AAY", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.fa.split_1-2.8.tsv"),
+            os.path.join(output_dir.name, "0", "AAY", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.8.fa"),
             os.path.join(self.test_data_dir, "clipped.0.AAY.fa")
         ))
         self.assertTrue(compare(
-            os.path.join(output_dir.name, "0", "AAY", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.fa.split_1-2.8.tsv.key"),
+            os.path.join(output_dir.name, "0", "AAY", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.8.fa.key"),
             os.path.join(self.test_data_dir, "clipped.0.AAY.fa.key")
         ))
         self.assertTrue(compare(
-            os.path.join(output_dir.name, "1", "None", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.fa.split_1-2.8.tsv"),
+            os.path.join(output_dir.name, "1", "None", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.8.fa"),
             os.path.join(self.test_data_dir, "clipped.1.None.fa")
         ))
         self.assertTrue(compare(
-            os.path.join(output_dir.name, "1", "None", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.fa.split_1-2.8.tsv.key"),
+            os.path.join(output_dir.name, "1", "None", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.8.fa.key"),
             os.path.join(self.test_data_dir, "clipped.1.None.fa.key")
         ))
         self.assertTrue(compare(
-            os.path.join(output_dir.name, "1", "AAY", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.fa.split_1-2.8.tsv"),
+            os.path.join(output_dir.name, "1", "AAY", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.8.fa"),
             os.path.join(self.test_data_dir, "clipped.1.AAY.fa")
         ))
         self.assertTrue(compare(
-            os.path.join(output_dir.name, "1", "AAY", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.fa.split_1-2.8.tsv.key"),
+            os.path.join(output_dir.name, "1", "AAY", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.8.fa.key"),
             os.path.join(self.test_data_dir, "clipped.1.AAY.fa.key")
         ))
         self.assertTrue(compare(
-            os.path.join(output_dir.name, "2", "None", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.fa.split_1-2.8.tsv"),
+            os.path.join(output_dir.name, "2", "None", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.8.fa"),
             os.path.join(self.test_data_dir, "clipped.2.None.fa")
         ))
         self.assertTrue(compare(
-            os.path.join(output_dir.name, "2", "None", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.fa.split_1-2.8.tsv.key"),
+            os.path.join(output_dir.name, "2", "None", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.8.fa.key"),
             os.path.join(self.test_data_dir, "clipped.2.None.fa.key")
         ))
 

@@ -72,9 +72,9 @@ def run_pipelines(input_file, base_output_dir, args, junctions_to_test, spacer, 
         class_i_arguments['use_normalized_percentiles']  = args.use_normalized_percentiles
         class_i_arguments['reference_scores_path']    = args.reference_scores_path
         pipeline_i = Pipeline(**class_i_arguments)
-        pipeline_i.generate_fasta([[1, 1]])
-        pipeline_i.call_iedb([[1, 1]])
-        parsed_output_files.extend(pipeline_i.parse_outputs([[1, 1]]))
+        pipeline_i.generate_fasta()
+        pipeline_i.call_iedb()
+        parsed_output_files.extend(pipeline_i.parse_outputs())
 
     if len(class_ii_prediction_algorithms) > 0 and len(class_ii_alleles) > 0:
         if args.iedb_install_directory:
@@ -98,9 +98,9 @@ def run_pipelines(input_file, base_output_dir, args, junctions_to_test, spacer, 
         class_ii_arguments['netmhc_stab']             = False
         class_ii_arguments['filename_addition']         = "MHC_II"
         pipeline_ii = Pipeline(**class_ii_arguments)
-        pipeline_ii.generate_fasta([[1, 1]])
-        pipeline_ii.call_iedb([[1, 1]])
-        parsed_output_files.extend(pipeline_ii.parse_outputs([[1, 1]]))
+        pipeline_ii.generate_fasta()
+        pipeline_ii.call_iedb()
+        parsed_output_files.extend(pipeline_ii.parse_outputs())
 
     return parsed_output_files
 
