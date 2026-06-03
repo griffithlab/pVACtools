@@ -25,7 +25,6 @@ class FastaToKmersTests(unittest.TestCase):
         class_i_epitope_length = [8,9,10,11]
         class_ii_epitope_length = [12,13,14,15,16]
         output_dir = tempfile.TemporaryDirectory()
-        #output_file = os.path.join(output_dir.name, f'sample.{l}.kmers.tsv')
         for x in class_i_epitope_length + class_ii_epitope_length:
             params = {
                 'fasta'           : tscript_fasta,
@@ -55,7 +54,6 @@ class FastaToKmersTests(unittest.TestCase):
         class_i_epitope_length = [8,9,10,11]
         class_ii_epitope_length = [12,13,14,15,16]
         output_dir = tempfile.TemporaryDirectory()
-        #output_file = os.path.join(output_dir.name, f'sample.{l}.kmers.tsv')
         for x in class_i_epitope_length + class_ii_epitope_length:
             params = {
                 'fasta'           : tscript_fasta,
@@ -76,5 +74,30 @@ class FastaToKmersTests(unittest.TestCase):
                 ),
                 "files don't match {} - {}".format(output_file, expected_file)
             )
+        output_dir.cleanup()
+
+    def test_pvacsplice2_fasta_to_kmers_runs_and_produces_expected_output(self):
+        test_data_dir = os.path.join(pvactools_directory(), "tests", "test_data", "fasta_to_kmers")
+        tscript_fasta = os.path.join(test_data_dir, 'pvacsplice.fasta')
+        output_dir = tempfile.TemporaryDirectory()
+        params = {
+            'fasta'           : tscript_fasta,
+            'output_dir'      : output_dir.name,
+            'epitope_length'  : 8,
+            'sample_name'     : 'sample',
+        }
+        fasta = FastaToKmers(**params)
+        fasta.execute()
+
+        expected_file = os.path.join(test_data_dir, f'output_pvacsplice.8_kmers.fa')
+        output_file = os.path.join(output_dir.name, f'sample.8.fa')
+
+        self.assertTrue(cmp(
+                output_file,
+                expected_file,
+                False
+            ),
+            "files don't match {} - {}".format(output_file, expected_file)
+        )
 
         output_dir.cleanup()

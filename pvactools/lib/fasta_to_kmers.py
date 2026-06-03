@@ -25,7 +25,6 @@ class FastaToKmers:
         sequence = str(self.tscript_fasta[seq_name])
         # loop over entire sequence (doing this for WT and ALT) i == position in peptide
         for i in range(len(sequence)):
-            final_seq_name = f'{seq_name};{i+1}'
             # grab kmer sequence
             k = sequence[i:self.epitope_length+i]
             if len(k) < self.epitope_length:
@@ -47,7 +46,10 @@ class FastaToKmers:
         final_kmers = {}
         for i in range(len(mut_dict)):
             mt_seq = mut_dict[i]
-            wt_seq = wt_dict[i]
+            if i < len(wt_dict):
+                wt_seq = wt_dict[i]
+            else:
+                wt_seq = ""
             min_match = min_match_count(len(mt_seq))
             diff = len(wt_dict) - len(mut_dict)
             alt_i = i + diff
