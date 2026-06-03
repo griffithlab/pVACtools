@@ -153,6 +153,7 @@ class PvacspliceTests(unittest.TestCase):
 
             for file_name in (
                 'HCC1395_TUMOR_DNA.MHC_I.all_epitopes.aggregated.tsv',
+                'HCC1395_TUMOR_DNA.MHC_I.all_epitopes.aggregated.metrics.json',
                 'HCC1395_TUMOR_DNA.MHC_I.all_epitopes.aggregated.tsv.reference_matches',
                 'HCC1395_TUMOR_DNA.MHC_I.filtered.tsv',
             ):
@@ -270,6 +271,7 @@ class PvacspliceTests(unittest.TestCase):
 
             for file_name in (
                 'HCC1395_TUMOR_DNA.MHC_II.all_epitopes.aggregated.tsv',
+                'HCC1395_TUMOR_DNA.MHC_II.all_epitopes.aggregated.metrics.json',
                 'HCC1395_TUMOR_DNA.MHC_II.all_epitopes.aggregated.tsv.reference_matches',
                 'HCC1395_TUMOR_DNA.MHC_II.filtered.tsv',
             ):
@@ -338,6 +340,7 @@ class PvacspliceTests(unittest.TestCase):
 
             for file_name in (
                 'HCC1395_TUMOR_DNA.Combined.all_epitopes.aggregated.tsv',
+                'HCC1395_TUMOR_DNA.Combined.all_epitopes.aggregated.metrics.json',
                 'HCC1395_TUMOR_DNA.Combined.filtered.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'combined', file_name)
@@ -399,6 +402,7 @@ class PvacspliceTests(unittest.TestCase):
 
             for file_name in (
                 'tumor.MHC_I.all_epitopes.aggregated.tsv',
+                'tumor.MHC_I.all_epitopes.aggregated.metrics.json',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'results', 'results_multiple_variants_overlapping_splice_site', file_name)

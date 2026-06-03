@@ -1,0 +1,204 @@
+{
+  "tumor_purity": null,
+  "vaf_clonal": 0.257,
+  "vaf_subclonal": 0.128,
+  "binding_threshold": 500,
+  "aggregate_inclusion_binding_threshold": 5000,
+  "aggregate_inclusion_count_limit": 15,
+  "trna_vaf": 0.25,
+  "trna_cov": 10,
+  "allele_expr_threshold": 2.5,
+  "transcript_prioritization_strategy": [
+    "canonical",
+    "mane_select",
+    "tsl"
+  ],
+  "maximum_transcript_support_level": 1,
+  "binding_percentile_threshold": 2.0,
+  "immunogenicity_percentile_threshold": 2.0,
+  "presentation_percentile_threshold": 2.0,
+  "percentile_threshold_strategy": "conservative",
+  "use_allele_specific_binding_thresholds": false,
+  "mt_top_score_metric": "Median",
+  "wt_top_score_metric": "Median",
+  "top_score_metric2": [
+    "ic50",
+    "combined_percentile"
+  ],
+  "allele_specific_binding_thresholds": {},
+  "allele_specific_anchors": false,
+  "alleles": [
+    "H-2-Kb"
+  ],
+  "anchor_contribution_threshold": 0.8,
+  "epitope_lengths": [
+    8
+  ],
+  "JUNC00000151": {
+    "good_binders": {
+      "Transcript Set 1": {
+        "peptides": {
+          "CGPAPLNL": {
+            "ic50s_MT": [
+              9840.04
+            ],
+            "combined_percentiles_MT": [
+              15.0
+            ],
+            "binding_percentiles_MT": [
+              15.0
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              "NA"
+            ],
+            "combined_percentiles_WT": [
+              "NA"
+            ],
+            "binding_percentiles_WT": [
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "H-2-Kb"
+            ],
+            "mutation_position": "NA",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "H-2-Kb": [
+                  9840.04
+                ]
+              },
+              "WT": {
+                "H-2-Kb": [
+                  "NA"
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "H-2-Kb": []
+              },
+              "WT": {
+                "H-2-Kb": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "H-2-Kb": [
+                  15.0
+                ]
+              },
+              "WT": {
+                "H-2-Kb": [
+                  "NA"
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "H-2-Kb": []
+              },
+              "WT": {
+                "H-2-Kb": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "H-2-Kb": []
+              },
+              "WT": {
+                "H-2-Kb": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "H-2-Kb": []
+              },
+              "WT": {
+                "H-2-Kb": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "H-2-Kb": []
+              },
+              "WT": {
+                "H-2-Kb": []
+              }
+            },
+            "wt_peptide": "FS-NA"
+          }
+        },
+        "transcripts": [
+          "ENSMUST00000111295.7-JUNC00000151"
+        ],
+        "transcript_expr": [
+          "NA"
+        ],
+        "mane_select": [
+          "Not Run"
+        ],
+        "canonical": [
+          "Not Run"
+        ],
+        "tsl": [
+          1
+        ],
+        "biotype": [
+          "protein_coding"
+        ],
+        "transcript_cds_flags": [
+          "None"
+        ],
+        "transcript_length": [
+          323
+        ],
+        "transcript_count": 1,
+        "peptide_count": 1,
+        "total_expr": 0.0
+      }
+    },
+    "sets": [
+      "Transcript Set 1"
+    ],
+    "transcript_counts": [
+      1
+    ],
+    "peptide_counts": [
+      1
+    ],
+    "set_expr": [
+      0.0
+    ],
+    "DNA VAF": 0.257,
+    "RNA VAF": "NA",
+    "gene_expr": 48.123,
+    "best_peptide_mt": "CGPAPLNL",
+    "best_peptide_wt": "NA",
+    "best_hla_allele": "H-2-Kb"
+  }
+}

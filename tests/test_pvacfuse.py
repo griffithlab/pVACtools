@@ -113,6 +113,7 @@ class PvacfuseTests(unittest.TestCase):
                 'sample.name.MHC_I.all_epitopes.tsv',
                 'sample.name.MHC_I.filtered.tsv',
                 'sample.name.MHC_I.all_epitopes.aggregated.tsv',
+                'sample.name.MHC_I.all_epitopes.aggregated.metrics.json',
                 'sample.name.MHC_I.all_epitopes.aggregated.tsv.reference_matches',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
@@ -161,6 +162,7 @@ class PvacfuseTests(unittest.TestCase):
                 'sample.name.MHC_I.all_epitopes.tsv',
                 'sample.name.MHC_I.filtered.tsv',
                 'sample.name.MHC_I.all_epitopes.aggregated.tsv',
+                'sample.name.MHC_I.all_epitopes.aggregated.metrics.json',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'fusions_agfusion_starfusion', 'MHC_Class_I', file_name.replace('sample.name', 'Test'))
@@ -202,6 +204,7 @@ class PvacfuseTests(unittest.TestCase):
                 'sample.name.MHC_I.all_epitopes.tsv',
                 'sample.name.MHC_I.filtered.tsv',
                 'sample.name.MHC_I.all_epitopes.aggregated.tsv',
+                'sample.name.MHC_I.all_epitopes.aggregated.metrics.json',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'arriba_fusions', 'MHC_Class_I', file_name.replace('sample.name', 'Test'))
@@ -239,6 +242,7 @@ class PvacfuseTests(unittest.TestCase):
                 'Test.Combined.all_epitopes.tsv',
                 'Test.Combined.filtered.tsv',
                 'Test.Combined.all_epitopes.aggregated.tsv',
+                'Test.Combined.all_epitopes.aggregated.metrics.json',
             ):
                 output_file   = os.path.join(output_dir.name, 'combined', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'combined', file_name)
