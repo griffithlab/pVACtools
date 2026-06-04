@@ -204,7 +204,9 @@ def main(args_input = sys.argv[1:]):
             'prediction_algorithms': class_ii_prediction_algorithms,
             'alleles': class_ii_alleles,
             'epitope_lengths': args.class_ii_epitope_length,
-            'netmhc_stab': False
+            'netmhc_stab': False,
+            'use_normalized_percentiles': False,
+            'reference_scores_path': args.reference_scores_path
         }
     }
 
@@ -214,6 +216,8 @@ def main(args_input = sys.argv[1:]):
         epitope_lengths = params['epitope_lengths']
         iedb_executable = params['iedb_executable']
         netmhc_stab = params['netmhc_stab']
+        use_normalized_percentiles = params['use_normalized_percentiles'],
+        reference_scores_path = params['reference_scores_path']
 
         if len(prediction_algorithms) > 0 and len(alleles) > 0:
             print("Executing MHC Class {} predictions".format(mhc_class))
@@ -227,6 +231,8 @@ def main(args_input = sys.argv[1:]):
             run_arguments['iedb_executable']       = iedb_executable
             run_arguments['prediction_algorithms'] = prediction_algorithms
             run_arguments['netmhc_stab']           = netmhc_stab
+            run_arguments['use_normalized_percentiles'] = use_normalized_percentiles
+            run_arguments['reference_scores_path'] = reference_scores_path
 
             for epitope_length in epitope_lengths:
                 per_length_run_arguments = copy.deepcopy(run_arguments)
