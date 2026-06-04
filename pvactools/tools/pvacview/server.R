@@ -250,31 +250,63 @@ server <- shinyServer(function(input, output, session) {
     )
   })
   output$dna_cutoff_ui <- renderUI({
-    current_dna_cutoff <- df$dna_cutoff
-    numericInput("dna_cutoff", "Clonal DNA VAF (Anything lower than 1/2 of chosen VAF level will be considered subclonal)", current_dna_cutoff, min = 0, max = 1, step = 0.01, width = 500)
+    if (df$metricsData$file_type == 'pvacfuse') {
+        return(NULL)
+    } else {
+        current_dna_cutoff <- df$dna_cutoff
+        numericInput("dna_cutoff", "Clonal DNA VAF (Anything lower than 1/2 of chosen VAF level will be considered subclonal)", current_dna_cutoff, min = 0, max = 1, step = 0.01, width = 500)
+    }
   })
   output$allele_expr_ui <- renderUI({
-    current_allele_expr <- df$allele_expr
-    numericInput("allele_expr", "Allele Expression cutoff to be considered a Pass variant. Note that this criteria is also used in determining Anchor and Subclonal variants.", current_allele_expr, min = 0, max = 100, step = 0.1, width = 500)
+    if (df$metricsData$file_type == 'pvacfuse') {
+        return(NULL)
+    } else {
+        current_allele_expr <- df$allele_expr
+        numericInput("allele_expr", "Allele Expression cutoff to be considered a Pass variant. Note that this criteria is also used in determining Anchor and Subclonal variants.", current_allele_expr, min = 0, max = 100, step = 0.1, width = 500)
+    }
+  })
+  output$expn_val_ui <- renderUI({
+    if (df$metricsData$file_type == 'pvacfuse') {
+        current_expn_val <- df$expn_val
+        numericInput("expn_val", "Expression cutoff to be considered a Pass variant.", current_expn_val, min = 0, max = 100, step = 0.1, width = 500)
+    } else {
+        return(NULL)
+    }
+  })
+  output$read_support_ui <- renderUI({
+    if (df$metricsData$file_type == 'pvacfuse') {
+        current_read_support <- df$read_support
+        numericInput("read_support", "Read support cutoff to be considered a Pass variant.", current_read_support, min = 0, max = 100, step = 0.1, width = 500)
+    } else {
+        return(NULL)
+    }
   })
   output$transcript_prioritization_strategy_ui <- renderUI({
-    current_transcript_prioritization_strategy <- df$transcript_prioritization_strategy
-    selectInput(
-        "transcript_prioritization_strategy",
-        "Specify how to evaluate the transcript giving rise to the neoantigen. 'canonical' will prioritize candidates resulting from variants on a Ensembl canonical transcript. 'mane_select' will prioritize candidates resulting from variants on a MANE select transcript. 'tsl' will prioritize candidates where the transcript support level (TSL) matches the maximum-transcript-support-level. When selecting more than one criteria, a transcript meeting EITHER of the selected criteria will be prioritized.",
-        c("canonical", "mane_select", "tsl"),
-        multiple=TRUE,
-        selected= current_transcript_prioritization_strategy
-    )
+    if (df$metricsData$file_type == 'pvacfuse') {
+        return(NULL)
+    } else {
+        current_transcript_prioritization_strategy <- df$transcript_prioritization_strategy
+        selectInput(
+            "transcript_prioritization_strategy",
+            "Specify how to evaluate the transcript giving rise to the neoantigen. 'canonical' will prioritize candidates resulting from variants on a Ensembl canonical transcript. 'mane_select' will prioritize candidates resulting from variants on a MANE select transcript. 'tsl' will prioritize candidates where the transcript support level (TSL) matches the maximum-transcript-support-level. When selecting more than one criteria, a transcript meeting EITHER of the selected criteria will be prioritized.",
+            c("canonical", "mane_select", "tsl"),
+            multiple=TRUE,
+            selected= current_transcript_prioritization_strategy
+        )
+    }
   })
   output$maximum_transcript_support_level_ui <- renderUI({
-    current_maximum_transcript_support_level <- df$maximum_transcript_support_level
-    radioButtons(
-      "maximum_transcript_support_level",
-      "The threshold to use for prioritizing epitopes on the Ensembl transcript support level (TSL). Prioritize all epitopes with a transcript support level <= this cutoff.",
-      c(1, 2, 3, 4, 5),
-      selected = current_maximum_transcript_support_level
-    )
+    if (df$metricsData$file_type == 'pvacfuse') {
+        return(NULL)
+    } else {
+        current_maximum_transcript_support_level <- df$maximum_transcript_support_level
+        radioButtons(
+          "maximum_transcript_support_level",
+          "The threshold to use for prioritizing epitopes on the Ensembl transcript support level (TSL). Prioritize all epitopes with a transcript support level <= this cutoff.",
+          c(1, 2, 3, 4, 5),
+          selected = current_maximum_transcript_support_level
+        )
+    }
   })
   #%ile Plot mode selector
   output$percentile_plot_mode_ui <- renderUI({
@@ -320,8 +352,6 @@ server <- shinyServer(function(input, output, session) {
     df$presentation_percentile_threshold <- as.numeric(input$presentation_percentile_threshold)
     df$percentile_threshold_strategy <- input$percentile_threshold_strategy
     df$scoring_candidate_metric <- input$scoring_candidate_metric
-    df$dna_cutoff <- as.numeric(input$dna_cutoff)
-    df$allele_expr <- as.numeric(input$allele_expr)
     df$allele_specific_anchors <- input$use_anchor
     df$anchor_contribution <- as.numeric(input$anchor_contribution)
     if (input$use_anchor) {
@@ -329,40 +359,25 @@ server <- shinyServer(function(input, output, session) {
     }else {
       df$anchor_mode <- "default"
     }
-    df$transcript_prioritization_strategy <- input$transcript_prioritization_strategy
-    df$maximum_transcript_support_level <- as.numeric(input$maximum_transcript_support_level)
-    df$mainTable$`Tier` <- apply(df$mainTable, 1, function(x) tier(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, df$metricsData[1:21], df$anchor_mode, df$use_allele_specific_binding_thresholds, df$binding_threshold, df$binding_percentile_threshold, df$immunogenicity_percentile_threshold, df$presentation_percentile_threshold, df$percentile_threshold_strategy, df$transcript_prioritization_strategy, df$maximum_transcript_support_level))
-    df$mainTable$`Scaled BA` <- apply(df$mainTable, 1, function(x) scale_binding_affinity(df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold, x["Allele"], x["IC50 MT"]))
-    #df$mainTable$`Scaled percentile` <- apply(df$mainTable, 1, function(x) {ifelse((is.null(df$percentile_threshold) || is.na(df$percentile_threshold)), as.numeric(x["%ile MT"]), as.numeric(x["%ile MT"]) / (df$percentile_threshold))})
-    df$mainTable$`Scaled binding percentile` <- apply(df$mainTable, 1, function(x) {as.numeric(x["IC50 %ile MT"]) / (df$binding_percentile_threshold)})
-    df$mainTable$`Scaled immunogenicity percentile` <- apply(df$mainTable, 1, function(x) {as.numeric(x["IM %ile MT"]) / (df$immunogenicity_percentile_threshold)})
-    df$mainTable$`Scaled presentation percentile` <- apply(df$mainTable, 1, function(x) {as.numeric(x["Pres %ile MT"]) / (df$presentation_percentile_threshold)})
-    df$mainTable$`IC50 Pass` <- apply(df$mainTable, 1, function(x) {is_ic50_pass(df$use_allele_specific_binding_thresholds, x['Allele'], df$allele_specific_binding_thresholds, as.numeric(x['IC50 MT']), as.numeric(df$binding_threshold))})
-    df$mainTable$`Binding Percentile Pass` <- apply(df$mainTable, 1, function(x) {is_percentile_pass(df$binding_percentile_threshold, as.numeric(x["IC50 %ile MT"]))})
-    df$mainTable$`Immunogenicity Percentile Pass` <- apply(df$mainTable, 1, function(x) {is_percentile_pass(df$immunogenicity_percentile_threshold, as.numeric(x["IM %ile MT"]))})
-    df$mainTable$`Presentation Percentile Pass` <- apply(df$mainTable, 1, function(x) {is_percentile_pass(df$presentation_percentile_threshold, as.numeric(x["Pres %ile MT"]))})
-    df$mainTable$`Anchor Pass` <- apply(df$mainTable, 1, function(x) {is_anchor_residue_pass(df$anchor_mode, x['Best Peptide'], x['Allele'], as.numeric(df$anchor_contribution), x['Pos'], x['IC50 WT'], as.numeric(df$binding_threshold))})
-    df$mainTable$`VAF Clonal Pass` <- apply(df$mainTable, 1, function(x) {is_vaf_clonal_pass(x["DNA VAF"], as.numeric(df$dna_cutoff))})
-    df$mainTable$`Allele Expr Pass` <- apply(df$mainTable, 1, function(x) {is_allele_expr_pass(x["RNA VAF"], x["RNA Expr"], x["Allele Expr"], as.numeric(df$allele_expr))})
-    df$mainTable$`RNA Expr Fail` <- apply(df$mainTable, 1, function(x) {!is.na(x['RNA Expr']) && as.numeric(x['RNA Expr']) == 0})
-    df$mainTable$`RNA VAF Fail` <- apply(df$mainTable, 1, function(x) {!is.na(x['RNA VAF']) && as.numeric(x['RNA VAF']) <= as.numeric(df$metricsData['trna_vaf'])})
-    df$mainTable$`RNA Depth Fail` <- apply(df$mainTable, 1, function(x) {!is.na(x['RNA Depth']) && as.numeric(x['RNA Depth']) <= as.numeric(df$metricsData['trna_cov'])})
-    df$mainTable$`Prob Pos Pass` <- apply(df$mainTable, 1, function(x) {is_probaa_pass(x["Prob Pos"])})
-    transcript_pass <- apply(df$mainTable, TRUE, function(x) {
-      if ('tsl' %in% df$transcript_prioritization_strategy && is_tsl_pass(x["TSL"], as.numeric(df$maximum_transcript_support_level))) {
-        return("True")
-      }
-      if ('mane_select' %in% df$transcript_prioritization_strategy && is_mane_select_pass(x["MANE Select"])) {
-        return("True")
-      }
-      if ('canonical' %in% df$transcript_prioritization_strategy && is_canonical_pass(x["Canonical"])) {
-        return("True")
-      }
-      return("False")
-    })
-    df$mainTable <- add_column(df$mainTable, `Transcript Pass` = transcript_pass, .after = "TSL")
-    tier_sorter <- c("Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "PoorTranscript", "LowExpr", "Anchor", "Subclonal", "ProbPos", "Poor", "NoExpr")
-    df$mainTable$`Rank` <- rank(desc(as.numeric(replace(df$mainTable$`Allele Expr`, is.na(df$mainTable$`Allele Expr`), 0))), ties.method = "first")
+    if (df$metricsData$file_type == 'pvacfuse') {
+        df$expn_val <- as.numeric(input$expn_val)
+        df$read_support <- as.numeric(input$read_support)
+        df <- postprocess_inputs(df)
+        df$mainTable$`Tier` <- apply(df$mainTable, 1, function(x) tier_pvacfuse(x, df$anchor_contribution, df$expn_val, df$read_support, df$metricsData[1:19], df$anchor_mode, df$use_allele_specific_binding_thresholds, df$binding_threshold, df$binding_percentile_threshold, df$immunogenicity_percentile_threshold, df$presentation_percentile_threshold, df$percentile_threshold_strategy))
+        df <- set_formatting_columns(df)
+        tier_sorter <- c("Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "LowReadSupport", "LowExpr", "Anchor", "ProbPos", "Poor")
+        df$mainTable$`Rank` <- rank(desc(as.numeric(replace(df$mainTable$`Expr`, is.na(df$mainTable$`Expr`), 0))), ties.method = "first")
+    } else {
+        df$dna_cutoff <- as.numeric(input$dna_cutoff)
+        df$allele_expr <- as.numeric(input$allele_expr)
+        df$transcript_prioritization_strategy <- input$transcript_prioritization_strategy
+        df$maximum_transcript_support_level <- as.numeric(input$maximum_transcript_support_level)
+        df <- postprocess_inputs(df)
+        df$mainTable$`Tier` <- apply(df$mainTable, 1, function(x) tier(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, df$metricsData[1:21], df$anchor_mode, df$use_allele_specific_binding_thresholds, df$binding_threshold, df$binding_percentile_threshold, df$immunogenicity_percentile_threshold, df$presentation_percentile_threshold, df$percentile_threshold_strategy, df$transcript_prioritization_strategy, df$maximum_transcript_support_level))
+        df <- set_formatting_columns(df)
+        tier_sorter <- c("Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "PoorTranscript", "LowExpr", "Anchor", "Subclonal", "ProbPos", "Poor", "NoExpr")
+        df$mainTable$`Rank` <- rank(desc(as.numeric(replace(df$mainTable$`Allele Expr`, is.na(df$mainTable$`Allele Expr`), 0))), ties.method = "first")
+    }
     for (metric in df$scoring_candidate_metric) {
         if (metric == "ic50") {
             rank_list <- rank(as.numeric(df$mainTable$`IC50 MT`), ties.method = "first")
@@ -388,53 +403,20 @@ server <- shinyServer(function(input, output, session) {
   #reset tier-ing with original parameters
   observeEvent(input$reset_params, {
     session$sendCustomMessage("unbind-DT", "mainTable")
-    df$binding_threshold <- as.numeric(df$metricsData$`binding_threshold`)
-    df$allele_specific_binding_thresholds <- df$metricsData$`allele_specific_binding_thresholds`
-    df$use_allele_specific_binding_thresholds <- df$metricsData$`use_allele_specific_binding_thresholds`
-    df$binding_percentile_threshold <- df$metricsData$`binding_percentile_threshold`
-    df$immunogenicity_percentile_threshold <- df$metricsData$`immunogenicity_percentile_threshold`
-    df$presentation_percentile_threshold <- df$metricsData$`presentation_percentile_threshold`
-    df$percentile_threshold_strategy <- df$metricsData$`percentile_threshold_strategy`
-    df$scoring_candidate_metric <- df$metricsData$`top_score_metric2`
-    df$dna_cutoff <- as.numeric(df$metricsData$`vaf_clonal`)
-    df$allele_expr <- as.numeric(df$metricsData$`allele_expr`)
-    df$anchor_mode <- ifelse(df$metricsData$`allele_specific_anchors`, "allele-specific", "default")
-    df$allele_specific_anchors <- df$metricsData$`allele_specific_anchors`
-    df$anchor_contribution <- as.numeric(df$metricsData$`anchor_contribution_threshold`)
-    df$transcript_prioritization_strategy <- df$metricsData$transcript_prioritization_strategy
-    df$maximum_transcript_support_level <- as.numeric(df$metricsData$maximum_transcript_support_level)
-    df$mainTable$`Tier` <- apply(df$mainTable, 1, function(x) tier(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, df$metricsData[1:21], df$anchor_mode, df$use_allele_specific_binding_thresholds, df$binding_threshold, df$binding_percentile_threshold, df$immunogenicity_percentile_threshold, df$presentation_percentile_threshold, df$percentile_threshold_strategy, df$transcript_prioritization_strategy, df$maximum_transcript_support_level))
-    df$mainTable$`Scaled BA` <- apply(df$mainTable, 1, function(x) scale_binding_affinity(df$allele_specific_binding_thresholds, df$use_allele_specific_binding_thresholds, df$binding_threshold, x["Allele"], x["IC50 MT"]))
-    #df$mainTable$`Scaled percentile` <- apply(df$mainTable, 1, function(x) {ifelse(is.null(df$percentile_threshold), as.numeric(x["%ile MT"]), as.numeric(x["%ile MT"]) / (df$percentile_threshold))})
-    df$mainTable$`Scaled binding percentile` <- apply(df$mainTable, 1, function(x) {as.numeric(x["IC50 %ile MT"]) / (df$binding_percentile_threshold)})
-    df$mainTable$`Scaled immunogenicity percentile` <- apply(df$mainTable, 1, function(x) {as.numeric(x["IM %ile MT"]) / (df$immunogenicity_percentile_threshold)})
-    df$mainTable$`Scaled presentation percentile` <- apply(df$mainTable, 1, function(x) {as.numeric(x["Pres %ile MT"]) / (df$presentation_percentile_threshold)})
-    df$mainTable$`IC50 Pass` <- apply(df$mainTable, 1, function(x) {is_ic50_pass(df$use_allele_specific_binding_thresholds, x['Allele'], df$allele_specific_binding_thresholds, as.numeric(x['IC50 MT']), as.numeric(df$binding_threshold))})
-    df$mainTable$`Binding Percentile Pass` <- apply(df$mainTable, 1, function(x) {is_percentile_pass(df$binding_percentile_threshold, as.numeric(x["IC50 %ile MT"]))})
-    df$mainTable$`Immunogenicity Percentile Pass` <- apply(df$mainTable, 1, function(x) {is_percentile_pass(df$immunogenicity_percentile_threshold, as.numeric(x["IM %ile MT"]))})
-    df$mainTable$`Presentation Percentile Pass` <- apply(df$mainTable, 1, function(x) {is_percentile_pass(df$presentation_percentile_threshold, as.numeric(x["Pres %ile MT"]))})
-    df$mainTable$`Anchor Pass` <- apply(df$mainTable, 1, function(x) {is_anchor_residue_pass(df$anchor_mode, x['Best Peptide'], x['Allele'], as.numeric(df$anchor_contribution), x['Pos'], x['IC50 WT'], as.numeric(df$binding_threshold))})
-    df$mainTable$`VAF Clonal Pass` <- apply(df$mainTable, 1, function(x) {is_vaf_clonal_pass(x["DNA VAF"], as.numeric(df$dna_cutoff))})
-    df$mainTable$`Allele Expr Pass` <- apply(df$mainTable, 1, function(x) {is_allele_expr_pass(x["RNA VAF"], x["RNA Expr"], x["Allele Expr"], as.numeric(df$allele_expr))})
-    df$mainTable$`RNA Expr Fail` <- apply(df$mainTable, 1, function(x) {!is.na(x['RNA Expr']) && as.numeric(x['RNA Expr']) == 0})
-    df$mainTable$`RNA VAF Fail` <- apply(df$mainTable, 1, function(x) {!is.na(x['RNA VAF']) && as.numeric(x['RNA VAF']) <= as.numeric(df$metricsData['trna_vaf'])})
-    df$mainTable$`RNA Depth Fail` <- apply(df$mainTable, 1, function(x) {!is.na(x['RNA Depth']) && as.numeric(x['RNA Depth']) <= as.numeric(df$metricsData['trna_cov'])})
-    df$mainTable$`Prob Pos Pass` <- apply(df$mainTable, 1, function(x) {is_probaa_pass(x["Prob Pos"])})
-    transcript_pass <- apply(df$mainTable, TRUE, function(x) {
-      if ('tsl' %in% df$transcript_prioritization_strategy && is_tsl_pass(x["TSL"], as.numeric(df$maximum_transcript_support_level))) {
-        return("True")
-      }
-      if ('mane_select' %in% df$transcript_prioritization_strategy && is_mane_select_pass(x["MANE Select"])) {
-        return("True")
-      }
-      if ('canonical' %in% df$transcript_prioritization_strategy && is_canonical_pass(x["Canonical"])) {
-        return("True")
-      }
-      return("False")
-    })
-    df$mainTable <- add_column(df$mainTable, `Transcript Pass` = transcript_pass, .after = "TSL")
-    tier_sorter <- c("Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "PoorTranscript", "LowExpr", "Anchor", "Subclonal", "ProbPos", "Poor", "NoExpr")
-    df$mainTable$`Rank` <- rank(desc(as.numeric(replace(df$mainTable$`Allele Expr`, is.na(df$mainTable$`Allele Expr`), 0))), ties.method = "first")
+    df <- process_metrics_data(df)
+    if (df$metricsData$file_type == 'pvacfuse') {
+        df$mainTable$`Tier` <- apply(df$mainTable, 1, function(x) tier_pvacfuse(x, df$anchor_contribution, df$expn_val, df$read_support, df$metricsData[1:19], df$anchor_mode, df$use_allele_specific_binding_thresholds, df$binding_threshold, df$binding_percentile_threshold, df$immunogenicity_percentile_threshold, df$presentation_percentile_threshold, df$percentile_threshold_strategy))
+        df <- postprocess_inputs(df)
+        df <- set_formatting_columns(df)
+        tier_sorter <- c("Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "LowReadSupport", "LowExpr", "Anchor", "ProbPos", "Poor")
+        df$mainTable$`Rank` <- rank(desc(as.numeric(replace(df$mainTable$`Expr`, is.na(df$mainTable$`Expr`), 0))), ties.method = "first")
+    } else {
+        df$mainTable$`Tier` <- apply(df$mainTable, 1, function(x) tier(x, df$anchor_contribution, df$dna_cutoff, df$allele_expr, df$metricsData[1:21], df$anchor_mode, df$use_allele_specific_binding_thresholds, df$binding_threshold, df$binding_percentile_threshold, df$immunogenicity_percentile_threshold, df$presentation_percentile_threshold, df$percentile_threshold_strategy, df$transcript_prioritization_strategy, df$maximum_transcript_support_level))
+        df <- postprocess_inputs(df)
+        df <- set_formatting_columns(df)
+        tier_sorter <- c("Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "PoorTranscript", "LowExpr", "Anchor", "Subclonal", "ProbPos", "Poor", "NoExpr")
+        df$mainTable$`Rank` <- rank(desc(as.numeric(replace(df$mainTable$`Allele Expr`, is.na(df$mainTable$`Allele Expr`), 0))), ties.method = "first")
+    }
     for (metric in df$scoring_candidate_metric) {
         if (metric == "ic50") {
             rank_list <- rank(as.numeric(df$mainTable$`IC50 MT`), ties.method = "first")
@@ -470,28 +452,49 @@ server <- shinyServer(function(input, output, session) {
   output$type_text <- renderText({
     input$add_file_label
   })
-  output$paramTable <- renderTable(
+  output$paramTable <- renderTable({
+    if (df$metricsData$file_type == 'pvacfuse') {
+        parameters <- c("Expression for Passing Variants", "Read Support Threshold")
+        values <- c(df$metricsData$expn_val, df$metricsData$read_support)
+    } else {
+        parameters <- c(
+            "Tumor Purity",
+            "VAF Clonal", "VAF Subclonal", "Allele Expression for Passing Variants",
+            "Transcript Prioritization Strategy", "Maximum TSL"
+        )
+        values <- c(
+            if (is.null(df$metricsData$tumor_purity)) {"NULL"} else {df$metricsData$tumor_purity},
+            df$metricsData$`vaf_clonal`, df$metricsData$`vaf_subclonal`, df$metricsData$`allele_expr_threshold`,
+            paste0(df$metricsData$transcript_prioritization_strategy, collapse=", "), df$metricsData$maximum_transcript_support_level
+        )
+    }
+    parameters <- c(
+        parameters,
+        "Binding Threshold", "Binding Threshold for Inclusion into Metrics File",
+        "Binding Percentile Threshold", "Immunogenicity Percentile Threshold",
+        "Presentation Percentile Threshold", "Percentile Threshold Strategy",
+        "Allele Specific Binding Thresholds",
+        "MT Top Score Metric", "WT Top Score Metric",
+        "Sorting Candidate Metric",
+        "Allele Specific Anchors Used", "Anchor Contribution Threshold"
+    )
+    values <- c(
+        values,
+        df$metricsData$binding_threshold,
+        df$metricsData$`aggregate_inclusion_binding_threshold`,
+        df$metricsData$binding_percentile_threshold, df$metricsData$immunogenicity_percentile_threshold,
+        df$metricsData$presentation_percentile_threshold, df$metricsData$percentile_threshold_strategy,
+        df$metricsData$use_allele_specific_binding_thresholds,
+        df$metricsData$mt_top_score_metric, df$metricsData$wt_top_score_metric,
+        paste0(df$metricsData$`top_score_metric2`, collapse=", "),
+        df$metricsData$allele_specific_anchors, df$metricsData$anchor_contribution_threshold
+    )
     data <- data.frame(
-      "Parameter" = c("Tumor Purity",
-                      "VAF Clonal", "VAF Subclonal", "Allele Expression for Passing Variants",
-                      "Binding Threshold", "Binding Threshold for Inclusion into Metrics File",
-                      "Transcript Prioritization Strategy", "Maximum TSL",
-                      "Binding Percentile Threshold", "Immunogenicity Percentile Threshold", "Presentation Percentile Threshold", "Percentile Threshold Strategy",
-                      "Allele Specific Binding Thresholds",
-                      "MT Top Score Metric", "WT Top Score Metric",
-                      "Sorting Candidate Metric",
-                      "Allele Specific Anchors Used", "Anchor Contribution Threshold"),
-      "Value" = c(if (is.null(df$metricsData$tumor_purity)) {"NULL"} else {df$metricsData$tumor_purity},
-                  df$metricsData$`vaf_clonal`, df$metricsData$`vaf_subclonal`, df$metricsData$`allele_expr_threshold`,
-                  df$metricsData$binding_threshold, df$metricsData$`aggregate_inclusion_binding_threshold`,
-                  paste0(df$metricsData$transcript_prioritization_strategy, collapse=", "), df$metricsData$maximum_transcript_support_level,
-                  df$metricsData$binding_percentile_threshold, df$metricsData$immunogenicity_percentile_threshold, df$metricsData$presentation_percentile_threshold, df$metricsData$percentile_threshold_strategy,
-                  df$metricsData$use_allele_specific_binding_thresholds,
-                  df$metricsData$mt_top_score_metric, df$metricsData$wt_top_score_metric,
-                  paste0(df$metricsData$`top_score_metric2`, collapse=", "),
-                  df$metricsData$allele_specific_anchors, df$metricsData$anchor_contribution_threshold)
-    ), digits = 3
-  )
+      "Parameter" = parameters,
+      "Value" = values
+    )
+    return(data)
+  }, digits = 3)
   output$bindingParamTable <- renderTable(
     if (df$metricsData$use_allele_specific_binding_thresholds) {
       data <- data.frame(
@@ -511,32 +514,45 @@ server <- shinyServer(function(input, output, session) {
       )
     }
   )
-  output$currentParamTable <- renderTable(
-    data <- data.frame(
-      "Parameter" = c("VAF Clonal", "VAF Subclonal", "Allele Expression for Passing Variants",
-                      "Binding Threshold", "Binding Threshold for Inclusion into Metrics File", "Transcript Prioritization Strategy", "Maximum TSL",
-                      "Binding Percentile Threshold", "Immunogenicity Percentile Threshold", "Presentation Percentile Threshold", "Percentile Threshold Strategy",
-                      "Allele Specific Binding Thresholds",
-                      "MT Top Score Metric", "WT Top Score Metric", "Sorting Candidate Metric",
-                      "Allele Specific Anchors Used", "Anchor Contribution Threshold"),
-      "Value" = c(
-        df$dna_cutoff,
-        df$dna_cutoff / 2,
-        df$allele_expr,
-        df$binding_threshold,
-        df$metricsData$`aggregate_inclusion_binding_threshold`,
-        paste0(df$transcript_prioritization_strategy, collapse=", "), df$maximum_transcript_support_level,
-        df$binding_percentile_threshold,
-        df$immunogenicity_percentile_threshold,
-        df$presentation_percentile_threshold,
-        df$percentile_threshold_strategy,
+  output$currentParamTable <- renderTable({
+    if (df$metricsData$file_type == 'pvacfuse') {
+        parameters <- c("Expression for Passing Variants", "Read Support Threshold")
+        values <- c(df$expn_val, df$read_support)
+    } else {
+        parameters <- c(
+            "VAF Clonal", "VAF Subclonal", "Allele Expression for Passing Variants",
+            "Transcript Prioritization Strategy", "Maximum TSL"
+        )
+        values <- c(
+            df$dna_cutoff, df$dna_cutoff / 2, df$allele_expr,
+            paste0(df$transcript_prioritization_strategy, collapse=", "), df$maximum_transcript_support_level
+        )
+    }
+    parameters <- c(
+        parameters,
+        "Binding Threshold", "Binding Threshold for Inclusion into Metrics File",
+        "Binding Percentile Threshold", "Immunogenicity Percentile Threshold",
+        "Presentation Percentile Threshold", "Percentile Threshold Strategy",
+        "Allele Specific Binding Thresholds",
+        "MT Top Score Metric", "WT Top Score Metric", "Sorting Candidate Metric",
+        "Allele Specific Anchors Used", "Anchor Contribution Threshold"
+    )
+    values <- c(
+        values,
+        df$binding_threshold, df$metricsData$`aggregate_inclusion_binding_threshold`,
+        df$binding_percentile_threshold, df$immunogenicity_percentile_threshold,
+        df$presentation_percentile_threshold, df$percentile_threshold_strategy,
         df$use_allele_specific_binding_thresholds,
-        df$metricsData$mt_top_score_metric,
-        df$metricsData$wt_top_score_metric,
+        df$metricsData$mt_top_score_metric, df$metricsData$wt_top_score_metric,
         paste0(df$scoring_candidate_metric, collapse=", "),
-        df$allele_specific_anchors, df$anchor_contribution)
-    ), digits = 3
-  )
+        df$allele_specific_anchors, df$anchor_contribution
+    )
+    data <- data.frame(
+      "Parameter" = parameters,
+      "Value" = values
+    )
+    return(data)
+  }, digits = 3)
   output$currentBindingParamTable <- renderTable(
     if (df$use_allele_specific_binding_thresholds) {
       data <- data.frame(
@@ -593,7 +609,7 @@ server <- shinyServer(function(input, output, session) {
       return(datatable(data.frame("Aggregate Report" = character())))
     }else {
       filtered_table <- df$mainTable[, !(colnames(df$mainTable) %in% c("ID", "Index", "Comments"))]
-      na_render_targets <- which(colnames(filtered_table) %in% c("IC50 MT", "IC50 WT", "%ile MT", "%ile WT", "IC50 %ile MT", "IC50 %ile WT", "IM %ile MT", "IM %ile WT", "Pres %ile MT", "Pres %ile WT"))
+      na_render_targets <- which(colnames(filtered_table) %in% c("IC50 MT", "IC50 WT", "%ile MT", "%ile WT", "IC50 %ile MT", "IC50 %ile WT", "IM %ile MT", "IM %ile WT", "Pres %ile MT", "Pres %ile WT", "Expr", "Read Support"))
       hla_columns <- which(colnames(filtered_table) %in% df$converted_hla_names)
 
       # Columns where the default value should be 'NA'
@@ -607,7 +623,7 @@ server <- shinyServer(function(input, output, session) {
                                                                         "Scaled binding percentile", "Scaled immunogenicity percentile", "Scaled presentation percentile", "Scaled BA", "Gene of Interest",
                                                                         "IC50 Pass", "Binding Percentile Pass", "Immunogenicity Percentile Pass", "Presentation Percentile Pass", "Anchor Pass",
                                                                         "VAF Clonal Pass", "Allele Expr Pass", "RNA Expr Fail", "RNA VAF Fail", "RNA Depth Fail",
-                                                                        "Prob Pos Pass"))
+                                                                        "Prob Pos Pass", "Expr Pass", "Read Support Pass"))
       hidden_targets <- c(hla_columns, additional_hidden_columns)
 
       # Applies a CSS class to the specified columns
@@ -619,7 +635,7 @@ server <- shinyServer(function(input, output, session) {
         list(targets = i, render = render_na)
       })
 
-      datatable(filtered_table,
+      dt <- datatable(filtered_table,
                 escape = FALSE,
                 callback = JS(callback(hla_count(), df$metricsData$mt_top_score_metric)),
                 class = "stripe",
@@ -655,41 +671,104 @@ server <- shinyServer(function(input, output, session) {
                 selection = list(mode = "single", selected = c(1)),
                 extensions = c("Buttons")
       )
+      dt <- dt %>%
+      formatStyle("IC50 MT", "Scaled BA",
+          backgroundColor = styleInterval(c(0.1, 0.2, 0.4, 0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#3F9750", "#F3F171", "#F3E770", "#F3DD6F", "#F0CD5B", "#F1C664", "#FF9999"))
+      ) %>%
+      formatStyle("%ile MT", "%ile MT",
+          backgroundColor = styleInterval(c(0.2, 0.4, 0.6, 0.8, 1, 1.25, 1.5, 1.75, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#F3F171", "#F3E770", "#F3DD6F", "#F1C664", "#FF9999"))
+      ) %>%
+      formatStyle("IC50 %ile MT", "Scaled binding percentile",
+          backgroundColor = styleInterval(c(0.2, 0.4, 0.6, 0.8, 1, 1.25, 1.5, 1.75, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#F3F171", "#F3E770", "#F3DD6F", "#F1C664", "#FF9999"))
+      ) %>%
+      formatStyle("IM %ile MT", "Scaled immunogenicity percentile",
+          backgroundColor = styleInterval(c(0.2, 0.4, 0.6, 0.8, 1, 1.25, 1.5, 1.75, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#F3F171", "#F3E770", "#F3DD6F", "#F1C664", "#FF9999"))
+      ) %>%
+      formatStyle("Pres %ile MT", "Scaled presentation percentile",
+          backgroundColor = styleInterval(c(0.2, 0.4, 0.6, 0.8, 1, 1.25, 1.5, 1.75, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#F3F171", "#F3E770", "#F3DD6F", "#F1C664", "#FF9999"))
+      ) %>%
+      formatStyle("Tier",
+          color = styleEqual(
+            c("Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "PoorTranscript", "LowExpr", "Anchor", "Subclonal", "ProbPos", "LowReadSupport", "Poor", "NoExpr"),
+            c("green", "orange", "orange", "orange", "orange", "orange", "orange", "orange", "orange", "orange", "orange", "red", "red")
+          )
+      ) %>%
+      formatStyle(c("Gene"), "Gene of Interest",
+          fontWeight = styleEqual(c(TRUE), c("bold")), border = styleEqual(c(TRUE), c("2px solid green"))
+      ) %>%
+      formatStyle(c("IC50 WT", "Pos"), "Anchor Pass",
+          fontWeight = styleEqual(c(FALSE), c("bold")), border = styleEqual(c(FALSE), c("2px solid red"))
+      ) %>%
+      formatStyle(c("IC50 MT"), "IC50 Pass",
+          fontWeight = styleEqual(c(FALSE), c("bold")), border = styleEqual(c(FALSE), c("2px solid red"))
+      ) %>%
+      formatStyle(c("IC50 %ile MT"), "Binding Percentile Pass",
+          fontWeight = styleEqual(c(FALSE), c("bold")), border = styleEqual(c(FALSE), c("2px solid red"))
+      ) %>%
+      formatStyle(c("IM %ile MT"), "Immunogenicity Percentile Pass",
+          fontWeight = styleEqual(c(FALSE), c("bold")), border = styleEqual(c(FALSE), c("2px solid red"))
+      ) %>%
+      formatStyle(c("Pres %ile MT"), "Presentation Percentile Pass",
+          fontWeight = styleEqual(c(FALSE), c("bold")), border = styleEqual(c(FALSE), c("2px solid red"))
+      ) %>%
+      formatStyle(c("Prob Pos"), "Prob Pos Pass",
+          fontWeight = styleEqual(c(FALSE), c("bold")), border = styleEqual(c(FALSE), c("2px solid red"))
+      ) %>%
+      formatStyle(c("Ref Match"), "Ref Match",
+          fontWeight = styleEqual(c("True"), c("bold")), border = styleEqual(c("True"), c("2px solid red"))
+      ) %>%
+      formatStyle("Best Peptide", fontFamily="monospace")
+      if (df$metricsData$file_type == 'pvacfuse') {
+        dt <- dt %>%
+        formatStyle(c("Expr"), "Expr Pass",
+            fontWeight = styleEqual(c(FALSE), c("bold")), border = styleEqual(c(FALSE), c("2px solid red"))
+        ) %>%
+        formatStyle(c("Read Support"), "Read Support Pass",
+            fontWeight = styleEqual(c(FALSE), c("bold")), border = styleEqual(c(FALSE), c("2px solid red"))
+        )
+      } else {
+        dt <- dt %>%
+        formatStyle(c("RNA Depth"), "Col RNA Depth",
+            background = styleColorBar(range(0, 200), "lightblue"),
+            backgroundSize = "98% 88%", backgroundRepeat = "no-repeat", backgroundPosition = "right"
+        ) %>%
+        formatStyle(c("RNA VAF"), "Col RNA VAF",
+            background = styleColorBar(range(0, 1), "lightblue"),
+            backgroundSize = "98% 88%", backgroundRepeat = "no-repeat", backgroundPosition = "right"
+        ) %>%
+        formatStyle(c("DNA VAF"), "Col DNA VAF",
+            background = styleColorBar(range(0, 1), "lightblue"),
+            backgroundSize = "98% 88%", backgroundRepeat = "no-repeat", backgroundPosition = "right"
+        ) %>%
+        formatStyle(c("RNA Expr"), "Col RNA Expr",
+            background = styleColorBar(range(0, 50), "lightblue"),
+            backgroundSize = "98% 88%", backgroundRepeat = "no-repeat", backgroundPosition = "right"
+        ) %>%
+        formatStyle(c("Allele Expr"), "Col Allele Expr",
+            background = styleColorBar(range(0, (max(as.numeric(as.character(unlist(df$mainTable["Col RNA VAF"]))) * 50))), "lightblue"),
+            backgroundSize = "98% 88%", backgroundRepeat = "no-repeat", backgroundPosition = "right"
+        ) %>%
+        formatStyle(c("DNA VAF"), "VAF Clonal Pass",
+            fontWeight = styleEqual(c(FALSE), c("bold")), border = styleEqual(c(FALSE), c("2px solid red"))
+        ) %>%
+        formatStyle(c("Allele Expr"), "Allele Expr Pass",
+            fontWeight = styleEqual(c(FALSE), c("bold")), border = styleEqual(c(FALSE), c("2px solid red"))
+        ) %>%
+        formatStyle(c("RNA Expr"), "RNA Expr Fail",
+            fontWeight = styleEqual(c(TRUE), c("bold")), border = styleEqual(c(TRUE), c("2px solid red"))
+        ) %>%
+        formatStyle(c("RNA VAF"), "RNA VAF Fail",
+            fontWeight = styleEqual(c(TRUE), c("bold")), border = styleEqual(c(TRUE), c("2px solid red"))
+        ) %>%
+        formatStyle(c("RNA Depth"), "RNA Depth Fail",
+            fontWeight = styleEqual(c(TRUE), c("bold")), border = styleEqual(c(TRUE), c("2px solid red"))
+        ) %>%
+        formatStyle(c("Transcript Pass"), "Transcript Pass",
+            fontWeight = styleEqual(c("False"), c("bold")), border = styleEqual(c("False"), c("2px solid red"))
+        )
+      }
+      dt
     }
-    %>% formatStyle("IC50 MT", "Scaled BA",
-        backgroundColor = styleInterval(c(0.1, 0.2, 0.4, 0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#3F9750", "#F3F171", "#F3E770", "#F3DD6F", "#F0CD5B", "#F1C664", "#FF9999"))
-        #fontWeight = styleInterval(c(1000), c("normal", "bold")),
-        #border = styleInterval(c(1000), c("normal", "2px solid red"))
-    )
-    %>% formatStyle("%ile MT", "%ile MT",
-        backgroundColor = styleInterval(c(0.2, 0.4, 0.6, 0.8, 1, 1.25, 1.5, 1.75, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#F3F171", "#F3E770", "#F3DD6F", "#F1C664", "#FF9999")))
-    %>% formatStyle("IC50 %ile MT", "Scaled binding percentile",
-        backgroundColor = styleInterval(c(0.2, 0.4, 0.6, 0.8, 1, 1.25, 1.5, 1.75, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#F3F171", "#F3E770", "#F3DD6F", "#F1C664", "#FF9999")))
-    %>% formatStyle("IM %ile MT", "Scaled immunogenicity percentile",
-        backgroundColor = styleInterval(c(0.2, 0.4, 0.6, 0.8, 1, 1.25, 1.5, 1.75, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#F3F171", "#F3E770", "#F3DD6F", "#F1C664", "#FF9999")))
-    %>% formatStyle("Pres %ile MT", "Scaled presentation percentile",
-        backgroundColor = styleInterval(c(0.2, 0.4, 0.6, 0.8, 1, 1.25, 1.5, 1.75, 2), c("#68F784", "#60E47A", "#58D16F", "#4FBD65", "#47AA5A", "#F3F171", "#F3E770", "#F3DD6F", "#F1C664", "#FF9999")))
-    %>% formatStyle("Tier", color = styleEqual(c("Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "PoorTranscript", "LowExpr", "Anchor", "Subclonal", "ProbPos", "Poor", "NoExpr"), c("green", "orange", "orange", "orange", "orange", "orange", "orange", "orange", "orange", "orange", "red", "red")))
-    %>% formatStyle(c("RNA Depth"), "Col RNA Depth", background = styleColorBar(range(0, 200), "lightblue"), backgroundSize = "98% 88%", backgroundRepeat = "no-repeat", backgroundPosition = "right")
-    %>% formatStyle(c("RNA VAF"), "Col RNA VAF", background = styleColorBar(range(0, 1), "lightblue"), backgroundSize = "98% 88%", backgroundRepeat = "no-repeat", backgroundPosition = "right")
-    %>% formatStyle(c("DNA VAF"), "Col DNA VAF", background = styleColorBar(range(0, 1), "lightblue"), backgroundSize = "98% 88%", backgroundRepeat = "no-repeat", backgroundPosition = "right")
-    %>% formatStyle(c("RNA Expr"), "Col RNA Expr", background = styleColorBar(range(0, 50), "lightblue"), backgroundSize = "98% 88%", backgroundRepeat = "no-repeat", backgroundPosition = "right")
-    %>% formatStyle(c("Allele Expr"), "Col Allele Expr", background = styleColorBar(range(0, (max(as.numeric(as.character(unlist(df$mainTable["Col RNA VAF"]))) * 50))), "lightblue"), backgroundSize = "98% 88%", backgroundRepeat = "no-repeat", backgroundPosition = "right")
-    %>% formatStyle(c("Gene"), "Gene of Interest", fontWeight = styleEqual(c(TRUE), c("bold")), border = styleEqual(c(TRUE), c("2px solid green")))
-    %>% formatStyle(c("IC50 WT", "Pos"), "Anchor Pass", fontWeight = styleEqual(c(FALSE), c("bold")), border = styleEqual(c(FALSE), c("2px solid red")))
-    %>% formatStyle(c("DNA VAF"), "VAF Clonal Pass", fontWeight = styleEqual(c(FALSE), c("bold")), border = styleEqual(c(FALSE), c("2px solid red")))
-    %>% formatStyle(c("Allele Expr"), "Allele Expr Pass", fontWeight = styleEqual(c(FALSE), c("bold")), border = styleEqual(c(FALSE), c("2px solid red")))
-    %>% formatStyle(c("RNA Expr"), "RNA Expr Fail", fontWeight = styleEqual(c(TRUE), c("bold")), border = styleEqual(c(TRUE), c("2px solid red")))
-    %>% formatStyle(c("RNA VAF"), "RNA VAF Fail", fontWeight = styleEqual(c(TRUE), c("bold")), border = styleEqual(c(TRUE), c("2px solid red")))
-    %>% formatStyle(c("RNA Depth"), "RNA Depth Fail", fontWeight = styleEqual(c(TRUE), c("bold")), border = styleEqual(c(TRUE), c("2px solid red")))
-    %>% formatStyle(c("IC50 MT"), "IC50 Pass",fontWeight = styleEqual(c(FALSE), c("bold")), border = styleEqual(c(FALSE), c("2px solid red")))
-    %>% formatStyle(c("IC50 %ile MT"), "Binding Percentile Pass",fontWeight = styleEqual(c(FALSE), c("bold")), border = styleEqual(c(FALSE), c("2px solid red")))
-    %>% formatStyle(c("IM %ile MT"), "Immunogenicity Percentile Pass",fontWeight = styleEqual(c(FALSE), c("bold")), border = styleEqual(c(FALSE), c("2px solid red")))
-    %>% formatStyle(c("Pres %ile MT"), "Presentation Percentile Pass",fontWeight = styleEqual(c(FALSE), c("bold")), border = styleEqual(c(FALSE), c("2px solid red")))
-    %>% formatStyle(c("Prob Pos"), "Prob Pos Pass", fontWeight = styleEqual(c(FALSE), c("bold")), border = styleEqual(c(FALSE), c("2px solid red")))
-    %>% formatStyle(c("Ref Match"), "Ref Match", fontWeight = styleEqual(c("True"), c("bold")), border = styleEqual(c("True"), c("2px solid red")))
-    %>% formatStyle(c("Transcript Pass"), "Transcript Pass", fontWeight = styleEqual(c("False"), c("bold")), border = styleEqual(c("False"), c("2px solid red")))
-    %>% formatStyle("Best Peptide", fontFamily="monospace")
     , server = FALSE)
   #capture last selected row so that it still displays data from that row when
   #a row is deselected (instead of switching back to the first row)
@@ -820,39 +899,55 @@ server <- shinyServer(function(input, output, session) {
     df$comments[selectedID(), 1] <- input$comments
   })
   ##display of genomic information
-  output$metricsTextGenomicCoord <- renderText({
+  output$metricsTextGenomicCoord <- renderUI({
     if (is.null(df$metricsData)) {
-      return()
+        return(NULL)
+    } else {
+        if (df$metricsData$file_type == 'pvacfuse') {
+            return(NULL)
+        } else {
+            tagList(
+                tags$span("Genomic Information (chromosome - start - stop - ref - alt)"),
+                tags$pre(selectedID())
+            )
+        }
     }
-    selectedID()
   })
-  ##display of openCRAVAT link for variant
   output$url <- renderUI({
-    if (is.null(df$mainTable)) {
+    if (is.null(df$mainTable) || df$metricsData$file_type == 'pvacfuse' || df$metricsData$file_type == 'pvacsplice') {
       return()
+    } else {
+        id <- strsplit(selectedID(), "-")
+        chromosome <- id[[1]][1]
+        start <- id[[1]][2]
+        stop <- id[[1]][3]
+        ref <- id[[1]][4]
+        alt <- id[[1]][5]
+        tagList(
+            h5("Additional Variant Information:"),
+            tags$a("OpenCRAVAT variant report", href = paste("https://run.opencravat.org/webapps/variantreport/index.html?chrom=", chromosome, "&pos=", stop, "&ref_base=", ref, "&alt_base=", alt, sep = ""), target = "_blank")
+        )
     }
-    id <- strsplit(selectedID(), "-")
-    chromosome <- id[[1]][1]
-    start <- id[[1]][2]
-    stop <- id[[1]][3]
-    ref <- id[[1]][4]
-    alt <- id[[1]][5]
-    url <- a("OpenCRAVAT variant report", href = paste("https://run.opencravat.org/webapps/variantreport/index.html?chrom=", chromosome, "&pos=", stop, "&ref_base=", ref, "&alt_base=", alt, sep = ""), target = "_blank")
-    HTML(paste(url))
   })
   ##display of RNA VAF
-  output$metricsTextRNA <- renderText({
-    if (is.null(df$metricsData)) {
+  output$metricsTextRNA <- renderUI({
+    if (is.null(df$metricsData) || df$metricsData$file_type == 'pvacfuse') {
       return()
     }
-    df$metricsData[[selectedID()]]$`RNA VAF`
+    tagList(
+        tags$span("RNA VAF"),
+        tags$pre(df$metricsData[[selectedID()]]$`RNA VAF`)
+    )
   })
   ##display of DNA VAF
-  output$metricsTextDNA <- renderText({
-    if (is.null(df$metricsData)) {
+  output$metricsTextDNA <- renderUI({
+    if (is.null(df$metricsData) || df$metricsData$file_type == 'pvacfuse') {
       return()
     }
-    df$metricsData[[selectedID()]]$`DNA VAF`
+    tagList(
+        tags$span("DNA VAF"),
+        tags$pre(df$metricsData[[selectedID()]]$`DNA VAF`)
+    )
   })
   ##display of MT IC50 from additional data file
   output$addData_IC50 <- renderText({
@@ -877,16 +972,24 @@ server <- shinyServer(function(input, output, session) {
   output$addData_transcript <- renderText({
     df$additionalData[df$additionalData$ID == selectedID(), ]$`Best Transcript`
   })
-  output$ml_prediction_score <- renderText({
-  if (is.null(df$additionalData)) {
-    return()
-  }
-  row <- df$additionalData[df$additionalData$ID == selectedID(), ]
-  if (nrow(row) == 0 || !("ML Prediction (score)" %in% colnames(df$additionalData))) {
-    return("N/A")
-  }
-  row$`ML Prediction (score)`
-})
+  output$ml_prediction_score <- renderUI({
+      if (is.null(df$additionalData) || df$metricsData$file_type == 'pvacfuse' || df$metricsData$file_type == 'pvacsplice') {
+        return()
+      } else {
+          row <- df$additionalData[df$additionalData$ID == selectedID(), ]
+          if (nrow(row) == 0 || !("ML Prediction (score)" %in% colnames(df$additionalData))) {
+            tagList(
+                tags$span("ML Prediction"),
+                tags$pre("N/A")
+            )
+          } else {
+            tagList(
+                tags$span("ML Prediction"),
+                tags$pre(row$`ML Prediction (score)`)
+            )
+          }
+      }
+  })
   ##transcript sets table displaying sets of transcripts with the same consequence
   output$transcriptSetsTable <- renderDT({
     withProgress(message = "Loading Transcript Sets Table", value = 0, {
@@ -904,7 +1007,15 @@ server <- shinyServer(function(input, output, session) {
         incProgress(0.5)
         for (i in 1:length(df$metricsData[[selectedID()]]$sets)){
           transcript_set <- df$metricsData[[selectedID()]]$good_binders[[df$metricsData[[selectedID()]]$sets[i]]]$`transcripts`
-          transcript_set <- lapply(transcript_set, function(x) strsplit(x, "-")[[1]][1])
+          if (df$metricsData$file_type == 'pvacfuse') {
+            transcript_set <- lapply(transcript_set, function(x) {
+                transcript_a <- str_split_i(x, "-", 1)
+                transcript_b <- str_split_i(x, "-", 2)
+                paste(transcript_a, transcript_b, sep = "-")
+            })
+          } else{
+            transcript_set <- lapply(transcript_set, function(x) strsplit(x, "-")[[1]][1])
+          }
           if (best_transcript %in% transcript_set) {
             best_transcript_set <- df$metricsData[[selectedID()]]$sets[i]
             best_transcript_set_id <- i
@@ -937,22 +1048,37 @@ server <- shinyServer(function(input, output, session) {
       GB_transcripts <- data.frame()
       best_transcript <- df$mainTable[df$mainTable$ID == selectedID(), ]$`Best Transcript`
       if (length(df$metricsData[[selectedID()]]$sets) != 0) {
-        GB_transcripts <- data.frame("Transcripts" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcripts`,
-                                     "Expression" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcript_expr`,
-                                     "MANE Select" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`mane_select`,
-                                     "Canonical" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`canonical`,
-                                     "TSL" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`tsl`,
-                                     "Biotype" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`biotype`,
-                                     "CDS Flags" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcript_cds_flags`,
-                                     "Length" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcript_length`)
+        if (df$metricsData$file_type == 'pvacfuse') {
+            GB_transcripts <- data.frame("Transcripts" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcripts`,
+                                         "Expression" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcript_expr`)
+
+        } else {
+            GB_transcripts <- data.frame("Transcripts" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcripts`,
+                                         "Expression" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcript_expr`,
+                                         "MANE Select" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`mane_select`,
+                                         "Canonical" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`canonical`,
+                                         "TSL" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`tsl`,
+                                         "Biotype" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`biotype`,
+                                         "CDS Flags" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcript_cds_flags`,
+                                         "Length" = df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcript_length`)
+        }
         GB_transcripts$`Best Transcript` <- apply(GB_transcripts, 1, function(x) grepl(best_transcript, x["Transcripts"], fixed = TRUE))
         incProgress(0.5)
-        names(GB_transcripts) <- c("Transcripts in Selected Set", "Expression", "MANE Select", "Canonical", "Transcript Support Level", "Biotype", "CDS Flags", "Transcript Length (#AA)", "Best Transcript")
+        if (df$metricsData$file_type == 'pvacfuse') {
+            names(GB_transcripts) <- c("Transcripts in Selected Set", "Expression", "Best Transcript")
+        } else {
+            names(GB_transcripts) <- c("Transcripts in Selected Set", "Expression", "MANE Select", "Canonical", "Transcript Support Level", "Biotype", "CDS Flags", "Transcript Length (#AA)", "Best Transcript")
+        }
         incProgress(0.5)
+        if (df$metricsData$file_type == 'pvacfuse') {
+            na_target <- c(2)
+        } else {
+            na_target <- c(5)
+        }
         datatable(GB_transcripts,
           selection = 'none',
           options = list(
-            columnDefs = list(list(defaultContent = "NA", targets = c(5)), list(visible = FALSE, targets = c(-1)))
+            columnDefs = list(list(defaultContent = "NA", targets = na_target), list(visible = FALSE, targets = c(-1)))
           )
         ) %>% formatStyle(c("Transcripts in Selected Set"), "Best Transcript", backgroundColor = styleEqual(c(TRUE), c("#98FF98")))
       }else {
@@ -966,20 +1092,46 @@ server <- shinyServer(function(input, output, session) {
     })
   })
 
-  ##display transcript expression
-  output$metricsTextTranscript <- renderText({
-    if (length(df$metricsData[[selectedID()]]$sets) != 0) {
-      df$metricsData[[selectedID()]]$good_binders[[selectedTranscriptSet()]]$`transcript_expr`
-    }else {
-      "N/A"
+  ##display (gene) expression
+  output$metricsTextGeneExpression <- renderUI({
+    if (is.null(df$metricsData)) {
+        return(NULL)
+    } else {
+        if (df$metricsData$file_type == 'pvacfuse') {
+            title <- "Expression"
+        } else {
+            title <- "Gene Expression"
+        }
+
+        if (length(df$metricsData[[selectedID()]]$sets) == 0) {
+            tagList(
+                tags$span(title),
+                tags$pre("N/A")
+            )
+        } else {
+            tagList(
+                tags$span(title),
+                tags$pre(df$metricsData[[selectedID()]]$`gene_expr`)
+            )
+        }
     }
   })
-  ##display gene expression
-  output$metricsTextGene <- renderText({
-    if (length(df$metricsData[[selectedID()]]$sets) != 0) {
-      df$metricsData[[selectedID()]]$`gene_expr`
-    }else {
-      "N/A"
+  ##display read support
+  output$metricsTextReadSupport <- renderUI({
+    if (is.null(df$metricsData) || df$metricsData$file_type != 'pvacfuse') {
+        return(NULL)
+    } else {
+        if (length(df$metricsData[[selectedID()]]$sets) == 0) {
+            tagList(
+                tags$span("Read Support"),
+                tags$pre("N/A")
+            )
+        } else {
+            tagList(
+                tags$span("Read Support"),
+                tags$pre(df$metricsData[[selectedID()]]$`read_support`)
+            )
+        }
     }
   })
   ##display peptide table with coloring

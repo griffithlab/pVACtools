@@ -103,6 +103,8 @@ explore_tab <- tabItem(
                     uiOutput("percentile_threshold_strategy_ui"),
                     uiOutput("dna_cutoff_ui"),
                     uiOutput("allele_expr_ui"),
+                    uiOutput("expn_val_ui"),
+                    uiOutput("read_support_ui"),
                     uiOutput("transcript_prioritization_strategy_ui"),
                     uiOutput("maximum_transcript_support_level_ui"),
                     uiOutput("scoring_candidate_metric_ui"),
@@ -213,13 +215,14 @@ explore_tab <- tabItem(
                         span("Best Transcript: ", verbatimTextOutput("addData_transcript")))
                 ),
                 box(width = 4, solidHeader = TRUE, title = "Variant & Gene Info",
-                    span("DNA VAF", verbatimTextOutput("metricsTextDNA")),
-                    span("RNA VAF", verbatimTextOutput("metricsTextRNA")),
-                    span("Gene Expression", verbatimTextOutput("metricsTextGene")),
-                    span("Genomic Information (chromosome - start - stop - ref - alt)", verbatimTextOutput("metricsTextGenomicCoord")),
-                    span("ML Prediction", verbatimTextOutput("ml_prediction_score")),
-                    h5("Additional variant information:"),
-                    uiOutput("url"), style = "overflow-x: scroll;font-size:100%"),
+                    uiOutput("metricsTextDNA"),
+                    uiOutput("metricsTextRNA"),
+                    uiOutput("metricsTextGeneExpression"),
+                    uiOutput("metricsTextReadSupport"),
+                    uiOutput("metricsTextGenomicCoord"),
+                    uiOutput("ml_prediction_score"),
+                    uiOutput("url"), style = "overflow-x: scroll;font-size:100%"
+                ),
                 box(width = 2, solidHeader = TRUE, title = "Peptide Evaluation Overview",
                     tableOutput("checked"), style = "overflow-x: scroll;font-size:100%")
             )

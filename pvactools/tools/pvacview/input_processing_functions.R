@@ -16,8 +16,12 @@ process_main_data <- function(mainData) {
     mainData$Rev <- shinyInputSelect(actionButton, mainData["ID"], "button-rev_", icon = icon("flag"), label = "", onclick = 'Shiny.onInputChange(\"review_eval\",  this.id, {priority: "event"})', onmousedown = "event.preventDefault(); event.stopPropagation();")
     mainData$`IC50 MT` <- as.numeric(mainData$`IC50 MT`)
     mainData$`%ile MT` <- as.numeric(mainData$`%ile MT`)
-    mainData$`RNA Depth` <- as.character(as.integer(mainData$`RNA Depth`))
-    mainData$`TSL`[is.na(mainData$`TSL`)] <- "NA"
+    if ("RNA Depth" %in% colnames(mainData)) {
+        mainData$`RNA Depth` <- as.character(as.integer(mainData$`RNA Depth`))
+    }
+    if ("TSL" %in% colnames(mainData)) {
+        mainData$`TSL`[is.na(mainData$`TSL`)] <- "NA"
+    }
     return(mainData)
 }
 
@@ -31,13 +35,9 @@ process_metrics_data <- function(df) {
     df$presentation_percentile_threshold <- df$metricsData$`presentation_percentile_threshold`
     df$percentile_threshold_strategy <- df$metricsData$`percentile_threshold_strategy`
     df$scoring_candidate_metric <- df$metricsData$`top_score_metric2`
-    df$dna_cutoff <- df$metricsData$vaf_clonal
-    df$allele_expr <- df$metricsData$allele_expr_threshold
     df$anchor_mode <- ifelse(df$metricsData$`allele_specific_anchors`, "allele-specific", "default")
     df$allele_specific_anchors <- df$metricsData$`allele_specific_anchors`
     df$anchor_contribution <- df$metricsData$`anchor_contribution_threshold`
-    df$maximum_transcript_support_level <- df$metricsData$maximum_transcript_support_level
-    df$transcript_prioritization_strategy <- df$metricsData$`transcript_prioritization_strategy`
     hla <- df$metricsData$alleles
     df$converted_hla_names <- unlist(lapply(hla, function(x) {
       if (grepl("HLA-", x)) {
@@ -46,6 +46,15 @@ process_metrics_data <- function(df) {
         x
       }
     }))
+    if (df$metricsData$file_type == 'pvacfuse') {
+        df$expn_val <- df$metricsData$expn_val
+        df$read_support <- df$metricsData$read_support
+    } else {
+        df$dna_cutoff <- df$metricsData$vaf_clonal
+        df$allele_expr <- df$metricsData$allele_expr_threshold
+        df$maximum_transcript_support_level <- df$metricsData$maximum_transcript_support_level
+        df$transcript_prioritization_strategy <- df$metricsData$`transcript_prioritization_strategy`
+    }
     return(df)
 }
 
@@ -53,14 +62,28 @@ postprocess_inputs <- function(df) {
     if (!("Ref Match" %in% colnames(df$mainTable))) {
         df$mainTable$`Ref Match` <- "Not Run"
     }
-    columns_needed <- c("ID", "Index", df$converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "MANE Select", "Canonical", "TSL", "Allele", "Pos", "Prob Pos",
-                        "Num Included Peptides", "Num Passing Peptides", "IC50 MT", "IC50 WT", "%ile MT", "%ile WT", "IC50 %ile MT", "IC50 %ile WT", "Pres %ile MT", "Pres %ile WT", "IM %ile MT", "IM %ile WT",
-                        "RNA Expr", "RNA VAF", "Allele Expr", "RNA Depth", "DNA VAF", "Tier", "Ref Match", "Acpt", "Rej", "Rev")
+    if (df$metricsData$file_type == 'pvacfuse') {
+        columns_needed <- c("ID", "Index", df$converted_hla_names, "Gene", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "Allele", "Pos", "Prob Pos",
+                            "Num Included Peptides", "Num Passing Peptides", "IC50 MT", "IC50 WT", "%ile MT", "%ile WT", "IC50 %ile MT", "IC50 %ile WT", "Pres %ile MT", "Pres %ile WT", "IM %ile MT", "IM %ile WT",
+                            "Expr", "Read Support", "Tier", "Ref Match", "Acpt", "Rej", "Rev")
+    } else {
+        columns_needed <- c("ID", "Index", df$converted_hla_names, "Gene", "AA Change", "Num Passing Transcripts", "Best Peptide", "Best Transcript", "MANE Select", "Canonical", "TSL", "Allele", "Pos", "Prob Pos",
+                            "Num Included Peptides", "Num Passing Peptides", "IC50 MT", "IC50 WT", "%ile MT", "%ile WT", "IC50 %ile MT", "IC50 %ile WT", "Pres %ile MT", "Pres %ile WT", "IM %ile MT", "IM %ile WT",
+                            "RNA Expr", "RNA VAF", "Allele Expr", "RNA Depth", "DNA VAF", "Tier", "Ref Match", "Acpt", "Rej", "Rev")
+    }
     if ("ML Prediction (score)" %in% colnames(df$mainTable)) {
         columns_needed <- c(columns_needed, "ML Prediction (score)")
     }
     df$mainTable <- df$mainTable[, columns_needed]
-    df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
+    if (df$metricsData$file_type == 'pvacfuse') {
+        df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {
+            gene_a <- str_split_i(x['Gene'], "-", 1)
+            gene_b <- str_split_i(x['Gene'], "-", 2)
+            any(gene_a == df$gene_list || gene_b == df$gene_list)
+        })
+    } else {
+        df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
+    }
     if ("Comments" %in% colnames(df$mainTable)) {
         df$comments <- data.frame(data = df$mainTable$`Comments`, nrow = nrow(df$mainTable), ncol = 1)
     }else {
@@ -75,37 +98,42 @@ set_formatting_columns <- function(df) {
     df$mainTable$`Scaled binding percentile` <- apply(df$mainTable, 1, function(x) {as.numeric(x["IC50 %ile MT"]) / (df$binding_percentile_threshold)})
     df$mainTable$`Scaled immunogenicity percentile` <- apply(df$mainTable, 1, function(x) {as.numeric(x["IM %ile MT"]) / (df$immunogenicity_percentile_threshold)})
     df$mainTable$`Scaled presentation percentile` <- apply(df$mainTable, 1, function(x) {as.numeric(x["Pres %ile MT"]) / (df$presentation_percentile_threshold)})
-    df$mainTable$`Col RNA Expr` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["RNA Expr"]), 0, x["RNA Expr"])})
-    df$mainTable$`Col RNA VAF` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["RNA VAF"]), 0, x["RNA VAF"])})
-    df$mainTable$`Col Allele Expr` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["Allele Expr"]), 0, x["Allele Expr"])})
-    df$mainTable$`Col RNA Depth` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["RNA Depth"]), 0, x["RNA Depth"])})
-    df$mainTable$`Col DNA VAF` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["DNA VAF"]), 0, x["DNA VAF"])})
     df$mainTable$`IC50 Pass` <- apply(df$mainTable, 1, function(x) {is_ic50_pass(df$use_allele_specific_binding_thresholds, x['Allele'], df$allele_specific_binding_thresholds, as.numeric(x['IC50 MT']), as.numeric(df$binding_threshold))})
     df$mainTable$`Binding Percentile Pass` <- apply(df$mainTable, 1, function(x) {is_percentile_pass(df$binding_percentile_threshold, as.numeric(x["IC50 %ile MT"]))})
     df$mainTable$`Immunogenicity Percentile Pass` <- apply(df$mainTable, 1, function(x) {is_percentile_pass(df$immunogenicity_percentile_threshold, as.numeric(x["IM %ile MT"]))})
     df$mainTable$`Presentation Percentile Pass` <- apply(df$mainTable, 1, function(x) {is_percentile_pass(df$presentation_percentile_threshold, as.numeric(x["Pres %ile MT"]))})
     df$mainTable$`Anchor Pass` <- apply(df$mainTable, 1, function(x) {is_anchor_residue_pass(df$anchor_mode, x['Best Peptide'], x['Allele'], as.numeric(df$anchor_contribution), x['Pos'], x['IC50 WT'], as.numeric(df$binding_threshold))})
-    df$mainTable$`VAF Clonal Pass` <- apply(df$mainTable, 1, function(x) {is_vaf_clonal_pass(x["DNA VAF"], as.numeric(df$dna_cutoff))})
-    df$mainTable$`Allele Expr Pass` <- apply(df$mainTable, 1, function(x) {is_allele_expr_pass(x["RNA VAF"], x["RNA Expr"], x["Allele Expr"], as.numeric(df$allele_expr))})
-    df$mainTable$`RNA Expr Fail` <- apply(df$mainTable, 1, function(x) {!is.na(x['RNA Expr']) && as.numeric(x['RNA Expr']) == 0})
-    df$mainTable$`RNA VAF Fail` <- apply(df$mainTable, 1, function(x) {!is.na(x['RNA VAF']) && as.numeric(x['RNA VAF']) <= as.numeric(df$metricsData['trna_vaf'])})
-    df$mainTable$`RNA Depth Fail` <- apply(df$mainTable, 1, function(x) {!is.na(x['RNA Depth']) && as.numeric(x['RNA Depth']) <= as.numeric(df$metricsData['trna_cov'])})
     df$mainTable$`Prob Pos Pass` <- apply(df$mainTable, 1, function(x) {is_probaa_pass(x["Prob Pos"])})
-    transcript_pass <- apply(df$mainTable, 1, function(x) {
-      if ('tsl' %in% df$transcript_prioritization_strategy && is_tsl_pass(x["TSL"], as.numeric(df$maximum_transcript_support_level))) {
-        return("True")
-      }
-      else if ('mane_select' %in% df$transcript_prioritization_strategy && is_mane_select_pass(x["MANE Select"])) {
-        return("True")
-      }
-      else if ('canonical' %in% df$transcript_prioritization_strategy && is_canonical_pass(x["Canonical"])) {
-        return("True")
-      }
-      else {
-        return("False")
-      }
-    })
-    df$mainTable <- add_column(df$mainTable, `Transcript Pass` = transcript_pass, .after = "TSL")
+    if (df$metricsData$file_type == 'pvacfuse') {
+        df$mainTable$`Expr Pass` <- apply(df$mainTable, 1, function(x) {is_expr_pass(x["Expr"], as.numeric(df$expn_val))})
+        df$mainTable$`Read Support Pass` <- apply(df$mainTable, 1, function(x) {is_read_support_pass(x["Read Support"], as.numeric(df$read_support))})
+    } else {
+        df$mainTable$`Col RNA Expr` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["RNA Expr"]), 0, x["RNA Expr"])})
+        df$mainTable$`Col RNA VAF` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["RNA VAF"]), 0, x["RNA VAF"])})
+        df$mainTable$`Col Allele Expr` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["Allele Expr"]), 0, x["Allele Expr"])})
+        df$mainTable$`Col RNA Depth` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["RNA Depth"]), 0, x["RNA Depth"])})
+        df$mainTable$`Col DNA VAF` <- apply(df$mainTable, 1, function(x) {ifelse(is.na(x["DNA VAF"]), 0, x["DNA VAF"])})
+        df$mainTable$`VAF Clonal Pass` <- apply(df$mainTable, 1, function(x) {is_vaf_clonal_pass(x["DNA VAF"], as.numeric(df$dna_cutoff))})
+        df$mainTable$`Allele Expr Pass` <- apply(df$mainTable, 1, function(x) {is_allele_expr_pass(x["RNA VAF"], x["RNA Expr"], x["Allele Expr"], as.numeric(df$allele_expr))})
+        df$mainTable$`RNA Expr Fail` <- apply(df$mainTable, 1, function(x) {!is.na(x['RNA Expr']) && as.numeric(x['RNA Expr']) == 0})
+        df$mainTable$`RNA VAF Fail` <- apply(df$mainTable, 1, function(x) {!is.na(x['RNA VAF']) && as.numeric(x['RNA VAF']) <= as.numeric(df$metricsData['trna_vaf'])})
+        df$mainTable$`RNA Depth Fail` <- apply(df$mainTable, 1, function(x) {!is.na(x['RNA Depth']) && as.numeric(x['RNA Depth']) <= as.numeric(df$metricsData['trna_cov'])})
+        transcript_pass <- apply(df$mainTable, 1, function(x) {
+          if ('tsl' %in% df$transcript_prioritization_strategy && is_tsl_pass(x["TSL"], as.numeric(df$maximum_transcript_support_level))) {
+            return("True")
+          }
+          else if ('mane_select' %in% df$transcript_prioritization_strategy && is_mane_select_pass(x["MANE Select"])) {
+            return("True")
+          }
+          else if ('canonical' %in% df$transcript_prioritization_strategy && is_canonical_pass(x["Canonical"])) {
+            return("True")
+          }
+          else {
+            return("False")
+          }
+        })
+        df$mainTable <- add_column(df$mainTable, `Transcript Pass` = transcript_pass, .after = "TSL")
+    }
     return (df)
 }
 
