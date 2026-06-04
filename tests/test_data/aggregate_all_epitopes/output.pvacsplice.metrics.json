@@ -1,4 +1,5 @@
 {
+  "file_type": "pvacsplice",
   "tumor_purity": null,
   "vaf_clonal": 0.273,
   "vaf_subclonal": 0.136,

@@ -370,7 +370,6 @@ class MatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMet
         self.calculate_clonal_vaf()
         metrics = self.base_metrics(epitope_lengths)
 
-
         data = []
         all_epitopes_df = self.read_input_file(used_columns, dtypes)
 
@@ -805,6 +804,11 @@ class PvacseqAggregateAllEpitopes(MatchedSequenceAggregateAllEpitopes, metaclass
         })
         return out_dict
 
+    def base_metrics(self, epitope_lengths):
+        base_metrics = { 'file_type': 'pvacseq'}
+        base_metrics.update(super().base_metrics(epitope_lengths))
+        return base_metrics
+
     def tier_aggregated_report(self):
         PvacseqUpdateTiers(
             self.output_file,
@@ -889,6 +893,11 @@ class PvacspliceAggregateAllEpitopes(MatchedSequenceAggregateAllEpitopes, metacl
             'Evaluation': 'Pending',
         })
         return out_dict
+
+    def base_metrics(self, epitope_lengths):
+        base_metrics = { 'file_type': 'pvacsplice'}
+        base_metrics.update(super().base_metrics(epitope_lengths))
+        return base_metrics
 
     def get_best_binder(self, df):
         return PvacspliceBestCandidate(
@@ -1034,6 +1043,7 @@ class PvacfuseAggregateAllEpitopes(MatchedSequenceAggregateAllEpitopes, metaclas
 
     def base_metrics(self, epitope_lengths):
         return {
+            'file_type': 'pvacfuse',
             'binding_threshold': self.binding_threshold,
             'aggregate_inclusion_binding_threshold': self.aggregate_inclusion_binding_threshold,
             'aggregate_inclusion_count_limit': self.aggregate_inclusion_count_limit,

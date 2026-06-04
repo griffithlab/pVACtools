@@ -1,4 +1,5 @@
 {
+  "file_type": "pvacfuse",
   "binding_threshold": 500,
   "aggregate_inclusion_binding_threshold": 5000,
   "aggregate_inclusion_count_limit": 15,

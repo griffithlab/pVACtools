@@ -1,4 +1,5 @@
 {
+  "file_type": "pvacseq",
   "tumor_purity": null,
   "vaf_clonal": 0.5,
   "vaf_subclonal": 0.25,
