@@ -4,11 +4,22 @@ from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq, translate
 from collections import OrderedDict, defaultdict
 import csv
+import tempfile
+import gzip
+import shutil
+
+import pvactools.lib.run_utils
 
 class FusionToFasta(metaclass=ABCMeta):
     def __init__(self, **kwargs):
         self.input_file = kwargs['input_file']
-        self.transcript_fasta = kwargs['transcript_fasta']
+        if pvactools.lib.run_utils.is_gz_file(kwargs['transcript_fasta']):
+            unzipped_file = tempfile.NamedTemporaryFile('wb')
+            with gzip.open(kwargs['transcript_fasta'], "rb") as f_in:
+                shutil.copyfileobj(f_in, unzipped_file)
+            self.transcript_fasta = unzipped_file.name
+        else:
+            self.transcript_fasta = kwargs['transcript_fasta']
         self.transcript_fasta_dict_versioned = SeqIO.to_dict(SeqIO.parse(self.transcript_fasta, "fasta"))
         self.transcript_fasta_dict_unversioned = { k.split('.')[0]: v for k, v in self.transcript_fasta_dict_versioned.items() }
         self.output_file = kwargs['output_file']
