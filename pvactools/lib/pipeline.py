@@ -781,6 +781,8 @@ class PvacbindPipeline(Pipeline):
                     'input_tsv_file'         : self.tsv_file_path(),
                     'key_files'              : split_fasta_key_file_paths,
                     'output_file'            : parsed_file_path,
+                    'use_normalized_percentiles': self.use_normalized_percentiles,
+                    'reference_scores_path'  : self.reference_scores_path,
                     'input_file_type'        : self.input_file_type,
                 }
                 if self.input_file_type in ['junctions', 'fusions']:

@@ -216,7 +216,7 @@ def main(args_input = sys.argv[1:]):
         epitope_lengths = params['epitope_lengths']
         iedb_executable = params['iedb_executable']
         netmhc_stab = params['netmhc_stab']
-        use_normalized_percentiles = params['use_normalized_percentiles'],
+        use_normalized_percentiles = params['use_normalized_percentiles']
         reference_scores_path = params['reference_scores_path']
 
         if len(prediction_algorithms) > 0 and len(alleles) > 0:
