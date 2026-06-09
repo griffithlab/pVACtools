@@ -59,6 +59,26 @@ Contents
    mailing_list
 
 
+Version 7.0.1
+-------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+* Bring sort_included_df logic in line with getting the best peptide so that
+  when the number of included peptides exceeds the
+  aggregate_inclusion_count_limit the logic for picking the included peptides
+  is the same as for getting the best peptide. by @susannasiebert in
+  https://github.com/griffithlab/pVACtools/pull/1403
+* Add missing argument hook up for transcript_prioritization_strategy and
+  aggregate_inclusion_count_limit in standalone top score filter and aggregate
+  report creation commands, respectively. by @susannasiebert in
+  https://github.com/griffithlab/pVACtools/pull/1404
+* Fully hook up normalized percentile calculation for pVACfuse and pVACsplice pipelines.
+  by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1405
+  and https://github.com/griffithlab/pVACtools/pull/1406
+* Resolved nondeterministic sorting in reference match comparisons. by
+  @ldhtnp in https://github.com/griffithlab/pVACtools/pull/1402
+
 New in Version 7
 ----------------
 
