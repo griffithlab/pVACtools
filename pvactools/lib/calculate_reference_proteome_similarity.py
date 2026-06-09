@@ -188,7 +188,7 @@ class CalculateReferenceProteomeSimilarity:
         records = list(SeqIO.parse(self.input_fasta, "fasta"))
 
         # Create mt record dictionary
-        if self.file_type == 'pVACseq':
+        if self.file_type in ['pVACseq', 'pVACfuse']:
             records_dict = {re.sub('^%s' % "MT\.", "", x.id): str(x.seq) for x in filter(lambda x: x.id.startswith('MT.'), records)}
         elif self.file_type == 'pVACsplice':
             records_dict = {re.sub('^%s' % "ALT\.", "", x.id): str(x.seq) for x in filter(lambda x: x.id.startswith('ALT.'), records)}

@@ -39,6 +39,8 @@ class FusionToFasta(metaclass=ABCMeta):
                 five_transcript_seq = self.trim_five_transcript_seq(full_five_transcript_seq, fusion_seq, int(line['protein_position']), line['index'])
                 if five_transcript_seq is None:
                     continue
+                if fusion_seq in five_transcript_seq:
+                    continue
                 five_transcript_id = f'WT5.{line["index"]}'
                 fusion_records.append(SeqRecord(Seq(five_transcript_seq), id=five_transcript_id, description=""))
 

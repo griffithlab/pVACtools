@@ -10,14 +10,14 @@ from pvactools.lib.input_file_converter import FusionInputConverter
 class FusionPipeline:
     def __init__(self, **kwargs):
         self.input_file = kwargs['input_file']
-        self.sample_name = kwargs['sample_name']
+        self.sample_name = kwargs.pop('sample_name', "tmp")
         self.output_dir = kwargs['output_dir']
         self.transcript_fasta = kwargs['transcript_fasta']
-        self.starfusion_file = kwargs['starfusion_file']
-        self.class_i_epitope_length = kwargs['class_i_epitope_length']
-        self.class_ii_epitope_length = kwargs['class_ii_epitope_length']
-        self.class_i_hla = kwargs['class_i_hla']
-        self.class_ii_hla = kwargs['class_ii_hla']
+        self.starfusion_file = kwargs.pop('starfusion_file', None)
+        self.class_i_epitope_length = kwargs.pop('class_i_epitope_length', None)
+        self.class_ii_epitope_length = kwargs.pop('class_ii_epitope_length', None)
+        self.class_i_hla = kwargs.pop('class_i_hla', None)
+        self.class_ii_hla = kwargs.pop('class_ii_hla', None)
 
     @staticmethod
     def file_exists(file_path: str, file_type: str):
@@ -29,9 +29,12 @@ class FusionPipeline:
         return exists
 
     def execute(self):
+        self.generate_fasta()
+        self.fasta_to_kmers()
+
+    def generate_fasta(self):
         self.input_to_tsv()
         self.fusion_to_fasta()
-        self.fasta_to_kmers()
 
     def create_file_path(self, key):
         inputs = {

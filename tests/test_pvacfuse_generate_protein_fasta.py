@@ -20,6 +20,7 @@ class GenerateFastaTests(unittest.TestCase):
         cls.executable     = os.path.join(cls.executable_dir, 'generate_protein_fasta.py')
         cls.test_data_dir  = os.path.join(pvactools_directory(), 'tests', 'test_data', 'pvacfuse_generate_protein_fasta')
         cls.flanking_sequence_length = '10'
+        cls.transcript_fasta = os.path.join(cls.test_data_dir, 'Homo_sapiens.GRCh38.95.cds.all.fa.gz')
 
     def test_command(self):
         pvac_script_path = os.path.join(
@@ -42,7 +43,7 @@ class GenerateFastaTests(unittest.TestCase):
     def test_generate_protein_fasta_runs(self):
         input_file = os.path.join(self.test_data_dir, 'agfusion')
         output_file = tempfile.NamedTemporaryFile()
-        self.assertFalse(generate_protein_fasta.main([input_file, "25", output_file.name]))
+        self.assertFalse(generate_protein_fasta.main([input_file, self.transcript_fasta, "25", output_file.name]))
         os.unlink("{}.manufacturability.tsv".format(output_file.name))
 
     def test_agfusion_input_file_generates_expected_file(self):
@@ -53,6 +54,7 @@ class GenerateFastaTests(unittest.TestCase):
             self.python,
             self.executable,
             generate_protein_fasta_input_file,
+            self.transcript_fasta,
             self.flanking_sequence_length,
             generate_protein_fasta_output_file.name,
             '-d', 'full',
@@ -70,6 +72,7 @@ class GenerateFastaTests(unittest.TestCase):
             self.python,
             self.executable,
             generate_protein_fasta_input_file,
+            self.transcript_fasta,
             self.flanking_sequence_length,
             generate_protein_fasta_output_file.name,
             '-d', 'full',
@@ -88,6 +91,7 @@ class GenerateFastaTests(unittest.TestCase):
             self.python,
             self.executable,
             generate_protein_fasta_input_file,
+            self.transcript_fasta,
             self.flanking_sequence_length,
             generate_protein_fasta_output_file.name,
             '-d', 'full',
@@ -99,18 +103,20 @@ class GenerateFastaTests(unittest.TestCase):
         os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))
         self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
 
-    def test_arriba_tsv_with_invalid_character(self):
-        generate_protein_fasta_input_file  = os.path.join(self.test_data_dir, 'input_with_invalid_character.tsv')
+    def test_mutant_only(self):
+        generate_protein_fasta_input_file  = os.path.join(self.test_data_dir, 'agfusion')
         generate_protein_fasta_output_file = tempfile.NamedTemporaryFile()
 
         self.assertFalse(call([
             self.python,
             self.executable,
             generate_protein_fasta_input_file,
+            self.transcript_fasta,
             self.flanking_sequence_length,
             generate_protein_fasta_output_file.name,
-            '-d', 'full'
+            '-d', 'full',
+            '--mutant-only',
         ], shell=False))
-        expected_output_file = os.path.join(self.test_data_dir, 'output_with_invalid_characters.fasta')
-        self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
+        expected_output_file = os.path.join(self.test_data_dir, 'output_agfusion.mutant_only.fasta')
         os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))
+        self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))

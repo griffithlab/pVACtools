@@ -66,7 +66,7 @@ def create_combined_reports(files, all_epitopes_output_file, filtered_report_fil
 
     PostProcessor(**post_processing_params).execute()
 
-def generate_fasta(args, output_dir, epitope_length, epitope_flank_length=0, net_chop_fasta=False):
+def generate_fasta(args, output_dir, epitope_length, flanking_length=0, net_chop_fasta=False):
     if net_chop_fasta:
         per_epitope_output_dir = None
         output_file = os.path.join(output_dir, "{}.net_chop.fa".format(args.sample_name))
@@ -76,14 +76,15 @@ def generate_fasta(args, output_dir, epitope_length, epitope_flank_length=0, net
         output_file = os.path.join(per_epitope_output_dir, "{}.fa".format(args.sample_name))
     params = [
         args.input_file,
-        str(epitope_flank_length + epitope_length - 1),
+        args.ref_fasta,
+        str(flanking_length + epitope_length),
         output_file,
     ]
     if args.downstream_sequence_length is not None:
         params.extend(["-d", str(args.downstream_sequence_length)])
     else:
         params.extend(["-d", 'full'])
-    pvactools.tools.pvacfuse.generate_protein_fasta.main(params, save_tsv_file=True, starfusion_file=args.starfusion_file)
+    pvactools.tools.pvacfuse.generate_protein_fasta.main(params)
     os.unlink("{}.manufacturability.tsv".format(output_file))
     return (output_file, per_epitope_output_dir)
 
@@ -272,17 +273,17 @@ def main(args_input = sys.argv[1:]):
                     output_files.append(output_file)
             if len(output_files) > 0:
                 # copy fasta to output dir
-                (input_file, per_epitope_output_dir) = generate_fasta(args, output_dir, max(epitope_lengths))
+                (input_file, per_epitope_output_dir) = generate_fasta(args, output_dir, 0, flanking_length=max(epitope_lengths)-1)
                 fasta_file = os.path.join(output_dir, "{}.fasta".format(args.sample_name))
                 shutil.copy(input_file, fasta_file)
                 if args.run_reference_proteome_similarity:
-                    epitope_flank_length = 7
-                    (input_file, per_epitope_output_dir) = generate_fasta(args, output_dir, epitope_flank_length)
+                    flanking_length = 7
+                    (input_file, per_epitope_output_dir) = generate_fasta(args, output_dir, 0, flanking_length=flanking_length)
                     run_arguments['fasta'] = input_file
                 # generate and copy net_chop fasta to output dir if specified
                 if args.net_chop_method:
-                    epitope_flank_length = 9
-                    (net_chop_fasta, _) = generate_fasta(args, output_dir, max(epitope_lengths), epitope_flank_length, net_chop_fasta=True)
+                    flanking_length = 10
+                    (net_chop_fasta, _) = generate_fasta(args, output_dir, max(epitope_lengths), flanking_length=flanking_length, net_chop_fasta=True)
                     run_arguments['net_chop_fasta'] = net_chop_fasta
                 all_epitopes_file = os.path.join(output_dir, "{}.MHC_{}.all_epitopes.tsv".format(args.sample_name,mhc_class))
                 filtered_file = os.path.join(output_dir, "{}.MHC_{}.filtered.tsv".format(args.sample_name,mhc_class))

@@ -175,7 +175,7 @@
     "best_hla_allele": "HLA-A*29:02",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "DTTVEEQVSTVMEVLKCKHQGLEMVTSTLWC",
+      "query_peptide": "SDTTVEEQVSTVMEVLKCKHQGLEMVTSTLWC",
       "matches": []
     }
   },
@@ -1354,7 +1354,7 @@
     "best_hla_allele": "HLA-A*29:02",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "SSEAVKFHGFLQMKIFLLLFSQFLLYSCSGDSLVLKHLNIDPVVWMRKQLLYLLLD",
+      "query_peptide": "LSSEAVKFHGFLQMKIFLLLFSQFLLYSCSGDSLVLKHLNIDPVVWMRKQLLYLLLD",
       "matches": []
     }
   },
@@ -1507,7 +1507,7 @@
     "best_hla_allele": "HLA-A*29:02",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "DDQEAKSFTIKGFKTCKYSNLT",
+      "query_peptide": "LDDQEAKSFTIKGFKTCKYSNLT",
       "matches": []
     }
   },
@@ -1660,7 +1660,7 @@
     "best_hla_allele": "HLA-A*29:02",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "DDQEAKSFTIKGFKTCKYSNLT",
+      "query_peptide": "LDDQEAKSFTIKGFKTCKYSNLT",
       "matches": []
     }
   },
@@ -1813,7 +1813,7 @@
     "best_hla_allele": "HLA-A*29:02",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "KQAGFKVLVSED",
+      "query_peptide": "LKQAGFKVLVSEDS",
       "matches": []
     }
   },
@@ -1966,7 +1966,7 @@
     "best_hla_allele": "HLA-A*29:02",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "ALFRKKGAGESG",
+      "query_peptide": "NALFRKKGAGESGK",
       "matches": []
     }
   },
@@ -2119,7 +2119,7 @@
     "best_hla_allele": "HLA-A*29:02",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "SLQGEKGN",
+      "query_peptide": "PSLQGEKGN",
       "matches": []
     }
   },
@@ -2272,7 +2272,7 @@
     "best_hla_allele": "HLA-A*29:02",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "NNTSGKKSNQARKRGSSMIQIQSQRRRCR",
+      "query_peptide": "QNNTSGKKSNQARKRGSSMIQIQSQRRRCR",
       "matches": []
     }
   },
@@ -2578,7 +2578,7 @@
     "best_hla_allele": "HLA-A*29:02",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "DLRTIPREIGGR",
+      "query_peptide": "GDLRTIPREIGGRL",
       "matches": []
     }
   },
@@ -2959,7 +2959,7 @@
     "best_hla_allele": "HLA-A*29:02",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "ELRDPTVQYQME",
+      "query_peptide": "QELRDPTVQYQMEM",
       "matches": []
     }
   },
@@ -3112,7 +3112,7 @@
     "best_hla_allele": "HLA-A*29:02",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "SWYQKKESKIDL",
+      "query_peptide": "ISWYQKKESKIDLL",
       "matches": []
     }
   },
@@ -3265,7 +3265,7 @@
     "best_hla_allele": "HLA-A*29:02",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "TDEHGEVHLWRY",
+      "query_peptide": "YTDEHGEVHLWRYE",
       "matches": []
     }
   },
@@ -3418,7 +3418,7 @@
     "best_hla_allele": "HLA-A*29:02",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "YLKIEKDGQQRYQQDRSSLHELPCIHWESQHSCGQEI",
+      "query_peptide": "EYLKIEKDGQQRYQQDRSSLHELPCIHWESQHSCGQEI",
       "matches": []
     }
   },
@@ -3571,7 +3571,7 @@
     "best_hla_allele": "HLA-A*29:02",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "EYLKIEKWPATLPTRQILAP",
+      "query_peptide": "QEYLKIEKWPATLPTRQILAP",
       "matches": []
     }
   },
@@ -3724,7 +3724,7 @@
     "best_hla_allele": "HLA-A*29:02",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "QPSFAADDKAST",
+      "query_peptide": "YQPSFAADDKAST",
       "matches": []
     }
   },
@@ -3877,7 +3877,7 @@
     "best_hla_allele": "HLA-A*29:02",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "FKITPSQ",
+      "query_peptide": "GFKITPSQ",
       "matches": []
     }
   },
@@ -4030,7 +4030,7 @@
     "best_hla_allele": "HLA-A*29:02",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "ITCIELVGETTDDHK",
+      "query_peptide": "GITCIELVGETTDDHK",
       "matches": []
     }
   },
@@ -4183,7 +4183,7 @@
     "best_hla_allele": "HLA-A*29:02",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "DDFISNGSPQLPLME",
+      "query_peptide": "DDDFISNGSPQLPLME",
       "matches": []
     }
   },
@@ -4450,7 +4450,7 @@
     "best_hla_allele": "HLA-A*29:02",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "ECLWTDNALFVQF",
+      "query_peptide": "NECLWTDNALFVQF",
       "matches": []
     }
   },
@@ -4603,7 +4603,7 @@
     "best_hla_allele": "HLA-A*29:02",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "ECLWTDRGVGQALGGDLGSSFGADECPVRAVC",
+      "query_peptide": "NECLWTDRGVGQALGGDLGSSFGADECPVRAVC",
       "matches": []
     }
   },
@@ -4756,7 +4756,7 @@
     "best_hla_allele": "HLA-A*29:02",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "INATDPGPEADGVK",
+      "query_peptide": "IINATDPGPEADGVK",
       "matches": []
     }
   },
@@ -5023,7 +5023,7 @@
     "best_hla_allele": "HLA-A*29:02",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "GKESIPLESGLQRLSFQDTLMVSKT",
+      "query_peptide": "LGKESIPLESGLQRLSFQDTLMVSKT",
       "matches": []
     }
   },
@@ -5176,7 +5176,7 @@
     "best_hla_allele": "HLA-A*29:02",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "EKKAADMDRMTE",
+      "query_peptide": "AEKKAADMDRMTED",
       "matches": []
     }
   },
@@ -5329,7 +5329,7 @@
     "best_hla_allele": "HLA-A*29:02",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "HAGECQRFSCCKWPYHLG",
+      "query_peptide": "LHAGECQRFSCCKWPYHLG",
       "matches": []
     }
   },
@@ -5482,7 +5482,7 @@
     "best_hla_allele": "HLA-A*29:02",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "NGRAAEGRHVRN",
+      "query_peptide": "YNGRAAEGRHVRNL",
       "matches": []
     }
   },
@@ -5635,7 +5635,7 @@
     "best_hla_allele": "HLA-A*29:02",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "ESKWSKAKFEFH",
+      "query_peptide": "KESKWSKAKFEFHH",
       "matches": []
     }
   },
@@ -5788,7 +5788,7 @@
     "best_hla_allele": "HLA-A*29:02",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "ASAKRTKAAC",
+      "query_peptide": "PASAKRTKAAC",
       "matches": []
     }
   },
@@ -5941,7 +5941,7 @@
     "best_hla_allele": "HLA-A*29:02",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "QKIRHFDEE",
+      "query_peptide": "EQKIRHFDEE",
       "matches": []
     }
   },
@@ -6208,7 +6208,7 @@
     "best_hla_allele": "HLA-A*29:02",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "KDNGWEVSKSCSQATTTGMPGVPTRTSTWWCHLPLDASWAETPTGSESWWSPPRKLFTDTTV",
+      "query_peptide": "IKDNGWEVSKSCSQATTTGMPGVPTRTSTWWCHLPLDASWAETPTGSESWWSPPRKLFTDTTV",
       "matches": []
     }
   },
@@ -6361,7 +6361,7 @@
     "best_hla_allele": "HLA-A*29:02",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "KRKFSAGGF",
+      "query_peptide": "GKRKFSAGGF",
       "matches": []
     }
   },
@@ -6514,7 +6514,7 @@
     "best_hla_allele": "HLA-A*29:02",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "ISDTTKAPRMTLILMPWLQK",
+      "query_peptide": "SISDTTKAPRMTLILMPWLQK",
       "matches": []
     }
   },
@@ -6667,7 +6667,7 @@
     "best_hla_allele": "HLA-A*29:02",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "PEACEESVCDQR",
+      "query_peptide": "DPEACEESVCDQRT",
       "matches": []
     }
   },
@@ -6820,7 +6820,7 @@
     "best_hla_allele": "HLA-A*29:02",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "CVQTDEEKVCDGDGSGSGLQP",
+      "query_peptide": "DCVQTDEEKVCDGDGSGSGLQP",
       "matches": []
     }
   },
@@ -7429,7 +7429,7 @@
     "best_hla_allele": "HLA-A*29:02",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "FFAIWHMEFYES",
+      "query_peptide": "IFFAIWHMEFYESA",
       "matches": []
     }
   }
