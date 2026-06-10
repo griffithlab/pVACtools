@@ -187,9 +187,11 @@ def get_mutated_peptide_with_flanking_sequence(wt_peptide, mt_peptide, flanking_
             break
     for i, (wt_epitope, mt_epitope) in enumerate(zip(reversed(list(wt_epitopes.values())), reversed(list(mt_epitopes.values())))):
         if wt_epitope != mt_epitope:
-            stop = len(mt_epitopes) - i + flanking_length
+            mt_stop = len(mt_epitopes) - i + flanking_length
+            wt_stop = len(wt_epitopes) - i + flanking_length
             break
-    mutant_subsequence = mt_peptide[start:stop]
+    mutant_subsequence = mt_peptide[start:mt_stop]
+    wildtype_subsequence = wt_peptide[start:wt_stop]
     supported_aas = supported_amino_acids()
     if mutant_subsequence[0] not in supported_aas:
         mutant_subsequence = mutant_subsequence[1:]
@@ -198,7 +200,7 @@ def get_mutated_peptide_with_flanking_sequence(wt_peptide, mt_peptide, flanking_
     if not all([c in supported_aas for c in mutant_subsequence]):
         print("Warning. Mutant sequence contains unsupported amino acid. Skipping entry {}".format(line['index']))
         return
-    return mutant_subsequence
+    return mutant_subsequence, wildtype_subsequence
 
 def get_mutated_frameshift_peptide_with_flanking_sequence(wt_peptide, mt_peptide, flanking_length):
     wt_epitopes = determine_neoepitopes(wt_peptide, flanking_length+1)
@@ -207,6 +209,7 @@ def get_mutated_frameshift_peptide_with_flanking_sequence(wt_peptide, mt_peptide
         if wt_epitope != mt_epitope:
             break
     mutant_subsequence = mt_peptide[start:]
+    wildtype_subsequence = wt_peptide[start:(start + (2 * flanking_length))]
     supported_aas = supported_amino_acids()
     if mutant_subsequence[0] not in supported_aas:
         mutant_subsequence = mutant_subsequence[1:]
@@ -215,7 +218,7 @@ def get_mutated_frameshift_peptide_with_flanking_sequence(wt_peptide, mt_peptide
     if not all([c in supported_aas for c in mutant_subsequence]):
         print("Warning. Mutant sequence contains unsupported amino acid. Skipping entry {}".format(line['index']))
         return
-    return mutant_subsequence
+    return mutant_subsequence, wildtype_subsequence
 
 def is_preferred_transcript(mutation, transcript_prioritization_strategy, maximum_transcript_support_level):
     if not isinstance(mutation, pd.Series):

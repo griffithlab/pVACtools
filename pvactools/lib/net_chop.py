@@ -95,7 +95,7 @@ class NetChop:
                     if self.file_type == 'pVACsplice':
                         mt_peptide = mt_records_dict[index]
                         wt_peptide = wt_records_dict[index]
-                        peptide = get_mutated_peptide_with_flanking_sequence(wt_peptide, mt_peptide, self.flanking_sequence_length)
+                        peptide, _ = get_mutated_peptide_with_flanking_sequence(wt_peptide, mt_peptide, self.flanking_sequence_length)
                         start_diff = self.flanking_sequence_length
                     else:
                         full_peptide = mt_records_dict[index]
