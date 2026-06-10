@@ -1,0 +1,3 @@
+chromosome_name	start	stop	reference	variant	amino_acid_change	codon_change	protein_position	type	main_somatic_variant
+chr6	1930220	1930221	A	T	F/Y	tTc/tAc	218	somatic	GMDS.ENST00000380815.missense.220T/L
+chr6	1930219	1930220	G	T	F/L	ttC/ttA	218	somatic	GMDS.ENST00000380815.missense.220T/L

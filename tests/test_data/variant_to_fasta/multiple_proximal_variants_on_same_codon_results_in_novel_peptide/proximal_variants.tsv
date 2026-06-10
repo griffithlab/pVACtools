@@ -1,0 +1,3 @@
+chromosome_name	start	stop	reference	variant	amino_acid_change	codon_change	protein_position	type	main_somatic_variant
+chr15	40622779	40622780	C	T	P/L	cCa/cTa	865	somatic	KNL1.ENST00000346991.missense.867E/L
+chr15	40622778	40622779	C	G	P/A	Cca/Gca	865	somatic	KNL1.ENST00000346991.missense.867E/L
