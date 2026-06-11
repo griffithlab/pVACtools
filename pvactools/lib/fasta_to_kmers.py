@@ -13,7 +13,6 @@ from pvactools.lib.run_utils import *
 class FastaToKmers:
     def __init__(self, **kwargs):
         self.tscript_fasta = Fasta(kwargs['fasta'])
-        self.fasta_path    = kwargs['fasta']
         self.output_dir    = kwargs['output_dir']
         self.epitope_length = kwargs['epitope_length']
         self.sample_name   = kwargs['sample_name']
@@ -38,11 +37,110 @@ class FastaToKmers:
 
         return kmer_dict
 
+    def loop_through_tscripts(self):
+        all_kmers = {}
+        # all MT fasta headers
+        mt_fasta_keys = [k for k in self.tscript_fasta.keys() if k.startswith(self.prefix())]
+        for mt_name in mt_fasta_keys:
+            index = mt_name.removeprefix(self.prefix())
+            # get final mutated kmer list from save_kmer_dicts()
+            kmers = self.create_kmer_dict(index)
+            if len(kmers) > 0:
+                all_kmers.update(kmers)
+        return all_kmers
+
+    def create_epitope_fasta(self, all_kmers):
+        records = []
+        for index, seq in all_kmers.items():
+            records.append(SeqRecord(Seq(seq), id=index, description=""))
+        output_file = f'{self.output_dir}/{self.sample_name}.{self.epitope_length}.fa'
+        SeqIO.write(records, output_file, "fasta")
+
+    def execute(self):
+        all_kmers = self.loop_through_tscripts()
+        if len(all_kmers) > 0:
+            self.create_epitope_fasta(all_kmers)
+
+class VariantFastaToKmers(FastaToKmers):
+    def prefix(self):
+        return "MT."
+
+    def create_kmer_dict(self, variant_name):
+        wt_dict = self.create_kmers(f'WT.{variant_name}')
+        mt_dict = self.create_kmers(f'MT.{variant_name}')
+        _, variant_type, aa_change = variant_name.rsplit('.', 2)
+        position = int(re.split('[A-Z|-]', aa_change)[0])
+        start_position = position - self.epitope_length
+        if start_position < 0:
+            start_position = 0
+        if variant_type == 'FS':
+            end_position = len(mt_dict)
+        else:
+            offset = len(wt_dict) - len(mt_dict)
+            if variant_type == 'inframe_insertion':
+                end_position = position - offset
+            else:
+                end_position = position
+            match_direction = "left"
+        if end_position > len(mt_dict):
+            end_position = len(mt_dict)
+        min_match = min_match_count(self.epitope_length)
+        final_kmers = {}
+        for i in range(start_position, end_position):
+            if i not in mt_dict:
+                continue
+
+            mt_seq = mt_dict[i]
+            if mt_seq in wt_dict.values():
+                continue
+            else:
+                final_kmers[f'MT.{variant_name}|{i}'] = mt_seq
+                if variant_type == 'missense':
+                    wt_seq = wt_dict[i]
+                    final_kmers[f'WT.{variant_name}|{i}'] = wt_seq
+                elif variant_type == 'FS':
+                    if i < len(wt_dict):
+                        wt_seq = wt_dict[i]
+                    else:
+                        wt_seq = ""
+                    total_match_count = determine_total_matches(mt_seq, wt_seq)
+                    if total_match_count >= min_match:
+                        final_kmers[f'WT.{variant_name}|{i}'] = wt_seq
+                else:
+                    if i < len(wt_dict):
+                        wt_seq = wt_dict[i]
+                    else:
+                        wt_seq = ""
+                    alt_i = i + offset
+                    if alt_i < 0:
+                        alt_wt_seq = ""
+                    else:
+                        alt_wt_seq = wt_dict[i+offset]
+                    if match_direction == 'left':
+                        left_match_count = determine_consecutive_matches_from_left(mt_seq, wt_seq)
+                        right_match_count = determine_consecutive_matches_from_right(mt_seq, alt_wt_seq)
+                        if left_match_count >= right_match_count:
+                            wt_seq_to_consider = wt_seq
+                        else:
+                            wt_seq_to_consider = alt_wt_seq
+                            match_direction = 'right'
+                    else:
+                        wt_seq_to_consider = alt_wt_seq
+                    total_match_count = determine_total_matches(mt_seq, wt_seq_to_consider)
+                    if total_match_count >= min_match:
+                        final_kmers[f'WT.{variant_name}|{i}'] = wt_seq_to_consider
+        return final_kmers
+
+class JunctionFastaToKmers(FastaToKmers):
+    def prefix(self):
+        return "ALT."
+
     def create_kmer_dict(self, splice_site_name):
         # wt and mut each get kmer dict
         wt_dict = self.create_kmers(f'WT.{splice_site_name}')
         mut_dict = self.create_kmers(f'ALT.{splice_site_name}')
         splice_type = splice_site_name.rsplit('.', 1)[1]
+        min_match = min_match_count(self.epitope_length)
         final_kmers = {}
         for i in range(len(mut_dict)):
             mt_seq = mut_dict[i]
@@ -50,7 +148,6 @@ class FastaToKmers:
                 wt_seq = wt_dict[i]
             else:
                 wt_seq = ""
-            min_match = min_match_count(len(mt_seq))
             diff = len(wt_dict) - len(mut_dict)
             alt_i = i + diff
             if alt_i < 0:
@@ -84,31 +181,6 @@ class FastaToKmers:
                     final_kmers[f'WT.{splice_site_name}|{i}'] = final_wt_seq
         return final_kmers
 
-    def prefix(self):
-        return "ALT."
-
-    def loop_through_tscripts(self):
-        all_kmers = {}
-        # all MT fasta headers
-        alt_fasta_keys = [k for k in self.tscript_fasta.keys() if k.startswith(self.prefix())]
-        for alt_name in alt_fasta_keys:
-            splice_site_name = alt_name.removeprefix(self.prefix())
-            # get final mutated kmer list from save_kmer_dicts()
-            all_kmers.update(self.create_kmer_dict(splice_site_name))
-        return all_kmers
-
-
-    def create_epitope_fasta(self, all_kmers):
-        records = []
-        for index, seq in all_kmers.items():
-            records.append(SeqRecord(Seq(seq), id=index, description=""))
-        output_file = f'{self.output_dir}/{self.sample_name}.{self.epitope_length}.fa'
-        SeqIO.write(records, output_file, "fasta")
-
-    def execute(self):
-        all_kmers = self.loop_through_tscripts()
-        if len(all_kmers) > 0:
-            self.create_epitope_fasta(all_kmers)
 
 class FusionFastaToKmers(FastaToKmers):
     def prefix(self):
@@ -122,6 +194,7 @@ class FusionFastaToKmers(FastaToKmers):
             three_wt_dict = self.create_kmers(f'WT3.{index}')
         mut_dict = self.create_kmers(f'MT.{index}')
 
+        min_match = min_match_count(self.epitope_length)
         final_kmers = {}
         for i in range(len(mut_dict)):
             mt_seq = mut_dict[i]
@@ -130,7 +203,6 @@ class FusionFastaToKmers(FastaToKmers):
             if fusion_type == 'inframe_fusion' and mt_seq in three_wt_dict.values():
                 continue
 
-            min_match = min_match_count(len(mt_seq))
             if fusion_type == 'frameshift_fusion':
                 if i in five_wt_dict:
                     five_wt_seq = five_wt_dict[i]

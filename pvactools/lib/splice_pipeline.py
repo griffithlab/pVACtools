@@ -4,7 +4,7 @@ import os
 import pandas as pd
 from pvactools.lib.filter_regtools_results import FilterRegtoolsResults
 from pvactools.lib.junction_to_fasta import JunctionToFasta
-from pvactools.lib.fasta_to_kmers import FastaToKmers
+from pvactools.lib.fasta_to_kmers import JunctionFastaToKmers
 from pvactools.lib.combine_inputs import CombineInputs
 from pvactools.lib.input_file_converter import PvacspliceVcfConverter
 from pvactools.lib.load_gtf_data import LoadGtfData
@@ -225,7 +225,7 @@ class JunctionPipeline:
                     'epitope_length': el,
                     'sample_name': self.sample_name,
                 }
-                fasta = FastaToKmers(**kmer_params)
+                fasta = JunctionFastaToKmers(**kmer_params)
                 fasta.execute()
                 print('Completed')
 
