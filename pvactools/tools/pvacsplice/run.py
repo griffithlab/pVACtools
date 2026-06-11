@@ -5,7 +5,7 @@ import shutil
 import copy
 
 from pathlib import Path
-from pvactools.lib.splice_pipeline import *
+from pvactools.lib.junction_pipeline import *
 from pvactools.lib.prediction_class import *
 from pvactools.lib.pipeline import *
 from pvactools.lib.run_argument_parser import *

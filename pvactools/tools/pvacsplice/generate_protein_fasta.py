@@ -11,7 +11,7 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
-from pvactools.lib.splice_pipeline import JunctionPipeline
+from pvactools.lib.junction_pipeline import JunctionPipeline
 from pvactools.lib.calculate_manufacturability import CalculateManufacturability
 from pvactools.lib.run_utils import *
 

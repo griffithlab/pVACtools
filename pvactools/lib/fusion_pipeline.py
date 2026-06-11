@@ -4,7 +4,6 @@ import os
 import pandas as pd
 from pvactools.lib.fusion_to_fasta import FusionToFasta
 from pvactools.lib.fasta_to_kmers import FusionFastaToKmers
-from pvactools.lib.combine_inputs import CombineInputs
 from pvactools.lib.input_file_converter import FusionInputConverter
 
 class FusionPipeline:
