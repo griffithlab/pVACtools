@@ -12,8 +12,7 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
-from pvactools.lib.fasta_generator import FastaGenerator
-from pvactools.lib.input_file_converter import VcfConverter
+from pvactools.lib.variant_pipeline import VariantPipeline
 from pvactools.lib.calculate_manufacturability import CalculateManufacturability
 from pvactools.lib.run_utils import *
 
@@ -90,48 +89,20 @@ def define_parser():
     )
     return parser
 
-def convert_vcf(input_vcf, temp_dir, sample_name, phased_proximal_variants_vcf, flanking_sequence_length, pass_only, biotypes, allow_incomplete_transcripts):
-    print("Converting VCF to TSV")
-    tsv_file = os.path.join(temp_dir, 'tmp.tsv')
-    convert_params = {
-        'input_file' : input_vcf,
-        'output_file': tsv_file,
-        'biotypes'   : biotypes,
-        'allow_incomplete_transcripts': allow_incomplete_transcripts
+def generate_fasta(args, temp_dir, downstream_sequence_length):
+    params = {
+        'output_dir'                  : temp_dir,
+        'input_file'                  : args.input_vcf,
+        'sample_name'                 : args.sample_name or 'tmp',
+        'pass_only'                   : args.pass_only,
+        'proximal_variants_vcf'       : args.phased_proximal_variants_vcf,
+        'biotypes'                    : args.biotypes,
+        'allow_incomplete_transcripts': args.allow_incomplete_transcripts,
+        'downstream_sequence_length'  : downstream_sequence_length,
+        'flanking_bases'              : args.flanking_sequence_length,
     }
-    if sample_name is not None:
-        convert_params['sample_name'] = sample_name
-    if phased_proximal_variants_vcf is not None:
-        convert_params['proximal_variants_vcf'] = phased_proximal_variants_vcf
-        proximal_variants_tsv = os.path.join(temp_dir, 'proximal_variants.tsv')
-        convert_params['proximal_variants_tsv'] = proximal_variants_tsv
-        convert_params['flanking_bases'] = (flanking_sequence_length + 1)* 4
-    else:
-        proximal_variants_tsv = None
-    if pass_only:
-        convert_params['pass_only'] = pass_only
-    converter = VcfConverter(**convert_params)
-    converter.execute()
-    print("Completed")
-    return proximal_variants_tsv
-
-def generate_fasta(flanking_sequence_length, downstream_sequence_length, temp_dir, proximal_variants_tsv):
-    print("Generating Variant Peptide FASTA and Key File")
-    tsv_file = os.path.join(temp_dir, 'tmp.tsv')
-    fasta_file = os.path.join(temp_dir, 'tmp.fasta')
-    fasta_key_file = os.path.join(temp_dir, 'tmp.fasta.key')
-    generate_fasta_params = {
-        'input_file'                : tsv_file,
-        'flanking_sequence_length'  : flanking_sequence_length,
-        'epitope_length'            : 0,
-        'output_file'               : fasta_file,
-        'output_key_file'           : fasta_key_file,
-        'downstream_sequence_length': downstream_sequence_length,
-        'proximal_variants_file'    : proximal_variants_tsv,
-    }
-    fasta_generator = FastaGenerator(**generate_fasta_params)
-    fasta_generator.execute()
-    print("Completed")
+    pipeline = VariantPipeline(**params)
+    pipeline.generate_fasta()
 
 def parse_input_tsv(input_tsv):
     if input_tsv is None:
@@ -140,70 +111,110 @@ def parse_input_tsv(input_tsv):
     with open(input_tsv, 'r') as fh:
         reader = csv.DictReader(fh, delimiter = "\t")
         if 'Best Peptide' in reader.fieldnames:
-            indexes = parse_aggregated_input_tsv(reader)
+            for line in reader:
+                indexes.append(line)
             file_type = 'aggregated'
         else:
-            indexes = parse_full_input_tsv(reader)
+            for line in reader:
+                indexes.append(line['Index'])
             file_type = 'full'
     return (indexes, file_type)
 
-def parse_full_input_tsv(reader):
-    indexes = []
-    for line in reader:
-        indexes.append(line['Index'])
-    return indexes
+def trim_sequences(args, temp_dir):
+    print("Trimming Variant Peptide FASTA")
+    fasta_file_path = os.path.join(temp_dir, f"{args.sample_name or 'tmp'}.transcripts.fa")
+    trimmed_fasta_file_path = os.path.join(temp_dir, f"{args.sample_name or 'tmp'}.transcripts.trimmed.fa")
 
-def parse_aggregated_input_tsv(reader):
-    indexes = {}
-    for line in reader:
-        indexes[line['Index']] = line
-    return indexes
-
-def parse_files(output_file, temp_dir, mutant_only, input_tsv, aggregate_report_evaluation):
-    print("Parsing the Variant Peptide FASTA and Key File")
-    fasta_file_path = os.path.join(temp_dir, 'tmp.fasta')
-    fasta_key_file_path = os.path.join(temp_dir, 'tmp.fasta.key')
-
-    with open(fasta_key_file_path, 'r') as fasta_key_file:
-        keys = yaml.load(fasta_key_file, Loader=yaml.FullLoader)
-
-    (tsv_indexes, file_type) = parse_input_tsv(input_tsv)
-
-    dataframe = OrderedDict()
-    output_records = []
+    records = {}
+    keys = set()
     for record in SeqIO.parse(fasta_file_path, "fasta"):
-        ids = keys[int(record.id)]
-        for record_id in ids:
-            if mutant_only and record_id.startswith('WT.'):
-                continue
-            if tsv_indexes is not None:
-                sequence_type, index = record_id.split('.', 1)
-                if file_type == 'full':
-                    if index in tsv_indexes:
-                        new_record = SeqRecord(record.seq, id=record_id, description=record_id)
-                        output_records.append(new_record)
-                elif file_type == 'aggregated':
-                    if index in tsv_indexes.keys() and tsv_indexes[index]['Evaluation'] in aggregate_report_evaluation:
-                        if record_id.startswith('MT.'):
-                            annotations = { 'Best Peptide': tsv_indexes[index]['Best Peptide'] }
-                            new_record = SeqRecord(record.seq, id=record_id, description=json.dumps(annotations))
-                        else:
-                            new_record = SeqRecord(record.seq, id=record_id, description=record_id)
-                        output_records.append(new_record)
-            else:
-                new_record = SeqRecord(record.seq, id=record_id, description=record_id)
-                output_records.append(new_record)
+        records[record.id] = str(record.seq)
+        keys.add(record.id.split('.', 1)[1])
 
-    if tsv_indexes is not None:
+    output_records = []
+    for key in sorted(keys, key=lambda x: int(x.split('.', 1)[0])):
+        mt_seq = records[f"MT.{key}"]
+        wt_seq = records[f"WT.{key}"]
+        _, variant_type, aa_change = key.rsplit('.', 2)
+        position = int(re.split('[A-Z|-]', aa_change)[0])
+        start_position = position - args.flanking_sequence_length - 1
+        if start_position < 0:
+            start_position = 0
+        end_position = position + args.flanking_sequence_length
+        if variant_type == 'missense':
+            trimmed_mt_seq = mt_seq[start_position:end_position]
+            output_records.append(SeqRecord(Seq(trimmed_mt_seq), id=f"MT.{key}", description=""))
+            if not args.mutant_only:
+                trimmed_wt_seq = wt_seq[start_position:end_position]
+                output_records.append(SeqRecord(Seq(trimmed_wt_seq), id=f"WT.{key}", description=""))
+        elif variant_type == 'FS':
+            trimmed_mt_seq = mt_seq[start_position:]
+            output_records.append(SeqRecord(Seq(trimmed_mt_seq), id=f"MT.{key}", description=""))
+            if not args.mutant_only:
+                trimmed_wt_seq = wt_seq[start_position:end_position]
+                output_records.append(SeqRecord(Seq(trimmed_wt_seq), id=f"WT.{key}", description=""))
+        elif variant_type == 'inframe_del':
+            trimmed_mt_seq = mt_seq[start_position:end_position]
+            output_records.append(SeqRecord(Seq(trimmed_mt_seq), id=f"MT.{key}", description=""))
+            if not args.mutant_only:
+                offset = len(wt_seq) - len(mt_seq)
+                trimmed_wt_seq = wt_seq[start_position:(end_position + offset)]
+                output_records.append(SeqRecord(Seq(trimmed_wt_seq), id=f"WT.{key}", description=""))
+        else:
+            offset = len(mt_seq) - len(wt_seq)
+            trimmed_mt_seq = mt_seq[start_position:(end_position + offset)]
+            output_records.append(SeqRecord(Seq(trimmed_mt_seq), id=f"MT.{key}", description=""))
+            if not args.mutant_only:
+                trimmed_wt_seq = wt_seq[start_position:end_position]
+                output_records.append(SeqRecord(Seq(trimmed_wt_seq), id=f"WT.{key}", description=""))
+
+    SeqIO.write(output_records, trimmed_fasta_file_path, "fasta")
+    print("Completed")
+
+def filter_fasta(args, temp_dir):
+    trimmed_fasta_file_path = os.path.join(temp_dir, f"{args.sample_name or 'tmp'}.transcripts.trimmed.fa")
+    filtered_fasta_file_path = os.path.join(temp_dir, f"{args.sample_name or 'tmp'}.transcripts.filtered.fa")
+
+    if args.input_tsv is None:
+        shutil.copy(trimmed_fasta_file_path, filtered_fasta_file_path)
+    else:
+        print("Filtering Variant Peptide FASTA")
+        (tsv_indexes, file_type) = parse_input_tsv(args.input_tsv)
+
+        output_records = []
+        for record in SeqIO.parse(trimmed_fasta_file_path, "fasta"):
+            record_id = record.id.split('.', 1)[1]
+            description = ""
+            if file_type == 'full':
+                if record_id not in tsv_indexes:
+                    continue
+            else:
+                matches = [r for r in tsv_indexes if r['Index'] == record_id and r['Evaluation'] in args.aggregate_report_evaluation]
+                if len(matches) == 0:
+                    continue
+                elif len(matches) == 1 and record.id.startswith('MT.'):
+                    description = json.dumps({ 'Best Peptide': matches[0]['Best Peptide'] })
+                elif len(matches) > 1:
+                    import pdb
+                    pdb.set_trace()
+            new_record = SeqRecord(record.seq, id=record.id, description=description)
+            output_records.append(new_record)
+
         ordered_output_records = []
         for tsv_index in tsv_indexes:
-            records = [r for r in output_records if r.id.split('.', 1)[1] == tsv_index]
+            if file_type == 'full':
+                records = [r for r in output_records if r.id.split('.', 1)[1] == tsv_index]
+            else:
+                records = [r for r in output_records if r.id.split('.', 1)[1] == tsv_index['Index']]
             ordered_output_records.extend(records)
         output_records = ordered_output_records
 
-    SeqIO.write(output_records, output_file, "fasta")
-    print("Completed")
+        SeqIO.write(output_records, filtered_fasta_file_path, "fasta")
+        print("Completed")
 
+    return(filtered_fasta_file_path)
+
+#todo: remove after figuring out how to incorporate order sheet creation
 def run_generate_protein_fasta(
     input_vcf,
     flanking_sequence_length,
@@ -219,36 +230,12 @@ def run_generate_protein_fasta(
     sample_name=None,
     peptide_ordering_form=False
 ):
-    if downstream_sequence_length == 'full':
-        downstream_sequence_length = None
-    elif downstream_sequence_length.isdigit():
-        downstream_sequence_length = int(downstream_sequence_length)
-    else:
-        sys.exit("The downstream sequence length needs to be a positive integer or 'full'")
 
-    temp_dir = tempfile.mkdtemp()
-
+    return
     try:
-        proximal_variants_tsv = convert_vcf(
-            input_vcf=input_vcf,
-            temp_dir=temp_dir,
-            sample_name=sample_name,
-            phased_proximal_variants_vcf=phased_proximal_variants_vcf,
-            flanking_sequence_length=flanking_sequence_length,
-            pass_only=pass_only,
-            biotypes=biotypes,
-            allow_incomplete_transcripts=allow_incomplete_transcripts,
-        )
-
-        proximal_variants_file = f"{output_file}.proximal_variants.tsv"
-        if proximal_variants_tsv is not None:
-            shutil.copy(proximal_variants_tsv, proximal_variants_file)
-
         generate_fasta(
-            flanking_sequence_length=flanking_sequence_length,
             downstream_sequence_length=downstream_sequence_length,
             temp_dir=temp_dir,
-            proximal_variants_tsv=proximal_variants_tsv
         )
 
         parse_files(
@@ -280,20 +267,27 @@ def main(args_input = sys.argv[1:]):
     parser = define_parser()
     args = parser.parse_args(args_input)
 
-    run_generate_protein_fasta(
-        input_vcf=args.input_vcf,
-        flanking_sequence_length=args.flanking_sequence_length,
-        output_file=args.output_file,
-        input_tsv=args.input_tsv,
-        phased_proximal_variants_vcf=args.phased_proximal_variants_vcf,
-        pass_only=args.pass_only,
-        biotypes=args.biotypes,
-        allow_incomplete_transcripts=args.allow_incomplete_transcripts,
-        mutant_only=args.mutant_only,
-        aggregate_report_evaluation=args.aggregate_report_evaluation,
-        downstream_sequence_length=args.downstream_sequence_length,
-        sample_name=args.sample_name
+    if args.downstream_sequence_length == 'full':
+        downstream_sequence_length = None
+    elif args.downstream_sequence_length.isdigit():
+        downstream_sequence_length = int(args.downstream_sequence_length)
+    else:
+        sys.exit("The downstream sequence length needs to be a positive integer or 'full'")
+
+    temp_dir = tempfile.mkdtemp()
+    generate_fasta(
+        args,
+        temp_dir,
+        downstream_sequence_length,
     )
+    trimmed_fasta = trim_sequences(args, temp_dir)
+    filtered_fasta = filter_fasta(args, temp_dir)
+    shutil.copy(filtered_fasta, args.output_file)
+    shutil.rmtree(temp_dir, ignore_errors=True)
+    manufacturability_file = "{}.manufacturability.tsv".format(args.output_file)
+    print("Calculating Manufacturability Metrics")
+    CalculateManufacturability(args.output_file, manufacturability_file, 'fasta').execute()
+    print("Completed")
 
 if __name__ == '__main__':
     main()

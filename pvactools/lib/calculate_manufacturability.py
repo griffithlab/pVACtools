@@ -2,6 +2,8 @@ import csv
 from vaxrank.manufacturability import ManufacturabilityScores
 from Bio import SeqIO
 
+from pvactools.lib.run_utils import *
+
 class CalculateManufacturability:
     def __init__(self, input_file, output_file, file_type='pVACseq'):
         self.input_file = input_file
@@ -33,6 +35,7 @@ class CalculateManufacturability:
 
     def execute(self):
         if self.file_type == 'fasta':
+            supported_aas = supported_amino_acids()
             with open(self.output_file, 'w') as output_fh:
                 writer = csv.DictWriter(output_fh, delimiter = "\t", fieldnames=['id', 'peptide_sequence'] + self.manufacturability_headers(), extrasaction='ignore', restval='NA')
                 writer.writeheader()
@@ -43,7 +46,8 @@ class CalculateManufacturability:
                         'id': seq_num,
                         'peptide_sequence': sequence
                     }
-                    if len(sequence) >= 7:
+                    all_valid_aas = all([c in supported_aas for c in sequence])
+                    if len(sequence) >= 7 and all_valid_aas:
                         scores = ManufacturabilityScores.from_amino_acids(sequence)
                         line = self.append_manufacturability_metrics(line, scores)
                     writer.writerow(line)
