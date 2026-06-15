@@ -155,8 +155,7 @@ def generate_fasta(args, temp_dir):
     }
 
     pipeline = JunctionPipeline(**junction_arguments)
-    pipeline.vcf_to_tsv()
-    pipeline.junction_to_fasta()
+    pipeline.generate_fasta()
 
     return pipeline.create_file_path('fasta')
 

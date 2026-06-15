@@ -2,6 +2,8 @@ import sys
 import shutil
 import os
 import pandas as pd
+
+from pvactools.lib.base_pipeline import BasePipeline
 from pvactools.lib.filter_regtools_results import FilterRegtoolsResults
 from pvactools.lib.junction_to_fasta import JunctionToFasta
 from pvactools.lib.fasta_to_kmers import JunctionFastaToKmers
@@ -9,7 +11,7 @@ from pvactools.lib.combine_inputs import CombineInputs
 from pvactools.lib.input_file_converter import PvacspliceVcfConverter
 from pvactools.lib.load_gtf_data import LoadGtfData
 
-class JunctionPipeline:
+class JunctionPipeline(BasePipeline):
     def __init__(self, **kwargs):
         self.input_file = kwargs['input_file']
         self.sample_name = kwargs['sample_name']
@@ -34,20 +36,6 @@ class JunctionPipeline:
         self.gtf_data = self.load_gtf_data()
         self.tmp_dir = os.path.join(self.output_dir, 'tmp')
         os.makedirs(self.tmp_dir, exist_ok=True)
-
-    @staticmethod
-    def file_exists(file_path: str, file_type: str):
-        if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
-            print(f"{file_type} file already exists. Skipping.")
-            exists = True
-        else:
-            exists = False
-        return exists
-
-    def execute(self):
-        self.vcf_to_tsv()
-        self.junction_to_fasta()
-        self.fasta_to_kmers()
 
 # if self.save_gtf --> should not have a gtf tsv file present
 # if self.save_gtf == True:
@@ -110,7 +98,7 @@ class JunctionPipeline:
             print('Completed')
         return filter_df
 
-    def vcf_to_tsv(self):
+    def input_to_tsv(self):
         if self.file_exists(self.create_file_path('annotated', temp=True), 'VCF TSV'):
             pass
         else:
@@ -151,7 +139,7 @@ class JunctionPipeline:
         return combined_df
 
     # creates transcripts.fa
-    def junction_to_fasta(self):
+    def tsv_to_fasta(self):
         combined_df = self.combine_inputs()
         if self.file_exists(self.create_file_path('fasta'), 'Junction fasta'):
             pass
@@ -228,12 +216,3 @@ class JunctionPipeline:
                 fasta = JunctionFastaToKmers(**kmer_params)
                 fasta.execute()
                 print('Completed')
-
-    def choose_final_lengths(self):
-        if not self.class_i_hla:
-            lengths = self.class_ii_epitope_length
-        elif not self.class_ii_hla:
-            lengths = self.class_i_epitope_length
-        else:
-            lengths = self.class_i_epitope_length + self.class_ii_epitope_length
-        return lengths
