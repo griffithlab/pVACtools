@@ -120,10 +120,16 @@ def parse_input_tsv(input_tsv):
             file_type = 'full'
     return (indexes, file_type)
 
-def trim_sequences(args, temp_dir):
+def trim_sequences(args=None, temp_dir=None, fasta_file_path=None, trimmed_fasta_file_path=None, flanking_sequence_length=None, mutant_only=None):
     print("Trimming Variant Peptide FASTA")
-    fasta_file_path = os.path.join(temp_dir, f"{args.sample_name or 'tmp'}.transcripts.fa")
-    trimmed_fasta_file_path = os.path.join(temp_dir, f"{args.sample_name or 'tmp'}.transcripts.trimmed.fa")
+    if fasta_file_path is None:
+        fasta_file_path = os.path.join(temp_dir, f"{args.sample_name or 'tmp'}.transcripts.fa")
+    if trimmed_fasta_file_path is None:
+        trimmed_fasta_file_path = os.path.join(temp_dir, f"{args.sample_name or 'tmp'}.transcripts.trimmed.fa")
+    if flanking_sequence_length is None:
+        flanking_sequence_length = args.flanking_sequence_length
+    if mutant_only is None:
+        mutant_only = args.mutant_only
 
     records = {}
     keys = set()
@@ -137,26 +143,26 @@ def trim_sequences(args, temp_dir):
         wt_seq = records[f"WT.{key}"]
         _, variant_type, aa_change = key.rsplit('.', 2)
         position = int(re.split('[A-Z|-]', aa_change)[0])
-        start_position = position - args.flanking_sequence_length - 1
+        start_position = position - flanking_sequence_length - 1
         if start_position < 0:
             start_position = 0
-        end_position = position + args.flanking_sequence_length
+        end_position = position + flanking_sequence_length
         if variant_type == 'missense':
             trimmed_mt_seq = mt_seq[start_position:end_position]
             output_records.append(SeqRecord(Seq(trimmed_mt_seq), id=f"MT.{key}", description=""))
-            if not args.mutant_only:
+            if not mutant_only:
                 trimmed_wt_seq = wt_seq[start_position:end_position]
                 output_records.append(SeqRecord(Seq(trimmed_wt_seq), id=f"WT.{key}", description=""))
         elif variant_type == 'FS':
             trimmed_mt_seq = mt_seq[start_position:]
             output_records.append(SeqRecord(Seq(trimmed_mt_seq), id=f"MT.{key}", description=""))
-            if not args.mutant_only:
+            if not mutant_only:
                 trimmed_wt_seq = wt_seq[start_position:end_position]
                 output_records.append(SeqRecord(Seq(trimmed_wt_seq), id=f"WT.{key}", description=""))
         elif variant_type == 'inframe_del':
             trimmed_mt_seq = mt_seq[start_position:end_position]
             output_records.append(SeqRecord(Seq(trimmed_mt_seq), id=f"MT.{key}", description=""))
-            if not args.mutant_only:
+            if not mutant_only:
                 offset = len(wt_seq) - len(mt_seq)
                 trimmed_wt_seq = wt_seq[start_position:(end_position + offset)]
                 output_records.append(SeqRecord(Seq(trimmed_wt_seq), id=f"WT.{key}", description=""))
@@ -164,7 +170,7 @@ def trim_sequences(args, temp_dir):
             offset = len(mt_seq) - len(wt_seq)
             trimmed_mt_seq = mt_seq[start_position:(end_position + offset)]
             output_records.append(SeqRecord(Seq(trimmed_mt_seq), id=f"MT.{key}", description=""))
-            if not args.mutant_only:
+            if not mutant_only:
                 trimmed_wt_seq = wt_seq[start_position:end_position]
                 output_records.append(SeqRecord(Seq(trimmed_wt_seq), id=f"WT.{key}", description=""))
 

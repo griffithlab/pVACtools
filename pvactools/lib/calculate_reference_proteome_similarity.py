@@ -288,11 +288,8 @@ class CalculateReferenceProteomeSimilarity:
             end_pos = index + len(epitope) + (self.match_length-1)
             peptide = full_peptide[start_pos:end_pos]
             wt_peptide = None
-        elif self.file_type == 'pVACfuse':
-            if self._input_tsv_type(line) == 'aggregated':
-                identifier = line['ID']
-            else:
-                identifier = line['Index']
+        elif self.file_type in ['pVACfuse', 'pVACseq']:
+            identifier = line['Index']
             if identifier in mt_records_dict:
                 peptide = mt_records_dict[identifier]
             else:

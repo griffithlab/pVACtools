@@ -244,9 +244,25 @@
     "best_peptide_wt": "LLPLLLLLL",
     "best_hla_allele": "HLA-E*01:01",
     "reference_matches": {
-      "count": 5,
-      "query_peptide": "PPLLPLLPLLLLLGA",
+      "count": 11,
+      "query_peptide": "PPPPLLPLLPLLLLLGA",
       "matches": [
+        {
+          "Matched Peptide": "PLLPLLLLL",
+          "Genes": "NRXN2",
+          "Transcripts": "ENST00000301894.6",
+          "Hit IDs": [
+            "ENSP00000301894.2"
+          ]
+        },
+        {
+          "Matched Peptide": "LPLLPLLLL",
+          "Genes": "NRXN2",
+          "Transcripts": "ENST00000301894.6",
+          "Hit IDs": [
+            "ENSP00000301894.2"
+          ]
+        },
         {
           "Matched Peptide": "LLPLLPLLL",
           "Genes": "NRXN2",
@@ -272,7 +288,7 @@
           ]
         },
         {
-          "Matched Peptide": "LPLLPLLL",
+          "Matched Peptide": "PPPLLPLLP",
           "Genes": "NRXN2",
           "Transcripts": "ENST00000301894.6",
           "Hit IDs": [
@@ -280,7 +296,25 @@
           ]
         },
         {
-          "Matched Peptide": "PPLLPLLP",
+          "Matched Peptide": "PPPPLLPLL",
+          "Genes": "NRXN2",
+          "Transcripts": "ENST00000301894.6",
+          "Hit IDs": [
+            "ENSP00000301894.2"
+          ]
+        },
+        {
+          "Matched Peptide": "LLPLLLLL",
+          "Genes": "NRXN2, SLC27A3",
+          "Transcripts": "ENST00000301894.6, ENST00000575439.5, ENST00000623839.3",
+          "Hit IDs": [
+            "ENSP00000485585.1",
+            "ENSP00000458504.1",
+            "ENSP00000301894.2"
+          ]
+        },
+        {
+          "Matched Peptide": "PPPPLLPL",
           "Genes": "NRXN2",
           "Transcripts": "ENST00000301894.6",
           "Hit IDs": [
@@ -1537,7 +1571,7 @@
     "best_hla_allele": "HLA-E*01:01",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "GSTGQGSGEKAGCPWSGTGQH",
+      "query_peptide": "GGGGRSAGSTGQGSGEKAGCPWSGTGQH",
       "matches": []
     }
   },
@@ -3307,7 +3341,7 @@
     "best_hla_allele": "HLA-E*01:01",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "VSTP",
+      "query_peptide": "SAAAAAAAVIPTVST",
       "matches": []
     }
   },
@@ -3455,7 +3489,7 @@
     "best_hla_allele": "HLA-E*01:01",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "SATLSRTLLLAAAGGSS",
+      "query_peptide": "SATLSRTLLLAAAGGS",
       "matches": []
     }
   }
