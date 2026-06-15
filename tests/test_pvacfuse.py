@@ -109,6 +109,15 @@ class PvacfuseTests(unittest.TestCase):
             close_mock_fhs()
 
             for file_name in (
+                'sample.name.9.fa',
+                'sample.name.transcripts.fa',
+                'sample.name.tsv',
+            ):
+                output_file   = os.path.join(output_dir.name, file_name)
+                expected_file = os.path.join(self.test_data_directory, 'fusions', file_name)
+                self.assertTrue(cmp(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
+
+            for file_name in (
                 'inputs.yml',
             ):
                 output_file   = os.path.join(output_dir.name, 'log', file_name)
@@ -164,6 +173,15 @@ class PvacfuseTests(unittest.TestCase):
             close_mock_fhs()
 
             for file_name in (
+                'sample.name.9.fa',
+                'sample.name.transcripts.fa',
+                'sample.name.tsv',
+            ):
+                output_file   = os.path.join(output_dir.name, file_name)
+                expected_file = os.path.join(self.test_data_directory, 'fusions_agfusion_starfusion', file_name)
+                self.assertTrue(cmp(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
+
+            for file_name in (
                 'inputs.yml',
             ):
                 output_file   = os.path.join(output_dir.name, 'log', file_name)
@@ -210,6 +228,15 @@ class PvacfuseTests(unittest.TestCase):
                 '--fasta-size', '2000',
             ])
             close_mock_fhs()
+
+            for file_name in (
+                'sample.name.9.fa',
+                'sample.name.transcripts.fa',
+                'sample.name.tsv',
+            ):
+                output_file   = os.path.join(output_dir.name, file_name)
+                expected_file = os.path.join(self.test_data_directory, 'arriba_fusions', file_name)
+                self.assertTrue(cmp(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
 
             for file_name in (
                 'inputs.yml',
