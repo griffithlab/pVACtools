@@ -109,6 +109,12 @@ class PvacfuseTests(unittest.TestCase):
             close_mock_fhs()
 
             for file_name in (
+                'inputs.yml',
+            ):
+                output_file   = os.path.join(output_dir.name, 'log', file_name)
+                self.assertTrue(os.path.exists(output_file))
+
+            for file_name in (
                 'sample.name.fasta',
                 'sample.name.MHC_I.all_epitopes.tsv',
                 'sample.name.MHC_I.filtered.tsv',
@@ -158,6 +164,12 @@ class PvacfuseTests(unittest.TestCase):
             close_mock_fhs()
 
             for file_name in (
+                'inputs.yml',
+            ):
+                output_file   = os.path.join(output_dir.name, 'log', file_name)
+                self.assertTrue(os.path.exists(output_file))
+
+            for file_name in (
                 'sample.name.fasta',
                 'sample.name.MHC_I.all_epitopes.tsv',
                 'sample.name.MHC_I.filtered.tsv',
@@ -198,6 +210,12 @@ class PvacfuseTests(unittest.TestCase):
                 '--fasta-size', '2000',
             ])
             close_mock_fhs()
+
+            for file_name in (
+                'inputs.yml',
+            ):
+                output_file   = os.path.join(output_dir.name, 'log', file_name)
+                self.assertTrue(os.path.exists(output_file))
 
             for file_name in (
                 'sample.name.fasta',

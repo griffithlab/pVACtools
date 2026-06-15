@@ -13,6 +13,7 @@ from pvactools.lib.post_processor import PostProcessor
 import pvactools.tools.pvacfuse.generate_protein_fasta
 from pvactools.lib.run_utils import *
 from pvactools.lib.prediction_class_utils import *
+from pvactools.lib.print_log import *
 
 def define_parser():
     return PvacfuseRunArgumentParser().parser
@@ -144,6 +145,8 @@ def main(args_input = sys.argv[1:]):
 
     fusions_dir = os.path.abspath(args.output_dir)
     os.makedirs(fusions_dir, exist_ok=True)
+
+    print_log(os.path.join(fusions_dir, 'log'), vars(args), 'inputs')
 
     fusion_arguments = {
         'output_dir'              : fusions_dir,

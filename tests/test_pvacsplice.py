@@ -145,6 +145,12 @@ class PvacspliceTests(unittest.TestCase):
                 self.assertTrue(cmp(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
 
             for file_name in (
+                'inputs.yml',
+            ):
+                output_file   = os.path.join(output_dir.name, 'log', file_name)
+                self.assertTrue(os.path.exists(output_file))
+
+            for file_name in (
                 'HCC1395_TUMOR_DNA.MHC_I.all_epitopes.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
@@ -261,6 +267,12 @@ class PvacspliceTests(unittest.TestCase):
                 output_file   = os.path.join(output_dir.name, file_name)
                 expected_file = os.path.join(self.test_data_directory, 'results', 'run', file_name)
                 self.assertTrue(cmp(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
+
+            for file_name in (
+                'inputs.yml',
+            ):
+                output_file   = os.path.join(output_dir.name, 'log', file_name)
+                self.assertTrue(os.path.exists(output_file))
 
             for file_name in (
                 'HCC1395_TUMOR_DNA.MHC_II.all_epitopes.tsv',
