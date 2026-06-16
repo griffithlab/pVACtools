@@ -13,7 +13,7 @@ from pvactools.lib.post_processor import PostProcessor
 from pvactools.lib.run_utils import *
 from pvactools.lib.prediction_class_utils import *
 from pvactools.lib.variant_pipeline import VariantPipeline
-import pvactools.tools.pvacseq.generate_protein_fasta
+from pvactools.tools.pvacseq.generate_protein_fasta import PvacseqGenerateProteinFasta
 from pvactools.lib.print_log import *
 
 def define_parser():
@@ -332,32 +332,35 @@ def main(args_input = sys.argv[1:]):
                 # copy fasta to output dir
                 transcript_fasta = variant_pipeline.create_file_path('fasta')
                 fasta_file = os.path.join(output_dir, "{}.fasta".format(args.sample_name))
-                pvactools.tools.pvacseq.generate_protein_fasta.trim_sequences(
-                    fasta_file_path = transcript_fasta,
-                    trimmed_fasta_file_path = fasta_file,
-                    flanking_sequence_length = max(epitope_lengths) - 1,
-                    mutant_only = False,
-                )
+                params = {
+                    'fasta_file_path': transcript_fasta,
+                    'trimmed_fasta_file_path': fasta_file,
+                    'flanking_sequence_length': max(epitope_lengths) - 1,
+                    'mutant_only': False,
+                }
+                PvacseqGenerateProteinFasta(**params).trim_sequences()
                 if args.run_reference_proteome_similarity:
                     fasta_file = os.path.join(output_dir, "{}.7.fasta".format(args.sample_name))
                     if not os.path.exists(fasta_file):
-                        pvactools.tools.pvacseq.generate_protein_fasta.trim_sequences(
-                            fasta_file_path = transcript_fasta,
-                            trimmed_fasta_file_path = fasta_file,
-                            flanking_sequence_length = 7,
-                            mutant_only = False,
-                        )
+                        params = {
+                            'fasta_file_path': transcript_fasta,
+                            'trimmed_fasta_file_path': fasta_file,
+                            'flanking_sequence_length': 7,
+                            'mutant_only': False,
+                        }
+                        PvacseqGenerateProteinFasta(**params).trim_sequences()
                     run_arguments['fasta'] = fasta_file
                 # generate and copy net_chop fasta to output dir if specified
                 if args.net_chop_method:
                     fasta_file = os.path.join(output_dir, "{}.10.fasta".format(args.sample_name))
                     if not os.path.exists(fasta_file):
-                        pvactools.tools.pvacseq.generate_protein_fasta.trim_sequences(
-                            fasta_file_path = transcript_fasta,
-                            trimmed_fasta_file_path = fasta_file,
-                            flanking_sequence_length = 10,
-                            mutant_only = False,
-                        )
+                        params = {
+                            'fasta_file_path': transcript_fasta,
+                            'trimmed_fasta_file_path': fasta_file,
+                            'flanking_sequence_length': 10,
+                            'mutant_only': False,
+                        }
+                        PvacseqGenerateProteinFasta(**params).trim_sequences()
                     run_arguments['net_chop_fasta'] = fasta_file
                 all_epitopes_file = os.path.join(output_dir, "{}.MHC_{}.all_epitopes.tsv".format(args.sample_name,mhc_class))
                 filtered_file = os.path.join(output_dir, "{}.MHC_{}.filtered.tsv".format(args.sample_name,mhc_class))

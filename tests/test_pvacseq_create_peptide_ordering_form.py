@@ -114,7 +114,7 @@ class CreatePeptideOrderingFormTests(unittest.TestCase):
             pd.testing.assert_frame_equal(generated_df, expected_df, check_dtype=False)
         except AssertionError as e:
             self.fail(f"Generated Excel content does not match expected:\n{e}")
-    
+
     def test_annotate_classi_and_classii_pass(self):
         peptide_sequence = annotate_every_nucleotide(
             sequence="ABCDEFGHIJKL",
