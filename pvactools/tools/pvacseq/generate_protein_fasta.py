@@ -156,34 +156,52 @@ class PvacseqGenerateProteinFasta():
             _, variant_type, aa_change = key.rsplit('.', 2)
             position = int(re.split('[A-Z|-]', aa_change)[0])
             start_position = position - self.flanking_sequence_length - 1
-            if start_position < 0:
-                start_position = 0
             end_position = position + self.flanking_sequence_length
             if variant_type == 'missense':
+                if start_position < 0:
+                    start_position = 0
                 trimmed_mt_seq = mt_seq[start_position:end_position]
                 output_records.append(SeqRecord(Seq(trimmed_mt_seq), id=f"MT.{key}", description=""))
                 if not self.mutant_only:
                     trimmed_wt_seq = wt_seq[start_position:end_position]
                     output_records.append(SeqRecord(Seq(trimmed_wt_seq), id=f"WT.{key}", description=""))
             elif variant_type == 'FS':
+                if start_position < 0:
+                    start_position = 0
                 trimmed_mt_seq = mt_seq[start_position:]
                 output_records.append(SeqRecord(Seq(trimmed_mt_seq), id=f"MT.{key}", description=""))
                 if not self.mutant_only:
                     trimmed_wt_seq = wt_seq[start_position:end_position]
                     output_records.append(SeqRecord(Seq(trimmed_wt_seq), id=f"WT.{key}", description=""))
             elif variant_type == 'inframe_del':
-                trimmed_mt_seq = mt_seq[start_position:end_position]
+                match = re.match(r"\d+(?:-\d+)?([A-Z]+)/([A-Z]+|-)", aa_change)
+                wt_aa, mt_aa = match.groups()
+                if wt_aa.startswith(mt_aa):
+                    start_position = start_position + 1
+                else:
+                    end_position = end_position - 1
+                if start_position < 0:
+                    start_position = 0
+                trimmed_mt_seq = mt_seq[start_position:(end_position)]
                 output_records.append(SeqRecord(Seq(trimmed_mt_seq), id=f"MT.{key}", description=""))
                 if not self.mutant_only:
                     offset = len(wt_seq) - len(mt_seq)
                     trimmed_wt_seq = wt_seq[start_position:(end_position + offset)]
                     output_records.append(SeqRecord(Seq(trimmed_wt_seq), id=f"WT.{key}", description=""))
             else:
+                match = re.match(r"\d+(?:-\d+)?([A-Z]+|-)/([A-Z]+)", aa_change)
+                wt_aa, mt_aa = match.groups()
+                if mt_aa.startswith(wt_aa):
+                    start_position = start_position + 1
+                else:
+                    end_position = end_position - 1
+                if start_position < 0:
+                    start_position = 0
                 offset = len(mt_seq) - len(wt_seq)
                 trimmed_mt_seq = mt_seq[start_position:(end_position + offset)]
                 output_records.append(SeqRecord(Seq(trimmed_mt_seq), id=f"MT.{key}", description=""))
                 if not self.mutant_only:
-                    trimmed_wt_seq = wt_seq[start_position:end_position]
+                    trimmed_wt_seq = wt_seq[start_position:(end_position)]
                     output_records.append(SeqRecord(Seq(trimmed_wt_seq), id=f"WT.{key}", description=""))
 
         SeqIO.write(output_records, self.trimmed_fasta_file_path, "fasta")
@@ -207,11 +225,8 @@ class PvacseqGenerateProteinFasta():
                     matches = [r for r in tsv_indexes if r['Index'] == record_id and r['Evaluation'] in self.aggregate_report_evaluation]
                     if len(matches) == 0:
                         continue
-                    elif len(matches) == 1 and record.id.startswith('MT.'):
+                    elif len(matches) > 0 and record.id.startswith('MT.'):
                         description = json.dumps({ 'Best Peptide': matches[0]['Best Peptide'] })
-                    elif len(matches) > 1:
-                        import pdb
-                        pdb.set_trace()
                 new_record = SeqRecord(record.seq, id=record.id, description=description)
                 output_records.append(new_record)
 

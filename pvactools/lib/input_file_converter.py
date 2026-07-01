@@ -28,11 +28,11 @@ class VcfConverter(InputFileConverter):
         self.normal_sample_name = kwargs.pop('normal_sample_name', None)
         self.proximal_variants_vcf = kwargs.pop('proximal_variants_vcf', None)
         self.proximal_variants_tsv = kwargs.pop('proximal_variants_tsv', None)
-        self.flanking_bases = kwargs.pop('flanking_bases', None)
+        self.flanking_nucleotide_bases = kwargs.pop('flanking_nucleotide_bases', None)
         self.biotypes = kwargs.pop('biotypes', ['protein_coding'])
         self.allow_incomplete_transcripts = kwargs.pop('allow_incomplete_transcripts', False)
-        if self.proximal_variants_vcf and not (self.proximal_variants_tsv and self.flanking_bases):
-            sys.exit("A proximal variants TSV output path and number of flanking bases need to be specified if a proximal variants input VCF is provided.")
+        if self.proximal_variants_vcf and not (self.proximal_variants_tsv and self.flanking_nucleotide_bases):
+            sys.exit("A proximal variants TSV output path and number of flanking nucleotide bases need to be specified if a proximal variants input VCF is provided.")
         if self.proximal_variants_vcf and not pvactools.lib.run_utils.is_gz_file(self.input_file):
             sys.exit("Input VCF {} needs to be bgzipped when running with a proximal variants VCF.".format(self.input_file))
         if self.proximal_variants_vcf and not pvactools.lib.run_utils.is_gz_file(self.proximal_variants_vcf):
@@ -45,7 +45,7 @@ class VcfConverter(InputFileConverter):
             self.proximal_variants_tsv_fh = open(self.proximal_variants_tsv, 'w')
             self.proximal_variants_writer = csv.DictWriter(self.proximal_variants_tsv_fh, delimiter='\t', fieldnames=['chromosome_name', 'start', 'stop', 'reference', 'variant', 'amino_acid_change', 'codon_change', 'protein_position', 'type', 'main_somatic_variant'])
             self.proximal_variants_writer.writeheader()
-            self.proximal_variant_parser = ProximalVariant(self.proximal_variants_vcf, self.pass_only, self.flanking_bases)
+            self.proximal_variant_parser = ProximalVariant(self.proximal_variants_vcf, self.pass_only, self.flanking_nucleotide_bases)
             self.somatic_vcf_reader = vcfpy.Reader.from_path(self.input_file)
         self.vcf_reader = vcfpy.Reader.from_path(self.input_file)
         sample_names = self.vcf_reader.header.samples.names

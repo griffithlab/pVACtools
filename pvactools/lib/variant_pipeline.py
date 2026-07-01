@@ -47,7 +47,7 @@ class VariantPipeline(BasePipeline):
                 'normal_sample_name': self.normal_sample_name,
                 'proximal_variants_vcf': self.proximal_variants_vcf,
                 'proximal_variants_tsv': self.create_file_path('proximal_variants_tsv'),
-                'flanking_bases': self.flanking_bases,
+                'flanking_nucleotide_bases': self.flanking_bases * 4,
                 'biotypes': self.biotypes,
                 'allow_incomplete_transcripts': self.allow_incomplete_transcripts,
             }

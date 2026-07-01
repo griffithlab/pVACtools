@@ -35610,15 +35610,15 @@
     "good_binders": {
       "Transcript Set 1": {
         "peptides": {
-          "KMNGVARC": {
+          "LSRTTEKM": {
             "ic50s_MT": [
-              39599.379
+              38028.941
             ],
             "combined_percentiles_MT": [
-              38.0
+              31.0
             ],
             "binding_percentiles_MT": [
-              38.0
+              31.0
             ],
             "presentation_percentiles_MT": [
               "NA"
@@ -35627,13 +35627,13 @@
               "NA"
             ],
             "ic50s_WT": [
-              44728.54
+              39577.96
             ],
             "combined_percentiles_WT": [
-              80.0
+              38.0
             ],
             "binding_percentiles_WT": [
-              80.0
+              38.0
             ],
             "presentation_percentiles_WT": [
               "NA"
@@ -35644,7 +35644,7 @@
             "hla_types": [
               "HLA-E*01:01"
             ],
-            "mutation_position": "2",
+            "mutation_position": "8",
             "problematic_positions": "None",
             "anchor_fails": "None",
             "individual_ic50_calls": {
@@ -35653,12 +35653,12 @@
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  39599.379
+                  38028.941
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  44728.54
+                  39577.96
                 ]
               }
             },
@@ -35677,12 +35677,12 @@
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  38.0
+                  31.0
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  80.0
+                  38.0
                 ]
               }
             },
@@ -35722,7 +35722,7 @@
                 "HLA-E*01:01": []
               }
             },
-            "wt_peptide": "KINGVARC"
+            "wt_peptide": "LSRTTEKI"
           }
         },
         "transcripts": [
@@ -35769,8 +35769,8 @@
     "DNA VAF": 1.0,
     "RNA VAF": "NA",
     "gene_expr": "NA",
-    "best_peptide_mt": "KMNGVARC",
-    "best_peptide_wt": "KINGVARC",
+    "best_peptide_mt": "LSRTTEKM",
+    "best_peptide_wt": "LSRTTEKI",
     "best_hla_allele": "HLA-E*01:01"
   },
   "chr3-130409352-130409353-G-T": {
@@ -66338,15 +66338,15 @@
     "good_binders": {
       "Transcript Set 1": {
         "peptides": {
-          "RSPDTYSQ": {
+          "CSPDTYSQ": {
             "ic50s_MT": [
-              36075.82
+              40447.68
             ],
             "combined_percentiles_MT": [
-              24.0
+              43.0
             ],
             "binding_percentiles_MT": [
-              24.0
+              43.0
             ],
             "presentation_percentiles_MT": [
               "NA"
@@ -66355,13 +66355,13 @@
               "NA"
             ],
             "ic50s_WT": [
-              36864.98
+              40925.75
             ],
             "combined_percentiles_WT": [
-              26.0
+              46.0
             ],
             "binding_percentiles_WT": [
-              26.0
+              46.0
             ],
             "presentation_percentiles_WT": [
               "NA"
@@ -66381,12 +66381,12 @@
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  36075.82
+                  40447.68
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  36864.98
+                  40925.75
                 ]
               }
             },
@@ -66405,12 +66405,12 @@
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  24.0
+                  43.0
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  26.0
+                  46.0
                 ]
               }
             },
@@ -66450,7 +66450,7 @@
                 "HLA-E*01:01": []
               }
             },
-            "wt_peptide": "RSPDTYSR"
+            "wt_peptide": "CSPDTYSR"
           }
         },
         "transcripts": [
@@ -66497,8 +66497,8 @@
     "DNA VAF": 1.0,
     "RNA VAF": "NA",
     "gene_expr": "NA",
-    "best_peptide_mt": "RSPDTYSQ",
-    "best_peptide_wt": "RSPDTYSR",
+    "best_peptide_mt": "CSPDTYSQ",
+    "best_peptide_wt": "CSPDTYSR",
     "best_hla_allele": "HLA-E*01:01"
   },
   "chrX-130013396-130013397-G-A": {

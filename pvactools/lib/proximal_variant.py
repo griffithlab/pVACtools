@@ -6,8 +6,8 @@ from Bio.Seq import translate
 import pvactools.lib.run_utils
 
 class ProximalVariant:
-    #flanking_bases is the number of bases (not amino acids!) to search on each side of a variant position
-    def __init__(self, proximal_variants_vcf, pass_only, flanking_bases):
+    #flanking_nucleotide_bases is the number of bases (not amino acids!) to search on each side of a variant position
+    def __init__(self, proximal_variants_vcf, pass_only, flanking_nucleotide_bases):
         if not os.path.exists(proximal_variants_vcf + '.tbi'):
             sys.exit('No .tbi file found for proximal variants VCF. Proximal variants VCF needs to be tabix indexed.')
 
@@ -27,7 +27,7 @@ class ProximalVariant:
             self.csq_parser = CsqParser(csq_header.description)
 
         self.pass_only = pass_only
-        self.flanking_bases = flanking_bases
+        self.flanking_nucleotide_bases = flanking_nucleotide_bases
 
     def extract(self, somatic_variant, alt, transcript):
         (phased_somatic_variant, potential_proximal_variants) = self.find_phased_somatic_variant_and_potential_proximal_variants(somatic_variant, alt, transcript)
@@ -77,7 +77,7 @@ class ProximalVariant:
         potential_proximal_variants = []
         phased_somatic_variant = None
         try:
-            entries = self.proximal_variants_vcf.fetch(somatic_variant.CHROM, somatic_variant.begin - self.flanking_bases, somatic_variant.affected_end + self.flanking_bases)
+            entries = self.proximal_variants_vcf.fetch(somatic_variant.CHROM, somatic_variant.begin - self.flanking_nucleotide_bases, somatic_variant.affected_end + self.flanking_nucleotide_bases)
         except ValueError as e:
             return (phased_somatic_variant, potential_proximal_variants)
 
