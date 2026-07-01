@@ -105,6 +105,8 @@ class PostProcessor:
                 top_score_metric2=self.top_score_metric2,
                 read_support=self.read_support,
                 expn_val=self.expn_val,
+                allele_specific_anchors=self.allele_specific_anchors,
+                anchor_contribution_threshold=self.anchor_contribution_threshold,
                 aggregate_inclusion_binding_threshold=self.aggregate_inclusion_binding_threshold,
                 aggregate_inclusion_count_limit=self.aggregate_inclusion_count_limit,
             ).execute()
@@ -144,6 +146,8 @@ class PostProcessor:
                 transcript_prioritization_strategy=self.transcript_prioritization_strategy,
                 maximum_transcript_support_level=self.maximum_transcript_support_level,
                 allow_incomplete_transcripts=self.allow_incomplete_transcripts,
+                allele_specific_anchors=self.allele_specific_anchors,
+                anchor_contribution_threshold=self.anchor_contribution_threshold,
             )
             aggregator.execute()
             self.vaf_clonal = aggregator.vaf_clonal
@@ -275,7 +279,7 @@ class PostProcessor:
     def calculate_reference_proteome_similarity(self):
         if self.run_reference_proteome_similarity:
             print("Calculating Reference Proteome Similarity")
-            if self.file_type == 'pVACseq':
+            if self.file_type in ['pVACseq', 'pVACsplice', 'pVACfuse']:
                 aggregate_metrics_file = self.aggregate_report.replace('.tsv', '.metrics.json')
                 CalculateReferenceProteomeSimilarity(
                     self.aggregate_report,
@@ -292,7 +296,21 @@ class PostProcessor:
                 aggregate_metrics_output_file = self.reference_similarity_fh.name.replace('.tsv', '.metrics.json')
                 shutil.move(aggregate_metrics_output_file, aggregate_metrics_file)
                 shutil.copy(self.reference_similarity_fh.name, self.aggregate_report)
+            else:
+                CalculateReferenceProteomeSimilarity(
+                    self.aggregate_report,
+                    self.fasta,
+                    self.reference_similarity_fh.name,
+                    species=self.species,
+                    file_type=self.file_type,
+                    n_threads=self.n_threads,
+                    blastp_path=self.blastp_path,
+                    blastp_db=self.blastp_db,
+                    peptide_fasta=self.peptide_fasta,
+                ).execute()
+                shutil.copy(self.reference_similarity_fh.name, self.aggregate_report)
 
+            if self.file_type == 'pVACseq':
                 PvacseqUpdateTiers(
                     self.aggregate_report,
                     self.vaf_clonal,
@@ -311,21 +329,7 @@ class PostProcessor:
                     anchor_contribution_threshold=self.anchor_contribution_threshold,
                     top_score_metric2=self.top_score_metric2,
                 ).execute()
-            else:
-                CalculateReferenceProteomeSimilarity(
-                    self.aggregate_report,
-                    self.fasta,
-                    self.reference_similarity_fh.name,
-                    species=self.species,
-                    file_type=self.file_type,
-                    n_threads=self.n_threads,
-                    blastp_path=self.blastp_path,
-                    blastp_db=self.blastp_db,
-                    peptide_fasta=self.peptide_fasta,
-                ).execute()
-                shutil.copy(self.reference_similarity_fh.name, self.aggregate_report)
-
-                if self.file_type == 'pVACbind':
+            elif self.file_type == 'pVACbind':
                     PvacbindUpdateTiers(
                         self.aggregate_report,
                         binding_threshold=self.binding_threshold,
@@ -336,36 +340,36 @@ class PostProcessor:
                         percentile_threshold_strategy=self.percentile_threshold_strategy,
                         top_score_metric2=self.top_score_metric2,
                     ).execute()
-                elif self.file_type == 'pVACfuse':
-                    PvacfuseUpdateTiers(
-                        self.aggregate_report,
-                        binding_threshold=self.binding_threshold,
-                        allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
-                        binding_percentile_threshold=self.binding_percentile_threshold,
-                        immunogenicity_percentile_threshold=self.immunogenicity_percentile_threshold,
-                        presentation_percentile_threshold=self.presentation_percentile_threshold,
-                        percentile_threshold_strategy=self.percentile_threshold_strategy,
-                        read_support=self.read_support,
-                        expn_val=self.expn_val,
-                        top_score_metric2=self.top_score_metric2,
-                    ).execute()
-                elif self.file_type == 'pVACsplice':
-                    PvacspliceUpdateTiers(
-                        self.aggregate_report,
-                        self.vaf_clonal,
-                        binding_threshold=self.binding_threshold,
-                        allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
-                        binding_percentile_threshold=self.binding_percentile_threshold,
-                        immunogenicity_percentile_threshold=self.immunogenicity_percentile_threshold,
-                        presentation_percentile_threshold=self.presentation_percentile_threshold,
-                        percentile_threshold_strategy=self.percentile_threshold_strategy,
-                        trna_vaf=self.trna_vaf,
-                        trna_cov=self.trna_cov,
-                        expn_val=self.expn_val,
-                        transcript_prioritization_strategy=self.transcript_prioritization_strategy,
-                        maximum_transcript_support_level=self.maximum_transcript_support_level,
-                        top_score_metric2=self.top_score_metric2,
-                    ).execute()
+            elif self.file_type == 'pVACfuse':
+                PvacfuseUpdateTiers(
+                    self.aggregate_report,
+                    binding_threshold=self.binding_threshold,
+                    allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
+                    binding_percentile_threshold=self.binding_percentile_threshold,
+                    immunogenicity_percentile_threshold=self.immunogenicity_percentile_threshold,
+                    presentation_percentile_threshold=self.presentation_percentile_threshold,
+                    percentile_threshold_strategy=self.percentile_threshold_strategy,
+                    read_support=self.read_support,
+                    expn_val=self.expn_val,
+                    top_score_metric2=self.top_score_metric2,
+                ).execute()
+            elif self.file_type == 'pVACsplice':
+                PvacspliceUpdateTiers(
+                    self.aggregate_report,
+                    self.vaf_clonal,
+                    binding_threshold=self.binding_threshold,
+                    allele_specific_binding_thresholds=self.allele_specific_binding_thresholds,
+                    binding_percentile_threshold=self.binding_percentile_threshold,
+                    immunogenicity_percentile_threshold=self.immunogenicity_percentile_threshold,
+                    presentation_percentile_threshold=self.presentation_percentile_threshold,
+                    percentile_threshold_strategy=self.percentile_threshold_strategy,
+                    trna_vaf=self.trna_vaf,
+                    trna_cov=self.trna_cov,
+                    expn_val=self.expn_val,
+                    transcript_prioritization_strategy=self.transcript_prioritization_strategy,
+                    maximum_transcript_support_level=self.maximum_transcript_support_level,
+                    top_score_metric2=self.top_score_metric2,
+                ).execute()
             shutil.move("{}.reference_matches".format(self.reference_similarity_fh.name), "{}.reference_matches".format(self.aggregate_report))
             print("Completed")
         else:

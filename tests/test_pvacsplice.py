@@ -130,6 +130,7 @@ class PvacspliceTests(unittest.TestCase):
                 '--problematic-amino-acids', 'C',
                 '-b', '2000',
                 '--maximum-transcript-support-level', '3',
+                '--fasta-size', '400'
             ])
 
             close_mock_fhs()
@@ -144,6 +145,12 @@ class PvacspliceTests(unittest.TestCase):
                 self.assertTrue(cmp(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
 
             for file_name in (
+                'inputs.yml',
+            ):
+                output_file   = os.path.join(output_dir.name, 'log', file_name)
+                self.assertTrue(os.path.exists(output_file))
+
+            for file_name in (
                 'HCC1395_TUMOR_DNA.MHC_I.all_epitopes.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
@@ -152,6 +159,7 @@ class PvacspliceTests(unittest.TestCase):
 
             for file_name in (
                 'HCC1395_TUMOR_DNA.MHC_I.all_epitopes.aggregated.tsv',
+                'HCC1395_TUMOR_DNA.MHC_I.all_epitopes.aggregated.metrics.json',
                 'HCC1395_TUMOR_DNA.MHC_I.all_epitopes.aggregated.tsv.reference_matches',
                 'HCC1395_TUMOR_DNA.MHC_I.filtered.tsv',
             ):
@@ -178,10 +186,10 @@ class PvacspliceTests(unittest.TestCase):
             for method in methods.keys():
                 for allele in methods[method].keys():
                     mock_request.assert_has_calls([
-                        generate_class_i_call(method, allele, 9, os.path.join(output_dir.name, "MHC_Class_I", "MHC_Class_I_9", "tmp", "HCC1395_TUMOR_DNA.9.fa.split_1-39"))
+                        generate_class_i_call(method, allele, 9, os.path.join(output_dir.name, "MHC_Class_I", "MHC_Class_I_9", "tmp", "HCC1395_TUMOR_DNA.9.fa.split_1-190"))
                     ])
                     mock_request.assert_has_calls([
-                        generate_class_i_call(method, allele, 10, os.path.join(output_dir.name, "MHC_Class_I", "MHC_Class_I_10", "tmp", "HCC1395_TUMOR_DNA.10.fa.split_1-41"))
+                        generate_class_i_call(method, allele, 10, os.path.join(output_dir.name, "MHC_Class_I", "MHC_Class_I_10", "tmp", "HCC1395_TUMOR_DNA.10.fa.split_1-210"))
                     ])
 
             with self.assertRaises(SystemExit) as cm:
@@ -245,6 +253,7 @@ class PvacspliceTests(unittest.TestCase):
                 '--problematic-amino-acids', 'C',
                 '--maximum-transcript-support-level', '3',
                 '-b', '2000',
+                '--fasta-size', '400'
             ])
 
             close_mock_fhs()
@@ -260,6 +269,12 @@ class PvacspliceTests(unittest.TestCase):
                 self.assertTrue(cmp(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
 
             for file_name in (
+                'inputs.yml',
+            ):
+                output_file   = os.path.join(output_dir.name, 'log', file_name)
+                self.assertTrue(os.path.exists(output_file))
+
+            for file_name in (
                 'HCC1395_TUMOR_DNA.MHC_II.all_epitopes.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_II', file_name)
@@ -268,6 +283,7 @@ class PvacspliceTests(unittest.TestCase):
 
             for file_name in (
                 'HCC1395_TUMOR_DNA.MHC_II.all_epitopes.aggregated.tsv',
+                'HCC1395_TUMOR_DNA.MHC_II.all_epitopes.aggregated.metrics.json',
                 'HCC1395_TUMOR_DNA.MHC_II.all_epitopes.aggregated.tsv.reference_matches',
                 'HCC1395_TUMOR_DNA.MHC_II.filtered.tsv',
             ):
@@ -290,7 +306,7 @@ class PvacspliceTests(unittest.TestCase):
                 self.assertTrue(cmp(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
 
             mock_request.assert_has_calls([
-                generate_class_ii_call('nn_align', 'DRB1*11:01', 15, os.path.join(output_dir.name, "MHC_Class_II", "MHC_Class_II_15", "tmp", "HCC1395_TUMOR_DNA.15.fa.split_1-51"))
+                generate_class_ii_call('nn_align', 'DRB1*11:01', 15, os.path.join(output_dir.name, "MHC_Class_II", "MHC_Class_II_15", "tmp", "HCC1395_TUMOR_DNA.15.fa.split_1-298"))
             ])
 
             output_dir.cleanup()
@@ -324,6 +340,7 @@ class PvacspliceTests(unittest.TestCase):
                 '-g',
                 '--maximum-transcript-support-level', '3',
                 '-b', '2000',
+                '--fasta-size', '400'
             ])
 
             for file_name in (
@@ -335,6 +352,7 @@ class PvacspliceTests(unittest.TestCase):
 
             for file_name in (
                 'HCC1395_TUMOR_DNA.Combined.all_epitopes.aggregated.tsv',
+                'HCC1395_TUMOR_DNA.Combined.all_epitopes.aggregated.metrics.json',
                 'HCC1395_TUMOR_DNA.Combined.filtered.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'combined', file_name)
@@ -396,6 +414,7 @@ class PvacspliceTests(unittest.TestCase):
 
             for file_name in (
                 'tumor.MHC_I.all_epitopes.aggregated.tsv',
+                'tumor.MHC_I.all_epitopes.aggregated.metrics.json',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'results', 'results_multiple_variants_overlapping_splice_site', file_name)

@@ -59,7 +59,7 @@ class UpdateTiers:
             'input_file',
             help="Input aggregated file with tiers to update. This file will be overwritten with the output."
         )
-        if tool in ['pvacseq']:
+        if tool in ['pvacseq', 'pvacfuse', 'pvacsplice']:
             parser.add_argument(
                 'metrics_file',
                 help="metrics.json file corresponding to the input aggregated file. This file will be overwritten to update tiering parameters used by this command."
@@ -164,7 +164,7 @@ class UpdateTiers:
                 default=1,
                 choices=[1, 2, 3, 4, 5]
             )
-        if tool == 'pvacseq':
+        if tool in ['pvacseq', 'pvacsplice', 'pvacfuse']:
             parser.add_argument(
                 "--allele-specific-anchors",
                 help="Use allele-specific anchor positions when evaluating the anchor criteria for tiering epitopes in the aggregate report. This option "
@@ -428,9 +428,12 @@ class PvacfuseUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         presentation_percentile_threshold=2.0,
         percentile_threshold_strategy='conservative',
         allele_specific_binding_thresholds=False,
+        allele_specific_anchors=False,
+        anchor_contribution_threshold=0.8,
         read_support=5,
         expn_val=0.1,
         top_score_metric2=["ic50", "combined_percentile"],
+        metrics_file=None,
     ):
         self.input_file = input_file
         self.output_file = tempfile.NamedTemporaryFile()
@@ -442,8 +445,10 @@ class PvacfuseUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         self.percentile_threshold_strategy = percentile_threshold_strategy
         self.read_support = read_support
         self.expn_val = expn_val
+        self.metrics_file=metrics_file
         self.top_score_metric2 = top_score_metric2
         super().__init__()
+        self.anchor_calculator = AnchorResiduePass(binding_threshold, self.use_allele_specific_binding_thresholds, self.allele_specific_binding_thresholds, allele_specific_anchors, anchor_contribution_threshold)
 
     def get_tier(self, mutation):
         if self.use_allele_specific_binding_thresholds and mutation['Allele'] in self.allele_specific_binding_thresholds:
@@ -473,6 +478,8 @@ class PvacfuseUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         elif self.percentile_threshold_strategy == 'exploratory':
             scores_pass = any(all_scores)
             binding_pass = any(binding_scores)
+
+        anchor_residue_pass = self.anchor_calculator.is_anchor_residue_pass(mutation)
 
         low_read_support = False
         if mutation['Read Support'] != 'NA' and float(mutation['Read Support']) < self.read_support:
@@ -493,6 +500,7 @@ class PvacfuseUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         if (scores_pass and
           not low_read_support and
           not low_expr and
+          anchor_residue_pass and
           refmatch_pass and
           probaa_pass):
             return "Pass"
@@ -501,6 +509,7 @@ class PvacfuseUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         if (not binding_pass and immunogenicity_percentile_pass and presentation_percentile_pass and
           not low_read_support and
           not low_expr and
+          anchor_residue_pass and
           refmatch_pass and
           probaa_pass):
             return "PoorBinder"
@@ -509,6 +518,7 @@ class PvacfuseUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         if (binding_pass and not immunogenicity_percentile_pass and presentation_percentile_pass and
           not low_read_support and
           not low_expr and
+          anchor_residue_pass and
           refmatch_pass and
           probaa_pass):
             return "PoorImmunogenicity"
@@ -517,6 +527,7 @@ class PvacfuseUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         if (binding_pass and immunogenicity_percentile_pass and not presentation_percentile_pass and
           not low_read_support and
           not low_expr and
+          anchor_residue_pass and
           refmatch_pass and
           probaa_pass):
             return "PoorPresentation"
@@ -525,6 +536,7 @@ class PvacfuseUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         if (scores_pass and
           not low_read_support and
           not low_expr and
+          anchor_residue_pass and
           not refmatch_pass and
           probaa_pass):
             return "RefMatch"
@@ -533,14 +545,25 @@ class PvacfuseUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         if (scores_pass and
           not low_read_support and
           not low_expr and
+          anchor_residue_pass and
           refmatch_pass and
           not probaa_pass):
             return "ProbPos"
+
+        #anchor residues
+        if (scores_pass and
+          not low_read_support and
+          not low_expr and
+          not anchor_residue_pass and
+          refmatch_pass and
+          probaa_pass):
+            return "Anchor"
 
         #low read support
         if (scores_pass and
           low_read_support and
           not low_expr and
+          anchor_residue_pass and
           refmatch_pass and
           probaa_pass):
             return "LowReadSupport"
@@ -549,6 +572,7 @@ class PvacfuseUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         if (scores_pass and
           not low_read_support and
           low_expr and
+          anchor_residue_pass and
           refmatch_pass and
           probaa_pass):
             return "LowExpr"
@@ -557,6 +581,25 @@ class PvacfuseUpdateTiers(UpdateTiers, metaclass=ABCMeta):
 
     def sort_table(self, output_lines):
         return pvacfuse_sort(output_lines, None, self.top_score_metric2, file_type='aggregated')
+
+    def update_metrics_file(self):
+        if self.metrics_file is not None:
+            output_metrics_file = tempfile.NamedTemporaryFile()
+            with open(self.metrics_file, 'r') as input_fh, open(output_metrics_file.name, 'w') as output_fh:
+                metrics = json.loads(input_fh.read())
+                metrics['binding_threshold'] = self.binding_threshold
+                metrics['expn_val'] = self.expn_val
+                metrics['read_support'] = self.read_support
+                metrics['binding_percentile_threshold'] = self.binding_percentile_threshold
+                metrics['immunogenicity_percentile_threshold'] = self.immunogenicity_percentile_threshold
+                metrics['presentation_percentile_threshold'] = self.presentation_percentile_threshold
+                metrics['percentile_threshold_strategy'] = self.percentile_threshold_strategy
+                metrics['use_allele_specific_binding_thresholds'] = self.use_allele_specific_binding_thresholds
+                metrics['top_score_metric2'] = self.top_score_metric2
+                metrics['allele_specific_anchors'] = self.anchor_calculator.use_allele_specific_anchors
+                metrics['anchor_contribution_threshold'] = self.anchor_calculator.anchor_contribution_threshold
+                json.dump(metrics, output_fh, indent=2, separators=(',', ': '))
+            shutil.copy(output_metrics_file.name, self.metrics_file)
 
 class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
     def __init__(
@@ -574,7 +617,10 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         expn_val=1,
         transcript_prioritization_strategy=['mane_select', 'canonical', 'tsl'],
         maximum_transcript_support_level=1,
+        allele_specific_anchors=False,
+        anchor_contribution_threshold=0.8,
         top_score_metric2=["ic50", "combined_percentile"],
+        metrics_file=None,
     ):
         self.input_file = input_file
         self.output_file = tempfile.NamedTemporaryFile()
@@ -591,8 +637,10 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         self.expn_val = expn_val
         self.transcript_prioritization_strategy = transcript_prioritization_strategy
         self.maximum_transcript_support_level = maximum_transcript_support_level
+        self.metrics_file=metrics_file
         self.top_score_metric2 = top_score_metric2
         super().__init__()
+        self.anchor_calculator = AnchorResiduePass(binding_threshold, self.use_allele_specific_binding_thresholds, self.allele_specific_binding_thresholds, allele_specific_anchors, anchor_contribution_threshold)
 
     def get_tier(self, mutation):
         if self.use_allele_specific_binding_thresholds and mutation['Allele'] in self.allele_specific_binding_thresholds:
@@ -622,6 +670,8 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
         elif self.percentile_threshold_strategy == 'exploratory':
             scores_pass = any(all_scores)
             binding_pass = any(binding_scores)
+
+        anchor_residue_pass = self.anchor_calculator.is_anchor_residue_pass(mutation)
 
         transcript_pass = is_preferred_transcript(mutation, self.transcript_prioritization_strategy, self.maximum_transcript_support_level)
 
@@ -646,6 +696,7 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
            allele_expr_pass and
            vaf_clonal_pass and
            transcript_pass and
+           anchor_residue_pass and
            refmatch_pass and
            probaa_pass):
             return "Pass"
@@ -655,6 +706,7 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
            allele_expr_pass and
            vaf_clonal_pass and
            transcript_pass and
+           anchor_residue_pass and
            refmatch_pass and
            probaa_pass):
             return "PoorBinder"
@@ -664,6 +716,7 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
            allele_expr_pass and
            vaf_clonal_pass and
            transcript_pass and
+           anchor_residue_pass and
            refmatch_pass and
            probaa_pass):
             return "PoorImmunogenicity"
@@ -673,6 +726,7 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
            allele_expr_pass and
            vaf_clonal_pass and
            transcript_pass and
+           anchor_residue_pass and
            refmatch_pass and
            probaa_pass):
             return "PoorPresentation"
@@ -682,6 +736,7 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
            allele_expr_pass and
            vaf_clonal_pass and
            transcript_pass and
+           anchor_residue_pass and
            not refmatch_pass and
            probaa_pass):
             return "RefMatch"
@@ -691,6 +746,7 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
            allele_expr_pass and
            vaf_clonal_pass and
            transcript_pass and
+           anchor_residue_pass and
            refmatch_pass and
            not probaa_pass):
             return "ProbPos"
@@ -700,15 +756,27 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
            allele_expr_pass and
            vaf_clonal_pass and
            not transcript_pass and
+           anchor_residue_pass and
            refmatch_pass and
            probaa_pass):
             return "PoorTranscript"
+
+        #anchor residues
+        if (scores_pass and
+           allele_expr_pass and
+           vaf_clonal_pass and
+           transcript_pass and
+           not anchor_residue_pass and
+           refmatch_pass and
+           probaa_pass):
+            return "Anchor"
 
         #not in founding clone
         if (scores_pass and
            allele_expr_pass and
            not vaf_clonal_pass and
            transcript_pass and
+           anchor_residue_pass and
            refmatch_pass and
            probaa_pass):
             return "Subclonal"
@@ -727,6 +795,7 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
            lowexpr and
            vaf_clonal_pass and
            transcript_pass and
+           anchor_residue_pass and
            refmatch_pass and
            probaa_pass):
             return "LowExpr"
@@ -742,6 +811,30 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
 
     def sort_table(self, output_lines):
         return pvacsplice_sort(output_lines, None, self.top_score_metric2, file_type='aggregated')
+
+    def update_metrics_file(self):
+        if self.metrics_file is not None:
+            output_metrics_file = tempfile.NamedTemporaryFile()
+            with open(self.metrics_file, 'r') as input_fh, open(output_metrics_file.name, 'w') as output_fh:
+                metrics = json.loads(input_fh.read())
+                metrics['vaf_clonal'] = round(self.vaf_clonal, 3)
+                metrics['vaf_subclonal'] = round(self.vaf_clonal/2, 3)
+                metrics['binding_threshold'] = self.binding_threshold
+                metrics['trna_vaf'] = self.trna_vaf
+                metrics['trna_cov'] = self.trna_cov
+                metrics['allele_expr_threshold'] = self.allele_expr_threshold
+                metrics['transcript_prioritization_strategy'] = sorted(self.transcript_prioritization_strategy)
+                metrics['maximum_transcript_support_level'] = self.maximum_transcript_support_level
+                metrics['binding_percentile_threshold'] = self.binding_percentile_threshold
+                metrics['immunogenicity_percentile_threshold'] = self.immunogenicity_percentile_threshold
+                metrics['presentation_percentile_threshold'] = self.presentation_percentile_threshold
+                metrics['percentile_threshold_strategy'] = self.percentile_threshold_strategy
+                metrics['use_allele_specific_binding_thresholds'] = self.use_allele_specific_binding_thresholds
+                metrics['top_score_metric2'] = self.top_score_metric2
+                metrics['allele_specific_anchors'] = self.anchor_calculator.use_allele_specific_anchors
+                metrics['anchor_contribution_threshold'] = self.anchor_calculator.anchor_contribution_threshold
+                json.dump(metrics, output_fh, indent=2, separators=(',', ': '))
+            shutil.copy(output_metrics_file.name, self.metrics_file)
 
 class PvacbindUpdateTiers(UpdateTiers, metaclass=ABCMeta):
     def __init__(

@@ -317,6 +317,20 @@ is_allele_expr_pass <- function(rna_vaf, gene_expr, allele_expr, allele_expr_cut
   }
   return(allele_expr_pass)
 }
+is_expr_pass <- function(expression, expression_cutoff) {
+  expr_pass <- TRUE
+  if (!is.na(expression) && as.numeric(expression) <= expression_cutoff) {
+    expr_pass <- FALSE
+  }
+  return(expr_pass)
+}
+is_read_support_pass <- function(read_support, read_support_cutoff) {
+  read_support_pass <- TRUE
+  if (!is.na(read_support) && as.numeric(read_support) <= read_support_cutoff) {
+    read_support_pass <- FALSE
+  }
+  return(read_support_pass)
+}
 is_vaf_clonal_pass <- function(dna_vaf, dna_cutoff) {
   vaf_clonal_pass <- TRUE
   if (!is.na(dna_vaf) && as.numeric(dna_vaf) < dna_cutoff / 2) {
@@ -412,11 +426,11 @@ tier <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cuto
     scores <- append(scores, presentation_percentile_pass)
   }
   if (percentile_threshold_strategy == 'conservative') {
-      binding_pass <- all(binding)
-      scores_pass <- all(scores)
+      binding_pass <- all(unlist(binding))
+      scores_pass <- all(unlist(scores))
   } else {
-      binding_pass <- any(binding)
-      scores_pass <- any(scores)
+      binding_pass <- any(unlist(binding))
+      scores_pass <- any(unlist(scores))
   }
   anchor_residue_pass <- is_anchor_residue_pass(anchor_mode, peptide, hla_allele, anchor_contribution, mutation_pos_list, wt_binding, binding_threshold)
   transcript_pass <- is_transcript_pass(canonical, mane_select, tsl, transcript_prioritization_strategy, tsl_max)
@@ -464,6 +478,82 @@ tier <- function(variant_info, anchor_contribution, dna_cutoff, allele_expr_cuto
   }
   if (((!is.na(gene_expr) && (gene_expr == 0)) || (!is.na(rna_vaf) && rna_vaf == 0)) && !lowexpr) {
     return("NoExpr")
+  }
+  return("Poor")
+}
+
+tier_pvacfuse <- function(variant_info, anchor_contribution, expn_val_cutoff, read_support_cutoff, meta_data, anchor_mode, use_allele_specific_binding_thresholds, binding_threshold, binding_percentile_threshold, immunogenicity_percentile_threshold, presentation_percentile_threshold, percentile_threshold_strategy) {
+  mt_binding <- as.numeric(variant_info["IC50 MT"])
+  wt_binding <- as.numeric(variant_info["IC50 WT"])
+  mt_binding_percent <- as.numeric(variant_info["IC50 %ile MT"])
+  mt_immunogenicity_percent <- as.numeric(variant_info["IM %ile MT"])
+  mt_presentation_percent <- as.numeric(variant_info["Pres %ile MT"])
+  expr <- variant_info["Expr"]
+  read_support <- variant_info["Read Support"]
+  hla_allele <- variant_info[['Allele']]
+  mutation_pos_list <- variant_info[['Pos']]
+  peptide <- variant_info[['Best Peptide']]
+
+  ic50_pass <- is_ic50_pass(use_allele_specific_binding_thresholds, hla_allele, meta_data[["allele_specific_binding_thresholds"]], mt_binding, binding_threshold)
+  binding_percentile_pass <- is_percentile_pass(binding_percentile_threshold, mt_binding_percent)
+  immunogenicity_percentile_pass <- is_percentile_pass(immunogenicity_percentile_threshold, mt_immunogenicity_percent)
+  presentation_percentile_pass <- is_percentile_pass(presentation_percentile_threshold, mt_presentation_percent)
+  scores <- list()
+  binding <- list()
+  if (!is.na(mt_binding)) {
+    scores <- append(scores, ic50_pass)
+    binding <- append(binding, ic50_pass)
+  }
+  if (!is.na(mt_binding_percent)) {
+    scores <- append(scores, binding_percentile_pass)
+    binding <- append(binding, binding_percentile_pass)
+  }
+  if (!is.na(mt_immunogenicity_percent)) {
+    scores <- append(scores, immunogenicity_percentile_pass)
+  }
+  if (!is.na(mt_presentation_percent)) {
+    scores <- append(scores, presentation_percentile_pass)
+  }
+  if (percentile_threshold_strategy == 'conservative') {
+      binding_pass <- all(unlist(binding))
+      scores_pass <- all(unlist(scores))
+  } else {
+      binding_pass <- any(unlist(binding))
+      scores_pass <- any(unlist(scores))
+  }
+  anchor_residue_pass <- is_anchor_residue_pass(anchor_mode, peptide, hla_allele, anchor_contribution, mutation_pos_list, wt_binding, binding_threshold)
+  expn_val_pass <- is_expr_pass(expr, expn_val_cutoff)
+  read_support_pass <- is_read_support_pass(read_support, read_support_cutoff)
+  refmatch_pass <- is_refmatch_pass(variant_info[['Ref Match']])
+  probaa_pass <- is_probaa_pass(variant_info[['Prob Pos']])
+
+  ## Assign Tiering
+  if (scores_pass && expn_val_pass && read_support_pass && anchor_residue_pass && refmatch_pass && probaa_pass) {
+    return("Pass")
+  }
+  if (!binding_pass && immunogenicity_percentile_pass && presentation_percentile_pass && expn_val_pass && read_support_pass && anchor_residue_pass && refmatch_pass && probaa_pass) {
+    return("PoorBinder")
+  }
+  if (binding_pass && !immunogenicity_percentile_pass && presentation_percentile_pass && expn_val_pass && read_support_pass && anchor_residue_pass && refmatch_pass && probaa_pass) {
+    return("PoorImmunogenicity")
+  }
+  if (binding_pass && immunogenicity_percentile_pass && !presentation_percentile_pass && expn_val_pass && read_support_pass && anchor_residue_pass && refmatch_pass && probaa_pass) {
+    return("PoorPresentation")
+  }
+  if (scores_pass && expn_val_pass && read_support_pass && anchor_residue_pass && !refmatch_pass && probaa_pass) {
+    return("RefMatch")
+  }
+  if (scores_pass && expn_val_pass && read_support_pass && anchor_residue_pass && refmatch_pass && !probaa_pass) {
+    return("ProbPos")
+  }
+  if (scores_pass && expn_val_pass && read_support_pass && !anchor_residue_pass && refmatch_pass && probaa_pass) {
+    return("Anchor")
+  }
+  if (scores_pass && expn_val_pass && !read_support_pass && anchor_residue_pass && refmatch_pass && probaa_pass) {
+    return("LowReadSupport")
+  }
+  if (scores_pass && !expn_val_pass && read_support_pass && anchor_residue_pass && refmatch_pass && probaa_pass) {
+    return("LowExp")
   }
   return("Poor")
 }

@@ -650,7 +650,7 @@ class InputFileConverterTests(unittest.TestCase):
         self.assertFalse(converter.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_no_gene_name.tsv')
         self.assertTrue(cmp(convert_vcf_output_file.name, expected_output_file))
-    
+
     def test_allow_incomplete_transcripts(self):
         convert_input_file  = os.path.join(self.test_data_dir, '..', 'pvacsplice', 'inputs', 'annotated.expression_chr1.vcf.gz')
         convert_output_file = tempfile.NamedTemporaryFile()
@@ -667,7 +667,7 @@ class InputFileConverterTests(unittest.TestCase):
         self.assertFalse(converter.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_with_incomplete_transcripts.tsv')
         self.assertTrue(cmp(convert_output_file.name, expected_output_file))
-    
+
     def test_exclude_incomplete_transcripts(self):
         convert_input_file  = os.path.join(self.test_data_dir, '..', 'pvacsplice', 'inputs', 'annotated.expression_chr1.vcf.gz')
         convert_output_file = tempfile.NamedTemporaryFile()

@@ -53,4 +53,5 @@ class PvacspliceUpdateTiersTests(unittest.TestCase):
 
     def test_runs(self):
         input_file = os.path.join(self.test_data_directory, 'results', 'run', 'MHC_Class_I', 'HCC1395_TUMOR_DNA.MHC_I.all_epitopes.aggregated.tsv')
-        self.assertFalse(update_tiers.main([input_file, "0.5"]))
+        input_metrics_file = os.path.join(self.test_data_directory, 'results', 'run' 'MHC_Class_I', 'HCC1295_TUMOR_DNA.MHC_I.all_epitopes.aggregated.metrics.json')
+        self.assertFalse(update_tiers.main([input_file, input_metrics_file, "0.5"]))

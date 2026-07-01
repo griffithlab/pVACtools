@@ -354,6 +354,10 @@ class RunArgumentParser(metaclass=ABCMeta):
 
     def pvacfuse(self):
         self.parser.add_argument(
+            "ref_fasta",
+            help="A reference CDS FASTA file. Note: this input should match the build and Ensembl version used to create the fusion annotations."
+        )
+        self.parser.add_argument(
             '--starfusion-file',
             help="Path to a star-fusion.fusion_predictions.tsv or star-fusion.fusion_predictions.abridged.tsv to extract "
                  + "read support and expression information from. When running with AGFusion data, both read support and "
@@ -376,19 +380,7 @@ class RunArgumentParser(metaclass=ABCMeta):
             default=0.1
         )
 
-    def pvacseq(self):
-        self.parser.add_argument(
-            "-p", "--phased-proximal-variants-vcf",
-            help="A VCF with phased proximal variant information. Must be gzipped and tabix indexed."
-        )
-        self.parser.add_argument(
-            "-c", "--minimum-fold-change", type=float,
-            default=0.0,
-            help="Minimum fold change between mutant (MT) binding score and wild-type (WT) score (fold change = WT/MT). "
-                 + "The default is 0, which filters no results, but 1 is often a sensible choice "
-                 + "(requiring that binding is better to the MT than WT peptide). "
-                 + "This fold change is sometimes referred to as a differential agretopicity index.",
-        )
+    def anchor_args(self):
         self.parser.add_argument(
             "--allele-specific-anchors",
             help="Use allele-specific anchor positions when tiering epitopes in the aggregate report. This option "
@@ -407,6 +399,20 @@ class RunArgumentParser(metaclass=ABCMeta):
                  + "scores together account for the selected contribution threshold are assigned as anchor locations. "
                  + " As a result, a higher threshold leads to the inclusion of more positions to be considered anchors.",
             default=0.8
+        )
+
+    def pvacseq(self):
+        self.parser.add_argument(
+            "-p", "--phased-proximal-variants-vcf",
+            help="A VCF with phased proximal variant information. Must be gzipped and tabix indexed."
+        )
+        self.parser.add_argument(
+            "-c", "--minimum-fold-change", type=float,
+            default=0.0,
+            help="Minimum fold change between mutant (MT) binding score and wild-type (WT) score (fold change = WT/MT). "
+                 + "The default is 0, which filters no results, but 1 is often a sensible choice "
+                 + "(requiring that binding is better to the MT than WT peptide). "
+                 + "This fold change is sometimes referred to as a differential agretopicity index.",
         )
         self.parser.add_argument(
             '--expn-val', type=float,
@@ -526,6 +532,7 @@ class PvacfuseRunArgumentParser(RunArgumentParser):
         self.binding_args(tool_name)
         self.prediction_args()
         self.fasta_generation()
+        self.anchor_args()
         self.genes_of_interest_args()
         self.aggregated_report_args()
         self.pvacfuse()
@@ -540,6 +547,7 @@ class PvacspliceRunArgumentParser(RunArgumentParser):
         self.pass_only_args()
         self.expression_coverage_args()
         self.prediction_args()
+        self.anchor_args()
         self.genes_of_interest_args()
         self.aggregated_report_args()
         self.pvacsplice()
@@ -560,6 +568,7 @@ class PvacseqRunArgumentParser(RunArgumentParser):
         self.expression_coverage_args()
         self.prediction_args()
         self.fasta_generation()
+        self.anchor_args()
         self.genes_of_interest_args()
         self.aggregated_report_args()
         self.pvacseq()

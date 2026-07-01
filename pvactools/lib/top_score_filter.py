@@ -67,7 +67,7 @@ class TopScoreFilter(metaclass=ABCMeta):
                 default=1,
                 choices=[1,2,3,4,5]
             )
-        if tool == 'pvacseq':
+        if tool in ['pvacseq', 'pvacfuse', 'pvacsplice']:
             parser.add_argument(
                 '-b', '--binding-threshold', type=int,
                 help="When determining the top peptide, only peptides passing the anchor criteria are considered. This criteria is failed if "
@@ -217,15 +217,40 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
 
 
 class PvacfuseTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
-    def __init__(self, input_file, output_file, top_score_metric="median", top_score_metric2 = ["ic50", "combined_percentile"]):
+    def __init__(
+        self,
+        input_file,
+        output_file,
+        top_score_metric="median",
+        top_score_metric2 = ["ic50", "combined_percentile"],
+        binding_threshold=500,
+        allele_specific_binding_thresholds=False,
+        allele_specific_anchors=False,
+        anchor_contribution_threshold=0.8,
+    ):
         self.input_file = input_file
         self.output_file = output_file
         self.top_score_metric = top_score_metric
         self.top_score_metric2 = top_score_metric2
         if self.top_score_metric == 'median':
-            self.formatted_top_score_metric = "Median"
+            self.mt_top_score_metric = "Median"
+            self.wt_top_score_metric = "Median"
         else:
-            self.formatted_top_score_metric = "Best"
+            self.mt_top_score_metric = "Best"
+            self.wt_top_score_metric = "Corresponding"
+        self.binding_threshold = binding_threshold
+        self.use_allele_specific_binding_thresholds = allele_specific_binding_thresholds
+        self.hla_types = pd.read_csv(self.input_file, delimiter="\t", usecols=["HLA Allele"])['HLA Allele'].unique()
+        allele_specific_binding_thresholds = {}
+        for hla_type in self.hla_types:
+            threshold = PredictionClass.cutoff_for_allele(hla_type)
+            if threshold is None:
+                allele_specific_binding_thresholds[hla_type] = self.binding_threshold
+            else:
+                allele_specific_binding_thresholds[hla_type] = float(threshold)
+        self.allele_specific_binding_thresholds = allele_specific_binding_thresholds
+        self.allele_specific_anchors = allele_specific_anchors
+        self.anchor_calculator = AnchorResiduePass(binding_threshold, self.use_allele_specific_binding_thresholds, self.allele_specific_binding_thresholds, allele_specific_anchors, anchor_contribution_threshold, self.wt_top_score_metric)
 
     def execute(self):
         with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh:
@@ -250,7 +275,7 @@ class PvacfuseTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
                 transcripts_with_same_epitopes = defaultdict(list)
                 for transcript, transcript_lines in groupby(lines, key = itemgetter('Index')):
                     transcript_lines = list(transcript_lines)
-                    epitopes = ','.join(sorted([x['Epitope Seq'] for x in transcript_lines]))
+                    epitopes = ','.join(sorted([x['MT Epitope Seq'] for x in transcript_lines]))
                     transcripts_with_same_epitopes[epitopes].append(transcript)
                 for transcripts in transcripts_with_same_epitopes.values():
                     transcript_set_lines = [x for x in lines if x['Index'] in transcripts]
@@ -271,10 +296,11 @@ class PvacfuseTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
     def find_best_line(self, lines):
         df = pd.DataFrame(lines)
         df.replace("NA", np.nan, inplace=True)
-        df = df.astype({"{} IC50 Score".format(self.formatted_top_score_metric):'float'})
+        df = df.astype({"{} MT IC50 Score".format(self.mt_top_score_metric):'float'})
         return PvacfuseBestCandidate(
             self.top_score_metric,
             self.top_score_metric2,
+            self.anchor_calculator,
         ).get(df)
 
 class PvacbindTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
@@ -326,18 +352,37 @@ class PvacspliceTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
         maximum_transcript_support_level=1,
         top_score_metric2=["ic50", "combined_percentile"],
         allow_incomplete_transcripts=False,
+        binding_threshold=500,
+        allele_specific_binding_thresholds=False,
+        allele_specific_anchors=False,
+        anchor_contribution_threshold=0.8,
     ):
         self.input_file = input_file
         self.output_file = output_file
         self.top_score_metric = top_score_metric
         self.top_score_metric2 = top_score_metric2
         if self.top_score_metric == 'median':
-            self.formatted_top_score_metric = "Median"
+            self.mt_top_score_metric = "Median"
+            self.wt_top_score_metric = "Median"
         else:
-            self.formatted_top_score_metric = "Best"
+            self.mt_top_score_metric = "Best"
+            self.wt_top_score_metric = "Corresponding"
         self.transcript_prioritization_strategy = transcript_prioritization_strategy
         self.maximum_transcript_support_level = maximum_transcript_support_level
         self.allow_incomplete_transcripts= allow_incomplete_transcripts
+        self.binding_threshold = binding_threshold
+        self.use_allele_specific_binding_thresholds = allele_specific_binding_thresholds
+        self.hla_types = pd.read_csv(self.input_file, delimiter="\t", usecols=["HLA Allele"])['HLA Allele'].unique()
+        allele_specific_binding_thresholds = {}
+        for hla_type in self.hla_types:
+            threshold = PredictionClass.cutoff_for_allele(hla_type)
+            if threshold is None:
+                allele_specific_binding_thresholds[hla_type] = self.binding_threshold
+            else:
+                allele_specific_binding_thresholds[hla_type] = float(threshold)
+        self.allele_specific_binding_thresholds = allele_specific_binding_thresholds
+        self.allele_specific_anchors = allele_specific_anchors
+        self.anchor_calculator = AnchorResiduePass(binding_threshold, self.use_allele_specific_binding_thresholds, self.allele_specific_binding_thresholds, allele_specific_anchors, anchor_contribution_threshold, self.wt_top_score_metric)
 
     def execute(self):
         with open(self.input_file) as input_fh, open(self.output_file, 'w') as output_fh:
@@ -361,11 +406,12 @@ class PvacspliceTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
     def find_best_line(self, lines):
         df = pd.DataFrame(lines)
         df.replace("NA", np.nan, inplace=True)
-        df = df.astype({"{} IC50 Score".format(self.formatted_top_score_metric):'float'})
+        df = df.astype({"{} MT IC50 Score".format(self.mt_top_score_metric):'float'})
         return PvacspliceBestCandidate(
             self.transcript_prioritization_strategy,
             self.maximum_transcript_support_level,
             self.top_score_metric,
             self.top_score_metric2,
             self.allow_incomplete_transcripts,
+            self.anchor_calculator,
         ).get(df)

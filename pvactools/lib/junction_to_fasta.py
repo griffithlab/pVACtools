@@ -47,7 +47,7 @@ class JunctionToFasta():
         # load in wt transcript df
         self.wt_df = self.load_gtf_data()
         # if anchor is D or A, make sure the wt coordinate is inside in the coding region of transcript
-        # (alt coordinate won't be present because ensembl only lists the wt coordinates) 
+        # (alt coordinate won't be present because ensembl only lists the wt coordinates)
         if self.anchor in ['D', 'A']:
             # look for ref coor index
             index = [index for index,value in self.wt_df[self.wt_row].items() if value == self.wt_coor]
@@ -59,14 +59,14 @@ class JunctionToFasta():
             # else:
             #     print(f'{self.anchor} WT: {self.wt_coor} {index[0]}')
         # if exon skip, check that both coordinates are inside the coding region of transcript
-        elif self.anchor == 'NDA':                    
-            # check for presence of both coordinates 
+        elif self.anchor == 'NDA':
+            # check for presence of both coordinates
             index_wt = [index for index,value in self.wt_df[self.wt_row].items() if value == self.wt_coor]
             index_alt = [index for index,value in self.wt_df[self.alt_row].items() if value == self.alt_coor]
             if index_wt and index_alt:
                 # print(f'NDA both coors present: {self.wt_coor}, {index_wt[0]}, {self.alt_coor}, {index_alt[0]}')
                 pass
-            else:    
+            else:
                 if not index_wt and not index_alt:
                     print(f'{self.fasta_index} Exon skip: both junction coordinates outside of coding transcript...Skipping')
                     print(f'Missing coordinates: {self.wt_coor} {self.alt_coor}')
@@ -104,18 +104,18 @@ class JunctionToFasta():
                 elif i != index_list[-1]:
                     continue
                 # if i IS NOT between two wt coordinates AND it IS the last index in list
-                # return an empty df that will cause an exception in run.py                
+                # return an empty df that will cause an exception in run.py
                 else:
                     # here i can add option to look for next start codon (start lost)
                     print(f'{self.fasta_index} Alternate junction coordinate outside of coding transcript...Skipping')
                     print(f'Missing coordinate: {self.alt_coor}')
                     self.alt_df = pd.DataFrame()
                     continue
-                
+
         # forward direction
         if self.reverse == False:
             # select rows that are possible places to insert altant coordinate
-            revised_df = self.alt_df[self.alt_df[self.wt_row] >= self.wt_coor] 
+            revised_df = self.alt_df[self.alt_df[self.wt_row] >= self.wt_coor]
             # loop over indexes in revised_df
             # ex: [13,14,15] (going to end of df)
             index_list = revised_df.index.tolist()
@@ -139,8 +139,8 @@ class JunctionToFasta():
                     print(f'{self.fasta_index} Alternate junction coordinate outside of coding transcript...Skipping')
                     print(f'Missing coordinate: {self.alt_coor}')
                     self.alt_df = pd.DataFrame()
-                    continue    
-                
+                    continue
+
         # exon skip
         # starting knowing both coors are in coding region
         if self.anchor == 'NDA':
@@ -169,7 +169,7 @@ class JunctionToFasta():
         # negative strand
         if self.strand == -1:
             dna_seq = dna_seq.reverse_complement() # still a Seq object
-        # make biopython happy by making dna_seq a multiple of 3 
+        # make biopython happy by making dna_seq a multiple of 3
         # adding Ns to end of sequence if remainder != 0
         remainder = len(dna_seq) % 3
         if remainder == 0:
@@ -199,7 +199,7 @@ class JunctionToFasta():
                 e.write(write_str)
 
 # GBM examples #
-# ex 1: KLHL5 A (+, 1) FS # 
+# ex 1: KLHL5 A (+, 1) FS #
 # 'ENST00000261425', 'chr4', [39081256, 39081963], 'A', 1, 'KLHL5'
 
 # ex 2: DSG3 D (+, 1) INDEL (1 aa deletion) #

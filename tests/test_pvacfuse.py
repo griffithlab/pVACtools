@@ -34,6 +34,8 @@ class PvacfuseTests(unittest.TestCase):
         cls.pvactools_directory = pvactools_directory()
         cls.test_data_directory = test_data_directory()
         cls.peptide_fasta = os.path.join(pvactools_directory(), "tests", "test_data", "Homo_sapiens.GRCh38.pep.short.fa.gz")
+        transcript_fasta = os.path.join(cls.test_data_directory, 'Homo_sapiens.GRCh38.95.cds.all.fa.gz')
+        cls.unzipped_transcript_fasta = gunzip_file(transcript_fasta)
 
     def test_pvacfuse_compiles(self):
         compiled_pvac_path = py_compile.compile(os.path.join(
@@ -95,20 +97,38 @@ class PvacfuseTests(unittest.TestCase):
                 'HLA-A*29:02',
                 'NetMHC',
                 output_dir.name,
+                self.unzipped_transcript_fasta,
                 '-e1', '9',
                 '--top-score-metric=lowest',
                 '--top-score-metric2=ic50',
                 '--keep-tmp-files',
                 '--run-reference-proteome-similarity',
                 '--peptide-fasta', self.peptide_fasta,
+                '--fasta-size', '600',
             ])
             close_mock_fhs()
+
+            for file_name in (
+                'sample.name.9.fa',
+                'sample.name.transcripts.fa',
+                'sample.name.tsv',
+            ):
+                output_file   = os.path.join(output_dir.name, file_name)
+                expected_file = os.path.join(self.test_data_directory, 'fusions', file_name)
+                self.assertTrue(cmp(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
+
+            for file_name in (
+                'inputs.yml',
+            ):
+                output_file   = os.path.join(output_dir.name, 'log', file_name)
+                self.assertTrue(os.path.exists(output_file))
 
             for file_name in (
                 'sample.name.fasta',
                 'sample.name.MHC_I.all_epitopes.tsv',
                 'sample.name.MHC_I.filtered.tsv',
                 'sample.name.MHC_I.all_epitopes.aggregated.tsv',
+                'sample.name.MHC_I.all_epitopes.aggregated.metrics.json',
                 'sample.name.MHC_I.all_epitopes.aggregated.tsv.reference_matches',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
@@ -116,7 +136,7 @@ class PvacfuseTests(unittest.TestCase):
                 self.assertTrue(compare(output_file, expected_file),  "files don't match %s - %s" %(output_file, expected_file))
 
             for file_name in (
-                'sample.name.ann.HLA-A*29:02.9.tsv_1-44',
+                'sample.name.ann.HLA-A*29:02.9.tsv_1-594',
                 'sample.name.HLA-A*29:02.9.parsed.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', '9', 'tmp', file_name)
@@ -124,7 +144,7 @@ class PvacfuseTests(unittest.TestCase):
                 self.assertTrue(compare(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
 
             mock_request.assert_has_calls([
-                generate_class_i_call('ann', 'HLA-A*29:02', 9, os.path.join(output_dir.name, "MHC_Class_I", "9", "tmp", "sample.name.9.fa.split_1-44"))
+                generate_class_i_call('ann', 'HLA-A*29:02', 9, os.path.join(output_dir.name, "MHC_Class_I", "9", "tmp", "sample.name.9.fa.split_1-594"))
             ])
 
             output_dir.cleanup()
@@ -144,24 +164,42 @@ class PvacfuseTests(unittest.TestCase):
                 'HLA-A*29:02',
                 'NetMHC',
                 output_dir.name,
+                self.unzipped_transcript_fasta,
                 '-e1', '9',
                 '--keep-tmp-files',
-                '--starfusion-file', os.path.join(self.test_data_directory, 'star-fusion.fusion_predictions.abridged.tsv')
+                '--starfusion-file', os.path.join(self.test_data_directory, 'star-fusion.fusion_predictions.abridged.tsv'),
+                '--fasta-size', '600',
             ])
             close_mock_fhs()
+
+            for file_name in (
+                'sample.name.9.fa',
+                'sample.name.transcripts.fa',
+                'sample.name.tsv',
+            ):
+                output_file   = os.path.join(output_dir.name, file_name)
+                expected_file = os.path.join(self.test_data_directory, 'fusions_agfusion_starfusion', file_name)
+                self.assertTrue(cmp(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
+
+            for file_name in (
+                'inputs.yml',
+            ):
+                output_file   = os.path.join(output_dir.name, 'log', file_name)
+                self.assertTrue(os.path.exists(output_file))
 
             for file_name in (
                 'sample.name.fasta',
                 'sample.name.MHC_I.all_epitopes.tsv',
                 'sample.name.MHC_I.filtered.tsv',
                 'sample.name.MHC_I.all_epitopes.aggregated.tsv',
+                'sample.name.MHC_I.all_epitopes.aggregated.metrics.json',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'fusions_agfusion_starfusion', 'MHC_Class_I', file_name.replace('sample.name', 'Test'))
                 self.assertTrue(compare(output_file, expected_file),  "files don't match %s - %s" %(output_file, expected_file))
 
             for file_name in (
-                'sample.name.ann.HLA-A*29:02.9.tsv_1-30',
+                'sample.name.ann.HLA-A*29:02.9.tsv_1-430',
                 'sample.name.HLA-A*29:02.9.parsed.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', '9', 'tmp', file_name)
@@ -185,15 +223,33 @@ class PvacfuseTests(unittest.TestCase):
                 'HLA-A*29:02',
                 'NetMHC',
                 output_dir.name,
+                self.unzipped_transcript_fasta,
                 '-e1', '9',
+                '--fasta-size', '2000',
             ])
             close_mock_fhs()
+
+            for file_name in (
+                'sample.name.9.fa',
+                'sample.name.transcripts.fa',
+                'sample.name.tsv',
+            ):
+                output_file   = os.path.join(output_dir.name, file_name)
+                expected_file = os.path.join(self.test_data_directory, 'arriba_fusions', file_name)
+                self.assertTrue(cmp(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
+
+            for file_name in (
+                'inputs.yml',
+            ):
+                output_file   = os.path.join(output_dir.name, 'log', file_name)
+                self.assertTrue(os.path.exists(output_file))
 
             for file_name in (
                 'sample.name.fasta',
                 'sample.name.MHC_I.all_epitopes.tsv',
                 'sample.name.MHC_I.filtered.tsv',
                 'sample.name.MHC_I.all_epitopes.aggregated.tsv',
+                'sample.name.MHC_I.all_epitopes.aggregated.metrics.json',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'arriba_fusions', 'MHC_Class_I', file_name.replace('sample.name', 'Test'))
@@ -216,12 +272,14 @@ class PvacfuseTests(unittest.TestCase):
                 'HLA-A*29:02,DRB1*11:01',
                 'NetMHC', 'NNalign',
                 output_dir.name,
+                self.unzipped_transcript_fasta,
                 '-e1', '9',
                 '-e2', '15',
                 '--top-score-metric=lowest',
                 '--keep-tmp-files',
                 '--run-reference-proteome-similarity',
                 '--peptide-fasta', self.peptide_fasta,
+                '--fasta-size', '800',
             ])
             close_mock_fhs()
 
@@ -229,6 +287,7 @@ class PvacfuseTests(unittest.TestCase):
                 'Test.Combined.all_epitopes.tsv',
                 'Test.Combined.filtered.tsv',
                 'Test.Combined.all_epitopes.aggregated.tsv',
+                'Test.Combined.all_epitopes.aggregated.metrics.json',
             ):
                 output_file   = os.path.join(output_dir.name, 'combined', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'combined', file_name)

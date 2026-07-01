@@ -1,0 +1,4812 @@
+{
+  "file_type": "pvacfuse",
+  "binding_threshold": 500,
+  "aggregate_inclusion_binding_threshold": 5000,
+  "aggregate_inclusion_count_limit": 15,
+  "expn_val": 0.1,
+  "read_support": 5,
+  "binding_percentile_threshold": 2.0,
+  "immunogenicity_percentile_threshold": 2.0,
+  "presentation_percentile_threshold": 2.0,
+  "percentile_threshold_strategy": "conservative",
+  "use_allele_specific_binding_thresholds": false,
+  "mt_top_score_metric": "Median",
+  "wt_top_score_metric": "Median",
+  "top_score_metric2": [
+    "ic50",
+    "combined_percentile"
+  ],
+  "allele_specific_binding_thresholds": {
+    "HLA-A*29:02": 641.0
+  },
+  "allele_specific_anchors": false,
+  "alleles": [
+    "HLA-A*29:02"
+  ],
+  "anchor_contribution_threshold": 0.8,
+  "epitope_lengths": [
+    9
+  ],
+  "1.EIF3K_CYP39A1.ENST00000593149_ENST00000275016.inframe_fusion.79": {
+    "good_binders": {
+      "Transcript Set 1": {
+        "peptides": {
+          "MLGDLSASI": {
+            "ic50s_MT": [
+              6540.21
+            ],
+            "combined_percentiles_MT": [
+              5.2
+            ],
+            "binding_percentiles_MT": [
+              5.2
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              19188.07
+            ],
+            "combined_percentiles_WT": [
+              17.0
+            ],
+            "binding_percentiles_WT": [
+              17.0
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "HLA-A*29:02"
+            ],
+            "mutation_position": "7, 9",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  6540.21
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  19188.07
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  5.2
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  17.0
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "wt_peptide": "MLGDLSDSQ"
+          }
+        },
+        "transcripts": [
+          "ENST00000593149-ENST00000275016-1.EIF3K_CYP39A1.ENST00000593149_ENST00000275016.inframe_fusion.79"
+        ],
+        "transcript_expr": [
+          0.573
+        ],
+        "transcript_count": 1,
+        "peptide_count": 1,
+        "total_expr": 0.573
+      }
+    },
+    "sets": [
+      "Transcript Set 1"
+    ],
+    "transcript_counts": [
+      1
+    ],
+    "peptide_counts": [
+      1
+    ],
+    "set_expr": [
+      0.573
+    ],
+    "read_support": 2103.0,
+    "gene_expr": 0.5734,
+    "best_peptide_mt": "MLGDLSASI",
+    "best_peptide_wt": "MLGDLSDSQ",
+    "best_hla_allele": "HLA-A*29:02"
+  },
+  "10.EIF3K_CYP39A1.ENST00000592558_ENST00000275016.inframe_fusion.140": {
+    "good_binders": {
+      "Transcript Set 1": {
+        "peptides": {
+          "SSIPKNVFL": {
+            "ic50s_MT": [
+              19395.75
+            ],
+            "combined_percentiles_MT": [
+              17.0
+            ],
+            "binding_percentiles_MT": [
+              17.0
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              21590.11
+            ],
+            "combined_percentiles_WT": [
+              20.0
+            ],
+            "binding_percentiles_WT": [
+              20.0
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "HLA-A*29:02"
+            ],
+            "mutation_position": "1",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  19395.75
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  21590.11
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  17.0
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  20.0
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "wt_peptide": "ASIPKNVFL"
+          }
+        },
+        "transcripts": [
+          "ENST00000592558-ENST00000275016-10.EIF3K_CYP39A1.ENST00000592558_ENST00000275016.inframe_fusion.140"
+        ],
+        "transcript_expr": [
+          "NA"
+        ],
+        "transcript_count": 1,
+        "peptide_count": 1,
+        "total_expr": 0.0
+      }
+    },
+    "sets": [
+      "Transcript Set 1"
+    ],
+    "transcript_counts": [
+      1
+    ],
+    "peptide_counts": [
+      1
+    ],
+    "set_expr": [
+      0.0
+    ],
+    "read_support": "NA",
+    "gene_expr": "NA",
+    "best_peptide_mt": "SSIPKNVFL",
+    "best_peptide_wt": "ASIPKNVFL",
+    "best_hla_allele": "HLA-A*29:02"
+  },
+  "11.EIF3K_CYP39A1.ENST00000614624_ENST00000275016.inframe_fusion.133": {
+    "good_binders": {
+      "Transcript Set 1": {
+        "peptides": {
+          "MLGDLSASI": {
+            "ic50s_MT": [
+              6540.21
+            ],
+            "combined_percentiles_MT": [
+              5.2
+            ],
+            "binding_percentiles_MT": [
+              5.2
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              19188.07
+            ],
+            "combined_percentiles_WT": [
+              17.0
+            ],
+            "binding_percentiles_WT": [
+              17.0
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "HLA-A*29:02"
+            ],
+            "mutation_position": "7, 9",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  6540.21
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  19188.07
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  5.2
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  17.0
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "wt_peptide": "MLGDLSDSQ"
+          }
+        },
+        "transcripts": [
+          "ENST00000614624-ENST00000275016-11.EIF3K_CYP39A1.ENST00000614624_ENST00000275016.inframe_fusion.133"
+        ],
+        "transcript_expr": [
+          0.573
+        ],
+        "transcript_count": 1,
+        "peptide_count": 1,
+        "total_expr": 0.573
+      }
+    },
+    "sets": [
+      "Transcript Set 1"
+    ],
+    "transcript_counts": [
+      1
+    ],
+    "peptide_counts": [
+      1
+    ],
+    "set_expr": [
+      0.573
+    ],
+    "read_support": 2103.0,
+    "gene_expr": 0.5734,
+    "best_peptide_mt": "MLGDLSASI",
+    "best_peptide_wt": "MLGDLSDSQ",
+    "best_hla_allele": "HLA-A*29:02"
+  },
+  "12.EIF3K_CYP39A1.ENST00000614624_ENST00000619708.frameshift_fusion.133": {
+    "good_binders": {
+      "Transcript Set 1": {
+        "peptides": {
+          "MLGDLSDAL": {
+            "ic50s_MT": [
+              12112.16
+            ],
+            "combined_percentiles_MT": [
+              8.9
+            ],
+            "binding_percentiles_MT": [
+              8.9
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              19188.07
+            ],
+            "combined_percentiles_WT": [
+              17.0
+            ],
+            "binding_percentiles_WT": [
+              17.0
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "HLA-A*29:02"
+            ],
+            "mutation_position": "8, 9",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  12112.16
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  19188.07
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  8.9
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  17.0
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "wt_peptide": "MLGDLSDSQ"
+          }
+        },
+        "transcripts": [
+          "ENST00000614624-ENST00000619708-12.EIF3K_CYP39A1.ENST00000614624_ENST00000619708.frameshift_fusion.133"
+        ],
+        "transcript_expr": [
+          "NA"
+        ],
+        "transcript_count": 1,
+        "peptide_count": 1,
+        "total_expr": 0.0
+      }
+    },
+    "sets": [
+      "Transcript Set 1"
+    ],
+    "transcript_counts": [
+      1
+    ],
+    "peptide_counts": [
+      1
+    ],
+    "set_expr": [
+      0.0
+    ],
+    "read_support": "NA",
+    "gene_expr": "NA",
+    "best_peptide_mt": "MLGDLSDAL",
+    "best_peptide_wt": "MLGDLSDSQ",
+    "best_hla_allele": "HLA-A*29:02"
+  },
+  "13.HNRNPUL2_AHNAK.ENST00000301785_ENST00000257247.frameshift_fusion.660": {
+    "good_binders": {
+      "Transcript Set 1": {
+        "peptides": {
+          "GYDGEGGDN": {
+            "ic50s_MT": [
+              28325.96
+            ],
+            "combined_percentiles_MT": [
+              32.0
+            ],
+            "binding_percentiles_MT": [
+              32.0
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              "NA"
+            ],
+            "combined_percentiles_WT": [
+              "NA"
+            ],
+            "binding_percentiles_WT": [
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "HLA-A*29:02"
+            ],
+            "mutation_position": "NA",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  28325.96
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  "NA"
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  32.0
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  "NA"
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "wt_peptide": "FS-NA"
+          }
+        },
+        "transcripts": [
+          "ENST00000301785-ENST00000257247-13.HNRNPUL2_AHNAK.ENST00000301785_ENST00000257247.frameshift_fusion.660"
+        ],
+        "transcript_expr": [
+          0.153
+        ],
+        "transcript_count": 1,
+        "peptide_count": 1,
+        "total_expr": 0.153
+      }
+    },
+    "sets": [
+      "Transcript Set 1"
+    ],
+    "transcript_counts": [
+      1
+    ],
+    "peptide_counts": [
+      1
+    ],
+    "set_expr": [
+      0.153
+    ],
+    "read_support": 570.0,
+    "gene_expr": 0.1534,
+    "best_peptide_mt": "GYDGEGGDN",
+    "best_peptide_wt": "NA",
+    "best_hla_allele": "HLA-A*29:02"
+  },
+  "14.HNRNPUL2_AHNAK.ENST00000301785_ENST00000378024.frameshift_fusion.660": {
+    "good_binders": {
+      "Transcript Set 1": {
+        "peptides": {
+          "GYDGEGGDN": {
+            "ic50s_MT": [
+              28325.96
+            ],
+            "combined_percentiles_MT": [
+              32.0
+            ],
+            "binding_percentiles_MT": [
+              32.0
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              "NA"
+            ],
+            "combined_percentiles_WT": [
+              "NA"
+            ],
+            "binding_percentiles_WT": [
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "HLA-A*29:02"
+            ],
+            "mutation_position": "NA",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  28325.96
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  "NA"
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  32.0
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  "NA"
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "wt_peptide": "FS-NA"
+          }
+        },
+        "transcripts": [
+          "ENST00000301785-ENST00000378024-14.HNRNPUL2_AHNAK.ENST00000301785_ENST00000378024.frameshift_fusion.660"
+        ],
+        "transcript_expr": [
+          0.153
+        ],
+        "transcript_count": 1,
+        "peptide_count": 1,
+        "total_expr": 0.153
+      }
+    },
+    "sets": [
+      "Transcript Set 1"
+    ],
+    "transcript_counts": [
+      1
+    ],
+    "peptide_counts": [
+      1
+    ],
+    "set_expr": [
+      0.153
+    ],
+    "read_support": 570.0,
+    "gene_expr": 0.1534,
+    "best_peptide_mt": "GYDGEGGDN",
+    "best_peptide_wt": "NA",
+    "best_hla_allele": "HLA-A*29:02"
+  },
+  "15.PLA2R1_RBMS1.ENST00000283243_ENST00000348849.inframe_fusion.865": {
+    "good_binders": {
+      "Transcript Set 1": {
+        "peptides": {
+          "FIHSKIKAQ": {
+            "ic50s_MT": [
+              26500.16
+            ],
+            "combined_percentiles_MT": [
+              28.0
+            ],
+            "binding_percentiles_MT": [
+              28.0
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              21279.34
+            ],
+            "combined_percentiles_WT": [
+              19.0
+            ],
+            "binding_percentiles_WT": [
+              19.0
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "HLA-A*29:02"
+            ],
+            "mutation_position": "9",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  26500.16
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  21279.34
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  28.0
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  19.0
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "wt_peptide": "FIHSKIKAL"
+          }
+        },
+        "transcripts": [
+          "ENST00000283243-ENST00000348849-15.PLA2R1_RBMS1.ENST00000283243_ENST00000348849.inframe_fusion.865"
+        ],
+        "transcript_expr": [
+          0.331
+        ],
+        "transcript_count": 1,
+        "peptide_count": 1,
+        "total_expr": 0.331
+      }
+    },
+    "sets": [
+      "Transcript Set 1"
+    ],
+    "transcript_counts": [
+      1
+    ],
+    "peptide_counts": [
+      1
+    ],
+    "set_expr": [
+      0.331
+    ],
+    "read_support": 1230.0,
+    "gene_expr": 0.3308,
+    "best_peptide_mt": "FIHSKIKAQ",
+    "best_peptide_wt": "FIHSKIKAL",
+    "best_hla_allele": "HLA-A*29:02"
+  },
+  "16.PLA2R1_RBMS1.ENST00000283243_ENST00000409075.inframe_fusion.865": {
+    "good_binders": {
+      "Transcript Set 1": {
+        "peptides": {
+          "FIHSKIKAQ": {
+            "ic50s_MT": [
+              26500.16
+            ],
+            "combined_percentiles_MT": [
+              28.0
+            ],
+            "binding_percentiles_MT": [
+              28.0
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              21279.34
+            ],
+            "combined_percentiles_WT": [
+              19.0
+            ],
+            "binding_percentiles_WT": [
+              19.0
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "HLA-A*29:02"
+            ],
+            "mutation_position": "9",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  26500.16
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  21279.34
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  28.0
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  19.0
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "wt_peptide": "FIHSKIKAL"
+          }
+        },
+        "transcripts": [
+          "ENST00000283243-ENST00000409075-16.PLA2R1_RBMS1.ENST00000283243_ENST00000409075.inframe_fusion.865"
+        ],
+        "transcript_expr": [
+          0.331
+        ],
+        "transcript_count": 1,
+        "peptide_count": 1,
+        "total_expr": 0.331
+      }
+    },
+    "sets": [
+      "Transcript Set 1"
+    ],
+    "transcript_counts": [
+      1
+    ],
+    "peptide_counts": [
+      1
+    ],
+    "set_expr": [
+      0.331
+    ],
+    "read_support": 1230.0,
+    "gene_expr": 0.3308,
+    "best_peptide_mt": "FIHSKIKAQ",
+    "best_peptide_wt": "FIHSKIKAL",
+    "best_hla_allele": "HLA-A*29:02"
+  },
+  "17.PLA2R1_RBMS1.ENST00000283243_ENST00000409289.inframe_fusion.865": {
+    "good_binders": {
+      "Transcript Set 1": {
+        "peptides": {
+          "FIHSKIKAQ": {
+            "ic50s_MT": [
+              26500.16
+            ],
+            "combined_percentiles_MT": [
+              28.0
+            ],
+            "binding_percentiles_MT": [
+              28.0
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              21279.34
+            ],
+            "combined_percentiles_WT": [
+              19.0
+            ],
+            "binding_percentiles_WT": [
+              19.0
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "HLA-A*29:02"
+            ],
+            "mutation_position": "9",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  26500.16
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  21279.34
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  28.0
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  19.0
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "wt_peptide": "FIHSKIKAL"
+          }
+        },
+        "transcripts": [
+          "ENST00000283243-ENST00000409289-17.PLA2R1_RBMS1.ENST00000283243_ENST00000409289.inframe_fusion.865"
+        ],
+        "transcript_expr": [
+          0.331
+        ],
+        "transcript_count": 1,
+        "peptide_count": 1,
+        "total_expr": 0.331
+      }
+    },
+    "sets": [
+      "Transcript Set 1"
+    ],
+    "transcript_counts": [
+      1
+    ],
+    "peptide_counts": [
+      1
+    ],
+    "set_expr": [
+      0.331
+    ],
+    "read_support": 1230.0,
+    "gene_expr": 0.3308,
+    "best_peptide_mt": "FIHSKIKAQ",
+    "best_peptide_wt": "FIHSKIKAL",
+    "best_hla_allele": "HLA-A*29:02"
+  },
+  "18.PLA2R1_RBMS1.ENST00000283243_ENST00000409972.inframe_fusion.865": {
+    "good_binders": {
+      "Transcript Set 1": {
+        "peptides": {
+          "FIHSKIKAQ": {
+            "ic50s_MT": [
+              26500.16
+            ],
+            "combined_percentiles_MT": [
+              28.0
+            ],
+            "binding_percentiles_MT": [
+              28.0
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              21279.34
+            ],
+            "combined_percentiles_WT": [
+              19.0
+            ],
+            "binding_percentiles_WT": [
+              19.0
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "HLA-A*29:02"
+            ],
+            "mutation_position": "9",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  26500.16
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  21279.34
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  28.0
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  19.0
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "wt_peptide": "FIHSKIKAL"
+          }
+        },
+        "transcripts": [
+          "ENST00000283243-ENST00000409972-18.PLA2R1_RBMS1.ENST00000283243_ENST00000409972.inframe_fusion.865"
+        ],
+        "transcript_expr": [
+          0.331
+        ],
+        "transcript_count": 1,
+        "peptide_count": 1,
+        "total_expr": 0.331
+      }
+    },
+    "sets": [
+      "Transcript Set 1"
+    ],
+    "transcript_counts": [
+      1
+    ],
+    "peptide_counts": [
+      1
+    ],
+    "set_expr": [
+      0.331
+    ],
+    "read_support": 1230.0,
+    "gene_expr": 0.3308,
+    "best_peptide_mt": "FIHSKIKAQ",
+    "best_peptide_wt": "FIHSKIKAL",
+    "best_hla_allele": "HLA-A*29:02"
+  },
+  "19.PLA2R1_RBMS1.ENST00000392771_ENST00000348849.inframe_fusion.865": {
+    "good_binders": {
+      "Transcript Set 1": {
+        "peptides": {
+          "FIHSKIKAQ": {
+            "ic50s_MT": [
+              26500.16
+            ],
+            "combined_percentiles_MT": [
+              28.0
+            ],
+            "binding_percentiles_MT": [
+              28.0
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              21279.34
+            ],
+            "combined_percentiles_WT": [
+              19.0
+            ],
+            "binding_percentiles_WT": [
+              19.0
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "HLA-A*29:02"
+            ],
+            "mutation_position": "9",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  26500.16
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  21279.34
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  28.0
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  19.0
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "wt_peptide": "FIHSKIKAL"
+          }
+        },
+        "transcripts": [
+          "ENST00000392771-ENST00000348849-19.PLA2R1_RBMS1.ENST00000392771_ENST00000348849.inframe_fusion.865"
+        ],
+        "transcript_expr": [
+          0.331
+        ],
+        "transcript_count": 1,
+        "peptide_count": 1,
+        "total_expr": 0.331
+      }
+    },
+    "sets": [
+      "Transcript Set 1"
+    ],
+    "transcript_counts": [
+      1
+    ],
+    "peptide_counts": [
+      1
+    ],
+    "set_expr": [
+      0.331
+    ],
+    "read_support": 1230.0,
+    "gene_expr": 0.3308,
+    "best_peptide_mt": "FIHSKIKAQ",
+    "best_peptide_wt": "FIHSKIKAL",
+    "best_hla_allele": "HLA-A*29:02"
+  },
+  "2.EIF3K_CYP39A1.ENST00000593149_ENST00000619708.frameshift_fusion.79": {
+    "good_binders": {
+      "Transcript Set 1": {
+        "peptides": {
+          "MLGDLSDAL": {
+            "ic50s_MT": [
+              12112.16
+            ],
+            "combined_percentiles_MT": [
+              8.9
+            ],
+            "binding_percentiles_MT": [
+              8.9
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              19188.07
+            ],
+            "combined_percentiles_WT": [
+              17.0
+            ],
+            "binding_percentiles_WT": [
+              17.0
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "HLA-A*29:02"
+            ],
+            "mutation_position": "8, 9",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  12112.16
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  19188.07
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  8.9
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  17.0
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "wt_peptide": "MLGDLSDSQ"
+          }
+        },
+        "transcripts": [
+          "ENST00000593149-ENST00000619708-2.EIF3K_CYP39A1.ENST00000593149_ENST00000619708.frameshift_fusion.79"
+        ],
+        "transcript_expr": [
+          "NA"
+        ],
+        "transcript_count": 1,
+        "peptide_count": 1,
+        "total_expr": 0.0
+      }
+    },
+    "sets": [
+      "Transcript Set 1"
+    ],
+    "transcript_counts": [
+      1
+    ],
+    "peptide_counts": [
+      1
+    ],
+    "set_expr": [
+      0.0
+    ],
+    "read_support": "NA",
+    "gene_expr": "NA",
+    "best_peptide_mt": "MLGDLSDAL",
+    "best_peptide_wt": "MLGDLSDSQ",
+    "best_hla_allele": "HLA-A*29:02"
+  },
+  "20.PLA2R1_RBMS1.ENST00000392771_ENST00000409075.inframe_fusion.865": {
+    "good_binders": {
+      "Transcript Set 1": {
+        "peptides": {
+          "FIHSKIKAQ": {
+            "ic50s_MT": [
+              26500.16
+            ],
+            "combined_percentiles_MT": [
+              28.0
+            ],
+            "binding_percentiles_MT": [
+              28.0
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              21279.34
+            ],
+            "combined_percentiles_WT": [
+              19.0
+            ],
+            "binding_percentiles_WT": [
+              19.0
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "HLA-A*29:02"
+            ],
+            "mutation_position": "9",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  26500.16
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  21279.34
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  28.0
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  19.0
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "wt_peptide": "FIHSKIKAL"
+          }
+        },
+        "transcripts": [
+          "ENST00000392771-ENST00000409075-20.PLA2R1_RBMS1.ENST00000392771_ENST00000409075.inframe_fusion.865"
+        ],
+        "transcript_expr": [
+          0.331
+        ],
+        "transcript_count": 1,
+        "peptide_count": 1,
+        "total_expr": 0.331
+      }
+    },
+    "sets": [
+      "Transcript Set 1"
+    ],
+    "transcript_counts": [
+      1
+    ],
+    "peptide_counts": [
+      1
+    ],
+    "set_expr": [
+      0.331
+    ],
+    "read_support": 1230.0,
+    "gene_expr": 0.3308,
+    "best_peptide_mt": "FIHSKIKAQ",
+    "best_peptide_wt": "FIHSKIKAL",
+    "best_hla_allele": "HLA-A*29:02"
+  },
+  "21.PLA2R1_RBMS1.ENST00000392771_ENST00000409289.inframe_fusion.865": {
+    "good_binders": {
+      "Transcript Set 1": {
+        "peptides": {
+          "FIHSKIKAQ": {
+            "ic50s_MT": [
+              26500.16
+            ],
+            "combined_percentiles_MT": [
+              28.0
+            ],
+            "binding_percentiles_MT": [
+              28.0
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              21279.34
+            ],
+            "combined_percentiles_WT": [
+              19.0
+            ],
+            "binding_percentiles_WT": [
+              19.0
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "HLA-A*29:02"
+            ],
+            "mutation_position": "9",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  26500.16
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  21279.34
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  28.0
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  19.0
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "wt_peptide": "FIHSKIKAL"
+          }
+        },
+        "transcripts": [
+          "ENST00000392771-ENST00000409289-21.PLA2R1_RBMS1.ENST00000392771_ENST00000409289.inframe_fusion.865"
+        ],
+        "transcript_expr": [
+          0.331
+        ],
+        "transcript_count": 1,
+        "peptide_count": 1,
+        "total_expr": 0.331
+      }
+    },
+    "sets": [
+      "Transcript Set 1"
+    ],
+    "transcript_counts": [
+      1
+    ],
+    "peptide_counts": [
+      1
+    ],
+    "set_expr": [
+      0.331
+    ],
+    "read_support": 1230.0,
+    "gene_expr": 0.3308,
+    "best_peptide_mt": "FIHSKIKAQ",
+    "best_peptide_wt": "FIHSKIKAL",
+    "best_hla_allele": "HLA-A*29:02"
+  },
+  "22.PLA2R1_RBMS1.ENST00000392771_ENST00000409972.inframe_fusion.865": {
+    "good_binders": {
+      "Transcript Set 1": {
+        "peptides": {
+          "FIHSKIKAQ": {
+            "ic50s_MT": [
+              26500.16
+            ],
+            "combined_percentiles_MT": [
+              28.0
+            ],
+            "binding_percentiles_MT": [
+              28.0
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              21279.34
+            ],
+            "combined_percentiles_WT": [
+              19.0
+            ],
+            "binding_percentiles_WT": [
+              19.0
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "HLA-A*29:02"
+            ],
+            "mutation_position": "9",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  26500.16
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  21279.34
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  28.0
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  19.0
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "wt_peptide": "FIHSKIKAL"
+          }
+        },
+        "transcripts": [
+          "ENST00000392771-ENST00000409972-22.PLA2R1_RBMS1.ENST00000392771_ENST00000409972.inframe_fusion.865"
+        ],
+        "transcript_expr": [
+          0.331
+        ],
+        "transcript_count": 1,
+        "peptide_count": 1,
+        "total_expr": 0.331
+      }
+    },
+    "sets": [
+      "Transcript Set 1"
+    ],
+    "transcript_counts": [
+      1
+    ],
+    "peptide_counts": [
+      1
+    ],
+    "set_expr": [
+      0.331
+    ],
+    "read_support": 1230.0,
+    "gene_expr": 0.3308,
+    "best_peptide_mt": "FIHSKIKAQ",
+    "best_peptide_wt": "FIHSKIKAL",
+    "best_hla_allele": "HLA-A*29:02"
+  },
+  "23.TMEM104_RAB37.ENST00000417024_ENST00000340415.inframe_fusion.225": {
+    "good_binders": {
+      "Transcript Set 1": {
+        "peptides": {
+          "YRIYLTILV": {
+            "ic50s_MT": [
+              6204.38
+            ],
+            "combined_percentiles_MT": [
+              5.0
+            ],
+            "binding_percentiles_MT": [
+              5.0
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              15294.87
+            ],
+            "combined_percentiles_WT": [
+              13.0
+            ],
+            "binding_percentiles_WT": [
+              13.0
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "HLA-A*29:02"
+            ],
+            "mutation_position": "6, 8, 9",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  6204.38
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  15294.87
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  5.0
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  13.0
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "wt_peptide": "YRIYLAIFT"
+          }
+        },
+        "transcripts": [
+          "ENST00000417024-ENST00000340415-23.TMEM104_RAB37.ENST00000417024_ENST00000340415.inframe_fusion.225"
+        ],
+        "transcript_expr": [
+          0.11
+        ],
+        "transcript_count": 1,
+        "peptide_count": 1,
+        "total_expr": 0.11
+      }
+    },
+    "sets": [
+      "Transcript Set 1"
+    ],
+    "transcript_counts": [
+      1
+    ],
+    "peptide_counts": [
+      1
+    ],
+    "set_expr": [
+      0.11
+    ],
+    "read_support": 401.0,
+    "gene_expr": 0.1104,
+    "best_peptide_mt": "YRIYLTILV",
+    "best_peptide_wt": "YRIYLAIFT",
+    "best_hla_allele": "HLA-A*29:02"
+  },
+  "24.TMEM104_RAB37.ENST00000417024_ENST00000402449.inframe_fusion.225": {
+    "good_binders": {
+      "Transcript Set 1": {
+        "peptides": {
+          "YRIYLTILV": {
+            "ic50s_MT": [
+              6204.38
+            ],
+            "combined_percentiles_MT": [
+              5.0
+            ],
+            "binding_percentiles_MT": [
+              5.0
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              15294.87
+            ],
+            "combined_percentiles_WT": [
+              13.0
+            ],
+            "binding_percentiles_WT": [
+              13.0
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "HLA-A*29:02"
+            ],
+            "mutation_position": "6, 8, 9",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  6204.38
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  15294.87
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  5.0
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  13.0
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "wt_peptide": "YRIYLAIFT"
+          }
+        },
+        "transcripts": [
+          "ENST00000417024-ENST00000402449-24.TMEM104_RAB37.ENST00000417024_ENST00000402449.inframe_fusion.225"
+        ],
+        "transcript_expr": [
+          0.11
+        ],
+        "transcript_count": 1,
+        "peptide_count": 1,
+        "total_expr": 0.11
+      }
+    },
+    "sets": [
+      "Transcript Set 1"
+    ],
+    "transcript_counts": [
+      1
+    ],
+    "peptide_counts": [
+      1
+    ],
+    "set_expr": [
+      0.11
+    ],
+    "read_support": 401.0,
+    "gene_expr": 0.1104,
+    "best_peptide_mt": "YRIYLTILV",
+    "best_peptide_wt": "YRIYLAIFT",
+    "best_hla_allele": "HLA-A*29:02"
+  },
+  "25.TMEM104_RAB37.ENST00000582773_ENST00000340415.inframe_fusion.212": {
+    "good_binders": {
+      "Transcript Set 1": {
+        "peptides": {
+          "YRIYLTILV": {
+            "ic50s_MT": [
+              6204.38
+            ],
+            "combined_percentiles_MT": [
+              5.0
+            ],
+            "binding_percentiles_MT": [
+              5.0
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              15294.87
+            ],
+            "combined_percentiles_WT": [
+              13.0
+            ],
+            "binding_percentiles_WT": [
+              13.0
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "HLA-A*29:02"
+            ],
+            "mutation_position": "6, 8, 9",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  6204.38
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  15294.87
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  5.0
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  13.0
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "wt_peptide": "YRIYLAIFT"
+          }
+        },
+        "transcripts": [
+          "ENST00000582773-ENST00000340415-25.TMEM104_RAB37.ENST00000582773_ENST00000340415.inframe_fusion.212"
+        ],
+        "transcript_expr": [
+          0.11
+        ],
+        "transcript_count": 1,
+        "peptide_count": 1,
+        "total_expr": 0.11
+      }
+    },
+    "sets": [
+      "Transcript Set 1"
+    ],
+    "transcript_counts": [
+      1
+    ],
+    "peptide_counts": [
+      1
+    ],
+    "set_expr": [
+      0.11
+    ],
+    "read_support": 401.0,
+    "gene_expr": 0.1104,
+    "best_peptide_mt": "YRIYLTILV",
+    "best_peptide_wt": "YRIYLAIFT",
+    "best_hla_allele": "HLA-A*29:02"
+  },
+  "26.TMEM104_RAB37.ENST00000582773_ENST00000402449.inframe_fusion.212": {
+    "good_binders": {
+      "Transcript Set 1": {
+        "peptides": {
+          "YRIYLTILV": {
+            "ic50s_MT": [
+              6204.38
+            ],
+            "combined_percentiles_MT": [
+              5.0
+            ],
+            "binding_percentiles_MT": [
+              5.0
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              15294.87
+            ],
+            "combined_percentiles_WT": [
+              13.0
+            ],
+            "binding_percentiles_WT": [
+              13.0
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "HLA-A*29:02"
+            ],
+            "mutation_position": "6, 8, 9",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  6204.38
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  15294.87
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  5.0
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  13.0
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "wt_peptide": "YRIYLAIFT"
+          }
+        },
+        "transcripts": [
+          "ENST00000582773-ENST00000402449-26.TMEM104_RAB37.ENST00000582773_ENST00000402449.inframe_fusion.212"
+        ],
+        "transcript_expr": [
+          0.11
+        ],
+        "transcript_count": 1,
+        "peptide_count": 1,
+        "total_expr": 0.11
+      }
+    },
+    "sets": [
+      "Transcript Set 1"
+    ],
+    "transcript_counts": [
+      1
+    ],
+    "peptide_counts": [
+      1
+    ],
+    "set_expr": [
+      0.11
+    ],
+    "read_support": 401.0,
+    "gene_expr": 0.1104,
+    "best_peptide_mt": "YRIYLTILV",
+    "best_peptide_wt": "YRIYLAIFT",
+    "best_hla_allele": "HLA-A*29:02"
+  },
+  "27.TMEM104_RAB37.ENST00000582330_ENST00000340415.inframe_fusion.212": {
+    "good_binders": {
+      "Transcript Set 1": {
+        "peptides": {
+          "YRIYLTILV": {
+            "ic50s_MT": [
+              6204.38
+            ],
+            "combined_percentiles_MT": [
+              5.0
+            ],
+            "binding_percentiles_MT": [
+              5.0
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              15294.87
+            ],
+            "combined_percentiles_WT": [
+              13.0
+            ],
+            "binding_percentiles_WT": [
+              13.0
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "HLA-A*29:02"
+            ],
+            "mutation_position": "6, 8, 9",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  6204.38
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  15294.87
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  5.0
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  13.0
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "wt_peptide": "YRIYLAIFT"
+          }
+        },
+        "transcripts": [
+          "ENST00000582330-ENST00000340415-27.TMEM104_RAB37.ENST00000582330_ENST00000340415.inframe_fusion.212"
+        ],
+        "transcript_expr": [
+          0.11
+        ],
+        "transcript_count": 1,
+        "peptide_count": 1,
+        "total_expr": 0.11
+      }
+    },
+    "sets": [
+      "Transcript Set 1"
+    ],
+    "transcript_counts": [
+      1
+    ],
+    "peptide_counts": [
+      1
+    ],
+    "set_expr": [
+      0.11
+    ],
+    "read_support": 401.0,
+    "gene_expr": 0.1104,
+    "best_peptide_mt": "YRIYLTILV",
+    "best_peptide_wt": "YRIYLAIFT",
+    "best_hla_allele": "HLA-A*29:02"
+  },
+  "28.TMEM104_RAB37.ENST00000582330_ENST00000402449.inframe_fusion.212": {
+    "good_binders": {
+      "Transcript Set 1": {
+        "peptides": {
+          "YRIYLTILV": {
+            "ic50s_MT": [
+              6204.38
+            ],
+            "combined_percentiles_MT": [
+              5.0
+            ],
+            "binding_percentiles_MT": [
+              5.0
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              15294.87
+            ],
+            "combined_percentiles_WT": [
+              13.0
+            ],
+            "binding_percentiles_WT": [
+              13.0
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "HLA-A*29:02"
+            ],
+            "mutation_position": "6, 8, 9",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  6204.38
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  15294.87
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  5.0
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  13.0
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "wt_peptide": "YRIYLAIFT"
+          }
+        },
+        "transcripts": [
+          "ENST00000582330-ENST00000402449-28.TMEM104_RAB37.ENST00000582330_ENST00000402449.inframe_fusion.212"
+        ],
+        "transcript_expr": [
+          0.11
+        ],
+        "transcript_count": 1,
+        "peptide_count": 1,
+        "total_expr": 0.11
+      }
+    },
+    "sets": [
+      "Transcript Set 1"
+    ],
+    "transcript_counts": [
+      1
+    ],
+    "peptide_counts": [
+      1
+    ],
+    "set_expr": [
+      0.11
+    ],
+    "read_support": 401.0,
+    "gene_expr": 0.1104,
+    "best_peptide_mt": "YRIYLTILV",
+    "best_peptide_wt": "YRIYLAIFT",
+    "best_hla_allele": "HLA-A*29:02"
+  },
+  "29.TMEM104_RAB37.ENST00000335464_ENST00000340415.inframe_fusion.212": {
+    "good_binders": {
+      "Transcript Set 1": {
+        "peptides": {
+          "YRIYLTILV": {
+            "ic50s_MT": [
+              6204.38
+            ],
+            "combined_percentiles_MT": [
+              5.0
+            ],
+            "binding_percentiles_MT": [
+              5.0
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              15294.87
+            ],
+            "combined_percentiles_WT": [
+              13.0
+            ],
+            "binding_percentiles_WT": [
+              13.0
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "HLA-A*29:02"
+            ],
+            "mutation_position": "6, 8, 9",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  6204.38
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  15294.87
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  5.0
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  13.0
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "wt_peptide": "YRIYLAIFT"
+          }
+        },
+        "transcripts": [
+          "ENST00000335464-ENST00000340415-29.TMEM104_RAB37.ENST00000335464_ENST00000340415.inframe_fusion.212"
+        ],
+        "transcript_expr": [
+          0.11
+        ],
+        "transcript_count": 1,
+        "peptide_count": 1,
+        "total_expr": 0.11
+      }
+    },
+    "sets": [
+      "Transcript Set 1"
+    ],
+    "transcript_counts": [
+      1
+    ],
+    "peptide_counts": [
+      1
+    ],
+    "set_expr": [
+      0.11
+    ],
+    "read_support": 401.0,
+    "gene_expr": 0.1104,
+    "best_peptide_mt": "YRIYLTILV",
+    "best_peptide_wt": "YRIYLAIFT",
+    "best_hla_allele": "HLA-A*29:02"
+  },
+  "3.EIF3K_CYP39A1.ENST00000248342_ENST00000275016.inframe_fusion.166": {
+    "good_binders": {
+      "Transcript Set 1": {
+        "peptides": {
+          "MLGDLSASI": {
+            "ic50s_MT": [
+              6540.21
+            ],
+            "combined_percentiles_MT": [
+              5.2
+            ],
+            "binding_percentiles_MT": [
+              5.2
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              19188.07
+            ],
+            "combined_percentiles_WT": [
+              17.0
+            ],
+            "binding_percentiles_WT": [
+              17.0
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "HLA-A*29:02"
+            ],
+            "mutation_position": "7, 9",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  6540.21
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  19188.07
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  5.2
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  17.0
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "wt_peptide": "MLGDLSDSQ"
+          }
+        },
+        "transcripts": [
+          "ENST00000248342-ENST00000275016-3.EIF3K_CYP39A1.ENST00000248342_ENST00000275016.inframe_fusion.166"
+        ],
+        "transcript_expr": [
+          0.573
+        ],
+        "transcript_count": 1,
+        "peptide_count": 1,
+        "total_expr": 0.573
+      }
+    },
+    "sets": [
+      "Transcript Set 1"
+    ],
+    "transcript_counts": [
+      1
+    ],
+    "peptide_counts": [
+      1
+    ],
+    "set_expr": [
+      0.573
+    ],
+    "read_support": 2103.0,
+    "gene_expr": 0.5734,
+    "best_peptide_mt": "MLGDLSASI",
+    "best_peptide_wt": "MLGDLSDSQ",
+    "best_hla_allele": "HLA-A*29:02"
+  },
+  "30.TMEM104_RAB37.ENST00000335464_ENST00000402449.inframe_fusion.212": {
+    "good_binders": {
+      "Transcript Set 1": {
+        "peptides": {
+          "YRIYLTILV": {
+            "ic50s_MT": [
+              6204.38
+            ],
+            "combined_percentiles_MT": [
+              5.0
+            ],
+            "binding_percentiles_MT": [
+              5.0
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              15294.87
+            ],
+            "combined_percentiles_WT": [
+              13.0
+            ],
+            "binding_percentiles_WT": [
+              13.0
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "HLA-A*29:02"
+            ],
+            "mutation_position": "6, 8, 9",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  6204.38
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  15294.87
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  5.0
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  13.0
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "wt_peptide": "YRIYLAIFT"
+          }
+        },
+        "transcripts": [
+          "ENST00000335464-ENST00000402449-30.TMEM104_RAB37.ENST00000335464_ENST00000402449.inframe_fusion.212"
+        ],
+        "transcript_expr": [
+          0.11
+        ],
+        "transcript_count": 1,
+        "peptide_count": 1,
+        "total_expr": 0.11
+      }
+    },
+    "sets": [
+      "Transcript Set 1"
+    ],
+    "transcript_counts": [
+      1
+    ],
+    "peptide_counts": [
+      1
+    ],
+    "set_expr": [
+      0.11
+    ],
+    "read_support": 401.0,
+    "gene_expr": 0.1104,
+    "best_peptide_mt": "YRIYLTILV",
+    "best_peptide_wt": "YRIYLAIFT",
+    "best_hla_allele": "HLA-A*29:02"
+  },
+  "4.EIF3K_CYP39A1.ENST00000248342_ENST00000619708.frameshift_fusion.166": {
+    "good_binders": {
+      "Transcript Set 1": {
+        "peptides": {
+          "MLGDLSDAL": {
+            "ic50s_MT": [
+              12112.16
+            ],
+            "combined_percentiles_MT": [
+              8.9
+            ],
+            "binding_percentiles_MT": [
+              8.9
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              19188.07
+            ],
+            "combined_percentiles_WT": [
+              17.0
+            ],
+            "binding_percentiles_WT": [
+              17.0
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "HLA-A*29:02"
+            ],
+            "mutation_position": "8, 9",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  12112.16
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  19188.07
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  8.9
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  17.0
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "wt_peptide": "MLGDLSDSQ"
+          }
+        },
+        "transcripts": [
+          "ENST00000248342-ENST00000619708-4.EIF3K_CYP39A1.ENST00000248342_ENST00000619708.frameshift_fusion.166"
+        ],
+        "transcript_expr": [
+          "NA"
+        ],
+        "transcript_count": 1,
+        "peptide_count": 1,
+        "total_expr": 0.0
+      }
+    },
+    "sets": [
+      "Transcript Set 1"
+    ],
+    "transcript_counts": [
+      1
+    ],
+    "peptide_counts": [
+      1
+    ],
+    "set_expr": [
+      0.0
+    ],
+    "read_support": "NA",
+    "gene_expr": "NA",
+    "best_peptide_mt": "MLGDLSDAL",
+    "best_peptide_wt": "MLGDLSDSQ",
+    "best_hla_allele": "HLA-A*29:02"
+  },
+  "5.EIF3K_CYP39A1.ENST00000538434_ENST00000275016.inframe_fusion.79": {
+    "good_binders": {
+      "Transcript Set 1": {
+        "peptides": {
+          "MLGDLSASI": {
+            "ic50s_MT": [
+              6540.21
+            ],
+            "combined_percentiles_MT": [
+              5.2
+            ],
+            "binding_percentiles_MT": [
+              5.2
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              19188.07
+            ],
+            "combined_percentiles_WT": [
+              17.0
+            ],
+            "binding_percentiles_WT": [
+              17.0
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "HLA-A*29:02"
+            ],
+            "mutation_position": "7, 9",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  6540.21
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  19188.07
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  5.2
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  17.0
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "wt_peptide": "MLGDLSDSQ"
+          }
+        },
+        "transcripts": [
+          "ENST00000538434-ENST00000275016-5.EIF3K_CYP39A1.ENST00000538434_ENST00000275016.inframe_fusion.79"
+        ],
+        "transcript_expr": [
+          0.573
+        ],
+        "transcript_count": 1,
+        "peptide_count": 1,
+        "total_expr": 0.573
+      }
+    },
+    "sets": [
+      "Transcript Set 1"
+    ],
+    "transcript_counts": [
+      1
+    ],
+    "peptide_counts": [
+      1
+    ],
+    "set_expr": [
+      0.573
+    ],
+    "read_support": 2103.0,
+    "gene_expr": 0.5734,
+    "best_peptide_mt": "MLGDLSASI",
+    "best_peptide_wt": "MLGDLSDSQ",
+    "best_hla_allele": "HLA-A*29:02"
+  },
+  "6.EIF3K_CYP39A1.ENST00000538434_ENST00000619708.frameshift_fusion.79": {
+    "good_binders": {
+      "Transcript Set 1": {
+        "peptides": {
+          "MLGDLSDAL": {
+            "ic50s_MT": [
+              12112.16
+            ],
+            "combined_percentiles_MT": [
+              8.9
+            ],
+            "binding_percentiles_MT": [
+              8.9
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              19188.07
+            ],
+            "combined_percentiles_WT": [
+              17.0
+            ],
+            "binding_percentiles_WT": [
+              17.0
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "HLA-A*29:02"
+            ],
+            "mutation_position": "8, 9",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  12112.16
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  19188.07
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  8.9
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  17.0
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "wt_peptide": "MLGDLSDSQ"
+          }
+        },
+        "transcripts": [
+          "ENST00000538434-ENST00000619708-6.EIF3K_CYP39A1.ENST00000538434_ENST00000619708.frameshift_fusion.79"
+        ],
+        "transcript_expr": [
+          "NA"
+        ],
+        "transcript_count": 1,
+        "peptide_count": 1,
+        "total_expr": 0.0
+      }
+    },
+    "sets": [
+      "Transcript Set 1"
+    ],
+    "transcript_counts": [
+      1
+    ],
+    "peptide_counts": [
+      1
+    ],
+    "set_expr": [
+      0.0
+    ],
+    "read_support": "NA",
+    "gene_expr": "NA",
+    "best_peptide_mt": "MLGDLSDAL",
+    "best_peptide_wt": "MLGDLSDSQ",
+    "best_hla_allele": "HLA-A*29:02"
+  },
+  "7.EIF3K_CYP39A1.ENST00000588934_ENST00000275016.frameshift_fusion.118": {
+    "good_binders": {
+      "Transcript Set 1": {
+        "peptides": {
+          "HFQAFWHQF": {
+            "ic50s_MT": [
+              257.23
+            ],
+            "combined_percentiles_MT": [
+              0.73
+            ],
+            "binding_percentiles_MT": [
+              0.73
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              18575.64
+            ],
+            "combined_percentiles_WT": [
+              16.0
+            ],
+            "binding_percentiles_WT": [
+              16.0
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "HLA-A*29:02"
+            ],
+            "mutation_position": "7, 8, 9",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  257.23
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  18575.64
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  0.73
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  16.0
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "wt_peptide": "HFQAFWVCP"
+          },
+          "AFWHQFQRM": {
+            "ic50s_MT": [
+              434.18
+            ],
+            "combined_percentiles_MT": [
+              1.0
+            ],
+            "binding_percentiles_MT": [
+              1.0
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              "NA"
+            ],
+            "combined_percentiles_WT": [
+              "NA"
+            ],
+            "binding_percentiles_WT": [
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "HLA-A*29:02"
+            ],
+            "mutation_position": "NA",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  434.18
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  "NA"
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  1.0
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  "NA"
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "wt_peptide": "FS-NA"
+          },
+          "FQAFWHQFQ": {
+            "ic50s_MT": [
+              2477.53
+            ],
+            "combined_percentiles_MT": [
+              2.7
+            ],
+            "binding_percentiles_MT": [
+              2.7
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              12434.7
+            ],
+            "combined_percentiles_WT": [
+              9.2
+            ],
+            "binding_percentiles_WT": [
+              9.2
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "HLA-A*29:02"
+            ],
+            "mutation_position": "6, 7, 8, 9",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  2477.53
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  12434.7
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  2.7
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  9.2
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "wt_peptide": "FQAFWVCPA"
+          },
+          "WHQFQRMSF": {
+            "ic50s_MT": [
+              3168.13
+            ],
+            "combined_percentiles_MT": [
+              3.1
+            ],
+            "binding_percentiles_MT": [
+              3.1
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              "NA"
+            ],
+            "combined_percentiles_WT": [
+              "NA"
+            ],
+            "binding_percentiles_WT": [
+              "NA"
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "HLA-A*29:02"
+            ],
+            "mutation_position": "NA",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  3168.13
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  "NA"
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  3.1
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  "NA"
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "wt_peptide": "FS-NA"
+          }
+        },
+        "transcripts": [
+          "ENST00000588934-ENST00000275016-7.EIF3K_CYP39A1.ENST00000588934_ENST00000275016.frameshift_fusion.118"
+        ],
+        "transcript_expr": [
+          "NA"
+        ],
+        "transcript_count": 1,
+        "peptide_count": 4,
+        "total_expr": 0.0
+      }
+    },
+    "sets": [
+      "Transcript Set 1"
+    ],
+    "transcript_counts": [
+      1
+    ],
+    "peptide_counts": [
+      4
+    ],
+    "set_expr": [
+      0.0
+    ],
+    "read_support": "NA",
+    "gene_expr": "NA",
+    "best_peptide_mt": "HFQAFWHQF",
+    "best_peptide_wt": "HFQAFWVCP",
+    "best_hla_allele": "HLA-A*29:02"
+  },
+  "8.EIF3K_CYP39A1.ENST00000545173_ENST00000275016.inframe_fusion.166": {
+    "good_binders": {
+      "Transcript Set 1": {
+        "peptides": {
+          "MLGDLSASI": {
+            "ic50s_MT": [
+              6540.21
+            ],
+            "combined_percentiles_MT": [
+              5.2
+            ],
+            "binding_percentiles_MT": [
+              5.2
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              19188.07
+            ],
+            "combined_percentiles_WT": [
+              17.0
+            ],
+            "binding_percentiles_WT": [
+              17.0
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "HLA-A*29:02"
+            ],
+            "mutation_position": "7, 9",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  6540.21
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  19188.07
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  5.2
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  17.0
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "wt_peptide": "MLGDLSDSQ"
+          }
+        },
+        "transcripts": [
+          "ENST00000545173-ENST00000275016-8.EIF3K_CYP39A1.ENST00000545173_ENST00000275016.inframe_fusion.166"
+        ],
+        "transcript_expr": [
+          0.573
+        ],
+        "transcript_count": 1,
+        "peptide_count": 1,
+        "total_expr": 0.573
+      }
+    },
+    "sets": [
+      "Transcript Set 1"
+    ],
+    "transcript_counts": [
+      1
+    ],
+    "peptide_counts": [
+      1
+    ],
+    "set_expr": [
+      0.573
+    ],
+    "read_support": 2103.0,
+    "gene_expr": 0.5734,
+    "best_peptide_mt": "MLGDLSASI",
+    "best_peptide_wt": "MLGDLSDSQ",
+    "best_hla_allele": "HLA-A*29:02"
+  },
+  "9.EIF3K_CYP39A1.ENST00000545173_ENST00000619708.frameshift_fusion.166": {
+    "good_binders": {
+      "Transcript Set 1": {
+        "peptides": {
+          "MLGDLSDAL": {
+            "ic50s_MT": [
+              12112.16
+            ],
+            "combined_percentiles_MT": [
+              8.9
+            ],
+            "binding_percentiles_MT": [
+              8.9
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              19188.07
+            ],
+            "combined_percentiles_WT": [
+              17.0
+            ],
+            "binding_percentiles_WT": [
+              17.0
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "HLA-A*29:02"
+            ],
+            "mutation_position": "8, 9",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  12112.16
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  19188.07
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NetMHC"
+              ],
+              "MT": {
+                "HLA-A*29:02": [
+                  8.9
+                ]
+              },
+              "WT": {
+                "HLA-A*29:02": [
+                  17.0
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-A*29:02": []
+              },
+              "WT": {
+                "HLA-A*29:02": []
+              }
+            },
+            "wt_peptide": "MLGDLSDSQ"
+          }
+        },
+        "transcripts": [
+          "ENST00000545173-ENST00000619708-9.EIF3K_CYP39A1.ENST00000545173_ENST00000619708.frameshift_fusion.166"
+        ],
+        "transcript_expr": [
+          "NA"
+        ],
+        "transcript_count": 1,
+        "peptide_count": 1,
+        "total_expr": 0.0
+      }
+    },
+    "sets": [
+      "Transcript Set 1"
+    ],
+    "transcript_counts": [
+      1
+    ],
+    "peptide_counts": [
+      1
+    ],
+    "set_expr": [
+      0.0
+    ],
+    "read_support": "NA",
+    "gene_expr": "NA",
+    "best_peptide_mt": "MLGDLSDAL",
+    "best_peptide_wt": "MLGDLSDSQ",
+    "best_hla_allele": "HLA-A*29:02"
+  }
+}

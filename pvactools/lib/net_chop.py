@@ -30,7 +30,7 @@ class NetChop:
 
     def get_mt_peptides(self):
         records = list(SeqIO.parse(self.input_fasta, "fasta"))
-        if self.file_type == 'pVACseq':
+        if self.file_type in ['pVACseq', 'pVACfuse']:
             records_dict = {re.sub('^%s' % "MT\.", "", x.id): str(x.seq) for x in filter(lambda x: x.id.startswith('MT.'), records)}
         elif self.file_type == 'pVACsplice':
             records_dict = {re.sub('^%s' % "ALT\.", "", x.id): str(x.seq) for x in filter(lambda x: x.id.startswith('ALT.'), records)}
@@ -86,7 +86,7 @@ class NetChop:
                     sequence_id = ('%010x'%x)[-10:]
                     staging_file.write('>'+sequence_id+'\n')
                     index = line['Index']
-                    if self.file_type == 'pVACseq':
+                    if self.file_type in ['pVACseq', 'pVACsplice', 'pVACfuse']:
                         epitope = line['MT Epitope Seq']
                     else:
                         epitope = line['Epitope Seq']
@@ -95,7 +95,7 @@ class NetChop:
                     if self.file_type == 'pVACsplice':
                         mt_peptide = mt_records_dict[index]
                         wt_peptide = wt_records_dict[index]
-                        peptide = get_mutated_peptide_with_flanking_sequence(wt_peptide, mt_peptide, self.flanking_sequence_length)
+                        peptide, _ = get_mutated_peptide_with_flanking_sequence(wt_peptide, mt_peptide, self.flanking_sequence_length)
                         start_diff = self.flanking_sequence_length
                     else:
                         full_peptide = mt_records_dict[index]
