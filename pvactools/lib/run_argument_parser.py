@@ -116,6 +116,15 @@ class RunArgumentParser(metaclass=ABCMeta):
                  + "allele has a binding percentile rank below this value. When creating the aggregated.tsv "
                  + "report, only bin candidates into the Pass tier that meet this threshold."
         )
+        if tool_name in ['pvacseq', 'pvacfuse', 'pvacsplice']:
+            self.parser.add_argument(
+                "-c", "--minimum-fold-change", type=float,
+                default=0.0,
+                help="Minimum fold change between mutant (MT) binding score and wild-type (WT) score (fold change = WT/MT). "
+                     + "The default is 0, which filters no results, but 1 is often a sensible choice "
+                     + "(requiring that binding is better to the MT than WT peptide). "
+                     + "This fold change is sometimes referred to as a differential agretopicity index.",
+            )
         self.parser.add_argument(
             '--presentation-percentile-threshold', type=float_range(0.0,100.0),
             default=2.0,
@@ -405,14 +414,6 @@ class RunArgumentParser(metaclass=ABCMeta):
         self.parser.add_argument(
             "-p", "--phased-proximal-variants-vcf",
             help="A VCF with phased proximal variant information. Must be gzipped and tabix indexed."
-        )
-        self.parser.add_argument(
-            "-c", "--minimum-fold-change", type=float,
-            default=0.0,
-            help="Minimum fold change between mutant (MT) binding score and wild-type (WT) score (fold change = WT/MT). "
-                 + "The default is 0, which filters no results, but 1 is often a sensible choice "
-                 + "(requiring that binding is better to the MT than WT peptide). "
-                 + "This fold change is sometimes referred to as a differential agretopicity index.",
         )
         self.parser.add_argument(
             '--expn-val', type=float,

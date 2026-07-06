@@ -12,6 +12,7 @@ def main(args_input = sys.argv[1:]):
     BindingFilter(
         args.input_file, args.output_file,
         binding_threshold=args.binding_threshold,
+        minimum_fold_change=args.minimum_fold_change,
         top_score_metric=args.top_score_metric,
         allele_specific_binding_thresholds=args.allele_specific_binding_thresholds,
         binding_percentile_threshold=args.binding_percentile_threshold,

@@ -44,7 +44,6 @@ def create_full_combined_reports(base_output_dir, args):
     post_processing_params = vars(args)
     post_processing_params['input_file'] = combined_output_file
     post_processing_params['filtered_report_file'] = filtered_report_file
-    post_processing_params['minimum_fold_change'] = None
     post_processing_params['run_coverage_filter'] = True
     post_processing_params['run_transcript_support_level_filter'] = True
     post_processing_params['run_net_chop'] = False
@@ -78,7 +77,6 @@ def combine_reports_per_class(class_output_dir:str, params:dict, mhc_class:str):
     post_processing_params['file_type'] = 'pVACsplice'
     post_processing_params['input_file'] = combined_fn
     post_processing_params['filtered_report_file'] = filtered_fn
-    post_processing_params['minimum_fold_change'] = None
     # methods in pp class
     post_processing_params['run_manufacturability_metrics'] = True
     post_processing_params['run_coverage_filter'] = True
@@ -202,6 +200,7 @@ def main(args_input = sys.argv[1:]):
         'genes_of_interest_file': args.genes_of_interest_file,
         'allele_specific_anchors'   : args.allele_specific_anchors,
         'anchor_contribution_threshold' : args.anchor_contribution_threshold,
+        'minimum_fold_change': args.minimum_fold_change,
     }
     junction_arguments.update(additional_args)
 
