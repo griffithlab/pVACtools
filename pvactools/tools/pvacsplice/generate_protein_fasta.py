@@ -11,7 +11,7 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
-from pvactools.lib.splice_pipeline import JunctionPipeline
+from pvactools.lib.junction_pipeline import JunctionPipeline
 from pvactools.lib.calculate_manufacturability import CalculateManufacturability
 from pvactools.lib.run_utils import *
 
@@ -155,8 +155,7 @@ def generate_fasta(args, temp_dir):
     }
 
     pipeline = JunctionPipeline(**junction_arguments)
-    pipeline.vcf_to_tsv()
-    pipeline.junction_to_fasta()
+    pipeline.generate_fasta()
 
     return pipeline.create_file_path('fasta')
 

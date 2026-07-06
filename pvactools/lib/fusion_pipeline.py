@@ -1,13 +1,11 @@
-import sys
-import shutil
 import os
-import pandas as pd
+
+from pvactools.lib.base_pipeline import BasePipeline
 from pvactools.lib.fusion_to_fasta import FusionToFasta
 from pvactools.lib.fasta_to_kmers import FusionFastaToKmers
-from pvactools.lib.combine_inputs import CombineInputs
 from pvactools.lib.input_file_converter import FusionInputConverter
 
-class FusionPipeline:
+class FusionPipeline(BasePipeline):
     def __init__(self, **kwargs):
         self.input_file = kwargs['input_file']
         self.sample_name = kwargs.pop('sample_name', "tmp")
@@ -18,23 +16,6 @@ class FusionPipeline:
         self.class_ii_epitope_length = kwargs.pop('class_ii_epitope_length', None)
         self.class_i_hla = kwargs.pop('class_i_hla', None)
         self.class_ii_hla = kwargs.pop('class_ii_hla', None)
-
-    @staticmethod
-    def file_exists(file_path: str, file_type: str):
-        if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
-            print(f"{file_type} file already exists. Skipping.")
-            exists = True
-        else:
-            exists = False
-        return exists
-
-    def execute(self):
-        self.generate_fasta()
-        self.fasta_to_kmers()
-
-    def generate_fasta(self):
-        self.input_to_tsv()
-        self.fusion_to_fasta()
 
     def create_file_path(self, key):
         inputs = {
@@ -60,7 +41,7 @@ class FusionPipeline:
             print("Completed")
 
     # creates transcripts.fa
-    def fusion_to_fasta(self):
+    def tsv_to_fasta(self):
         if self.file_exists(self.create_file_path('fasta'), 'Fusion fasta'):
             pass
         else:
@@ -91,12 +72,3 @@ class FusionPipeline:
                 fasta = FusionFastaToKmers(**kmer_params)
                 fasta.execute()
                 print('Completed')
-
-    def choose_final_lengths(self):
-        if not self.class_i_hla:
-            lengths = self.class_ii_epitope_length
-        elif not self.class_ii_hla:
-            lengths = self.class_i_epitope_length
-        else:
-            lengths = self.class_i_epitope_length + self.class_ii_epitope_length
-        return lengths

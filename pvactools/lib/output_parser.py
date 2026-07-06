@@ -1784,3 +1784,191 @@ class PvacfuseOutputParser(PvacspliceOutputParser):
 
         tmp_output_filehandle.close()
         os.replace(tmp_output_file, self.output_file)
+
+class PvacseqOutputParser(PvacspliceOutputParser):
+    def base_headers(self):
+        headers = [
+            'Chromosome',
+            'Start',
+            'Stop',
+            'Reference',
+            'Variant',
+            'Transcript',
+            'Transcript Support Level',
+            'Transcript Length',
+            'Canonical',
+            'MANE Select',
+            'Biotype',
+            'Transcript CDS Flags',
+            'Ensembl Gene ID',
+            'Variant Type',
+            'Mutation',
+            'Protein Position',
+            'Gene Name',
+            'HGVSc',
+            'HGVSp',
+            'HLA Allele',
+            'Peptide Length',
+            'Sub-peptide Position',
+            'Mutation Position',
+            'MT Epitope Seq',
+            'WT Epitope Seq',
+            'Best MT IC50 Score Method',
+            'Best MT IC50 Score',
+            'Corresponding WT IC50 Score',
+            'Corresponding Fold Change',
+            'Best MT Percentile Method',
+            'Best MT Percentile',
+            'Corresponding WT Percentile',
+            'Best MT IC50 Percentile Method',
+            'Best MT IC50 Percentile',
+            'Corresponding WT IC50 Percentile',
+            'Best MT Immunogenicity Percentile Method',
+            'Best MT Immunogenicity Percentile',
+            'Corresponding WT Immunogenicity Percentile',
+            'Best MT Presentation Percentile Method',
+            'Best MT Presentation Percentile',
+            'Corresponding WT Presentation Percentile',
+            'Tumor DNA Depth',
+            'Tumor DNA VAF',
+            'Tumor RNA Depth',
+            'Tumor RNA VAF',
+            'Normal Depth',
+            'Normal VAF',
+            'Gene Expression',
+            'Transcript Expression',
+            'Median MT IC50 Score',
+            'Median WT IC50 Score',
+            'Median Fold Change',
+            'Median MT Percentile',
+            'Median WT Percentile',
+            'Median MT IC50 Percentile',
+            'Median WT IC50 Percentile',
+            'Median MT Immunogenicity Percentile',
+            'Median WT Immunogenicity Percentile',
+            'Median MT Presentation Percentile',
+            'Median WT Presentation Percentile',
+        ]
+        return headers
+
+    def execute(self):
+        tmp_output_file = self.output_file + '.tmp'
+        tmp_output_filehandle = open(tmp_output_file, 'w')
+        tsv_writer = csv.DictWriter(tmp_output_filehandle, delimiter='\t', fieldnames=self.output_headers())
+        tsv_writer.writeheader()
+
+        # added for pvacsplice - variant info
+        tsv_entries = self.parse_input_tsv_file()
+
+        # get binding info from iedb files
+        iedb_results = self.process_input_iedb_file(None)
+
+        # from input iedb files
+        for result in iedb_results.values():
+            # get unique index
+            tsv_index = result['tsv_index']
+            tsv_entry = tsv_entries[tsv_index]
+
+            if result['corresponding_wt_ic50'] == 'NA':
+                corresponding_fold_change = 'NA'
+            elif result['best_mt_ic50'] == 0:
+                corresponding_fold_change = inf
+            else:
+                corresponding_fold_change = round((result['corresponding_wt_ic50']/result['best_mt_ic50']), 3)
+
+            if result['median_wt_ic50'] == 'NA':
+                median_fold_change = 'NA'
+            elif result['median_mt_ic50'] == 0:
+                median_fold_change = inf
+            else:
+                median_fold_change = round((result['median_wt_ic50']/result['median_mt_ic50']), 3)
+            row = {
+                'Chromosome'          : tsv_entry['chromosome_name'],
+                'Start'               : tsv_entry['start'],
+                'Stop'                : tsv_entry['stop'],
+                'Reference'           : tsv_entry['reference'],
+                'Variant'             : tsv_entry['variant'],
+                'Transcript'          : tsv_entry['transcript_name'],
+                'Transcript Support Level': tsv_entry['transcript_support_level'],
+                'Transcript Length'   : tsv_entry['transcript_length'],
+                'Canonical'           : tsv_entry['canonical'],
+                'MANE Select'         : tsv_entry['mane_select'],
+                'Biotype'             : tsv_entry['biotype'],
+                'Transcript CDS Flags': tsv_entry['transcript_cds_flags'],
+                'Ensembl Gene ID'     : tsv_entry['ensembl_gene_id'],
+                'HGVSc'               : tsv_entry['hgvsc'],
+                'HGVSp'               : tsv_entry['hgvsp'],
+                'Variant Type'        : tsv_entry['variant_type'],
+                'Mutation'            : tsv_entry['amino_acid_change'],
+                'Protein Position'    : tsv_entry['protein_position'],
+                'Gene Name'           : tsv_entry['gene_name'],
+                'HLA Allele'          : result['allele'],
+                'Peptide Length'      : result['peptide_length'],
+                'Sub-peptide Position': result['position'],
+                'Mutation Position'   : result['mutation_position'] if 'mutation_position' in result else 'NA',
+                'MT Epitope Seq'      : result['mt_epitope_seq'],
+                'WT Epitope Seq'      : result['wt_epitope_seq'],
+                'Index'               : result['tsv_index'],
+                #Median IC50 Score
+                'Median MT IC50 Score': self.rounded_score_or_na(result['median_mt_ic50']),
+                'Median WT IC50 Score': self.rounded_score_or_na(result['median_wt_ic50']),
+                'Median Fold Change': median_fold_change,
+                #Median Percentile
+                'Median MT Percentile': self.rounded_score_or_na(result['median_mt_percentile']),
+                'Median WT Percentile': self.rounded_score_or_na(result['median_wt_percentile']),
+                #Median IC50 Percentile
+                'Median MT IC50 Percentile': self.rounded_score_or_na(result['median_mt_ic50_percentile']),
+                'Median WT IC50 Percentile': self.rounded_score_or_na(result['median_wt_ic50_percentile']),
+                #Median Immunogenicity Percentile
+                'Median MT Immunogenicity Percentile': self.rounded_score_or_na(result['median_mt_immunogenicity_percentile']),
+                'Median WT Immunogenicity Percentile': self.rounded_score_or_na(result['median_wt_immunogenicity_percentile']),
+                #Median Presentation Percentile
+                'Median MT Presentation Percentile': self.rounded_score_or_na(result['median_mt_presentation_percentile']),
+                'Median WT Presentation Percentile': self.rounded_score_or_na(result['median_wt_presentation_percentile']),
+                #Best IC50 Score
+                'Best MT IC50 Score': self.rounded_score_or_na(result['best_mt_ic50']),
+                'Best MT IC50 Score Method': result['best_mt_ic50_method'],
+                'Corresponding WT IC50 Score': self.rounded_score_or_na(result['corresponding_wt_ic50']),
+                'Corresponding Fold Change': corresponding_fold_change,
+                #Best Percentile
+                'Best MT Percentile': self.rounded_score_or_na(result['best_mt_percentile']),
+                'Best MT Percentile Method': result['best_mt_percentile_method'],
+                'Corresponding WT Percentile': self.rounded_score_or_na(result['corresponding_wt_percentile']),
+                #Best IC50 Percentile
+                'Best MT IC50 Percentile': self.rounded_score_or_na(result['best_mt_ic50_percentile']),
+                'Best MT IC50 Percentile Method': result['best_mt_ic50_percentile_method'],
+                'Corresponding WT IC50 Percentile': self.rounded_score_or_na(result['corresponding_wt_ic50_percentile']),
+                #Best Immunogenicity Percentile
+                'Best MT Immunogenicity Percentile': self.rounded_score_or_na(result['best_mt_immunogenicity_percentile']),
+                'Best MT Immunogenicity Percentile Method': result['best_mt_immunogenicity_percentile_method'],
+                'Corresponding WT Immunogenicity Percentile': self.rounded_score_or_na(result['corresponding_wt_immunogenicity_percentile']),
+                #Best Presentation Percentile
+                'Best MT Presentation Percentile': self.rounded_score_or_na(result['best_mt_presentation_percentile']),
+                'Best MT Presentation Percentile Method': result['best_mt_presentation_percentile_method'],
+                'Corresponding WT Presentation Percentile': self.rounded_score_or_na(result['corresponding_wt_presentation_percentile']),
+            }
+            row = self.add_prediction_scores(row, result['mt_scores'], result['wt_scores'])
+
+            for (tsv_key, row_key) in zip(['gene_expression', 'transcript_expression', 'normal_vaf', 'tdna_vaf', 'trna_vaf'], ['Gene Expression', 'Transcript Expression', 'Normal VAF', 'Tumor DNA VAF', 'Tumor RNA VAF']):
+                if tsv_key in tsv_entry:
+                    if tsv_entry[tsv_key] == 'NA':
+                        row[row_key] = 'NA'
+                    else:
+                        # no --normal-sample-name parameter causes ValueError here bc tries to convert empty string to float
+                        if 'normal' in tsv_key and tsv_entry[tsv_key] == '':
+                            row[row_key] = 'NA'
+                        else:
+                            row[row_key] = round(float(tsv_entry[tsv_key]), 3)
+
+            for (tsv_key, row_key) in zip(['normal_depth', 'tdna_depth', 'trna_depth'], ['Normal Depth', 'Tumor DNA Depth', 'Tumor RNA Depth']):
+                if tsv_key in tsv_entry:
+                    row[row_key] = tsv_entry[tsv_key]
+                elif 'normal' in tsv_key and tsv_entry[tsv_key] == '':
+                    row[row_key] = 'NA'
+
+            if self.add_sample_name:
+                row['Sample Name'] = self.sample_name
+            tsv_writer.writerow(row)
+
+        tmp_output_filehandle.close()
+        os.replace(tmp_output_file, self.output_file)

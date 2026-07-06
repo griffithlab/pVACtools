@@ -114,7 +114,7 @@ class CreatePeptideOrderingFormTests(unittest.TestCase):
             pd.testing.assert_frame_equal(generated_df, expected_df, check_dtype=False)
         except AssertionError as e:
             self.fail(f"Generated Excel content does not match expected:\n{e}")
-    
+
     def test_annotate_classi_and_classii_pass(self):
         peptide_sequence = annotate_every_nucleotide(
             sequence="ABCDEFGHIJKL",
@@ -142,7 +142,7 @@ class CreatePeptideOrderingFormTests(unittest.TestCase):
         bold_indices = [6, 7, 8]
         for idx in bold_indices:
             assert peptide_sequence[idx].bold, f"Amino acid at index {idx} should be bolded"
-    
+
     def test_annotate_classi_pass(self):
         peptide_sequence = annotate_every_nucleotide(
             sequence="ABCDEFGHIJKL",
@@ -198,7 +198,7 @@ class CreatePeptideOrderingFormTests(unittest.TestCase):
         bold_indices = [6, 7, 8]
         for idx in bold_indices:
             assert peptide_sequence[idx].bold, f"Amino acid at index {idx} should be bolded"
-    
+
     def test_annotate_classi_and_classii_fail(self):
         peptide_sequence = annotate_every_nucleotide(
             sequence="ABCDEFGHIJKL",
@@ -226,11 +226,11 @@ class CreatePeptideOrderingFormTests(unittest.TestCase):
         bold_indices = [6, 7, 8]
         for idx in bold_indices:
             assert not peptide_sequence[idx].bold, f"Amino acid at index {idx} should not be bolded"
-        
+
         # Check 'large' from probPos
         assert peptide_sequence[2].large  # "C"
         assert peptide_sequence[7].large  # "H"
-    
+
     def test_missense_formatting(self):
         peptide_sequence = annotate_every_nucleotide(
             sequence = "EDAVQGIANQDAAQGIAKE",
@@ -263,7 +263,7 @@ class CreatePeptideOrderingFormTests(unittest.TestCase):
             expected_underlined_positions,
             f"Expected underlining at {mutant_positions}, but got {expected_underlined_positions}",
         )
-    
+
     def test_missense_with_proximal_variant_formatting(self):
         peptide_sequence = annotate_every_nucleotide(
             sequence = "EDASQGIANQDAAQGIAKE",
@@ -296,7 +296,7 @@ class CreatePeptideOrderingFormTests(unittest.TestCase):
             expected_underlined_positions,
             f"Expected underlining at {mutant_positions}, but got {expected_underlined_positions}",
         )
-    
+
     def test_frameshift_formatting(self):
         peptide_sequence = annotate_every_nucleotide(
             sequence = "DTGGGGRSAGSTGQGSGEKAGCPWSGTGQH",
@@ -329,7 +329,7 @@ class CreatePeptideOrderingFormTests(unittest.TestCase):
             expected_underlined_positions,
             f"Expected underlining at {mutant_positions}, but got {expected_underlined_positions}",
         )
-    
+
     def test_frameshift_with_proximal_variant_formatting(self):
         peptide_sequence = annotate_every_nucleotide(
             sequence = "DTSGGGRSAGSTGQGSGEKAGCPWSGTGQH",
@@ -362,7 +362,7 @@ class CreatePeptideOrderingFormTests(unittest.TestCase):
             expected_underlined_positions,
             f"Expected underlining at {mutant_positions}, but got {expected_underlined_positions}",
         )
-    
+
     def test_inframe_deletion_formatting(self):
         peptide_sequence = annotate_every_nucleotide(
             sequence = "PASAAAAAAAVIPTVSTPP",
@@ -395,7 +395,7 @@ class CreatePeptideOrderingFormTests(unittest.TestCase):
             expected_underlined_positions,
             f"Expected underlining at {mutant_positions}, but got {expected_underlined_positions}",
         )
-    
+
     def test_inframe_deletion_with_proximal_variant_formatting(self):
         peptide_sequence = annotate_every_nucleotide(
             sequence = "PASAAAAAAAVIPTVSTPL",
@@ -461,7 +461,7 @@ class CreatePeptideOrderingFormTests(unittest.TestCase):
             expected_underlined_positions,
             f"Expected underlining at {mutant_positions}, but got {expected_underlined_positions}",
         )
-    
+
     def test_inframe_insertion_with_proximal_variant_formatting(self):
         peptide_sequence = annotate_every_nucleotide(
             sequence = "PTPPPPLLPLLPLLLLLGASGGG",

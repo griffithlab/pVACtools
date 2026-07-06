@@ -89,7 +89,7 @@ class CalculateReferenceProteomeSimilarityTests(unittest.TestCase):
         tmp_aggregated_metrics_file = tempfile.NamedTemporaryFile()
         import shutil
         shutil.copy(input_aggregated_metrics_file, tmp_aggregated_metrics_file.name)
-        input_fasta = os.path.join(self.test_data_dir, 'Test.fasta')
+        input_fasta = os.path.join(self.test_data_dir, 'input.fasta')
         output_file = tempfile.NamedTemporaryFile(suffix='.tsv')
         metric_file = "{}.reference_matches".format(output_file.name)
         output_aggregated_metrics_file = output_file.name.replace(".tsv", ".metrics.json")

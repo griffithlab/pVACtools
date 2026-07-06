@@ -1,8 +1,10 @@
 import sys
 import argparse
 import os
+import shutil
 
-from pvactools.tools.pvacseq.generate_protein_fasta import run_generate_protein_fasta
+from pvactools.tools.pvacseq.generate_protein_fasta import PvacseqGenerateProteinFasta
+from pvactools.lib.calculate_manufacturability import CalculateManufacturability
 from pvactools.lib.generate_reviews_files import main as run_generate_reviews_files
 from pvactools.lib.color_peptides51mer import main as run_color_peptides
 from pvactools.lib.run_utils import aggregate_report_evaluations
@@ -143,30 +145,42 @@ def main(args_input = sys.argv[1:]):
     else:
         os.makedirs(output_path)
 
-    run_generate_protein_fasta(
-        input_vcf=args.input_vcf,
-        flanking_sequence_length=args.flanking_sequence_length,
-        output_file=os.path.join(output_path, args.output_file_prefix),
-        input_tsv=args.classI_aggregated_tsv,
-        phased_proximal_variants_vcf=args.phased_proximal_variants_vcf,
-        pass_only=args.pass_only,
-        biotypes=args.biotypes,
-        allow_incomplete_transcripts=args.allow_incomplete_transcripts,
-        mutant_only=True,
-        aggregate_report_evaluation=args.aggregate_report_evaluation,
-        downstream_sequence_length=args.downstream_sequence_length,
-        sample_name=args.sample_name,
-        peptide_ordering_form=True
-    )
+    if args.downstream_sequence_length == 'full':
+        downstream_sequence_length = None
+    elif args.downstream_sequence_length.isdigit():
+        downstream_sequence_length = int(args.downstream_sequence_length)
+    else:
+        sys.exit("The downstream sequence length needs to be a positive integer or 'full'")
 
-    file_path = os.path.join(output_path, args.output_file_prefix)
-    file_prefix = os.path.join(output_path, f"{args.output_file_prefix}_{args.sample_name}")
+    params = {
+        'input_vcf': args.input_vcf,
+        'sample_name': args.sample_name,
+        'pass_only': args.pass_only,
+        'phased_proximal_variants_vcf': args.phased_proximal_variants_vcf,
+        'biotypes': args.biotypes,
+        'allow_incomplete_transcripts': args.allow_incomplete_transcripts,
+        'downstream_sequence_length': downstream_sequence_length,
+        'flanking_sequence_length': args.flanking_sequence_length,
+        'mutant_only': True,
+        'aggregate_report_evaluation': args.aggregate_report_evaluation,
+        'input_tsv': args.classI_aggregated_tsv,
+        'output_file': os.path.join(output_path, f'{args.output_file_prefix}_{args.sample_name}.fa'),
+    }
+    generator = PvacseqGenerateProteinFasta(**params)
+    generator.generate_fasta()
+    generator.trim_sequences()
+    generator.filter_fasta()
+    shutil.copy(generator.filtered_fasta_file_path, generator.output_file)
 
-    os.rename(file_path, f"{file_prefix}.fa")
-    os.rename(f"{file_path}_combined", f"{file_prefix}_combined.fa")
-    os.rename(f"{file_path}.manufacturability.tsv", f"{file_prefix}.manufacturability.tsv")
-    peptide_manufacture_path = f"{file_prefix}.manufacturability.tsv"
-    combined_fasta_path = f"{file_prefix}_combined.fa"
+    combined_fasta_path = os.path.join(output_path, f'{args.output_file_prefix}_{args.sample_name}_combined.fa')
+    generator.mutant_only = False
+    generator.output_file = combined_fasta_path
+    generator.filter_fasta()
+    shutil.copy(generator.filtered_fasta_file_path, combined_fasta_path)
+    shutil.rmtree(generator.temp_dir, ignore_errors=True)
+
+    peptide_manufacture_path = os.path.join(output_path, f'{args.output_file_prefix}_{args.sample_name}.manufacturability.tsv')
+    CalculateManufacturability(combined_fasta_path, peptide_manufacture_path, 'fasta').execute()
 
     peptide_51mer_path = run_generate_reviews_files(
         peptides_path=peptide_manufacture_path,
@@ -195,7 +209,7 @@ def main(args_input = sys.argv[1:]):
 
     os.remove(peptide_51mer_path)
     os.remove(combined_fasta_path)
-    
+
 
 if __name__ == "__main__":
     main()

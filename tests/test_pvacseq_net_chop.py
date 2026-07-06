@@ -54,7 +54,7 @@ class PvacseqNetChopTests(unittest.TestCase):
 
     def test_runs(self):
         input_file = os.path.join(self.test_data_directory, 'Test.all_epitopes.short.tsv')
-        input_fasta = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.fasta')
+        input_fasta = os.path.join(self.test_data_directory, 'run', 'MHC_Class_I', 'Test.fasta')
         output_file = tempfile.NamedTemporaryFile()
         self.assertFalse(net_chop.main([
             input_file,

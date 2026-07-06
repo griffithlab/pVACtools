@@ -13,7 +13,7 @@ from Bio.SeqRecord import SeqRecord
 from pvactools.lib.prediction_class import *
 from pvactools.lib.input_file_converter import VcfConverter
 from pvactools.lib.fasta_generator import FastaGenerator, VectorFastaGenerator
-from pvactools.lib.output_parser import DefaultOutputParser, UnmatchedSequencesOutputParser, PvacspliceOutputParser, PvacfuseOutputParser
+from pvactools.lib.output_parser import DefaultOutputParser, UnmatchedSequencesOutputParser, PvacspliceOutputParser, PvacfuseOutputParser, PvacseqOutputParser
 from pvactools.lib.post_processor import PostProcessor
 from pvactools.lib.run_utils import *
 import pvactools.lib.call_iedb
@@ -99,7 +99,7 @@ class Pipeline(metaclass=ABCMeta):
             return self.input_file
         elif self.input_file_type == 'junctions':
             return os.path.join(self.junctions_dir, f'{self.sample_name}_combined.tsv')
-        elif self.input_file_type == 'fusions':
+        elif self.input_file_type in ['fusions', 'vcf']:
             return os.path.abspath(os.path.join(self.output_dir, '..', '..', f'{self.sample_name}.tsv'))
         else:
             tsv_file = self.sample_name + '.tsv'
@@ -133,7 +133,7 @@ class Pipeline(metaclass=ABCMeta):
 
     def output_parser(self, params):
         parser_types = {
-            'vcf': 'DefaultOutputParser',
+            'vcf': 'PvacseqOutputParser',
             'pvacvector_input_fasta': 'UnmatchedSequencesOutputParser',
             'fasta': 'UnmatchedSequencesOutputParser',
             'junctions': 'PvacspliceOutputParser',
@@ -678,7 +678,7 @@ class PvacbindPipeline(Pipeline):
         warning_messages = []
         for (split_start, split_end) in chunks:
             tsv_chunk = "%d-%d" % (split_start, split_end)
-            if self.input_file_type in ['fasta', 'junctions', 'fusions']:
+            if self.input_file_type in ['fasta', 'junctions', 'fusions', 'vcf']:
                 fasta_chunk = tsv_chunk
             else:
                 fasta_chunk = "%d-%d" % (split_start*2-1, split_end*2)
@@ -763,7 +763,7 @@ class PvacbindPipeline(Pipeline):
                     continue
                 for (split_start, split_end) in chunks:
                     tsv_chunk = "%d-%d" % (split_start, split_end)
-                    if self.input_file_type in ['fasta', 'junctions', 'fusions']:
+                    if self.input_file_type in ['fasta', 'junctions', 'fusions', 'vcf']:
                         fasta_chunk = tsv_chunk
                     else:
                         fasta_chunk = "%d-%d" % (split_start*2-1, split_end*2)
@@ -787,7 +787,7 @@ class PvacbindPipeline(Pipeline):
                     'reference_scores_path'  : self.reference_scores_path,
                     'input_file_type'        : self.input_file_type,
                 }
-                if self.input_file_type in ['junctions', 'fusions']:
+                if self.input_file_type in ['junctions', 'fusions', 'vcf']:
                     params['input_tsv_file'] = self.tsv_file_path()
                 params['sample_name'] = self.sample_name
                 params['flurry_state'] = self.flurry_state

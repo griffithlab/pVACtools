@@ -8,8 +8,10 @@ import py_compile
 from subprocess import run as subprocess_run
 from subprocess import PIPE
 import re
+import shutil
 
 from pvactools.tools.pvacseq import generate_protein_fasta
+from pvactools.tools.pvacseq.generate_protein_fasta import PvacseqGenerateProteinFasta
 from tests.utils import *
 
 class GenerateFastaTests(unittest.TestCase):
@@ -148,23 +150,24 @@ class GenerateFastaTests(unittest.TestCase):
         generate_protein_fasta_phased_proximal_variants_vcf = os.path.join(self.test_data_dir, 'phased.vcf.gz')
         generate_protein_fasta_output_file = tempfile.NamedTemporaryFile()
 
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            generate_protein_fasta_input_file,
-            '7',
-            generate_protein_fasta_output_file.name,
-            '-d', 'full',
-            '--phased-proximal-variants-vcf', generate_protein_fasta_phased_proximal_variants_vcf,
-            '--allow-incomplete-transcripts',
-        ], shell=False))
-        os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))
-        proximal_output_file = "{}.proximal_variants.tsv".format(generate_protein_fasta_output_file.name)
-        expected_proximal_output_file = os.path.join(self.test_data_dir, 'output_with_phased_vcf.proximal_variants.tsv')
-        self.assertTrue(cmp(proximal_output_file, expected_proximal_output_file))
-        os.unlink(proximal_output_file)
+        params = {
+            'input_vcf': generate_protein_fasta_input_file,
+            'phased_proximal_variants_vcf': generate_protein_fasta_phased_proximal_variants_vcf,
+            'allow_incomplete_transcripts': True,
+            'flanking_sequence_length': 7,
+            'output_file': generate_protein_fasta_output_file.name,
+        }
+        generator = PvacseqGenerateProteinFasta(**params)
+        generator.generate_fasta()
+        generator.trim_sequences()
+        generator.filter_fasta()
+        shutil.copy(generator.filtered_fasta_file_path, generate_protein_fasta_output_file.name)
+
         expected_output_file = os.path.join(self.test_data_dir, 'output_with_phased_vcf.fasta')
         self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
+        expected_output_file = os.path.join(self.test_data_dir, 'output_with_phased_vcf.proximal_variants.tsv')
+        self.assertTrue(cmp(os.path.join(generator.temp_dir, 'tmp.proximal_variants.tsv'), expected_output_file))
+        shutil.rmtree(generator.temp_dir, ignore_errors=True)
 
     def test_output_peptide_sequence_length_longer_that_wildtype(self):
         flanking_sequence_length           = '300'
