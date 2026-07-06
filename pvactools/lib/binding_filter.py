@@ -134,7 +134,7 @@ class BindingFilter:
                  + " The 'exploratory' option requires a candidate to pass EITHER the binding threshold or the percentile threshold.",
             default="conservative",
         )
-        if tool == 'pvacseq':
+        if tool in ['pvacseq', 'pvacfuse', 'pvacsplice']:
             parser.add_argument(
                 '-c', '--minimum-fold-change', type=int,
                 help="Minimum fold change between mutant binding "

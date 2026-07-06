@@ -28,7 +28,6 @@ def create_per_class_report(files, all_epitopes_output_file, filtered_report_fil
 
     post_processing_params['input_file'] = all_epitopes_output_file
     post_processing_params['filtered_report_file'] = filtered_report_file
-    post_processing_params['minimum_fold_change'] = None
     post_processing_params['run_coverage_filter'] = True
     post_processing_params['run_transcript_support_level_filter'] = False
     post_processing_params['run_manufacturability_metrics'] = True
@@ -55,7 +54,6 @@ def create_combined_reports(files, all_epitopes_output_file, filtered_report_fil
     post_processing_params = vars(args).copy()
     post_processing_params['input_file'] = all_epitopes_output_file
     post_processing_params['filtered_report_file'] = filtered_report_file
-    post_processing_params['minimum_fold_change'] = None
     post_processing_params['run_coverage_filter'] = True
     post_processing_params['run_transcript_support_level_filter'] = False
     post_processing_params['run_net_chop'] = False
