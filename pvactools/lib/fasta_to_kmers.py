@@ -12,7 +12,10 @@ from pvactools.lib.run_utils import *
 
 class FastaToKmers:
     def __init__(self, **kwargs):
-        self.tscript_fasta = Fasta(kwargs['fasta'])
+        try:
+            self.tscript_fasta = Fasta(kwargs['fasta'])
+        except ValueError as e:
+            raise ValueError(str(e).replace("key", "fasta header") + ". Please ensure that the input FASTA uses unique headers.")
         self.output_dir    = kwargs['output_dir']
         self.epitope_length = kwargs['epitope_length']
         self.sample_name   = kwargs['sample_name']
@@ -60,6 +63,17 @@ class FastaToKmers:
         all_kmers = self.loop_through_tscripts()
         if len(all_kmers) > 0:
             self.create_epitope_fasta(all_kmers)
+
+class SequenceFastaToKmers(FastaToKmers):
+    def prefix(self):
+        return ""
+
+    def create_kmer_dict(self, variant_name):
+        kmer_dict = self.create_kmers(variant_name)
+        final_kmers = {}
+        for i, seq in kmer_dict.items():
+            final_kmers[f'{variant_name}|{i}'] = seq
+        return final_kmers
 
 class VariantFastaToKmers(FastaToKmers):
     def prefix(self):

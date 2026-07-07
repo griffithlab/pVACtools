@@ -23,8 +23,8 @@ class JunctionPipeline(BasePipeline):
         self.gtf_file = kwargs['gtf_file']
         self.class_i_epitope_length = kwargs['class_i_epitope_length']
         self.class_ii_epitope_length = kwargs['class_ii_epitope_length']
-        self.class_i_hla = kwargs['class_i_hla']
-        self.class_ii_hla = kwargs['class_ii_hla']
+        self.class_i_hla = kwargs.pop('class_i_hla', None)
+        self.class_ii_hla = kwargs.pop('class_ii_hla', None)
         self.junction_score = kwargs['junction_score']
         self.anchor_types = kwargs['anchor_types']
         self.variant_distance = kwargs['variant_distance']

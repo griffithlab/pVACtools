@@ -1366,6 +1366,53 @@ class UnmatchedSequencesOutputParser(OutputParser):
         os.replace(tmp_output_file, self.output_file)
 
 
+class PvacbindOutputParser(UnmatchedSequencesOutputParser):
+    def parse_iedb_file(self):
+        protein_identifiers_from_label = {}
+        for key_file in self.key_files:
+            with open(key_file, 'r') as key_file_reader:
+                chunk = key_file.rsplit('.', 2)[1].split('_')[1]
+                protein_identifiers_from_label[chunk] = yaml.load(key_file_reader, Loader=yaml.FullLoader)
+        iedb_results = {}
+        for input_iedb_file in self.input_iedb_files:
+            with open(input_iedb_file, 'r') as reader:
+                chunk = input_iedb_file.rsplit('_', 1)[1]
+                iedb_tsv_reader = csv.DictReader(reader, delimiter='\t')
+                filename = os.path.basename(input_iedb_file)
+
+                pattern = re.compile(rf"{re.escape(self.sample_name)}\.(\w+(?:-\d+\.\d+)?)")
+                match = pattern.match(filename)
+                method = match.group(1)
+
+                for line in iedb_tsv_reader:
+                    if "Warning: Potential DNA sequence(s)" in line['allele']:
+                        continue
+                    fasta_label  = int(line['seq_num'])
+                    epitope        = line['peptide']
+                    scores         = self.get_scores(line, method)
+                    allele         = line['allele']
+                    peptide_length = len(epitope)
+
+                    if protein_identifiers_from_label[chunk][fasta_label] is not None:
+                        protein_labels = protein_identifiers_from_label[chunk][fasta_label]
+
+                    for key in protein_labels:
+                        (tsv_index, position) = key.rsplit('|', 1)
+                        if 'core_peptide' in line and int(line['end']) - int(line['start']) == 8:
+                            #Start and end refer to the position of the core peptide
+                            #Infer the (start) position of the peptide from the positions of the core peptide
+                            position   = int(position) - line['peptide'].find(line['core_peptide'])
+
+                        if key not in iedb_results:
+                            iedb_results[key]                      = {}
+                            iedb_results[key]['mt_scores']         = {}
+                            iedb_results[key]['mt_epitope_seq']    = epitope
+                            iedb_results[key]['position']          = int(position) + 1
+                            iedb_results[key]['tsv_index']         = tsv_index
+                            iedb_results[key]['allele']            = allele
+                        iedb_results[key]['mt_scores'].update(scores)
+        return iedb_results
+
 class PvacspliceOutputParser(DefaultOutputParser):
     def parse_iedb_file(self, tsv_entries=None):
         # input key file
