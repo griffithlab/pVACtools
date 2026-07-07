@@ -24,37 +24,6 @@ def combine_epitope_len_reports(file_list, file_final_name):
     elif len(file_list) == 1:
         shutil.copy(file_list[0], file_final_name)
 
-def create_full_combined_reports(base_output_dir, args):
-    output_dir = os.path.join(base_output_dir, 'combined')
-    os.makedirs(output_dir, exist_ok=True)
-
-    file1 = os.path.join(base_output_dir, 'MHC_Class_I', "{}.MHC_I.all_epitopes.tsv".format(args.sample_name))
-    file2 = os.path.join(base_output_dir, 'MHC_Class_II', "{}.MHC_II.all_epitopes.tsv".format(args.sample_name))
-    if not os.path.exists(file1):
-        print("File {} doesn't exist. Aborting.".format(file1))
-        return
-    if not os.path.exists(file2):
-        print("File {} doesn't exist. Aborting.".format(file2))
-        return
-
-    combined_output_file = os.path.join(output_dir, "{}.Combined.all_epitopes.tsv".format(args.sample_name))
-    combine_reports([file1, file2], combined_output_file)
-    filtered_report_file = os.path.join(output_dir, "{}.Combined.filtered.tsv".format(args.sample_name))
-
-    post_processing_params = vars(args)
-    post_processing_params['input_file'] = combined_output_file
-    post_processing_params['filtered_report_file'] = filtered_report_file
-    post_processing_params['run_coverage_filter'] = True
-    post_processing_params['run_transcript_support_level_filter'] = True
-    post_processing_params['run_net_chop'] = False
-    post_processing_params['run_netmhc_stab'] = False
-    post_processing_params['run_manufacturability_metrics'] = False
-    post_processing_params['run_reference_proteome_similarity'] = False
-    post_processing_params['file_type'] = 'pVACsplice'
-    post_processing_params['filename_addition'] = "Combined"
-
-    PostProcessor(**post_processing_params).execute()
-
 def combine_reports_per_class(class_output_dir:str, params:dict, mhc_class:str):
     output_dir = os.path.join(class_output_dir, f'MHC_Class_{mhc_class}')
 
@@ -291,10 +260,6 @@ def main(args_input = sys.argv[1:]):
         print("No MHC class II prediction algorithms chosen. Skipping MHC class II predictions.")
     elif len(class_ii_alleles) == 0:
         print("No MHC class II alleles chosen. Skipping MHC class II predictions.")
-
-    if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0 and len(class_ii_prediction_algorithms) > 0 and len(class_ii_alleles) > 0:
-        print("Creating combined reports")
-        create_full_combined_reports(junctions_dir, args)
 
     if args.save_gtf is False:
         shutil.rmtree(os.path.join(junctions_dir, 'tmp'), ignore_errors=True)

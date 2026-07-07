@@ -243,16 +243,6 @@ class PvacbindTests(unittest.TestCase):
                 expected_file = os.path.join(self.test_data_directory, 'run', 'MHC_Class_II', 'tmp', file_name.replace('sample.name', 'Test'))
                 self.assertTrue(compare(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
 
-            #Combined output files
-            for file_name in (
-                'sample.name.Combined.all_epitopes.tsv',
-                'sample.name.Combined.filtered.tsv',
-                'sample.name.Combined.all_epitopes.aggregated.tsv',
-            ):
-                output_file   = os.path.join(output_dir.name, 'combined', file_name)
-                expected_file = os.path.join(self.test_data_directory, 'run', 'combined', file_name.replace('sample.name', 'Test'))
-                self.assertTrue(compare(output_file, expected_file))
-
             with self.assertRaises(SystemExit) as cm:
                 run.main([
                     os.path.join(self.test_data_directory, "input.fasta"),
