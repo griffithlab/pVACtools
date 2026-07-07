@@ -29,9 +29,9 @@ def make_response(data, path, test_name):
     return response_obj
 
 def make_predict_response(input_file, allele, length, path, test_name):
-    file_parts = input_file.split(os.sep)
-    clip_count = file_parts[7]
-    spacer = file_parts[8]
+    file_parts = input_file.rsplit(os.sep, 5)
+    clip_count = file_parts[1]
+    spacer = file_parts[2]
     filename = f'response_{allele}_{length}_ann_{test_name}_{clip_count}_{spacer}.tsv'
     reader = open(os.path.join(
         path,
