@@ -70,7 +70,7 @@ class JunctionToKmerPipeline(InputToKmerPipeline):
             'gtf': '_gtf.tsv',
             'annotated': '_annotated.tsv',
             'filtered': '_filtered.tsv',
-            'combined': '_combined.tsv',
+            'combined': '.tsv',
             'fasta': '.transcripts.fa',
         }
         if temp:
@@ -201,7 +201,7 @@ class JunctionToKmerPipeline(InputToKmerPipeline):
 
     def fasta_to_kmers(self):
         for el in self.choose_final_lengths():
-            fasta_file = f'{self.output_dir}.{self.sample_name}.{el}.fa'
+            fasta_file = os.path.join(self.output_dir, f'{self.sample_name}.{el}.fa')
             if os.path.exists(fasta_file):
                 print(f'{el}mer fasta already exists. Skipping.')
                 continue
@@ -209,7 +209,7 @@ class JunctionToKmerPipeline(InputToKmerPipeline):
                 print(f'Generating {el}mer peptides from novel junction sequences')
                 kmer_params = {
                     'fasta': self.create_file_path('fasta'),
-                    'output_dir': self.tmp_dir,
+                    'output_dir': self.output_dir,
                     'epitope_length': el,
                     'sample_name': self.sample_name,
                 }

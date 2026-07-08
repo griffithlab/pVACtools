@@ -105,142 +105,185 @@ def define_parser():
     )
     return parser
 
-def parse_input_tsv(input_tsv):
-    if input_tsv is None:
-        return (None, None)
-    with open(input_tsv, 'r') as fh:
-        reader = csv.DictReader(fh, delimiter = "\t")
-        if 'Index' in reader.fieldnames:
-            indexes = parse_full_input_tsv(reader)
-            file_type = 'full'
-        else:
-            indexes = parse_aggregated_input_tsv(reader)
-            file_type = 'aggregated'
-    return (indexes, file_type)
+class PvacspliceGenerateProteinFasta():
+    def __init__(self, **kwargs):
+        self.input_file = kwargs.pop('input_file', None)
+        self.annotated_vcf = kwargs.pop('annotated_vcf', None)
+        self.ref_fasta = kwargs.pop('ref_fasta', None)
+        self.gtf_file = kwargs.pop('gtf_file', None)
+        self.sample_name = kwargs.pop('sample_name', 'tmp')
+        if self.sample_name is None:
+            self.sample_name = 'tmp'
+        self.pass_only = kwargs.pop('pass_only', False)
+        self.biotypes = kwargs.pop('biotypes', ['protein_coding'])
+        self.allow_incomplete_transcripts = kwargs.pop('allow_incomplete_transcripts', False)
+        #self.downstream_sequence_length = kwargs.pop('downstream_sequence_length', 1000)
+        self.flanking_sequence_length = kwargs.pop('flanking_sequence_length')
+        self.mutant_only = kwargs.pop('mutant_only', False)
+        self.junction_score = kwargs.pop('junction_score', 10)
+        self.variant_distance = kwargs.pop('variant_distance', 100)
+        self.anchor_types = kwargs.pop('anchor_types', ['A', 'D', 'NDA'])
+        self.aggregate_report_evaluation = kwargs.pop('aggregate_report_evaluation', ['Accept'])
+        self.temp_dir = tempfile.mkdtemp()
+        self.fasta_file_path = kwargs.pop('fasta_file_path', os.path.join(self.temp_dir, f"{self.sample_name}.transcripts.fa"))
+        self.trimmed_fasta_file_path = kwargs.pop('trimmed_fasta_file_path', os.path.join(self.temp_dir, f"{self.sample_name}.transcripts.trimmed.fa"))
+        self.filtered_fasta_file_path = os.path.join(self.temp_dir, f"{self.sample_name}.transcripts.filtered.fa")
+        self.input_tsv = kwargs.pop('input_tsv', None)
+        self.output_file = kwargs.pop('output_file', None)
 
-def parse_full_input_tsv(reader):
-    indexes = []
-    for line in reader:
-        indexes.append(line['Index'])
-    return indexes
+    def parse_input_tsv(self):
+        if self.input_tsv is None:
+            return (None, None)
+        with open(self.input_tsv, 'r') as fh:
+            reader = csv.DictReader(fh, delimiter = "\t")
+            if 'Index' in reader.fieldnames:
+                indexes = self.parse_full_input_tsv(reader)
+                file_type = 'full'
+            else:
+                indexes = self.parse_aggregated_input_tsv(reader)
+                file_type = 'aggregated'
+        return (indexes, file_type)
 
-def parse_aggregated_input_tsv(reader):
-    indexes = []
-    for line in reader:
-        indexes.append(line)
-    return indexes
+    def parse_full_input_tsv(self, reader):
+        indexes = []
+        for line in reader:
+            indexes.append(line['Index'])
+        return indexes
 
-def generate_fasta(args, temp_dir):
-    junction_arguments = {
-        'input_file_type'                  : 'junctions',
-        'junctions_dir'                    : temp_dir,
-        'input_file'                       : args.input_file,
-        'gtf_file'                         : args.gtf_file,
-        'save_gtf'                         : False,
-        'sample_name'                      : args.sample_name,
-        'ref_fasta'                        : args.ref_fasta,
-        'annotated_vcf'                    : args.annotated_vcf,
-        'pass_only'                        : args.pass_only,
-        'biotypes'                         : args.biotypes,
-        'allow_incomplete_transcripts'     : args.allow_incomplete_transcripts,
-        'junction_score'                   : args.junction_score,
-        'variant_distance'                 : args.variant_distance,
-        'anchor_types'                     : args.anchor_types,
-        'normal_sample_name'               : None,
-        'keep_tmp_files'                   : False,
-        'class_i_epitope_length'           : [],
-        'class_ii_epitope_length'          : [],
-        'class_i_hla'                      : [],
-        'class_ii_hla'                     : [],
-    }
+    def parse_aggregated_input_tsv(self, reader):
+        indexes = []
+        for line in reader:
+            indexes.append(line)
+        return indexes
 
-    pipeline = JunctionToKmerPipeline(**junction_arguments)
-    pipeline.generate_fasta()
+    def generate_fasta(self):
+        junction_arguments = {
+            'input_file_type'                  : 'junctions',
+            'junctions_dir'                    : self.temp_dir,
+            'input_file'                       : self.input_file,
+            'gtf_file'                         : self.gtf_file,
+            'save_gtf'                         : False,
+            'sample_name'                      : self.sample_name,
+            'ref_fasta'                        : self.ref_fasta,
+            'annotated_vcf'                    : self.annotated_vcf,
+            'pass_only'                        : self.pass_only,
+            'biotypes'                         : self.biotypes,
+            'allow_incomplete_transcripts'     : self.allow_incomplete_transcripts,
+            'junction_score'                   : self.junction_score,
+            'variant_distance'                 : self.variant_distance,
+            'anchor_types'                     : self.anchor_types,
+            'normal_sample_name'               : None,
+            'keep_tmp_files'                   : False,
+            'class_i_epitope_length'           : [],
+            'class_ii_epitope_length'          : [],
+            'class_i_hla'                      : [],
+            'class_ii_hla'                     : [],
+        }
 
-    return pipeline.create_file_path('fasta')
+        pipeline = JunctionToKmerPipeline(**junction_arguments)
+        pipeline.generate_fasta()
 
-def trim_sequences(args, temp_dir, transcript_fasta):
-    trimmed_transcript_fasta = os.path.join(temp_dir, f"{args.sample_name}.transcripts.trimmed.fa")
+        return pipeline.create_file_path('fasta')
 
-    records = {}
-    keys = set()
-    for record in SeqIO.parse(transcript_fasta, "fasta"):
-        records[record.id] = record.seq
-        keys.add(record.id.split('.', 1)[1])
-
-    output_records = []
-    for key in sorted(keys, key=lambda x: int(x.split('.', 1)[0])):
-        mt_sequence = records[f"ALT.{key}"]
-        wt_sequence = records[f"WT.{key}"]
-        if mt_sequence in wt_sequence:
-            continue
-        _, frameshift_status = key.rsplit('.', 1)
-        if frameshift_status == 'inframe_splice_site':
-            final_mt_sequence, final_wt_sequence = get_mutated_peptide_with_flanking_sequence(wt_sequence, mt_sequence, min(args.flanking_sequence_length, len(wt_sequence)-1, len(mt_sequence)-1))
-        elif frameshift_status == 'frameshift_splice_site':
-            final_mt_sequence, final_wt_sequence = get_mutated_frameshift_peptide_with_flanking_sequence(wt_sequence, mt_sequence, min(args.flanking_sequence_length, len(wt_sequence)-1, len(mt_sequence)-1))
-        else:
-            raise Exception("Unexpected frameshift status {} for record {}. Skipping".format(frameshift_status, identifier))
-        if final_mt_sequence and final_wt_sequence:
-            output_records.append(SeqRecord(final_mt_sequence, id=f"MT.{key}", description=""))
-            if not args.mutant_only:
-                output_records.append(SeqRecord(final_wt_sequence, id=f"ALT.{key}", description=""))
-
-    SeqIO.write(output_records, trimmed_transcript_fasta, "fasta")
-    return trimmed_transcript_fasta
-
-def filter_fasta(args, temp_dir):
-    trimmed_transcript_fasta = os.path.join(temp_dir, f"{args.sample_name}.transcripts.trimmed.fa")
-    filtered_transcript_fasta = os.path.join(temp_dir, f"{args.sample_name}.transcripts.filtered.fa")
-
-    if args.input_tsv is None:
-        shutil.copy(trimmed_transcript_fasta, filtered_transcript_fasta)
-    else:
-        (tsv_indexes, tsv_file_type) = parse_input_tsv(args.input_tsv)
+    def trim_sequences(self):
+        records = {}
+        keys = set()
+        for record in SeqIO.parse(self.fasta_file_path, "fasta"):
+            records[record.id] = record.seq
+            keys.add(record.id.split('.', 1)[1])
 
         output_records = []
-        for record in SeqIO.parse(trimmed_transcript_fasta, "fasta"):
-            record_id = record.id.split('.', 1)[1]
-            if tsv_file_type == 'full':
-                if record_id not in tsv_indexes:
-                    continue
+        for key in sorted(keys, key=lambda x: int(x.split('.', 1)[0])):
+            mt_sequence = records[f"ALT.{key}"]
+            wt_sequence = records[f"WT.{key}"]
+            if mt_sequence in wt_sequence:
+                continue
+            _, frameshift_status = key.rsplit('.', 1)
+            if frameshift_status == 'inframe_splice_site':
+                final_mt_sequence, final_wt_sequence = get_mutated_peptide_with_flanking_sequence(wt_sequence, mt_sequence, min(self.flanking_sequence_length, len(wt_sequence)-1, len(mt_sequence)-1))
+            elif frameshift_status == 'frameshift_splice_site':
+                final_mt_sequence, final_wt_sequence = get_mutated_frameshift_peptide_with_flanking_sequence(wt_sequence, mt_sequence, min(self.flanking_sequence_length, len(wt_sequence)-1, len(mt_sequence)-1))
             else:
-                matches = [i for i in tsv_indexes if i['ID'] == record_id and i['Evaluation'] in args.aggregate_report_evaluation]
-                if len(matches) == 0:
-                    continue
-            new_record = SeqRecord(record.seq, id=record.id, description="")
-            output_records.append(new_record)
+                raise Exception("Unexpected frameshift status {} for record {}. Skipping".format(frameshift_status, identifier))
+            if final_mt_sequence and final_wt_sequence:
+                output_records.append(SeqRecord(final_mt_sequence, id=f"ALT.{key}", description=""))
+                if not self.mutant_only:
+                    output_records.append(SeqRecord(final_wt_sequence, id=f"WT.{key}", description=""))
 
-        ordered_output_records = []
-        for tsv_index in tsv_indexes:
-            if tsv_file_type == 'full':
-                records = [r for r in output_records if r.id.split('.', 1)[1] == tsv_index]
-            else:
-                records = [r for r in output_records if r.id.split('.', 1)[1] == tsv_index['ID']]
-            ordered_output_records.extend(records)
-        output_records = ordered_output_records
+        SeqIO.write(output_records, self.trimmed_fasta_file_path, "fasta")
 
-        SeqIO.write(output_records, filtered_transcript_fasta, "fasta")
+    def filter_fasta(self):
+        if self.input_tsv is None:
+            shutil.copy(self.trimmed_fasta_file_path, self.filtered_fasta_file_path)
+        else:
+            (tsv_indexes, tsv_file_type) = self.parse_input_tsv()
 
-    return filtered_transcript_fasta
+            output_records = []
+            for record in SeqIO.parse(self.trimmed_fasta_file_path, "fasta"):
+                record_id = record.id.split('.', 1)[1]
+                if tsv_file_type == 'full':
+                    if record_id not in tsv_indexes:
+                        continue
+                else:
+                    matches = [i for i in tsv_indexes if i['ID'] == record_id and i['Evaluation'] in self.aggregate_report_evaluation]
+                    if len(matches) == 0:
+                        continue
+                new_record = SeqRecord(record.seq, id=record.id, description="")
+                output_records.append(new_record)
+
+            ordered_output_records = []
+            for tsv_index in tsv_indexes:
+                if tsv_file_type == 'full':
+                    records = [r for r in output_records if r.id.split('.', 1)[1] == tsv_index]
+                else:
+                    records = [r for r in output_records if r.id.split('.', 1)[1] == tsv_index['ID']]
+                ordered_output_records.extend(records)
+            output_records = ordered_output_records
+
+            SeqIO.write(output_records, self.filtered_fasta_file_path, "fasta")
+
+    def execute(self):
+        self.generate_fasta()
+        self.trim_sequences()
+        self.filter_fasta()
+        shutil.copy(self.filtered_fasta_file_path, self.output_file)
+        shutil.rmtree(self.temp_dir, ignore_errors=True)
+        manufacturability_file = "{}.manufacturability.tsv".format(self.output_file)
+        print("Calculating Manufacturability Metrics")
+        CalculateManufacturability(self.output_file, manufacturability_file, 'fasta').execute()
+        print("Completed")
 
 def main(args_input = sys.argv[1:]):
     parser = define_parser()
     args = parser.parse_args(args_input)
 
-    if not (set(args.aggregate_report_evaluation)).issubset(set(['Accept', 'Reject', 'Review', 'Pending'])):
-        sys.exit("Aggregate report evaluation ({}) contains invalid values.".format(args.aggregate_report_evaluation))
+    #if args.downstream_sequence_length == 'full':
+    #    downstream_sequence_length = None
+    #elif args.downstream_sequence_length.isdigit():
+    #    downstream_sequence_length = int(args.downstream_sequence_length)
+    #else:
+    #    sys.exit("The downstream sequence length needs to be a positive integer or 'full'")
 
-    temp_dir = tempfile.mkdtemp()
-    transcript_fasta = generate_fasta(args, temp_dir)
-    trimmed_fasta = trim_sequences(args, temp_dir, transcript_fasta)
-    filtered_fasta = filter_fasta(args, temp_dir)
-    shutil.copy(filtered_fasta, args.output_file)
-    shutil.rmtree(temp_dir, ignore_errors=True)
-    manufacturability_file = "{}.manufacturability.tsv".format(args.output_file)
-    print("Calculating Manufacturability Metrics")
-    CalculateManufacturability(args.output_file, manufacturability_file, 'fasta').execute()
-    print("Completed")
+    params = {
+        'input_file': args.input_file,
+        'annotated_vcf': args.annotated_vcf,
+        'ref_fasta': args.ref_fasta,
+        'gtf_file': args.gtf_file,
+        'sample_name': args.sample_name,
+        'pass_only': args.pass_only,
+        'biotypes': args.biotypes,
+        'allow_incomplete_transcripts': args.allow_incomplete_transcripts,
+        #'downstream_sequence_length': downstream_sequence_length,
+        'flanking_sequence_length': args.flanking_sequence_length,
+        'mutant_only': args.mutant_only,
+        'junction_score': args.junction_score,
+        'variant_distance': args.variant_distance,
+        'anchor_types': args.anchor_types,
+        'aggregate_report_evaluation': args.aggregate_report_evaluation,
+        'input_tsv': args.input_tsv,
+        'output_file': args.output_file,
+    }
+    PvacspliceGenerateProteinFasta(**params).execute()
 
 if __name__ == '__main__':
     main()

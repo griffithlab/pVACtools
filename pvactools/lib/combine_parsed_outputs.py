@@ -1,40 +1,29 @@
-import argparse
 import sys
 import csv
 import pvactools.lib.sort
 
-def main(args_input = sys.argv[1:]):
-    parser = argparse.ArgumentParser('pvacseq combine_parsed_outputs', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument(
-        'input_files',
-        nargs="+",
-        help="List of parsed epitope files for different allele-length combinations (same sample)."
-    )
-    parser.add_argument(
-        'output_file', type=argparse.FileType('w'),
-        help="Combined output .tsv file."
-    )
-    args = parser.parse_args(args_input)
+class CombineParsedOutputs:
+    def __init__(self, **kwargs):
+        self.input_files = kwargs['input_files']
+        self.output_file = kwargs['output_file']
 
-    fieldnames = []
-    for input_file in args.input_files:
-        with open(input_file, 'r') as input_file_handle:
-            reader = csv.DictReader(input_file_handle, delimiter='\t')
-            if len(fieldnames) == 0:
-                fieldnames = reader.fieldnames
-            else:
-                for fieldname in reader.fieldnames:
-                    if fieldname not in fieldnames:
-                        fieldnames.append(fieldname)
+    def execute(self):
+        fieldnames = []
+        for input_file in self.input_files:
+            with open(input_file, 'r') as input_file_handle:
+                reader = csv.DictReader(input_file_handle, delimiter='\t')
+                if len(fieldnames) == 0:
+                    fieldnames = reader.fieldnames
+                else:
+                    for fieldname in reader.fieldnames:
+                        if fieldname not in fieldnames:
+                            fieldnames.append(fieldname)
 
-    tsv_writer = csv.DictWriter(args.output_file, list(fieldnames), delimiter = '\t', lineterminator = '\n', restval='NA')
-    tsv_writer.writeheader()
-    for input_file in args.input_files:
-        with open(input_file, 'r') as input_file_handle:
-            reader = csv.DictReader(input_file_handle, delimiter='\t')
-            for row in reader:
-                tsv_writer.writerow(row)
-    args.output_file.close()
-
-if __name__ == "__main__":
-    main()
+        with open(self.output_file, 'w') as fh:
+            tsv_writer = csv.DictWriter(fh, list(fieldnames), delimiter = '\t', lineterminator = '\n', restval='NA')
+            tsv_writer.writeheader()
+            for input_file in self.input_files:
+                with open(input_file, 'r') as input_file_handle:
+                    reader = csv.DictReader(input_file_handle, delimiter='\t')
+                    for row in reader:
+                        tsv_writer.writerow(row)

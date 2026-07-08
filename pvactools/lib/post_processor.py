@@ -18,6 +18,7 @@ class PostProcessor:
     def __init__(self, **kwargs):
         for (k,v) in kwargs.items():
             setattr(self, k, v)
+        self.minimum_fold_change = kwargs.pop('minimum_fold_change', None)
         self.aggregate_report = self.input_file.replace('.tsv', '.aggregated.tsv')
         self.identify_problematic_amino_acids_fh = tempfile.NamedTemporaryFile()
         self.mark_genes_of_interest_fh = tempfile.NamedTemporaryFile()

@@ -137,8 +137,10 @@ class PvacspliceTests(unittest.TestCase):
 
             for file_name in (
                 'HCC1395_TUMOR_DNA.transcripts.fa',
-                'HCC1395_TUMOR_DNA_combined.tsv',
+                'HCC1395_TUMOR_DNA.tsv',
                 'HCC1395_TUMOR_DNA_gtf.tsv',
+                'HCC1395_TUMOR_DNA.9.fa',
+                'HCC1395_TUMOR_DNA.10.fa',
             ):
                 output_file   = os.path.join(output_dir.name, file_name)
                 expected_file = os.path.join(self.test_data_directory, 'results', 'run', file_name)
@@ -169,28 +171,11 @@ class PvacspliceTests(unittest.TestCase):
 
             for length in [9, 10]:
                 for file_name in (
-                    'HCC1395_TUMOR_DNA.MHC_I.all_epitopes.tsv',
+                    'HCC1395_TUMOR_DNA.all_epitopes.tsv',
                 ):
-                    output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'MHC_Class_I_{}'.format(length), file_name)
+                    output_file   = os.path.join(output_dir.name, 'MHC_Class_I', str(length), file_name)
                     expected_file = os.path.join(self.test_data_directory, 'results', 'run', 'MHC_Class_I', 'MHC_Class_I_{}'.format(length), file_name)
                     self.assertTrue(cmp(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
-                for file_name in (
-                    'HCC1395_TUMOR_DNA.{}.fa'.format(length),
-                ):
-                    output_file   = os.path.join(output_dir.name, 'MHC_Class_I', 'MHC_Class_I_{}'.format(length), 'tmp', file_name)
-                    expected_file = os.path.join(self.test_data_directory, 'results', 'run', 'MHC_Class_I', 'MHC_Class_I_{}'.format(length), 'tmp', file_name)
-                    self.assertTrue(cmp(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
-
-            #Class I output files
-            methods = self.methods
-            for method in methods.keys():
-                for allele in methods[method].keys():
-                    mock_request.assert_has_calls([
-                        generate_class_i_call(method, allele, 9, os.path.join(output_dir.name, "MHC_Class_I", "MHC_Class_I_9", "tmp", "HCC1395_TUMOR_DNA.9.fa.split_1-190"))
-                    ])
-                    mock_request.assert_has_calls([
-                        generate_class_i_call(method, allele, 10, os.path.join(output_dir.name, "MHC_Class_I", "MHC_Class_I_10", "tmp", "HCC1395_TUMOR_DNA.10.fa.split_1-210"))
-                    ])
 
             with self.assertRaises(SystemExit) as cm:
                 run.main([
@@ -261,8 +246,9 @@ class PvacspliceTests(unittest.TestCase):
             #Class II output files
             for file_name in (
                 'HCC1395_TUMOR_DNA.transcripts.fa',
-                'HCC1395_TUMOR_DNA_combined.tsv',
+                'HCC1395_TUMOR_DNA.tsv',
                 'HCC1395_TUMOR_DNA_gtf.tsv',
+                'HCC1395_TUMOR_DNA.15.fa',
             ):
                 output_file   = os.path.join(output_dir.name, file_name)
                 expected_file = os.path.join(self.test_data_directory, 'results', 'run', file_name)
@@ -292,22 +278,11 @@ class PvacspliceTests(unittest.TestCase):
                 self.assertTrue(cmp(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
 
             for file_name in (
-                'HCC1395_TUMOR_DNA.MHC_II.all_epitopes.tsv',
+                'HCC1395_TUMOR_DNA.all_epitopes.tsv',
             ):
-                output_file   = os.path.join(output_dir.name, 'MHC_Class_II', 'MHC_Class_II_15', file_name)
+                output_file   = os.path.join(output_dir.name, 'MHC_Class_II', '15', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'results', 'run', 'MHC_Class_II', 'MHC_Class_II_15', file_name)
                 self.assertTrue(cmp(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
-
-            for file_name in (
-                'HCC1395_TUMOR_DNA.15.fa',
-            ):
-                output_file   = os.path.join(output_dir.name, 'MHC_Class_II', 'MHC_Class_II_15', 'tmp', file_name)
-                expected_file = os.path.join(self.test_data_directory, 'results', 'run', 'MHC_Class_II', 'MHC_Class_II_15', 'tmp', file_name)
-                self.assertTrue(cmp(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
-
-            mock_request.assert_has_calls([
-                generate_class_ii_call('nn_align', 'DRB1*11:01', 15, os.path.join(output_dir.name, "MHC_Class_II", "MHC_Class_II_15", "tmp", "HCC1395_TUMOR_DNA.15.fa.split_1-298"))
-            ])
 
             output_dir.cleanup()
             os.unlink(unzipped_fasta_file)
@@ -372,7 +347,7 @@ class PvacspliceTests(unittest.TestCase):
                 self.assertTrue(cmp(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
 
             for file_name in (
-                'tumor_combined.tsv',
+                'tumor.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, file_name)
                 expected_file = os.path.join(self.test_data_directory, 'results', 'results_multiple_variants_overlapping_splice_site', file_name)

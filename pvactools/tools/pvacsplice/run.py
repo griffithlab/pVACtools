@@ -6,8 +6,9 @@ import copy
 
 from pathlib import Path
 from pvactools.lib.junction_to_kmer_pipeline import JunctionToKmerPipeline
+from pvactools.lib.pvacsplice_prediction_pipeline import PvacsplicePredictionPipeline
+from pvactools.tools.pvacsplice.generate_protein_fasta import PvacspliceGenerateProteinFasta
 from pvactools.lib.prediction_class import *
-from pvactools.lib.pipeline import *
 from pvactools.lib.run_argument_parser import *
 from pvactools.lib.post_processor import *
 from pvactools.lib.run_utils import *
@@ -24,44 +25,22 @@ def combine_epitope_len_reports(file_list, file_final_name):
     elif len(file_list) == 1:
         shutil.copy(file_list[0], file_final_name)
 
-def combine_reports_per_class(class_output_dir:str, params:dict, mhc_class:str):
-    output_dir = os.path.join(class_output_dir, f'MHC_Class_{mhc_class}')
+def create_per_class_report(files, all_epitopes_output_file, filtered_report_file, post_processing_params):
+    for file_name in files:
+        if not os.path.exists(file_name):
+            print("File {} doesn't exist. Aborting.".format(file_name))
+            return
 
-    for x in ['all_epitopes', 'filtered']:
-        mhc_dirs = [os.path.join(output_dir, f) for f in os.listdir(output_dir) if f.startswith(f'MHC_Class_{mhc_class}')]
-    if not mhc_dirs:
-        print(f'MHC_Class_{mhc_class} subfolder(s) are missing')
-    combined_files = []
-    for m in mhc_dirs:
-        file = os.path.join(m, f'{params["sample_name"]}.MHC_{mhc_class}.all_epitopes.tsv')
-        if os.path.exists(file):
-            combined_files.append(file)
-    if len(combined_files) == 0:
-        return
-    combined_fn = os.path.join(output_dir, f'{params["sample_name"]}.MHC_{mhc_class}.all_epitopes.tsv')
-    combine_epitope_len_reports(combined_files, combined_fn)
-    filtered_fn = os.path.join(output_dir, f'{params["sample_name"]}.MHC_{mhc_class}.filtered.tsv')
+    combine_reports(files, all_epitopes_output_file)
 
-    post_processing_params = params.copy()
-    post_processing_params['file_type'] = 'pVACsplice'
-    post_processing_params['input_file'] = combined_fn
-    post_processing_params['filtered_report_file'] = filtered_fn
-    # methods in pp class
-    post_processing_params['run_manufacturability_metrics'] = True
+    post_processing_params['input_file'] = all_epitopes_output_file
+    post_processing_params['filtered_report_file'] = filtered_report_file
     post_processing_params['run_coverage_filter'] = True
     post_processing_params['run_transcript_support_level_filter'] = True
-    # add custom params for netchop / netmhc_stab
-    if params['net_chop_method']:
-        post_processing_params['net_chop_fasta'] = params['net_chop_fasta']
-        post_processing_params['run_net_chop'] = True
-    else:
-        post_processing_params['run_net_chop'] = False
-    if params['netmhc_stab']:
-        post_processing_params['run_netmhc_stab'] = True
-    else:
-        post_processing_params['run_netmhc_stab'] = False
-
-    print('Begin post processor')
+    post_processing_params['run_manufacturability_metrics'] = True
+    post_processing_params['run_net_chop'] = True if post_processing_params['net_chop_method'] else False
+    post_processing_params['run_netmhc_stab'] = True if post_processing_params['netmhc_stab'] else False
+    post_processing_params['file_type'] = 'pVACsplice'
     PostProcessor(**post_processing_params).execute()
 
 def main(args_input = sys.argv[1:]):
@@ -90,8 +69,8 @@ def main(args_input = sys.argv[1:]):
         sys.exit("The number of IEDB retries must be less than or equal to 100.")
 
     # pvacsplice output dir (from args)
-    junctions_dir = os.path.abspath(args.output_dir)
-    os.makedirs(junctions_dir, exist_ok=True)
+    base_output_dir = os.path.abspath(args.output_dir)
+    os.makedirs(base_output_dir, exist_ok=True)
 
     if (args.netmhciipan_version == '4.0' and args.iedb_install_directory is not None):
         raise Exception("Standalone IEDB does not support version 4.0")
@@ -103,11 +82,11 @@ def main(args_input = sys.argv[1:]):
     (class_i_alleles, class_ii_alleles, species) = split_alleles(alleles)
 
     # all input file check
-    print_log(os.path.join(junctions_dir, 'log'), vars(args), 'inputs')
+    print_log(os.path.join(base_output_dir, 'log'), vars(args), 'inputs')
 
     junction_arguments = {
         'input_file_type'                  : 'junctions',
-        'junctions_dir'                    : junctions_dir,
+        'junctions_dir'                    : base_output_dir,
         'input_file'                       : args.input_file,
         'gtf_file'                         : args.gtf_file,
         'save_gtf'                         : args.save_gtf,
@@ -131,140 +110,98 @@ def main(args_input = sys.argv[1:]):
     pipeline = JunctionToKmerPipeline(**junction_arguments)
     pipeline.execute()
 
+    if args.iedb_install_directory:
+        iedb_mhc_i_executable = os.path.join(args.iedb_install_directory, 'mhc_i', 'src', 'predict_binding.py')
+        if not os.path.exists(iedb_mhc_i_executable):
+            sys.exit("IEDB MHC I executable path doesn't exist %s" % iedb_mhc_i_executable)
+        iedb_mhc_ii_executable = os.path.join(args.iedb_install_directory, 'mhc_ii', 'mhc_II_binding.py')
+        if not os.path.exists(iedb_mhc_ii_executable):
+            sys.exit("IEDB MHC II executable path doesn't exist %s" % iedb_mhc_ii_executable)
+    else:
+        iedb_mhc_i_executable = None
+        iedb_mhc_ii_executable = None
 
-    additional_args = {
-        'top_score_metric'          : args.top_score_metric,
-        'top_score_metric2'         : args.top_score_metric2,
-        'binding_threshold'         : args.binding_threshold,
-        'binding_percentile_threshold': args.binding_percentile_threshold,
-        'immunogenicity_percentile_threshold': args.immunogenicity_percentile_threshold,
-        'presentation_percentile_threshold': args.presentation_percentile_threshold,
-        'percentile_threshold_strategy': args.percentile_threshold_strategy,
-        'allele_specific_binding_thresholds': args.allele_specific_binding_thresholds,
-        'aggregate_inclusion_binding_threshold' : args.aggregate_inclusion_binding_threshold,
-        'aggregate_inclusion_count_limit': args.aggregate_inclusion_count_limit,
-        'net_chop_method'           : args.net_chop_method,
-        'net_chop_threshold'        : args.net_chop_threshold,
-        'additional_report_columns' : args.additional_report_columns,
-        'fasta_size'                : args.fasta_size,
-        'iedb_retries'              : args.iedb_retries,
-        'n_threads'                 : args.n_threads,
-        'species'                   : species,
-        'run_reference_proteome_similarity': args.run_reference_proteome_similarity,
-        'blastp_db'                 : args.blastp_db,
-        'blastp_path'               : args.blastp_path,
-        'peptide_fasta'             : args.peptide_fasta,
-        'problematic_amino_acids'   : args.problematic_amino_acids,
-        'normal_cov'                : args.normal_cov,
-        'normal_vaf'                : args.normal_vaf,
-        'tdna_cov'                  : args.tdna_cov,
-        'tdna_vaf'                  : args.tdna_vaf,
-        'trna_cov'                  : args.trna_cov,
-        'trna_vaf'                  : args.trna_vaf,
-        'expn_val'                  : args.expn_val,
-        'tumor_purity'              : args.tumor_purity,
-        'transcript_prioritization_strategy': args.transcript_prioritization_strategy,
-        'maximum_transcript_support_level' : args.maximum_transcript_support_level,
-        'run_post_processor'        : True,
-        'genes_of_interest_file': args.genes_of_interest_file,
-        'allele_specific_anchors'   : args.allele_specific_anchors,
-        'anchor_contribution_threshold' : args.anchor_contribution_threshold,
-        'minimum_fold_change': args.minimum_fold_change,
+    if args.use_normalized_percentiles and species != 'human':
+        print("WARNING: Normalized percentiles are only available for human alleles. Option will be ignored.")
+        args.use_normalized_percentiles = False
+
+    all_params = {
+        'I': {
+            'iedb_executable': iedb_mhc_i_executable,
+            'prediction_algorithms': class_i_prediction_algorithms,
+            'alleles': class_i_alleles,
+            'epitope_lengths': args.class_i_epitope_length,
+            'netmhc_stab': args.netmhc_stab,
+            'use_normalized_percentiles': args.use_normalized_percentiles,
+            'reference_scores_path': args.reference_scores_path
+        },
+        'II': {
+            'iedb_executable': iedb_mhc_ii_executable,
+            'prediction_algorithms': class_ii_prediction_algorithms,
+            'alleles': class_ii_alleles,
+            'epitope_lengths': args.class_ii_epitope_length,
+            'netmhc_stab': False,
+            'use_normalized_percentiles': False,
+            'reference_scores_path': args.reference_scores_path
+        }
     }
-    junction_arguments.update(additional_args)
 
-    if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0:
-        if args.iedb_install_directory:
-            iedb_mhc_i_executable = os.path.join(args.iedb_install_directory, 'mhc_i', 'src', 'predict_binding.py')
-            if not os.path.exists(iedb_mhc_i_executable):
-                sys.exit("IEDB MHC I executable path doesn't exist %s" % iedb_mhc_i_executable)
-        else:
-            iedb_mhc_i_executable = None
+    for (mhc_class, params) in all_params.items():
+        if len(params['prediction_algorithms']) > 0 and len(params['alleles']) > 0:
+            params['base_output_dir'] = base_output_dir
+            params['mhc_class'] = mhc_class
+            params['sample_name'] = args.sample_name
+            params['fasta_size'] = args.fasta_size
+            params['iedb_retries'] = args.iedb_retries
+            params['n_threads'] = args.n_threads
+            params['additional_report_columns'] = args.additional_report_columns
+            params['transcript_fasta'] = pipeline.create_file_path('fasta')
 
-        if args.use_normalized_percentiles and species != 'human':
-            print("WARNING: Normalized percentiles are only available for human alleles. Option will be ignored.")
-            args.use_normalized_percentiles = False
+            predictor = PvacsplicePredictionPipeline(**params)
+            predictor.execute()
 
-        for x in args.class_i_epitope_length:
-            class_i_arguments = copy.deepcopy(junction_arguments)
-            print(f'Executing MHC Class I predictions for {x}mers')
-            output_len_dir = os.path.join(junctions_dir, 'MHC_Class_I', f'MHC_Class_I_{x}')
-            os.makedirs(output_len_dir, exist_ok=True)
-
-            input_file  = os.path.join(junctions_dir, 'tmp', f'{args.sample_name}.{x}.fa')
-            if not os.path.exists(input_file):
-                print(f'No {x}mer neoepitopes found')
-                continue
-
-            class_i_arguments['input_file']              = input_file
-            class_i_arguments['alleles']                 = class_i_alleles
-            class_i_arguments['iedb_executable']         = iedb_mhc_i_executable
-            class_i_arguments['epitope_lengths']         = x
-            class_i_arguments['prediction_algorithms']   = class_i_prediction_algorithms.copy()
-            class_i_arguments['output_dir']              = output_len_dir
-            class_i_arguments['netmhc_stab']             = args.netmhc_stab
-            class_i_arguments['filename_addition']         = "MHC_I"
-            class_i_arguments['use_normalized_percentiles']  = args.use_normalized_percentiles
-            class_i_arguments['reference_scores_path']    = args.reference_scores_path
-            pipeline = PvacsplicePipeline(**class_i_arguments)
-            pipeline.execute()
-
-        fasta_file = os.path.join(junctions_dir, "{}.transcripts.fa".format(args.sample_name))
-        class_i_arguments['fasta'] = fasta_file
-        class_i_arguments['net_chop_fasta'] = fasta_file
-
-        combine_reports_per_class(junctions_dir, class_i_arguments, 'I')
-
-    elif len(class_i_prediction_algorithms) == 0:
-        print("No MHC class I prediction algorithms chosen. Skipping MHC class I predictions.")
-    elif len(class_i_alleles) == 0:
-        print("No MHC class I alleles chosen. Skipping MHC class I predictions.")
-
-    if len(class_ii_prediction_algorithms) > 0 and len(class_ii_alleles) > 0:
-        if args.iedb_install_directory:
-            iedb_mhc_ii_executable = os.path.join(args.iedb_install_directory, 'mhc_ii', 'mhc_II_binding.py')
-            if not os.path.exists(iedb_mhc_ii_executable):
-                sys.exit("IEDB MHC II executable path doesn't exist %s" % iedb_mhc_ii_executable)
-        else:
-            iedb_mhc_ii_executable = None
-
-        for y in args.class_ii_epitope_length:
-            class_ii_arguments = copy.deepcopy(junction_arguments)
-            print(f'Executing MHC Class II predictions for {y}mers')
-            output_len_dir = os.path.join(junctions_dir, 'MHC_Class_II', f'MHC_Class_II_{y}')
-            os.makedirs(output_len_dir, exist_ok=True)
-
-            input_file  = os.path.join(junctions_dir, 'tmp', f'{args.sample_name}.{y}.fa')
-            if not os.path.exists(input_file):
-                print(f'No {y}mer neoepitopes found')
-                continue
-
-            class_ii_arguments['input_file']              = input_file
-            class_ii_arguments['alleles']                 = class_ii_alleles
-            class_ii_arguments['prediction_algorithms']   = class_ii_prediction_algorithms.copy()
-            class_ii_arguments['iedb_executable']         = iedb_mhc_ii_executable
-            class_ii_arguments['epitope_lengths']         = y
-            class_ii_arguments['output_dir']              = output_len_dir
-            class_ii_arguments['netmhc_stab']             = False
-            class_ii_arguments['filename_addition']         = "MHC_II"
-            pipeline = PvacsplicePipeline(**class_ii_arguments)
-            pipeline.execute()
-
-        fasta_file = os.path.join(junctions_dir, "{}.transcripts.fa".format(args.sample_name))
-        class_ii_arguments['fasta'] = fasta_file
-        class_ii_arguments['net_chop_fasta'] = fasta_file
-
-        combine_reports_per_class(junctions_dir, class_ii_arguments, 'II')
-
-    elif len(class_ii_prediction_algorithms) == 0:
-        print("No MHC class II prediction algorithms chosen. Skipping MHC class II predictions.")
-    elif len(class_ii_alleles) == 0:
-        print("No MHC class II alleles chosen. Skipping MHC class II predictions.")
+            if len(predictor.output_files) > 0:
+                post_processing_params = vars(args).copy()
+                if args.run_reference_proteome_similarity:
+                    fasta_file = os.path.join(predictor.output_dir, "{}.7.fasta".format(args.sample_name))
+                    if not os.path.exists(fasta_file):
+                        fasta_params = {
+                            'fasta_file_path': pipeline.create_file_path('fasta'),
+                            'trimmed_fasta_file_path': fasta_file,
+                            'flanking_sequence_length': 7,
+                            'mutant_only': False,
+                        }
+                        PvacspliceGenerateProteinFasta(**fasta_params).trim_sequences()
+                    post_processing_params['fasta'] = fasta_file
+                # generate and copy net_chop fasta to output dir if specified
+                if args.net_chop_method:
+                    fasta_file = os.path.join(predictor.output_dir, "{}.10.fasta".format(args.sample_name))
+                    if not os.path.exists(fasta_file):
+                        fasta_params = {
+                            'fasta_file_path': pipeline.create_file_path('fasta'),
+                            'trimmed_fasta_file_path': fasta_file,
+                            'flanking_sequence_length': 10,
+                            'mutant_only': False,
+                        }
+                        PvacspliceGenerateProteinFasta(**fasta_params).trim_sequences()
+                    post_processing_params['net_chop_fasta'] = fasta_file
+                all_epitopes_file = os.path.join(predictor.output_dir, "{}.MHC_{}.all_epitopes.tsv".format(args.sample_name,mhc_class))
+                filtered_file = os.path.join(predictor.output_dir, "{}.MHC_{}.filtered.tsv".format(args.sample_name,mhc_class))
+                post_processing_params["filename_addition"] = "MHC_{}".format(mhc_class)
+                post_processing_params["species"] = species
+                post_processing_params["netmhc_stab"] = params["netmhc_stab"]
+                create_per_class_report(predictor.output_files, all_epitopes_file, filtered_file, post_processing_params)
+            else:
+                print("\nNo processable variants found. Aborting.\n")
+        elif len(params["prediction_algorithms"]) == 0:
+            print("No MHC class {} prediction algorithms chosen. Skipping MHC class {} predictions.".format(mhc_class, mhc_class))
+        elif len(params["alleles"]) == 0:
+            print("No MHC class {} alleles chosen. Skipping MHC class {} predictions.".format(mhc_class, mhc_class))
 
     if args.save_gtf is False:
-        shutil.rmtree(os.path.join(junctions_dir, 'tmp'), ignore_errors=True)
+        shutil.rmtree(os.path.join(base_output_dir, 'tmp'), ignore_errors=True)
 
-    change_permissions_recursive(junctions_dir, 0o755, 0o644)
+    change_permissions_recursive(base_output_dir, 0o755, 0o644)
 
 if __name__ == '__main__':
     main()

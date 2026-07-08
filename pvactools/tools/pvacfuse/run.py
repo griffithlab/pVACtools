@@ -6,11 +6,11 @@ import platform
 import copy
 
 from pvactools.lib.prediction_class import *
-from pvactools.lib.pipeline import PvacsplicePipeline
+from pvactools.lib.pvacfuse_prediction_pipeline import PvacfusePredictionPipeline
 from pvactools.lib.fusion_to_kmer_pipeline import FusionToKmerPipeline
 from pvactools.lib.run_argument_parser import PvacfuseRunArgumentParser
 from pvactools.lib.post_processor import PostProcessor
-import pvactools.tools.pvacfuse.generate_protein_fasta
+from pvactools.tools.pvacfuse.generate_protein_fasta import PvacfuseGenerateProteinFasta
 from pvactools.lib.run_utils import *
 from pvactools.lib.prediction_class_utils import *
 from pvactools.lib.print_log import *
@@ -18,7 +18,7 @@ from pvactools.lib.print_log import *
 def define_parser():
     return PvacfuseRunArgumentParser().parser
 
-def create_per_class_report(files, all_epitopes_output_file, filtered_report_file, post_processing_params, run_params):
+def create_per_class_report(files, all_epitopes_output_file, filtered_report_file, post_processing_params):
     for file_name in files:
         if not os.path.exists(file_name):
             print("File {} doesn't exist. Aborting.".format(file_name))
@@ -31,63 +31,10 @@ def create_per_class_report(files, all_epitopes_output_file, filtered_report_fil
     post_processing_params['run_coverage_filter'] = True
     post_processing_params['run_transcript_support_level_filter'] = False
     post_processing_params['run_manufacturability_metrics'] = True
-    if run_params['net_chop_method']:
-        post_processing_params['run_net_chop'] = True
-        post_processing_params['net_chop_fasta'] = run_params['net_chop_fasta']
-    else:
-        post_processing_params['run_net_chop'] = False
-    post_processing_params['run_netmhc_stab'] = True if run_params['netmhc_stab'] else False
-    if run_params['run_reference_proteome_similarity']:
-        post_processing_params['fasta'] = run_params['fasta']
-    post_processing_params['species'] = run_params['species']
+    post_processing_params['run_net_chop'] = True if post_processing_params['net_chop_method'] else False
+    post_processing_params['run_netmhc_stab'] = True if post_processing_params['netmhc_stab'] else False
     post_processing_params['file_type'] = 'pVACfuse'
     PostProcessor(**post_processing_params).execute()
-
-def generate_fasta(args, output_dir, epitope_length, flanking_length=0, net_chop_fasta=False):
-    if net_chop_fasta:
-        per_epitope_output_dir = None
-        output_file = os.path.join(output_dir, "{}.net_chop.fa".format(args.sample_name))
-    else:
-        per_epitope_output_dir = os.path.join(output_dir, str(epitope_length))
-        os.makedirs(per_epitope_output_dir, exist_ok=True)
-        output_file = os.path.join(per_epitope_output_dir, "{}.fa".format(args.sample_name))
-    params = [
-        args.input_file,
-        args.ref_fasta,
-        str(flanking_length + epitope_length),
-        output_file,
-    ]
-    if args.downstream_sequence_length is not None:
-        params.extend(["-d", str(args.downstream_sequence_length)])
-    else:
-        params.extend(["-d", 'full'])
-    pvactools.tools.pvacfuse.generate_protein_fasta.main(params)
-    os.unlink("{}.manufacturability.tsv".format(output_file))
-    return (output_file, per_epitope_output_dir)
-
-def append_columns(intermediate_output_file, tsv_file, output_file):
-    tsv_entries = {}
-    with open(tsv_file, 'r') as input_fh:
-        reader = csv.DictReader(input_fh, delimiter="\t")
-        for line in reader:
-            tsv_entries[line['index']] = line
-
-    with open(intermediate_output_file, 'r') as input_fh, open(output_file, 'w') as output_fh:
-        reader = csv.DictReader(input_fh, delimiter="\t")
-        fieldnames = ['Chromosome', 'Start', 'Stop', 'Transcript', 'Gene Name', 'Variant Type'] + reader.fieldnames + ['Read Support', 'Expression']
-        writer = csv.DictWriter(output_fh, delimiter="\t", fieldnames=fieldnames)
-        writer.writeheader()
-        for line in reader:
-            matching_line = tsv_entries[line['Index']]
-            line['Chromosome'] = matching_line['chromosome_name']
-            line['Start'] = matching_line['start']
-            line['Stop'] = matching_line['stop']
-            line['Transcript'] = matching_line['transcript_name']
-            line['Gene Name'] = matching_line['gene_name']
-            line['Variant Type'] = matching_line['variant_type']
-            line['Read Support'] = matching_line['fusion_read_support']
-            line['Expression'] = matching_line['fusion_expression']
-            writer.writerow(line)
 
 def main(args_input = sys.argv[1:]):
     parser = define_parser()
@@ -139,40 +86,6 @@ def main(args_input = sys.argv[1:]):
     pipeline = FusionToKmerPipeline(**fusion_arguments)
     pipeline.execute()
 
-    shared_arguments = {
-        'input_file_type'           : 'fusions',
-        'sample_name'               : args.sample_name,
-        'top_score_metric'          : args.top_score_metric,
-        'top_score_metric2'         : args.top_score_metric2,
-        'binding_threshold'         : args.binding_threshold,
-        'binding_percentile_threshold': args.binding_percentile_threshold,
-        'immunogenicity_percentile_threshold': args.immunogenicity_percentile_threshold,
-        'presentation_percentile_threshold': args.presentation_percentile_threshold,
-        'percentile_threshold_strategy': args.percentile_threshold_strategy,
-        'allele_specific_binding_thresholds': args.allele_specific_binding_thresholds,
-        'net_chop_method'           : args.net_chop_method,
-        'net_chop_threshold'        : args.net_chop_threshold,
-        'additional_report_columns' : args.additional_report_columns,
-        'fasta_size'                : args.fasta_size,
-        'iedb_retries'              : args.iedb_retries,
-        'downstream_sequence_length': downstream_sequence_length,
-        'keep_tmp_files'            : args.keep_tmp_files,
-        'n_threads'                 : args.n_threads,
-        'species'                   : species,
-        'run_reference_proteome_similarity': args.run_reference_proteome_similarity,
-        'blastp_path'               : args.blastp_path,
-        'blastp_db'                 : args.blastp_db,
-        'run_post_processor'        : False,
-        'problematic_amino_acids'   : args.problematic_amino_acids,
-        'starfusion_file'           : args.starfusion_file,
-        'read_support'              : args.read_support,
-        'expn_val'                  : args.expn_val,
-        'peptide_fasta'             : args.peptide_fasta,
-        'aggregate_inclusion_binding_threshold': args.aggregate_inclusion_binding_threshold,
-        'aggregate_inclusion_count_limit': args.aggregate_inclusion_count_limit,
-        'genes_of_interest_file': args.genes_of_interest_file,
-    }
-
     if args.iedb_install_directory:
         iedb_mhc_i_executable = os.path.join(args.iedb_install_directory, 'mhc_i', 'src', 'predict_binding.py')
         if not os.path.exists(iedb_mhc_i_executable):
@@ -210,70 +123,55 @@ def main(args_input = sys.argv[1:]):
     }
 
     for (mhc_class, params) in all_params.items():
-        prediction_algorithms = params['prediction_algorithms']
-        alleles = params['alleles']
-        epitope_lengths = params['epitope_lengths']
-        iedb_executable = params['iedb_executable']
-        netmhc_stab = params['netmhc_stab']
-        use_normalized_percentiles = params['use_normalized_percentiles']
-        reference_scores_path = params['reference_scores_path']
+        if len(params['prediction_algorithms']) > 0 and len(params['alleles']) > 0:
+            params['base_output_dir'] = base_output_dir
+            params['mhc_class'] = mhc_class
+            params['sample_name'] = args.sample_name
+            params['fasta_size'] = args.fasta_size
+            params['iedb_retries'] = args.iedb_retries
+            params['n_threads'] = args.n_threads
+            params['additional_report_columns'] = args.additional_report_columns
+            params['transcript_fasta'] = pipeline.create_file_path('fasta')
 
-        if len(prediction_algorithms) > 0 and len(alleles) > 0:
-            print("Executing MHC Class {} predictions".format(mhc_class))
+            predictor = PvacfusePredictionPipeline(**params)
+            predictor.execute()
 
-            output_dir = os.path.join(base_output_dir, 'MHC_Class_{}'.format(mhc_class))
-            os.makedirs(output_dir, exist_ok=True)
-
-            output_files = []
-            run_arguments = copy.deepcopy(shared_arguments)
-            run_arguments['alleles']               = alleles
-            run_arguments['iedb_executable']       = iedb_executable
-            run_arguments['prediction_algorithms'] = prediction_algorithms
-            run_arguments['netmhc_stab']           = netmhc_stab
-            run_arguments['use_normalized_percentiles'] = use_normalized_percentiles
-            run_arguments['reference_scores_path'] = reference_scores_path
-
-            for epitope_length in epitope_lengths:
-                per_length_run_arguments = copy.deepcopy(run_arguments)
-                per_epitope_output_dir = os.path.join(output_dir, str(epitope_length))
-                os.makedirs(per_epitope_output_dir, exist_ok=True)
-                input_file = os.path.join(args.output_dir, f'{args.sample_name}.{epitope_length}.fa')
-                if os.path.getsize(input_file) == 0:
-                    print("The intermediate FASTA file for epitope length {} is empty. No processable fusions found.")
-                    continue
-
-                per_length_run_arguments['input_file']      = input_file
-                per_length_run_arguments['epitope_lengths'] = epitope_length
-                per_length_run_arguments['output_dir']      = per_epitope_output_dir
-                pipeline = PvacsplicePipeline(**per_length_run_arguments)
-                pipeline.execute()
-                output_file = os.path.join(per_epitope_output_dir, "{}.all_epitopes.tsv".format(args.sample_name))
-                if os.path.exists(output_file):
-                    output_files.append(output_file)
-            if len(output_files) > 0:
-                # copy fasta to output dir
-                (input_file, per_epitope_output_dir) = generate_fasta(args, output_dir, 0, flanking_length=max(epitope_lengths)-1)
-                fasta_file = os.path.join(output_dir, "{}.fasta".format(args.sample_name))
-                shutil.copy(input_file, fasta_file)
+            if len(predictor.output_files) > 0:
+                post_processing_params = vars(args).copy()
                 if args.run_reference_proteome_similarity:
-                    flanking_length = 7
-                    (input_file, per_epitope_output_dir) = generate_fasta(args, output_dir, 0, flanking_length=flanking_length)
-                    run_arguments['fasta'] = input_file
+                    fasta_file = os.path.join(predictor.output_dir, "{}.7.fasta".format(args.sample_name))
+                    if not os.path.exists(fasta_file):
+                        fasta_params = {
+                            'fasta_file_path': pipeline.create_file_path('fasta'),
+                            'trimmed_fasta_file_path': fasta_file,
+                            'flanking_sequence_length': 7,
+                            'mutant_only': False,
+                        }
+                        PvacfuseGenerateProteinFasta(**fasta_params).trim_sequences()
+                    post_processing_params['fasta'] = fasta_file
                 # generate and copy net_chop fasta to output dir if specified
                 if args.net_chop_method:
-                    flanking_length = 10
-                    (net_chop_fasta, _) = generate_fasta(args, output_dir, max(epitope_lengths), flanking_length=flanking_length, net_chop_fasta=True)
-                    run_arguments['net_chop_fasta'] = net_chop_fasta
-                all_epitopes_file = os.path.join(output_dir, "{}.MHC_{}.all_epitopes.tsv".format(args.sample_name,mhc_class))
-                filtered_file = os.path.join(output_dir, "{}.MHC_{}.filtered.tsv".format(args.sample_name,mhc_class))
-                post_processing_params = vars(args).copy()
+                    fasta_file = os.path.join(predictor.output_dir, "{}.10.fasta".format(args.sample_name))
+                    if not os.path.exists(fasta_file):
+                        fasta_params = {
+                            'fasta_file_path': pipeline.create_file_path('fasta'),
+                            'trimmed_fasta_file_path': fasta_file,
+                            'flanking_sequence_length': 10,
+                            'mutant_only': False,
+                        }
+                        PvacfuseGenerateProteinFasta(**fasta_params).trim_sequences()
+                    post_processing_params['net_chop_fasta'] = fasta_file
+                all_epitopes_file = os.path.join(predictor.output_dir, "{}.MHC_{}.all_epitopes.tsv".format(args.sample_name,mhc_class))
+                filtered_file = os.path.join(predictor.output_dir, "{}.MHC_{}.filtered.tsv".format(args.sample_name,mhc_class))
                 post_processing_params["filename_addition"] = "MHC_{}".format(mhc_class)
-                create_per_class_report(output_files, all_epitopes_file, filtered_file, post_processing_params, run_arguments)
+                post_processing_params["species"] = species
+                post_processing_params["netmhc_stab"] = params["netmhc_stab"]
+                create_per_class_report(predictor.output_files, all_epitopes_file, filtered_file, post_processing_params)
             else:
-                print("\nNo processable fusions found. Aborting.\n")
-        elif len(prediction_algorithms) == 0:
+                print("\nNo processable variants found. Aborting.\n")
+        elif len(params["prediction_algorithms"]) == 0:
             print("No MHC class {} prediction algorithms chosen. Skipping MHC class {} predictions.".format(mhc_class, mhc_class))
-        elif len(alleles) == 0:
+        elif len(params["alleles"]) == 0:
             print("No MHC class {} alleles chosen. Skipping MHC class {} predictions.".format(mhc_class, mhc_class))
 
     change_permissions_recursive(base_output_dir, 0o755, 0o644)

@@ -2078,7 +2078,7 @@
     "best_hla_allele": "HLA-DRB1*11:01",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "QVSEETIKVYCLQKELK",
+      "query_peptide": "SEETIKVYCLQKE",
       "matches": []
     }
   },
@@ -3300,7 +3300,7 @@
     "best_hla_allele": "HLA-DRB1*11:01",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "QLKKKSEEKELKIKNH",
+      "query_peptide": "LKKKSEEKELKIKN",
       "matches": []
     }
   },

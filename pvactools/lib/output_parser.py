@@ -1371,12 +1371,12 @@ class PvacbindOutputParser(UnmatchedSequencesOutputParser):
         protein_identifiers_from_label = {}
         for key_file in self.key_files:
             with open(key_file, 'r') as key_file_reader:
-                chunk = key_file.rsplit('.', 2)[1].split('_')[1]
+                chunk = key_file.rsplit('.', 2)[1]
                 protein_identifiers_from_label[chunk] = yaml.load(key_file_reader, Loader=yaml.FullLoader)
         iedb_results = {}
         for input_iedb_file in self.input_iedb_files:
             with open(input_iedb_file, 'r') as reader:
-                chunk = input_iedb_file.rsplit('_', 1)[1]
+                chunk = input_iedb_file.rsplit('.', 2)[1]
                 iedb_tsv_reader = csv.DictReader(reader, delimiter='\t')
                 filename = os.path.basename(input_iedb_file)
 
@@ -1419,7 +1419,7 @@ class PvacspliceOutputParser(DefaultOutputParser):
         protein_identifiers_from_label = {}
         for key_file in self.key_files:
             with open(key_file, 'r') as key_file_reader:
-                chunk = key_file.rsplit('.', 2)[1].split('_')[1]
+                chunk = key_file.rsplit('.', 2)[1]
                 protein_identifiers_from_label[chunk] = yaml.load(key_file_reader, Loader=yaml.FullLoader)
         # final output
         iedb_results = {}
@@ -1427,7 +1427,7 @@ class PvacspliceOutputParser(DefaultOutputParser):
         for input_iedb_file in self.input_iedb_files:
             # input iedb file
             with open(input_iedb_file, 'r') as reader:
-                chunk = input_iedb_file.rsplit('_', 1)[1]
+                chunk = input_iedb_file.rsplit('.', 2)[1]
                 iedb_tsv_reader = csv.DictReader(reader, delimiter='\t')
                 filename = os.path.basename(input_iedb_file)
                 pattern = re.compile(rf"{re.escape(self.sample_name)}\.(\w+(?:-\d+\.\d+)?)")
