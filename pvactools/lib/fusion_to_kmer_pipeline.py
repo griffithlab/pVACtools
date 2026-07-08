@@ -1,11 +1,11 @@
 import os
 
-from pvactools.lib.base_pipeline import BasePipeline
+from pvactools.lib.input_to_kmer_pipeline import InputToKmerPipeline
 from pvactools.lib.fusion_to_fasta import FusionToFasta
 from pvactools.lib.fasta_to_kmers import FusionFastaToKmers
 from pvactools.lib.input_file_converter import FusionInputConverter
 
-class FusionPipeline(BasePipeline):
+class FusionToKmerPipeline(InputToKmerPipeline):
     def __init__(self, **kwargs):
         self.input_file = kwargs['input_file']
         self.sample_name = kwargs.pop('sample_name', "tmp")

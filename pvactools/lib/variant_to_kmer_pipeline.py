@@ -1,11 +1,11 @@
 import os
 
-from pvactools.lib.base_pipeline import BasePipeline
+from pvactools.lib.input_to_kmer_pipeline import InputToKmerPipeline
 from pvactools.lib.variant_to_fasta import VariantToFasta
 from pvactools.lib.fasta_to_kmers import VariantFastaToKmers
 from pvactools.lib.input_file_converter import VcfConverter
 
-class VariantPipeline(BasePipeline):
+class VariantToKmerPipeline(InputToKmerPipeline):
     def __init__(self, **kwargs):
         self.input_file = kwargs['input_file']
         self.output_dir = kwargs['output_dir']

@@ -1,6 +1,6 @@
 import os
 
-class BasePipeline:
+class InputToKmerPipeline:
     @staticmethod
     def file_exists(file_path: str, file_type: str):
         if os.path.exists(file_path) and os.path.getsize(file_path) > 0:

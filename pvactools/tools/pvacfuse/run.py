@@ -7,7 +7,7 @@ import copy
 
 from pvactools.lib.prediction_class import *
 from pvactools.lib.pipeline import PvacsplicePipeline
-from pvactools.lib.fusion_pipeline import FusionPipeline
+from pvactools.lib.fusion_to_kmer_pipeline import FusionToKmerPipeline
 from pvactools.lib.run_argument_parser import PvacfuseRunArgumentParser
 from pvactools.lib.post_processor import PostProcessor
 import pvactools.tools.pvacfuse.generate_protein_fasta
@@ -136,7 +136,7 @@ def main(args_input = sys.argv[1:]):
         'class_ii_hla'            : class_ii_alleles,
     }
 
-    pipeline = FusionPipeline(**fusion_arguments)
+    pipeline = FusionToKmerPipeline(**fusion_arguments)
     pipeline.execute()
 
     shared_arguments = {

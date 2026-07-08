@@ -10,7 +10,7 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
-from pvactools.lib.fusion_pipeline import FusionPipeline
+from pvactools.lib.fusion_to_kmer_pipeline import FusionToKmerPipeline
 from pvactools.lib.calculate_manufacturability import CalculateManufacturability
 
 def define_parser():
@@ -66,7 +66,7 @@ def generate_fasta(args, temp_dir):
         'output_dir': temp_dir,
         'transcript_fasta': args.ref_fasta
     }
-    pipeline = FusionPipeline(**params)
+    pipeline = FusionToKmerPipeline(**params)
     pipeline.generate_fasta()
 
 def parse_input_tsv(input_tsv):

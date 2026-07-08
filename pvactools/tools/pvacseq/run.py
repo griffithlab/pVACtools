@@ -9,6 +9,7 @@ import copy
 from pvactools.lib.prediction_class import *
 from pvactools.lib.pipeline import PvacsplicePipeline
 from pvactools.lib.run_argument_parser import PvacseqRunArgumentParser
+from pvactools.lib.variant_to_kmer_pipeline import VariantToKmerPipeline
 from pvactools.lib.post_processor import PostProcessor
 from pvactools.lib.run_utils import *
 from pvactools.lib.prediction_class_utils import *
@@ -164,7 +165,7 @@ def main(args_input = sys.argv[1:]):
         'class_i_hla'                 : class_i_alleles,
         'class_ii_hla'                : class_ii_alleles,
     }
-    variant_pipeline = VariantPipeline(**variant_arguments)
+    variant_pipeline = VariantToKmerPipeline(**variant_arguments)
     variant_pipeline.execute()
 
     shared_arguments = {

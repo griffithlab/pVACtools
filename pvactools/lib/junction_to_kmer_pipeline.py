@@ -3,7 +3,7 @@ import shutil
 import os
 import pandas as pd
 
-from pvactools.lib.base_pipeline import BasePipeline
+from pvactools.lib.input_to_kmer_pipeline import InputToKmerPipeline
 from pvactools.lib.filter_regtools_results import FilterRegtoolsResults
 from pvactools.lib.junction_to_fasta import JunctionToFasta
 from pvactools.lib.fasta_to_kmers import JunctionFastaToKmers
@@ -11,7 +11,7 @@ from pvactools.lib.combine_inputs import CombineInputs
 from pvactools.lib.input_file_converter import PvacspliceVcfConverter
 from pvactools.lib.load_gtf_data import LoadGtfData
 
-class JunctionPipeline(BasePipeline):
+class JunctionToKmerPipeline(InputToKmerPipeline):
     def __init__(self, **kwargs):
         self.input_file = kwargs['input_file']
         self.sample_name = kwargs['sample_name']

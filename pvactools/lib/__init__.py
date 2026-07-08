@@ -22,7 +22,9 @@ __all__ = [
     'fasta_to_kmers',
     'combine_inputs',
     'load_gtf_data',
-    'junction_pipeline',
+    'junction_to_kmer_pipeline',
+    'variant_to_kmer_pipeline',
+    'fusion_to_kmer_pipeline',
     'anchor_residue_pass',
     'aggregate_report_filter',
 ]

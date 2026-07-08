@@ -11,7 +11,7 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
-from pvactools.lib.junction_pipeline import JunctionPipeline
+from pvactools.lib.junction_to_kmer_pipeline import JunctionToKmerPipeline
 from pvactools.lib.calculate_manufacturability import CalculateManufacturability
 from pvactools.lib.run_utils import *
 
@@ -154,7 +154,7 @@ def generate_fasta(args, temp_dir):
         'class_ii_hla'                     : [],
     }
 
-    pipeline = JunctionPipeline(**junction_arguments)
+    pipeline = JunctionToKmerPipeline(**junction_arguments)
     pipeline.generate_fasta()
 
     return pipeline.create_file_path('fasta')

@@ -5,7 +5,7 @@ import shutil
 import copy
 
 from pathlib import Path
-from pvactools.lib.junction_pipeline import *
+from pvactools.lib.junction_to_kmer_pipeline import JunctionToKmerPipeline
 from pvactools.lib.prediction_class import *
 from pvactools.lib.pipeline import *
 from pvactools.lib.run_argument_parser import *
@@ -128,7 +128,7 @@ def main(args_input = sys.argv[1:]):
         'keep_tmp_files'                   : args.keep_tmp_files,
     }
 
-    pipeline = JunctionPipeline(**junction_arguments)
+    pipeline = JunctionToKmerPipeline(**junction_arguments)
     pipeline.execute()
 
 
