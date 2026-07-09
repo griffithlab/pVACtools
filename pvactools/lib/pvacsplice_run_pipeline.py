@@ -6,7 +6,7 @@ from pvactools.lib.run_pipeline import RunPipeline
 from pvactools.lib.junction_to_kmer_pipeline import JunctionToKmerPipeline
 from pvactools.lib.pvacsplice_prediction_pipeline import PvacsplicePredictionPipeline
 from pvactools.tools.pvacsplice.generate_protein_fasta import PvacspliceGenerateProteinFasta
-from pvactools.lib.post_processor import PostProcessor
+from pvactools.lib.post_processor import PvacsplicePostProcessor
 
 class PvacspliceRunPipeline(RunPipeline):
     def check_downstream_sequence_length_argument(self):
@@ -68,13 +68,7 @@ class PvacspliceRunPipeline(RunPipeline):
     def call_post_processor(self, all_epitopes_file, filtered_file, post_processing_params):
         post_processing_params['input_file'] = all_epitopes_file
         post_processing_params['filtered_report_file'] = filtered_file
-        post_processing_params['run_coverage_filter'] = True
-        post_processing_params['run_transcript_support_level_filter'] = True
-        post_processing_params['run_manufacturability_metrics'] = True
-        post_processing_params['run_net_chop'] = True if post_processing_params['net_chop_method'] else False
-        post_processing_params['run_netmhc_stab'] = True if post_processing_params['netmhc_stab'] else False
-        post_processing_params['file_type'] = 'pVACsplice'
-        PostProcessor(**post_processing_params).execute()
+        PvacsplicePostProcessor(**post_processing_params).execute()
 
     def call_ml_predictor(self):
         pass

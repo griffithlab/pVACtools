@@ -5,7 +5,7 @@ from pvactools.lib.run_pipeline import RunPipeline
 from pvactools.lib.variant_to_kmer_pipeline import VariantToKmerPipeline
 from pvactools.lib.pvacseq_prediction_pipeline import PvacseqPredictionPipeline
 from pvactools.tools.pvacseq.generate_protein_fasta import PvacseqGenerateProteinFasta
-from pvactools.lib.post_processor import PostProcessor
+from pvactools.lib.post_processor import PvacseqPostProcessor
 
 class PvacseqRunPipeline(RunPipeline):
     def call_input_to_kmer_pipeline(self):
@@ -38,13 +38,7 @@ class PvacseqRunPipeline(RunPipeline):
     def call_post_processor(self, all_epitopes_file, filtered_file, post_processing_params):
         post_processing_params['input_file'] = all_epitopes_file
         post_processing_params['filtered_report_file'] = filtered_file
-        post_processing_params['run_coverage_filter'] = True
-        post_processing_params['run_transcript_support_level_filter'] = True
-        post_processing_params['run_manufacturability_metrics'] = True
-        post_processing_params['run_net_chop'] = True if post_processing_params['net_chop_method'] else False
-        post_processing_params['run_netmhc_stab'] = True if post_processing_params['netmhc_stab'] else False
-        post_processing_params['file_type'] = 'pVACseq'
-        PostProcessor(**post_processing_params).execute()
+        PvacseqPostProcessor(**post_processing_params).execute()
 
     def call_ml_predictor(self):
         if len(self.class_i_prediction_algorithms) > 0 and len(self.class_i_alleles) > 0 and len(self.class_ii_prediction_algorithms) > 0 and len(self.class_ii_alleles) > 0:

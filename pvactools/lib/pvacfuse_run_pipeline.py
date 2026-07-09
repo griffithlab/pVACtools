@@ -2,7 +2,7 @@ from pvactools.lib.run_pipeline import RunPipeline
 from pvactools.lib.fusion_to_kmer_pipeline import FusionToKmerPipeline
 from pvactools.lib.pvacfuse_prediction_pipeline import PvacfusePredictionPipeline
 from pvactools.tools.pvacfuse.generate_protein_fasta import PvacfuseGenerateProteinFasta
-from pvactools.lib.post_processor import PostProcessor
+from pvactools.lib.post_processor import PvacfusePostProcessor
 
 class PvacfuseRunPipeline(RunPipeline):
     def check_tumor_purity_argument(self):
@@ -34,13 +34,7 @@ class PvacfuseRunPipeline(RunPipeline):
     def call_post_processor(self, all_epitopes_file, filtered_file, post_processing_params):
         post_processing_params['input_file'] = all_epitopes_file
         post_processing_params['filtered_report_file'] = filtered_file
-        post_processing_params['run_coverage_filter'] = True
-        post_processing_params['run_transcript_support_level_filter'] = False
-        post_processing_params['run_manufacturability_metrics'] = True
-        post_processing_params['run_net_chop'] = True if post_processing_params['net_chop_method'] else False
-        post_processing_params['run_netmhc_stab'] = True if post_processing_params['netmhc_stab'] else False
-        post_processing_params['file_type'] = 'pVACfuse'
-        PostProcessor(**post_processing_params).execute()
+        PvacfusePostProcessor(**post_processing_params).execute()
 
     def call_ml_predictor(self):
         pass
