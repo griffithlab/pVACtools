@@ -29,7 +29,7 @@ def make_response(data, path, test_name):
     return response_obj
 
 def make_predict_response(input_file, allele, length, path, test_name):
-    file_parts = input_file.rsplit(os.sep, 5)
+    file_parts = input_file.rsplit(os.sep, 6)
     clip_count = file_parts[1]
     spacer = file_parts[2]
     filename = f'response_{allele}_{length}_ann_{test_name}_{clip_count}_{spacer}.tsv'
@@ -62,7 +62,6 @@ class TestPvacvector(unittest.TestCase):
         cls.keep_tmp = 'True'
         cls.allele = 'HLA-A*02:01'
         cls.epitope_length = '8'
-        cls.input_n_mer = '25'
 
     def test_run_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))
@@ -157,11 +156,11 @@ class TestPvacvector(unittest.TestCase):
                 self.method,
                 output_dir.name,
                 '-e1', self.epitope_length,
-                '-n', self.input_n_mer,
                 '--allow-n-peptide-exclusion', '0',
                 '--percentile-threshold-strategy', 'exploratory',
                 '--binding-percentile-threshold', '100',
-                '-k'
+                '-k',
+                '--fasta-size', '600'
             ])
 
             #vaccine design algorithm producing correct output with fasta input
@@ -186,74 +185,6 @@ class TestPvacvector(unittest.TestCase):
 
             output_dir.cleanup()
 
-    def test_pvacvector_generate_fa_runs_and_produces_expected_output(self):
-        with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
-            data,
-            test_data_directory(),
-            'generate_fa',
-        ))) as mock_request:
-            output_dir = tempfile.TemporaryDirectory()
-
-            run.main([
-                self.input_tsv,
-                self.test_run_name,
-                self.allele,
-                self.method,
-                output_dir.name,
-                '-v', self.input_vcf,
-                '-e1', self.epitope_length,
-                '-n', self.input_n_mer,
-                '--allow-n-peptide-exclusion', '0',
-                '--percentile-threshold-strategy', 'exploratory',
-                '--binding-percentile-threshold', '100',
-                '-k',
-            ])
-
-            #conversion from vcf to fasta file producing correct output, input file for vaccine design algorithm
-            self.assertTrue(compare(
-                    os.path.join(output_dir.name, "vector_input.fa"),
-                    os.path.join(self.test_data_dir, "input_parse_test_output.fa")
-                    ))
-
-
-            if 'DISPLAY' in os.environ.keys():
-                image_out = os.path.join(output_dir.name, 'vector.png')
-                #vaccine visualization producing image
-                self.assertTrue(os.path.exists(image_out))
-                self.assertTrue(os.stat(image_out).st_size > 0)
-
-            output_dir.cleanup()
-
-    def test_pvacvector_generate_fa_with_epitope_at_beginning_of_transcript(self):
-        with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
-            data,
-            test_data_directory(),
-            'negative_start',
-        ))) as mock_request:
-            output_dir = tempfile.TemporaryDirectory()
-
-            run.main([
-                os.path.join(self.test_data_dir, "input_negative_start.tsv"),
-                'H_MT-10109-005',
-                self.allele,
-                self.method,
-                output_dir.name,
-                '-v', os.path.join(self.test_data_dir, "input_negative_start.vcf.gz"),
-                '-e1', self.epitope_length,
-                '-n', self.input_n_mer,
-                '--allow-n-peptide-exclusion', '0',
-                '--allow-incomplete-transcripts',
-                '--percentile-threshold-strategy', 'exploratory',
-                '--binding-percentile-threshold', '100',
-                '-k',
-            ])
-
-            self.assertTrue(compare(
-                os.path.join(output_dir.name, "vector_input.fa"),
-                os.path.join(self.test_data_dir, "output_negative_start.fa")
-            ))
-            output_dir.cleanup()
-
     def test_pvacvector_clipping(self):
         with patch('pvactools.lib.prediction_class.IEDB.predict', unittest.mock.Mock(side_effect = lambda input_file, allele, length, path, retries, tmp_dir=None, log_dir=None: make_predict_response(
             input_file,
@@ -265,14 +196,12 @@ class TestPvacvector(unittest.TestCase):
             output_dir = tempfile.TemporaryDirectory()
 
             run.main([
-                self.input_tsv,
+                os.path.join(self.test_data_dir, 'input_parse_test_output.fa'),
                 self.test_run_name,
                 self.allele,
                 self.method,
                 output_dir.name,
-                '-v', self.input_vcf,
                 '-e1', self.epitope_length,
-                '-n', self.input_n_mer,
                 '-k',
                 '-b', '32000',
                 '--max-clip-length', '2',
@@ -280,6 +209,7 @@ class TestPvacvector(unittest.TestCase):
                 '--percentile-threshold-strategy', 'exploratory',
                 '--binding-percentile-threshold', '100',
                 '--spacers', 'None,AAY',
+                '--fasta-size', '400'
             ])
 
             self.assertTrue(compare(
@@ -304,44 +234,44 @@ class TestPvacvector(unittest.TestCase):
             ))
 
             self.assertTrue(compare(
-                os.path.join(output_dir.name, "0", "None", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.8.fa"),
+                os.path.join(output_dir.name, "0", "None", "tmp", "test_pvacvector_produces_expected_output.8.fa"),
                 os.path.join(self.test_data_dir, "clipped.0.None.fa")
             ))
             self.assertTrue(compare(
-                os.path.join(output_dir.name, "0", "None", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.8.fa.key"),
-                os.path.join(self.test_data_dir, "clipped.0.None.fa.key")
+                os.path.join(output_dir.name, "0", "None", "test_pvacvector_produces_expected_output.8.fa"),
+                os.path.join(self.test_data_dir, "clipped.0.None.kmer.fa")
             ))
             self.assertTrue(compare(
-                os.path.join(output_dir.name, "0", "AAY", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.8.fa"),
+                os.path.join(output_dir.name, "0", "AAY", "tmp", "test_pvacvector_produces_expected_output.8.fa"),
                 os.path.join(self.test_data_dir, "clipped.0.AAY.fa")
             ))
             self.assertTrue(compare(
-                os.path.join(output_dir.name, "0", "AAY", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.8.fa.key"),
-                os.path.join(self.test_data_dir, "clipped.0.AAY.fa.key")
+                os.path.join(output_dir.name, "0", "AAY", "test_pvacvector_produces_expected_output.8.fa"),
+                os.path.join(self.test_data_dir, "clipped.0.AAY.kmer.fa")
             ))
             self.assertTrue(compare(
-                os.path.join(output_dir.name, "1", "None", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.8.fa"),
+                os.path.join(output_dir.name, "1", "None", "tmp", "test_pvacvector_produces_expected_output.8.fa"),
                 os.path.join(self.test_data_dir, "clipped.1.None.fa")
             ))
             self.assertTrue(compare(
-                os.path.join(output_dir.name, "1", "None", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.8.fa.key"),
-                os.path.join(self.test_data_dir, "clipped.1.None.fa.key")
+                os.path.join(output_dir.name, "1", "None", "test_pvacvector_produces_expected_output.8.fa"),
+                os.path.join(self.test_data_dir, "clipped.1.None.kmer.fa")
             ))
             self.assertTrue(compare(
-                os.path.join(output_dir.name, "1", "AAY", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.8.fa"),
+                os.path.join(output_dir.name, "1", "AAY", "tmp", "test_pvacvector_produces_expected_output.8.fa"),
                 os.path.join(self.test_data_dir, "clipped.1.AAY.fa")
             ))
             self.assertTrue(compare(
-                os.path.join(output_dir.name, "1", "AAY", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.8.fa.key"),
-                os.path.join(self.test_data_dir, "clipped.1.AAY.fa.key")
+                os.path.join(output_dir.name, "1", "AAY", "test_pvacvector_produces_expected_output.8.fa"),
+                os.path.join(self.test_data_dir, "clipped.1.AAY.kmer.fa")
             ))
             self.assertTrue(compare(
-                os.path.join(output_dir.name, "2", "None", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.8.fa"),
+                os.path.join(output_dir.name, "2", "None", "tmp", "test_pvacvector_produces_expected_output.8.fa"),
                 os.path.join(self.test_data_dir, "clipped.2.None.fa")
             ))
             self.assertTrue(compare(
-                os.path.join(output_dir.name, "2", "None", "MHC_Class_I", "tmp", "test_pvacvector_produces_expected_output.8.fa.key"),
-                os.path.join(self.test_data_dir, "clipped.2.None.fa.key")
+                os.path.join(output_dir.name, "2", "None", "test_pvacvector_produces_expected_output.8.fa"),
+                os.path.join(self.test_data_dir, "clipped.2.None.kmer.fa")
             ))
 
             self.assertTrue(compare(
@@ -360,14 +290,12 @@ class TestPvacvector(unittest.TestCase):
             output_dir = tempfile.TemporaryDirectory()
 
             run.main([
-                self.input_tsv,
+                os.path.join(self.test_data_dir, 'input_parse_test_output.fa'),
                 self.test_run_name,
                 self.allele,
                 self.method,
                 output_dir.name,
-                '-v', self.input_vcf,
                 '-e1', self.epitope_length,
-                '-n', self.input_n_mer,
                 '-k',
                 '-b', '32000',
                 '--binding-percentile-threshold', '80',
@@ -394,7 +322,6 @@ class TestPvacvector(unittest.TestCase):
             self.method,
             output_dir.name,
             '-e1', self.epitope_length,
-            '-n', self.input_n_mer,
             '-k',
             '-b', '22000',
             '--percentile-threshold-strategy', 'exploratory',
@@ -465,11 +392,11 @@ class TestPvacvector(unittest.TestCase):
                     self.method,
                     output_dir.name,
                     '-e1', self.epitope_length,
-                    '-n', self.input_n_mer,
                     '-b', '22000',
                     '--percentile-threshold-strategy', 'exploratory',
                     '--binding-percentile-threshold', '100',
                     '--spacers', 'None',
+                    '--fasta-size', '1000',
                 ])
                 self.assertIn("INFO:root:Clipping 1 amino acids off the end of peptide MT.14.LGALS2.ENST00000215886.4.missense.132E/Q would clip the best peptide. Skipping.", log.output)
                 self.assertIn("INFO:root:Clipping 2 amino acids off the start of peptide MT.20.PKDREJ.ENST00000253255.5.missense.1875T/I would clip the best peptide. Skipping.", log.output)

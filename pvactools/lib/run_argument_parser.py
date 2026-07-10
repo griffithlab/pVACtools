@@ -236,7 +236,6 @@ class RunArgumentParser(metaclass=ABCMeta):
             default=200,
             help="Number of FASTA entries per IEDB request. "
                  + "For some resource-intensive prediction algorithms like Pickpocket and NetMHCpan it might be helpful to reduce this number. "
-                 + "Needs to be an even number.",
         )
 
     def pass_only_args(self):
@@ -491,14 +490,6 @@ class RunArgumentParser(metaclass=ABCMeta):
 
     def pvacvector(self):
         self.parser.add_argument(
-            '-v', "--input-vcf",
-            help="Path to original pVACseq input VCF file. Required if input file is a pVACseq TSV."
-        )
-        self.parser.add_argument(
-            '-n', "--input-n-mer", default='25',
-            help="Length of the peptide sequence to use when creating the FASTA from the pVACseq TSV.",
-        )
-        self.parser.add_argument(
             '--spacers', type=lambda s:[spacer for spacer in s.split(',')],
             help="Comma-separated list of spacers to use for testing junction epitopes. Include None to test junctions without spacers. Peptide combinations will be tested with each spacer in the order specified.",
             default="None,AAY,HHHH,GGS,GPGPG,HHAA,AAL,HH,HHC,HHH,HHHD,HHL,HHHC"
@@ -512,6 +503,12 @@ class RunArgumentParser(metaclass=ABCMeta):
             '--allow-n-peptide-exclusion', type=int,
             help="If no solution is found after adding spacers and clipping peptides, attempt to find partial solutions with up to n peptides removed.",
             default=2,
+        )
+        self.parser.add_argument(
+            "-s", "--fasta-size",type=int,
+            default=200,
+            help="Number of FASTA entries per IEDB request. "
+                 + "For some resource-intensive prediction algorithms like Pickpocket and NetMHCpan it might be helpful to reduce this number. "
         )
 
 class PvacbindRunArgumentParser(RunArgumentParser):
@@ -577,7 +574,7 @@ class PvacseqRunArgumentParser(RunArgumentParser):
 class PvacvectorRunArgumentParser(RunArgumentParser):
     def __init__(self):
         tool_name = 'pvacvector'
-        input_file_help = "A .fa file with peptides or a pVACseq .tsv file with epitopes to use for vector design."
+        input_file_help = "A .fa file with peptides or to use for vector design."
         RunArgumentParser.__init__(self, tool_name, input_file_help)
         self.parser.add_argument(
             "-e1", "--class-i-epitope-length", type=lambda s:[int(epl) for epl in s.split(',')],
