@@ -21,7 +21,6 @@ from pvactools.lib.optimal_peptide import OptimalPeptide
 from pvactools.lib.vector_visualization import VectorVisualization
 from pvactools.lib.run_argument_parser import PvacvectorRunArgumentParser
 from pvactools.lib.pvacvector_run_pipeline import PvacvectorRunPipeline
-from pvactools.lib.pipeline import *
 from pvactools.lib.run_utils import *
 from pvactools.lib.prediction_class import NetMHCIIVersion
 from pvactools.lib.prediction_class_utils import *
