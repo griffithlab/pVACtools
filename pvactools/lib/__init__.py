@@ -8,7 +8,6 @@ __all__ = [
     "identify_problematic_amino_acids",
     "input_file_converter",
     "download_example_data",
-    "fasta_generator",
     "output_parser",
     'net_chop',
     "netmhc_stab",
