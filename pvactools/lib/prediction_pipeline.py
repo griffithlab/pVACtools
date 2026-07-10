@@ -60,8 +60,8 @@ class PredictionPipeline:
                     continue
                 print(f"Parsing prediction file for Allele {allele} and Epitope Length {epitope_length}")
                 parser_arguments = {
-                    'input_iedb_files'          : call_predictors.output_files,
-                    'input_tsv_file'            : self.input_tsv_file,
+                    'prediction_files'          : call_predictors.output_files,
+                    'tsv_file'                  : self.input_tsv_file,
                     'key_files'                 : call_predictors.output_key_files,
                     'output_file'               : parsed_file_path,
                     'use_normalized_percentiles': self.use_normalized_percentiles,
