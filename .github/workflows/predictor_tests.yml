@@ -43,6 +43,11 @@ jobs:
           sudo apt-get install -y pandoc
           sudo apt-get install -y mafft
           sudo apt-get install -y build-essential
+          sudo apt-get install -y tcsh
+          sudo apt-get install -y zlib1g-dev
+          sudo apt-get install -y gawk
+          sudo apt-get install -y wget
+          sudo apt-get install -y unzip
           sudo apt-get clean
           pip install pypandoc==1.7.2
       - name: Install Python dependencies
@@ -58,6 +63,21 @@ jobs:
           pip install -e .
           mhcflurry-downloads fetch
           immuscope-download-weights
+      - name: Install IEDB MHC I
+        run: |
+          mkdir ./IEDB
+          cd ./IEDB
+          wget https://downloads.iedb.org/tools/mhci/3.1.7/IEDB_MHC_I-3.1.7.tar.gz; tar -xzvf IEDB_MHC_I-3.1.7.tar.gz; rm IEDB_MHC_I-3.1.7.tar.gz
+          cd mhc_i
+          ./configure
+      - name: Install IEDB MHC II
+        run: |
+          cd ./IEDB
+          wget https://downloads.iedb.org/tools/mhcii/3.1.12/IEDB_MHC_II-3.1.12.tar.gz; tar -xzvf IEDB_MHC_II-3.1.12.tar.gz; rm IEDB_MHC_II-3.1.12.tar.gz
+          cd mhc_ii
+          python ./configure.py -k netmhciipan -k smm -k nn
+      - name: Set IEDB_PATH environment variable
+        run: echo "IEDB_PATH=./IEDB" >> $GITHUB_ENV
       - name: Install MixMHCpred
         uses: actions/checkout@master
         with:
@@ -99,4 +119,4 @@ jobs:
       - name: Run tests
         env:
           TEST_FLAG: 1
-        run: python -m unittest predictor_tests/test_call_iedb.py
+        run: python -m unittest predictor_tests/test_call_predictors.py
