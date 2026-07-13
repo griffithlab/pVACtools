@@ -43,28 +43,6 @@ def create_per_class_report(files, all_epitopes_output_file, filtered_report_fil
     post_processing_params['file_type'] = 'pVACfuse'
     PostProcessor(**post_processing_params).execute()
 
-def create_combined_reports(files, all_epitopes_output_file, filtered_report_file, run_manufacturability_metrics, args):
-    for file_name in files:
-        if not os.path.exists(file_name):
-            print("File {} doesn't exist. Aborting.".format(file_name))
-            return
-
-    combine_reports(files, all_epitopes_output_file)
-
-    post_processing_params = vars(args).copy()
-    post_processing_params['input_file'] = all_epitopes_output_file
-    post_processing_params['filtered_report_file'] = filtered_report_file
-    post_processing_params['run_coverage_filter'] = True
-    post_processing_params['run_transcript_support_level_filter'] = False
-    post_processing_params['run_net_chop'] = False
-    post_processing_params['run_netmhc_stab'] = False
-    post_processing_params['run_manufacturability_metrics'] = run_manufacturability_metrics
-    post_processing_params['run_reference_proteome_similarity'] = False
-    post_processing_params['file_type'] = 'pVACfuse'
-    post_processing_params["filename_addition"] = "Combined"
-
-    PostProcessor(**post_processing_params).execute()
-
 def generate_fasta(args, output_dir, epitope_length, flanking_length=0, net_chop_fasta=False):
     if net_chop_fasta:
         per_epitope_output_dir = None
@@ -297,16 +275,6 @@ def main(args_input = sys.argv[1:]):
             print("No MHC class {} prediction algorithms chosen. Skipping MHC class {} predictions.".format(mhc_class, mhc_class))
         elif len(alleles) == 0:
             print("No MHC class {} alleles chosen. Skipping MHC class {} predictions.".format(mhc_class, mhc_class))
-
-    if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0 and len(class_ii_prediction_algorithms) > 0 and len(class_ii_alleles) > 0:
-        print("Creating combined reports")
-        output_dir = os.path.join(base_output_dir, 'combined')
-        os.makedirs(output_dir, exist_ok=True)
-        file1 = os.path.join(base_output_dir, 'MHC_Class_I', "{}.MHC_I.all_epitopes.tsv".format(args.sample_name))
-        file2 = os.path.join(base_output_dir, 'MHC_Class_II', "{}.MHC_II.all_epitopes.tsv".format(args.sample_name))
-        combined_output_file = os.path.join(output_dir, "{}.Combined.all_epitopes.tsv".format(args.sample_name))
-        filtered_report_file = os.path.join(output_dir, "{}.Combined.filtered.tsv".format(args.sample_name))
-        create_combined_reports([file1, file2], combined_output_file, filtered_report_file, False, args)
 
     change_permissions_recursive(base_output_dir, 0o755, 0o644)
 
