@@ -68,40 +68,47 @@ The ideal peptide candidate should be derived from a gene/transcript that is exp
 
 **Predicted Binding Affinity**
 
-Binding affinity is measured by IC50 (peptide concentration required for 50% of displacement of a reference peptide to an MHC groove). Lower IC50 means a lower peptide concentration was required to achieve 50% displacement, which signifies better binding affinity. A common threshold for considering a peptide to be a strong binder is 500 nM. We also list the `Binding threshold` for inclusion in the Metric File. This parameter determines how many peptides the user wants to include in the peptide detailed view. Note that this parameter cannot be changed in the visualization component of pVACview but would need to be changed when generating the original aggregate report and metrics file. The default cutoff was set to 5000 nM to reasonably capture information about different peptide candidates from the same mutation but also to exclude those that have extremely poor binding.
+Binding affinity is measured by IC50 (peptide concentration required for 50% of displacement of a reference peptide to an MHC groove). Lower IC50 means a lower peptide concentration was required to achieve 50% displacement, which signifies better binding affinity. A common threshold for considering a peptide to be a strong binder is 500 nM. We also list the ``Binding Threshold for Inclusion into Metric File``. This parameter determines how many peptides the user wants to include in the peptide detailed view. Note that this parameter cannot be changed in the visualization component of pVACview but would need to be changed when generating the original aggregate report and metrics file. The default cutoff was set to 5000 nM to reasonably capture information about different peptide candidates from the same mutation but also to exclude those that have extremely poor binding.
 
 - ``Binding Threshold``: IC50 value cutoff for a passing neoantigen. (default: 500 nM)
 - ``Binding Threshold for Inclusion Into Metric File``: IC50 value cutoff for neoantigens to be loaded to pVACview. This feature helps limit the number of neoantigens being loaded to pVACview. (default: 5000 nM)
 
-Additionally, users have the option to consider percentile ranks on top of raw IC50 predictions. Percentile rank is a method used to predict binding affinity of a peptide by comparing it to a set of peptides with similar sizes. A lower percentile rank indicates stronger affinity. Percentile rank of less than 2% are generally
-recommended for differentiating binders from non-binders (see `Jurtz, Vanessa et al. 2017 paper <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5679736/>`_). In contrast to IC50 predictions, percentile ranks allow a more normalized comparison across different HLA alleles that may have allele-specific binding cutoffs. This feature is turned off by default but can be turned on by the user and considered when regenerating Tiering across variants.
+Additionally, percentile ranks are considered on top of raw IC50 predictions. Percentile rank is a method used to predict binding affinity, presentation, or immunogenicty of a peptide by comparing it to a set of peptides with similar sizes. A lower percentile rank indicates stronger affinity, presentation, or immunogencity, respectively. Percentile rank of less than 2% are generally
+recommended (see `Jurtz, Vanessa et al. 2017 paper <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5679736/>`_). In contrast to IC50 predictions or raw scores, percentile ranks allow a more normalized comparison across different HLA alleles especially for binding where different alleles may have allele-specific binding cutoffs.
 
-- ``Percentile Threshold`` : percentile score cutoff. (default: NULL)
+- ``Binding Percentile Threshold`` : binding percentile score cutoff.
+  (default: 2)
+- ``Presentation Percentile Threshold`` : presentation percentile score cutoff.
+  (default: 2)
+- ``Immunogenicity Percentile Threshold`` : immunogenicity percentile score cutoff.
+  (default: 2)
 - ``Percentile Threshold Strategy``: if set to ``conservative`` a candidate
-  needs to pass both the binding and percentile threshold. If set to
-  ``exploratory`` a candidate only needs to pass either threshold. (default:
+  needs to pass the binding, binding percentile, presentation percentile and
+  immunogenicity percentile thresholds. If set to
+  ``exploratory`` a candidate only needs to pass one of the thresholds. (default:
   conservative)
 
 When using the predicted IC50 values from binding prediction tools, another aspect to consider is the binding threshold of each allele. As stated earlier, different alleles may have allele-specific binding thresholds that vary from the default 500nM cutoff. Users can choose to use allele-specific binding threshold where data is available by turning this option on.
 
 - ``Allele Specific Binding Threshold`` : this dictates whether the binding threshold is set specific to each allele based on `IEDB <https://help.iedb.org/hc/en-us/articles/114094151811-Selecting-thresholds-cut-offs-for-MHC-class-I-and-II-binding-predictions>`_ suggestion (option TRUE), or based on the ``Binding Threshold`` defined above (option FALSE). (demo data original value:  TRUE)
 
-An important advantage of using pVACseq to generate neoantigen predictions is that multiple binding affinity algorithms can be run (namely up to 8 Class I binding affinity algorithms and up to 4 Class II binding affinity algorithms). However, the user will need to decide whether the lowest or the median prediction value across algorithms should be used as the binding metric (IC50 MT, IC50 WT, %ile MT, and %ile WT columns) for each peptide-HLA combination. This cannot be changed in pVACview but is determined during the initial pVACseq run. To view which score metric (median or lowest) was used to compare binding affinity of mutant (MT) and wildtype (WT) peptides, we provide:
+An important advantage of using pVACseq to generate neoantigen predictions is that multiple algorithms can be run (namely up to 15 Class I algorithms and up to 7 Class II algorithms). However, the user will need to decide whether the lowest or the median prediction value across algorithms should be used as themetric (IC50 MT, %ile MT, IC50 %ile MT, Pres %ile MT, and IM %ile MT columns) for each peptide-HLA combination. This cannot be changed in pVACview but is determined during the initial pVACseq run. To view which score metric (median or lowest) was used to compare binding affinity of mutant (MT) and wildtype (WT) peptides, we provide:
 
 - ``MT Top Score Metric`` : mutant top score metric. (default: Median)
 - ``WT Top Score Metric`` : wildtype top score metric. (default: Median)
 
-Aditionally, the ``HLA.Alleles`` and respective ``Binding.Cutoffs`` are also displayed.
+Additionally, the ``HLA.Alleles`` and respective ``Binding.Cutoffs`` are also displayed.
 
 - ``HLA.Alleles`` : is the list of HLA alleles that the sample expresses and given as input when running pVACseq.
-- ``Binding.Cutoffs``: the IC50 cutoff value for the corresponding HLA allele. In the below example screenshots, allele-specific binding thresholds were used (``Allele Specific Binding Threshold: TRUE``). This results in the binding threshold for HLA-A*29:01 being set to the one recommended by `IEDB <https://help.iedb.org/hc/en-us/articles/114094151811-Selecting-thresholds-cut-offs-for-MHC-class-I-and-II-binding-predictions>`_. For the remaining alleles, IEDB does not have an specific binding threshold recommendation so the threshold is set to the basic binding threshold as a fallback, in this case 500 (``Binding Threshold: 500``).
+- ``Binding.Cutoffs``: the IC50 cutoff value for the corresponding HLA allele.
+  In the below example screenshots, allele-specific binding thresholds were used (``Allele Specific Binding Threshold: TRUE``). This results in the binding threshold for HLA-A*29:02 being set to the one recommended by `IEDB <https://help.iedb.org/hc/en-us/articles/114094151811-Selecting-thresholds-cut-offs-for-MHC-class-I-and-II-binding-predictions>`_. For the remaining alleles, IEDB does not have an specific binding threshold recommendation so the threshold is set to the basic binding threshold as a fallback, in this case 500 (``Binding Threshold: 500``).
 
 **Transcript-level Features**
 
 When predicting neoantigen candidates for a somatic variant, multiple transcripts of a gene may code for the same candidate. pVACseq will attempt to select the most likely transcript coding for a candidate (Best Transcript). The MANE Select, Canonical, and Transcript Support Level (TSL) may considered when picking the best transcript. When determining a candidate's tier, these criteria may also be taken into account. `TSL <https://useast.ensembl.org/info/genome/genebuild/transcript_quality_tags.html>`_ provides information on degree to which transcript isoforms are supported by experimental evidence. The existing TSL levels are: TSL1, TSL2, TSL3, TSL4, TSL5, TSLNA, with TSL1 being the best TSL level.  We suggest users using a higher TSL level cutoff (lower number) for higher confidence in the annotation of the targeted transcript. Default is set to be TSL1.
 
 - ``Transcript Prioritization Strategy``: Users can specify up to three
-  different critieria to consider. The best transcript will need to pass
+  different criteria to consider. The best transcript will need to pass
   at least one of the specified criteria in order for the candidate to pass.
   (default: mane_select, canonical, tsl)
 
@@ -163,10 +170,10 @@ currently being investigated is indicated at the bottom of this section.
 
 Next, we will evaluate some neoantigen candidates using the original parameters for Tiering.
 
-Example 1: a good candidate: KIF1C-S433F: TEFQIGPEEA
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Example 1: a good candidate: COL19A1-L1019N: VSDEEINKY
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. figure:: ../../images/screenshots/vignette/KIF1C-new/KIF1C_0.png
+.. figure:: ../../images/screenshots/vignette/COL19A1/COL19A1_0.png
     :width: 1000px
     :align: right
     :alt: pVACview Vignette
@@ -174,11 +181,11 @@ Example 1: a good candidate: KIF1C-S433F: TEFQIGPEEA
 
 **Variant-level assessment:**
 
-The variant has good DNA and RNA VAF (the DNA VAF is 0.316, higher than the Subclonal threshold of 0.25, thereby pVACseq assumes that the variant is clonal).
+The variant has good DNA and RNA VAF (the DNA VAF is 0.255, higher than the Subclonal threshold of 0.25, thereby pVACseq assumes that the variant is clonal).
 
 In this case, there’s only 1 mutant transcript that matches with the user-provided RNAseq data (**Transcript Sets of Selected Variant** tab shows only 1 result).
 
-.. figure:: ../../images/screenshots/vignette/KIF1C-new/KIF1C_1_TranscriptSetsOfSelectedVariant.png
+.. figure:: ../../images/screenshots/vignette/COL19A1/COL19A1_1_TranscriptSetsOfSelectedVariant.png
     :width: 1000px
     :align: right
     :alt: pVACview Vignette
@@ -186,7 +193,7 @@ In this case, there’s only 1 mutant transcript that matches with the user-prov
 
 The predicted best peptide (neoantigen candidate) doesn’t have any match in the human proteome. This is ideal, since the candidate will more likely to be recognized by T cells and not ignored due to central tolerance.
 
-.. figure:: ../../images/screenshots/vignette/KIF1C-new/KIF1C_2_ReferenceMatches.png
+.. figure:: ../../images/screenshots/vignette/COL19A1/COL19A1_2_ReferenceMatches.png
     :width: 1000px
     :align: right
     :alt: pVACview Vignette
@@ -196,7 +203,7 @@ The predicted best peptide (neoantigen candidate) doesn’t have any match in th
 
 The variant is detected in only 1 transcript. This transcript has good expression and Transcript Support Level and is the MANE Select and Canonical transcript. It also have a protein_coding biotype and no CDS flags.
 
-.. figure:: ../../images/screenshots/vignette/KIF1C-new/KIF1C_6_TranscriptsInSet.png
+.. figure:: ../../images/screenshots/vignette/COL19A1/COL19A1_6_TranscriptsInSet.png
     :width: 1000px
     :align: right
     :alt: pVACview Vignette
@@ -204,7 +211,7 @@ The variant is detected in only 1 transcript. This transcript has good expressio
 
 You can see the mutant (MT) and wildtype (WT) peptide sequence for this transcript side-by-side.
 
-.. figure:: ../../images/screenshots/vignette/KIF1C-new/KIF1C_4_PeptidesTranscriptSet.png
+.. figure:: ../../images/screenshots/vignette/COL19A1/COL19A1_4_PeptidesTranscriptSet.png
     :width: 1000px
     :align: right
     :alt: pVACview Vignette
@@ -212,27 +219,33 @@ You can see the mutant (MT) and wildtype (WT) peptide sequence for this transcri
 
 **Peptide-level assessment:**
 
-The candidate being investigated has a good binding affinity (median IC50 score is less than 500nM, percentile rank is less than 2%). Presentation and immunogenicity percentiles vary with algorithms but overall the mutant peptide has better percentiles than the wildtype peptide, and the percentiles are less than 2%.
+The candidate being investigated has a good binding affinity for HLA-A*29:02 (median IC50 score is less than 641nM - the allele-specific binding threshold for this allele). Additionally, the median IC50, presentation, and immunogenicty percentile ranks for HLA-A*29:02 are less than 2% each. The violin plots and individual data tables also show acceptable concordance between the individual algorithms.
 
-.. figure:: ../../images/screenshots/vignette/KIF1C-new/KIF1C_7_IC50plot.png
+.. figure:: ../../images/screenshots/vignette/COL19A1/COL19A1_8_percentilePlot.png
     :width: 1000px
     :align: right
     :alt: pVACview Vignette
     :figclass: align-left
 
-.. figure:: ../../images/screenshots/vignette/KIF1C-new/KIF1C_8_percentilePlot.png
+.. figure:: ../../images/screenshots/vignette/COL19A1/COL19A1_7_IC50plot.png
     :width: 1000px
     :align: right
     :alt: pVACview Vignette
     :figclass: align-left
 
-.. figure:: ../../images/screenshots/vignette/KIF1C-new/KIF1C_9_BindingData.png
+.. figure:: ../../images/screenshots/vignette/COL19A1/COL19A1_9_BindingData.png
     :width: 1000px
     :align: right
     :alt: pVACview Vignette
     :figclass: align-left
 
-.. figure:: ../../images/screenshots/vignette/KIF1C-new/KIF1C_10_ElutionAndImmunogenicityData.png
+.. figure:: ../../images/screenshots/vignette/COL19A1/COL19A1_10_PresentationData.png
+    :width: 1000px
+    :align: right
+    :alt: pVACview Vignette
+    :figclass: align-left
+
+.. figure:: ../../images/screenshots/vignette/COL19A1/COL19A1_11_ImmunogenicityData.png
     :width: 1000px
     :align: right
     :alt: pVACview Vignette
@@ -240,11 +253,10 @@ The candidate being investigated has a good binding affinity (median IC50 score 
 
 The mutation is not in an anchor position (see ``Anchor heatmap`` tab). A list of anchor positions for each allele-length combination
 is provided in the ``Anchor Positions`` panel below. Additionally, the underlying anchor prediction scores for each amino acid position are
-provided in the ``Anchor Weights`` panel at the bottom. Both mutant and wildtype peptides are good binders, yet the mutant peptide
-is a stronger binder. This is scenario number 2 (WT strong binder, MT strong binder, MT not in an anchor position) according to the Scenario
+provided in the ``Anchor Weights`` panel at the bottom. While the mutant peptide (``VSFEEINKY``) is a good binder, the wildtype peptide (``VSFEEIKKY``) is a weak binder for HLA-A*29:02. This is scenario number 1 (WT weak binder, MT strong binder) according to the Scenario
 Guide, where the neoantigen candidate is favorable and can be accepted.
 
-.. figure:: ../../images/screenshots/vignette/KIF1C-new/KIF1C_5_AnchorHeatmap.png
+.. figure:: ../../images/screenshots/vignette/COL19A1/COL19A1_5_AnchorHeatmap.png
     :width: 1000px
     :align: right
     :alt: pVACview Vignette
@@ -253,7 +265,7 @@ Guide, where the neoantigen candidate is favorable and can be accepted.
 
 Beside the Class-I peptide, the best predicted Class-II peptide from the user-input can also be reviewed, using the **Additional Data** tab.
 
-.. figure:: ../../images/screenshots/vignette/KIF1C-new/KIF1C_3_AdditionalData.png
+.. figure:: ../../images/screenshots/vignette/COL19A1/COL19A1_3_AdditionalData.png
     :width: 1000px
     :align: right
     :alt: pVACview Vignette
@@ -262,7 +274,7 @@ Beside the Class-I peptide, the best predicted Class-II peptide from the user-in
 
 **Decision:**
 
-.. figure:: ../../images/screenshots/vignette/KIF1C-new/KIF1C_11_Decision.png
+.. figure:: ../../images/screenshots/vignette/COL19A1/COL19A1_11_Decision.png
     :width: 1000px
     :align: right
     :alt: pVACview Vignette
@@ -283,7 +295,7 @@ Example 2: a good candidate derived from a variant with multiple transcript sets
 
 **Variant-level assessment:**
 
-The variant has good DNA and RNA VAF (the DNA VAF is 0.302, higher than the Subclonal threshold of 0.25, thereby the variant is assumed to be clonal) . 
+The variant has good DNA and RNA VAF (the DNA VAF is 0.302, higher than the Subclonal threshold of 0.25, thereby the variant is assumed to be clonal).
 
 **Transcript-level assessment:**
 
@@ -315,7 +327,9 @@ The images below are transcripts in Transcript Set 2 (top-middle, 13 transcripts
     :alt: pVACview Vignette
     :figclass: align-left
 
-The images below are the neoantigen candidates from Transcript Set 2 (top) and Transcript Set 1 (bottom). The best neoantigen candidate (AERMGFTVV) is highlighted in green. Here, candidates are ranked based on IC50 score - the best candidate has the lowest IC50 score. The transcripts' MANE Select status, Canonical status, Biotype and TSL as well as the existence of problematic positions, and whether or not the peptide failed the anchor evaluation are also taken into account and candidates failing these criteria are deprioritized over candidates passing these criteria. As a result, a candidate with the lowest IC50 score is not always selected as the best peptide if these criteria aren't met.
+The images below are the neoantigen candidates from Transcript Set 2 (top) and Transcript Set 1 (bottom). The best neoantigen candidate (AERMGFTVV) is highlighted in green. Here, candidates are ranked based on IC50 score, the existence of problematic positions, and whether or not the peptide failed the anchor evaluation are also taken into account and candidates failing these criteria are deprioritized over candidates passing these criteria. As a result, a candidate with the lowest IC50 score is not always selected as the best peptide if these criteria aren't met. Additionally, the Best Peptide is always the first peptide in the list even if it isn't the one with the lowest IC50 score.
+
+In this panel, users may also switch between displaying IC50, combined percentile, binding percentile, presentation percentile, or immunogenicity percentile using the "Specify what data to show" dropwdown. The peptide ordering is mainted from the IC50 view when switching to any of the percentile views meaning that the peptide order in the percentile views does not reflect the percentile rank ordering.
 
 .. figure:: ../../images/screenshots/vignette/ADAR/TranscriptSet1/ADAR_3_TranscriptSet1.png
     :width: 1000px
@@ -331,13 +345,7 @@ The images below are the neoantigen candidates from Transcript Set 2 (top) and T
 
 **Peptide-level assessment:**
 
-For simplicity, we will review only the best peptide (AERMGFTVV). This candidate has good binding affinity (the median IC50 is 76.11nM, which is less than the 500nM cut-off; the median percentile is 0.125, which is less than recommended value of 2; the predictions from all algorithms are in high agreement with no outliers, as seen in the violin plot).
-
-.. figure:: ../../images/screenshots/vignette/ADAR/TranscriptSet1/ADAR_7_IC50plot_TranscriptSet1.png
-    :width: 1000px
-    :align: right
-    :alt: pVACview Vignette
-    :figclass: align-left
+For simplicity, we will review only the best peptide (AERMGFTVV). This candidate has good binding affinity (the median IC50 is 76.11nM, which is less than the 500nM cut-off). It also has good median binding, presentation, and immunogenicity percentiles (0.072, 0.094, and 1.627, respectively; which are all less than recommended cutoffs of 2). The predictions from all algorithms are in high agreement with no outliers, as seen in the violin plots.
 
 .. figure:: ../../images/screenshots/vignette/ADAR/TranscriptSet1/ADAR_8_percentilePlot_TranscriptSet1.png
     :width: 1000px
@@ -345,16 +353,14 @@ For simplicity, we will review only the best peptide (AERMGFTVV). This candidate
     :alt: pVACview Vignette
     :figclass: align-left
 
-The candidate also has good presentation and immunogenicity scores (percentiles less than 2%). It's unclear whether the candidate is likely to trigger Tcell response, since  immunogenicity percentile scores were not provided (two algorithms BigMHC_IM and DeepImmuno do not predict immunogenicity percentile scores).
-
-.. figure:: ../../images/screenshots/vignette/ADAR/TranscriptSet1/ADAR_10_ElutionAndImmunogenicityData_TranscriptSet1.png
+.. figure:: ../../images/screenshots/vignette/ADAR/TranscriptSet1/ADAR_7_IC50plot_TranscriptSet1.png
     :width: 1000px
     :align: right
     :alt: pVACview Vignette
     :figclass: align-left
 
 Altogether, both the candidate (mutant peptide - MT) and its wildtype (WT) peptide are strong binders. The figure below shows the mutated
-amino acid (V) in the candidate (AERMGFTVV) is not in an anchor position for allele HLA-B*45:01. This fits into Scenario 4 in the guide,
+amino acid (V) in the candidate (AERMGFTVV) is not in an anchor position for allele HLA-B*45:01. This fits into Scenario 2 in the guide,
 where the candidate is likely to elicit strong recognition from the immune system.
 
 .. figure:: ../../images/screenshots/vignette/ADAR/TranscriptSet1/ADAR_5_AnchorHeatmap_TranscriptSet1.png
@@ -403,6 +409,77 @@ These potentially problematic characteristics are also flagged by the red boxes 
 Since the candidate peptide has a match in the reference proteome, we will reject this candidate by clicking the
 thumbs-down button.
 
+ML-Based Neoantigen Evaluation Predictions
+__________________________________________
+
+This ML prediction output file contains ML-based evaluation predictions that can help prioritize neoantigen candidates by presetting the evaluation status for each candidate. 
+When pVACseq is run with both MHC Class I and Class II predictions and the ``--run-ml-predictions`` flag enabled, or when using the :ref:`add_ml_predictions <optional_downstream_analysis_tools_label>` 
+tool, an aggregate report file with ML predictions (``<sample_name>.MHC_I.all_epitopes.aggregated.ML_predict.tsv``) is generated in the same folder as the Class I aggregated file (``MHC_Class_I``). This file can be loaded into pVACview in combination with the Class I metrics.json file and the Class II aggregated file from their usual locations.
+This file contains ML-based evaluation predictions that can help prioritize neoantigen candidates by presetting the evaluation status for each candidate.
+
+The ML prediction file includes all columns from the Class I aggregated file with two columns different:
+
+**Evaluation Column**
+
+The ``Evaluation`` column is pre-populated with ML-predicted evaluation status for each candidate:
+
+- ``Accept``: Variants with prediction probability >= ``--ml-threshold-accept`` (default: 0.55). These candidates are predicted to be favorable neoantigen candidates to be included in a vaccine. 
+- ``Reject``: Variants with prediction probability <= ``--ml-threshold-reject`` (default: 0.30). These candidates are predicted to be unfavorable. ``--ml-threshold-reject`` should be set to a value less than ``--ml-threshold-accept``.
+- ``Pending``: Variants with prediction probability between ``--ml-threshold-reject`` and ``--ml-threshold-accept``, or when the ML model cannot make a prediction due to missing data. These candidates require manual review.
+
+**ML Prediction (score) Column**
+
+The ``ML Prediction (score)`` column provides additional context by displaying the evaluation status along with the underlying prediction probability score. 
+The format is ``"<Evaluation> (<probability_score>)"`` (e.g., ``"Accept (0.72)"``, ``"Reject (0.15)"``, ``"Review (0.48)"``). 
+The "Review" status is retained in this column as a suggestion for users to change the status in the "Evaluation" column to "Review", or "Accept" or "Reject" manually.
+This column shows ``"NA"`` when the ML model cannot make a prediction due to missing data (e.g., when a candidate is found in the Class I aggregated report but not in the Class II aggregated report).
+
+The ``<probability_score>`` represents the model's confidence that a candidate should be accepted to be in a vaccine, with values closer to 1.0 indicating higher confidence in acceptance.
+
+
+**Important Features Used by the ML Model**
+
+The ML model integrates information from multiple sources to make its predictions. The following features are among the five most important factors considered:
+
+- Allele expression
+- RNA VAF
+- RNA Expression
+- NetMHCpan MT IC50 Score
+- TSL
+
+The model combines these features (and many more other features) using a trained random forest algorithm that has learned patterns from expert-reviewed neoantigen candidates. 
+The predictions serve as a starting point for evaluation, but should be reviewed in conjunction with the detailed information available in pVACview, 
+including binding affinity plots, anchor position analysis, and reference proteome matches.
+
+**pVACview ML Predictions Example**
+
+To view predictions on pVACview, load the following files: 
+1. The ML prediction file (``<sample_name>.MHC_I.all_epitopes.aggregated.ML_predict.tsv``) in place of the Class I tsv file. 
+2. The metrics.json file of Class I data. 
+3. The Class II aggregated.tsv file.  
+4. A list of genes of interest (optional).
+
+.. figure:: ../../images/screenshots/vignette/pvacview-ml-predictions-example.png
+    :width: 1000px
+    :align: right
+    :alt: pVACview ML Predictions Example
+    :figclass: align-left
+
+
+In the pVACview interface shown above, the ML prediction file is loaded in place of the standard Class I TSV file, with all 
+other inputs as described. Candidate evaluation statuses are automatically pre-populated based on the ML predictions, as shown in the “Acpt,” 
+“Rej,” and “Rev” columns, with prediction scores displayed in the “ML Prediction (score)” column. Users may review and override these assignments 
+as needed.
+
+In this example, MAU2 is classified in the Pass tier by pVACseq and predicted as Accept by the ML model, providing concordant support for its 
+selection. In contrast, TUBGCP6 is labeled as a PoorBinder by pVACseq but predicted as Accept by the ML model, likely due to favorable features 
+such as high expression and variant allele frequency (VAF), as well as potential Class II binding indicated in the Additional Data table (shown below). While 
+this candidate may be provisionally accepted, further evaluation is needed to confirm that all Class II selection criteria are met.
+
+.. figure:: ../../images/screenshots/vignette/pvacview-ml-predictions-example2.png
+    :width: 500px
+    :align: center
+    :alt: pVACview ML Predictions Example TUBGCP6 Class II Additional Data
 
 Export
 ______

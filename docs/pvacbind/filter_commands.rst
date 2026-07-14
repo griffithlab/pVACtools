@@ -71,12 +71,36 @@ Top Score Filter
 
 .. program-output:: pvacbind top_score_filter -h
 
-This filter picks the top epitope for a variant. By default the
-``--top-score-metric`` option is set to ``median`` which will apply this
-filter to the ``Median MT Score`` column and pick the epitope with the lowest
-median mutant ic50 score for each variant. If the ``--top-score-metric``
-option is set to ``lowest``, the ``Best MT Score`` column is instead used to
-make this determination.
+This filter picks the top epitope for each peptide in the original input FASTA.
+Epitopes with the same Index are identified as coming from the same peptide.
+
+For each peptide the best epitope is determined as follows:
+
+- Pick the entries with no Problematic Positions.
+- For the remaining entries, calculate a rank for all the metrics specified
+  via the ``--top-score-metric2`` parameter and sum them. Whether the lowest or median value
+  is considered for each metric is controlled by the ``--top-score-metric`` parameter.
+  Sort the remaining entries on this sum rank followed by the rank of the first
+  ``--top-score-metric2`` specified (to break
+  any ties in the sum rank). Select the highest sorted entry.
+
+The selected top epitopes for each peptide are then sorted as follows:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Sort Criteria
+     - Sort Order
+   * - Sum of the ascending ranks of
+       the metrics selected via the ``--top-score-metric2`` parameter (possible values:
+       ``IC50 MT``, ``%ile MT``, ``IC50 %ile MT``, ``Pres %ile MT``; default: ``IC50 MT``,
+       ``%ile MT``).
+     - Ascending sum rank
+   * - First metric specified in the ``--top-score-metric2`` as a tie breaker
+       for identical sum ranks
+     - Ascending rank
+   * - ``Index`` column
+     - Alphabetical
 
 Aggregate Report Filter
 -----------------------

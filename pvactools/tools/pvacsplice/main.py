@@ -114,34 +114,6 @@ def define_parser():
     )
     download_example_data_parser.set_defaults(func=download_example_data)
 
-    valid_alleles_parser = subparsers.add_parser(
-        "valid_alleles",
-        help="Show a list of valid allele names.",
-        add_help=False
-    )
-    valid_alleles_parser.set_defaults(func=valid_alleles)
-
-    valid_algorithms_parser = subparsers.add_parser(
-        "valid_algorithms",
-        help="Show a list of algorithms supported given the specified species and/or allele",
-        add_help=False
-    )
-    valid_algorithms_parser.set_defaults(func=valid_algorithms)
-
-    valid_netmhciipan_versions_parser = subparsers.add_parser(
-        "valid_netmhciipan_versions",
-        help="Show a list of valid versions of NetMHCIIpan and NetMHCIIpanEL that can be used.",
-        add_help=False
-    )
-    valid_netmhciipan_versions_parser.set_defaults(func=valid_netmhciipan_versions)
-
-    allele_specific_cutoffs_parser = subparsers.add_parser(
-        "allele_specific_cutoffs",
-        help="Show the allele specific cutoffs.",
-        add_help=False,
-    )
-    allele_specific_cutoffs_parser.set_defaults(func=allele_specific_cutoffs)
-
     return parser
 
 

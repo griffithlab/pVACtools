@@ -19,6 +19,7 @@ def main(args_input = sys.argv[1:]):
         allele_specific_anchors=args.allele_specific_anchors,
         anchor_contribution_threshold=args.anchor_contribution_threshold,
         maximum_transcript_support_level=args.maximum_transcript_support_level,
+        transcript_prioritization_strategy=args.transcript_prioritization_strategy,
     ).execute()
 
 if __name__ == "__main__":

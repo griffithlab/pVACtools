@@ -156,7 +156,8 @@ class RunArgumentParser(metaclass=ABCMeta):
             '-m2', '--top-score-metric2', type=top_score_metric2(),
             help="Which metrics to consider when selecting the best peptide in the aggregate erport and the top score filter step (filtered report). "
                  + "Each specified metric will be ranked and the sum of these ranks will be used. This rank sum is also used as the primary sorting criteria in the "
-                 + "aggregated report for the candidates within each tier as well as in the filtered report. "
+                 + "aggregated report for the candidates within each tier as well as in the filtered report. Available options are "
+                 + "'ic50', 'combined_percentile', 'binding_percentile', 'immunogenicity_percentile', and 'presentation_percentile'."
                  + "Whether the lowest or median is considered for each metric is controlled by the --top-score-metric parameter. ",
             default=['ic50', 'combined_percentile'],
         )
@@ -255,12 +256,12 @@ class RunArgumentParser(metaclass=ABCMeta):
             help="Normal Coverage Cutoff. When creating the filtered.tsv report, only include epitopes "
                  + "with a normal read depth above this cutoff.",
             default=5
-        ) 
+        )
         self.parser.add_argument(
             '--tdna-cov', type=int,
             help="Tumor DNA Coverage Cutoff. When creating the filtered.tsv report, only include epitopes "
                  + "with a tumor DNA read depth above this cutoff.",
-            default=1
+            default=10
         )
         self.parser.add_argument(
             '--trna-cov', type=int,
@@ -416,6 +417,23 @@ class RunArgumentParser(metaclass=ABCMeta):
                  + "calculated as --trna-vaf * --expn-val * 10. Only candidates with Allele Expr "
                  + "(RNA Expr * RNA VAF) above the allele expr cutoff will be binned into the Pass tier."
         )
+        # ML prediction arguments
+        self.parser.add_argument(
+            "--run-ml-predictions",
+            help="Enable ML-based neoantigen evaluation predictions.",
+            default=False,
+            action='store_true',
+        )
+        self.parser.add_argument(
+            "--ml-threshold-accept", type=float,
+            default=0.55,
+            help="Threshold for Accept predictions in ML model (default: 0.55).",
+        )
+        self.parser.add_argument(
+            "--ml-threshold-reject", type=float,
+            default=0.30,
+            help="Threshold for Reject predictions in ML model (default: 0.30).",
+        )        
 
     def pvacsplice(self):
         self.parser.add_argument(
@@ -573,16 +591,17 @@ class PvacvectorRunArgumentParser(RunArgumentParser):
             help="Fail junctions where any junctional epitope has ic50 binding scores below this value.",
         )
         self.parser.add_argument(
-            '--percentile-threshold', type=float_range(0.0,100.0),
+            '--binding-percentile-threshold', type=float_range(0.0,100.0),
+            default=2.0,
             help="Fail junctions where any junctional epitope "
-                 +"has a percentile rank below this value."
+                 +"has a binding percentile rank below this value."
         )
         self.parser.add_argument(
             '--percentile-threshold-strategy',
             choices=['conservative', 'exploratory'],
             help="Specify the how to evaluate junctional epitopes if a percentile threshold is set. "
-                 + " The 'conservative' option fails a junction if a junctional epitope fails EITHER the binding threshold OR the percentile threshold (default)."
-                 + " The 'exploratory' option fails a junction only if a junctional epitope fails BOTH the binding threshold AND the percentile threshold.",
+                 + " The 'conservative' option fails a junction if a junctional epitope fails EITHER the binding threshold OR the binding percentile threshold (default)."
+                 + " The 'exploratory' option fails a junction only if a junctional epitope fails BOTH the binding threshold AND the binding percentile threshold.",
             default="conservative",
         )
         self.parser.add_argument(

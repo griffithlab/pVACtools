@@ -16,8 +16,8 @@ class IdentifyProblematicAminoAcidsTests(unittest.TestCase):
         cls.mark_genes_of_interest_path = os.path.join(pvactools_directory(), "pvactools", "lib", "mark_genes_of_interest.py")
         cls.test_data_path= os.path.join(pvactools_directory(), "tests", "test_data", "mark_genes_of_interest")
 
-    def module_compiles(self):
-        self.assertTrue(py_compile.compile(self.mark_genes_of_interest))
+    def test_module_compiles(self):
+        self.assertTrue(py_compile.compile(self.mark_genes_of_interest_path))
 
     def test_mark_genes_of_interest_output(self):
         output_file = tempfile.NamedTemporaryFile()

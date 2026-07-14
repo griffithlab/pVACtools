@@ -15,10 +15,10 @@ class JunctionToFastaTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.python = sys.executable
-        cls.executable = os.path.join(pvactools_directory(), "pvactools", "tools", "pvacsplice", "junction_to_fasta.py")
+        cls.executable = os.path.join(pvactools_directory(), "pvactools", "lib", "junction_to_fasta.py")
         cls.test_data_dir = os.path.join(pvactools_directory(), "tests", "test_data", "pvacsplice")
 
-    def module_compiles(self):
+    def test_module_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))
 
     # using GBM data instead? - how about i run one with current gtf and fa - one of every type going through the pipeline

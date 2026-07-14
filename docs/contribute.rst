@@ -29,7 +29,7 @@ Testing
 -------
 
 To test code changes, users will first need to install pVACtools from their
-local checkout of the pVACtools respository. From inside the main repository
+local checkout of the pVACtools repository. From inside the main repository
 folder run:
 
 .. code-block:: none
@@ -92,10 +92,10 @@ you can use the pVACtools docker image. Sphinx allows you to build a local
 copy of the docs and see how the build looks in your browser before you 
 commit/push and submit a pull request.  The following instructions detail 
 how to run sphinx from the pVACtools docker container and view changes in 
-the brower on your host system.
+the browser on your host system.
 
 The following instructions assume: (1) that you already have Docker installed 
-and running on your sytem and (2) that you have a clone of the pVACtools 
+and running on your system and (2) that you have a clone of the pVACtools 
 github repository.
 
 The following ``docker run`` command publishes port 8000 in the docker 

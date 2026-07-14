@@ -48,60 +48,170 @@ and immunogenicity algorithms.
 By using the IEDB RESTful web interface, pVACsplice leverages their extensive support of different prediction algorithms.
 
 In addition to IEDB-supported prediction algorithms, we've also added support
-for `MHCflurry <http://www.biorxiv.org/content/early/2017/08/09/174243>`_ and
-`MHCnuggets <http://karchinlab.org/apps/appMHCnuggets.html>`_.
+for a variety of additional algorithms.
 
-================================================= ======= ========================
-MHC Class I Binding Affinity Prediction Algorithm Version Supports Percentile Rank
-================================================= ======= ========================
-NetMHCpan                                         4.1     yes
-NetMHC                                            4.0     yes
-NetMHCcons                                        1.1     yes
-PickPocket                                        1.1     yes
-SMM                                               1.0     yes
-SMMPMBEC                                          1.0     yes
-MHCflurry                                                 yes
-MHCnuggets                                                yes
-================================================= ======= ========================
+.. list-table::
+   :header-rows: 1
 
-================================================== ================================================================ ========================
-MHC Class II Binding Affinity Prediction Algorithm Version                                                          Supports Percentile Rank
-================================================== ================================================================ ========================
-NetMHCIIpan                                        4.0 (not supported by standalone IEDB), 4.1 (default), 4.2., 4.3 yes
-SMMalign                                           1.1                                                              yes
-NNalign                                            2.3                                                              yes
-MHCnuggets                                                                                                          yes
-================================================== ================================================================ ========================
+   * - Algorithm
+     - Version(s)
+     - MHC Class
+     - Prediction Type
+     - Supports Percentile Ranks?
+     - Supports Normalized Percentile Ranks?
+   * - BigMHC_EL
+     -
+     - MHC Class I
+     - Presentation
+     - no
+     - yes
+   * - BigMHC_IM
+     -
+     - MHC Class I
+     - Immunogenicity
+     - no
+     - yes
+   * - DeepImmuno
+     -
+     - MHC Class I
+     - Immunogenicity
+     - no
+     - yes
+   * - ImmuoScope_IM
+     -
+     - MHC Class II
+     - Immunogenicity
+     - no
+     - no
+   * - MHCflurry
+     -
+     - MHC Class I
+     - Binding
+     - yes
+     - yes
+   * - MHCflurryEL
+     -
+     - MHC Class I
+     - Presentation, Processing
+     - yes (Presentation only)
+     - yes (Presentation and Processing)
+   * - MHCnuggetsI
+     -
+     - MHC Class I
+     - Binding
+     - yes
+     - yes
+   * - MHCnuggetsII
+     -
+     - MHC Class II
+     - Binding
+     - yes
+     - no
+   * - MixMHC2pred
+     -
+     - MHC Class II
+     - Presentation
+     - yes
+     - no
+   * - MixMHCpred
+     -
+     - MHC Class I
+     - Binding
+     - yes
+     - yes
+   * - NNalign
+     - 2.3
+     - MHC Class II
+     - Binding
+     - yes
+     - no
+   * - NetMHC
+     - 4.0
+     - MHC Class I
+     - Binding
+     - yes
+     - yes
+   * - NetMHCIIpan
+     - 4.0 (not supported by standalone IEDB), 4.1 (default), 4.2., 4.3
+     - MHC Class II
+     - Binding
+     - yes
+     - no
+   * - NetMHCIIpanEL
+     - 4.0 (not supported by standalone IEDB), 4.1 (default), 4.2., 4.3
+     - MHC Class II
+     - Presentation
+     - yes
+     - no
+   * - NetMHCcons
+     - 1.1
+     - MHC Class I
+     - Binding
+     - yes
+     - yes
+   * - NetMHCpan
+     - 4.1
+     - MHC Class I
+     - Binding
+     - yes
+     - yes
+   * - NetMHCpanEL
+     - 4.1
+     - MHC Class I
+     - Presentation
+     - yes
+     - yes
+   * - PRIME
+     -
+     - MHC Class I
+     - Immunogenicity
+     - yes
+     - yes
+   * - Pickpocket
+     - 1.1
+     - MHC Class I
+     - Binding
+     - yes
+     - yes
+   * - SMM
+     - 1.0
+     - MHC Class I
+     - Binding
+     - yes
+     - yes
+   * - SMMPMBEC
+     - 1.0
+     - MHC Class I
+     - Binding
+     - yes
+     - yes
+   * - SMMalign
+     - 1.1
+     - MHC Class II
+     - Binding
+     - yes
+     - no
 
-============================================= ======= ========================
-MHC Class I Presentation Prediction Algorithm Version Supports Percentile Rank
-============================================= ======= ========================
-NetMHCpanEL                                   4.1     yes
-MHCflurryEL                                           | Processing Score: no;
-                                                      | Presentation Score: yes
-BigMHC_EL                                             no
-============================================= ======= ========================
+**Calculation of normalized percentiles**
 
-============================================== ================================================================ ========================
-MHC Class II Presentation Prediction Algorithm Version                                                          Supports Percentile Rank
-============================================== ================================================================ ========================
-NetMHCIIpanEL                                  4.0 (not supported by standalone IEDB), 4.1 (default), 4.2., 4.3 yes
-============================================== ================================================================ ========================
-
-=============================================== ======= ========================
-MHC Class I Immunogenicity Prediction Algorithm Version Supports Percentile Rank
-=============================================== ======= ========================
-BigMHC_IM                                               no
-DeepImmuno                                              no
-=============================================== ======= ========================
+Not all prediction algorithms supported by pVACsplice output a percentile rank.
+In order to alleviate this issue, and to provide percentile ranks that have been consistently
+calculated, we have run predictions for all class I algorithms supported by pVACtools on 100,000
+reference peptides each in lengths 8-11 and for the most common 1,000 human class I MHC alleles.
+These predictions allow pVACsplice to support the calculation of normalized percentiles. This feature
+is enable be setting the ``--use-normalized-percentiles`` parameter. With this option enabled,
+pVACsplice will calculate normalized percentiles scores for all predicted neoantigen candidates and
+selected prediction algorithms. These normalized percentile ranks will be used in place of percentile
+ranks calculated by the algorithms natively. The algorithms supporting this feature are noted in the
+table above.
 
 **Comprehensive filtering**
 
-Automatic filtering on the binding affinity ic50 (nm) value narrows down the results to only include
-"good" candidate peptides. The binding filter threshold can be adjusted by the user for each
+Automatic filtering on the binding affinity IC50 (nm) value, binding percentile, presentation percentile,
+and immunogenicity percentile narrows down the results to only include
+"good" candidate peptides. The binding filter thresholds can be adjusted by the user for each
 pVACsplice run. pVACsplice also support the option of filtering on allele-specific binding thresholds
-as recommended by `IEDB <https://help.iedb.org/hc/en-us/articles/114094151811-Selecting-thresholds-cut-offs-for-MHC-class-I-and-II-binding-predictions>`_
-as well as percentile ranks.
+as recommended by `IEDB <https://help.iedb.org/hc/en-us/articles/114094151811-Selecting-thresholds-cut-offs-for-MHC-class-I-and-II-binding-predictions>`_.
 Additional filtering on the binding affitinity can be manually done by the user by running the
 :ref:`standalone binding filter <pvacsplice_filter_commands>` on the filtered result file
 to narrow down the candidate epitopes even further or on the unfiltered
@@ -112,8 +222,9 @@ adjustable thresholds on depth, VAF, and/or expression values. The user can also
 the :ref:`standalone coverage filter <pvacsplice_filter_commands>` to further narrow down their results
 from the filtered output file.
 
-pVACsplice will filter on the transcript support level to only keep high-confidence
-transcripts of level 1. This filter can also be run :ref:`standalone
+If the input VCF is annotated with Ensembl transcript support levels (TSLs), MANE Select, and
+Canonical status, pVACseq will filter on these to only keep high-confidence
+transcripts. This filter can also be run :ref:`standalone
 <pvacsplice_filter_commands>`.
 
 As a last filtering step, pVACsplice applies the top score filter to only keep the top scoring epitope

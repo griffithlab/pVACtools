@@ -16,7 +16,7 @@ When uploading the file, users can then choose how to visualize the data by sele
 from the input they would like to use to group and sort candidates.
 
 The feature chosen to group by
-will allow users to explore candidates that are simliar to one another in a separate table. For example,
+will allow users to explore candidates that are similar to one another in a separate table. For example,
 to mimic the pVACseq module, users could choose to group by variant.
 
 The order of the candidates in each grouping is determined by the numeric feature chosen to sort by.

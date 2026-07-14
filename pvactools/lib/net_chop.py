@@ -85,15 +85,11 @@ class NetChop:
                 for line in chunk:
                     sequence_id = ('%010x'%x)[-10:]
                     staging_file.write('>'+sequence_id+'\n')
-                    if self.file_type == 'pVACbind' or self.file_type == 'pVACfuse':
-                        index = line['Mutation']
-                        epitope = line['Epitope Seq']
-                    elif self.file_type == 'pVACsplice':
-                        index = line['Index']
-                        epitope = line['Epitope Seq']
-                    else:
-                        index = line['Index']
+                    index = line['Index']
+                    if self.file_type == 'pVACseq':
                         epitope = line['MT Epitope Seq']
+                    else:
+                        epitope = line['Epitope Seq']
                     if index not in mt_records_dict:
                         raise Exception("FASTA entry for index {} not found. Please check that the FASTA file matches the input TSV.".format(index))
                     if self.file_type == 'pVACsplice':

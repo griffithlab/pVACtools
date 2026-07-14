@@ -46,6 +46,7 @@ _________
 MHCnuggets
 __________
 
+- Website: https://karchinlab.org/software/
 - GitHub: https://github.com/KarchinLab/mhcnuggets
 - Citation: Shao XM, Bhattacharya R, Huang J, Sivakumar IKA, Tokheim C, Zheng L, Hirsch D,
   Kaminow B, Omdahl A, Bonsack M, Riemer AB, Velculescu VE, Anagnostou V, Pagel KA, Karchin
@@ -61,6 +62,7 @@ __________
 BigMHC
 ______
 
+- Website: https://karchinlab.org/software/
 - GitHub: https://github.com/KarchinLab/BigMHC
 - Citation: Albert BA, Yang Y, Shao XM, Singh D, Smit KN, Anagnostou V, Karchin R. Deep neural
   networks predict class I major histocompatibility complex epitope presentation and transfer
@@ -86,6 +88,62 @@ __________
   PubMed PMID: `34009266 <https://pubmed.ncbi.nlm.nih.gov/34009266/>`_
 
 - License: `MIT License <https://github.com/frankligy/DeepImmuno/blob/main/LICENSE>`_
+
+MixMHCpred
+__________
+
+- Website: https://gfellerlab.org/index.php/computational-tools/
+- GitHub: https://github.com/GfellerLab/MixMHCpred
+- Citation: Gfeller D, Schmidt J, Croce G, Guillaume P, Bobisse S, Genolet R, Queiroz L, Cesbron J,
+  Racle J, Harari A. Improved predictions of antigen presentation and TCR recognition with MixMHCpred2.2
+  and PRIME2.0 reveal potent SARS-CoV-2 CD8+ T-cell epitopes. (2023), Cell Systems, 14, 72.
+
+  doi: https://doi.org/10.1016/j.cels.2022.12.002
+
+  PubMed PMID: `36603583 <https://pubmed.ncbi.nlm.nih.gov/36603583/>`_
+
+- License: `Academic License <https://raw.githubusercontent.com/GfellerLab/MixMHCpred/refs/heads/master/MixMHCpred_license.pdf>`_
+
+MixMHC2pred
+___________
+
+- Website: https://gfellerlab.org/index.php/computational-tools/
+- GitHub: https://github.com/GfellerLab/MixMHC2pred
+- Citation: Racle J, Guillaume P, Schmidt J, Michaux J, Larabi A, Lau K, Perez MAS, Croce G, Genolet R,
+  Coukos G, Zoete V, Pojer F, Bassani-Sternberg M, Harari A, Gfeller D. Machine learning predictions of
+  MHC-II specificities reveal alternative binding mode of class II epitopes. (2023) Immunity, 2023, 56, 1-17.
+
+  doi: https://doi.org/10.1016/j.immuni.2023.03.009
+
+  PubMed PMID: `37023751 <https://pubmed.ncbi.nlm.nih.gov/37023751/>`_
+
+- License: `Academic License <https://github.com/GfellerLab/MixMHC2pred/blob/master/LICENSE>`_
+
+PRIME
+_____
+
+- Website: https://gfellerlab.org/index.php/computational-tools/
+- GitHub: https://github.com/GfellerLab/PRIME
+- Citation: Gfeller D, Schmidt J, Croce G, Guillaume P, Bobisse S, Genolet R, Queiroz L, Cesbron J,
+  Racle J, Harari A. Improved predictions of antigen presentation and TCR recognition with MixMHCpred2.2
+  and PRIME2.0 reveal potent SARS-CoV-2 CD8+ T-cell epitopes. (2023), Cell Systems, 14, 72.
+
+  doi: https://doi.org/10.1016/j.cels.2022.12.002
+
+  PubMed PMID: `36603583 <https://pubmed.ncbi.nlm.nih.gov/36603583/>`_
+
+- License: `Academic License <https://github.com/GfellerLab/PRIME/blob/master/PRIME_license.pdf>`_
+
+ImmuScope
+_________
+
+- GitHub: https://github.com/shenlongchen/ImmuScope
+- Citation: Shen, LC., Zhang, Y., Wang, Z. et al. Self-iterative multiple-instance learning enables
+  the prediction of CD4+ T cell immunogenic epitopes. Nat Mach Intell 7, 1250–1265 (2025).
+
+  doi: https://doi.org/10.1038/s42256-025-01073-z
+
+- License: `GPL-3.0 license <https://github.com/shenlongchen/ImmuScope/blob/main/LICENSE>`_
 
 NetChop
 _______

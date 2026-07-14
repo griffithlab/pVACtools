@@ -6,9 +6,6 @@ from datetime import datetime
 import sys
 import os
 
-logging.basicConfig(level=logging.DEBUG, format="%(message)s")
-
-
 def define_parser():
     """
     Purpose:    Define arguments for the parser that the user can use

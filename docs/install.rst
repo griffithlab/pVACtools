@@ -11,7 +11,7 @@ pVACtools requires Python 3.6 or above. Before running any installation steps, c
 
    python -V
 
-If you don't have Python 3 installed, we recommend using `Conda <https://conda.io/projects/conda/en/latest/user-guide/install/index.html>`_ to emulate a Python 3 environment. We've encountered problems with users that already have Python 2.x installed when they also try to install Python 3. The defaults will not be set correctly in that case. If you already have Python 2.x installed we **strongly** recommmend using Conda instead of installing Python 3 locally.
+If you don't have Python 3 installed, we recommend using `Conda <https://conda.io/projects/conda/en/latest/user-guide/install/index.html>`_ to emulate a Python 3 environment. We've encountered problems with users that already have Python 2.x installed when they also try to install Python 3. The defaults will not be set correctly in that case. If you already have Python 2.x installed we **strongly** recommend using Conda instead of installing Python 3 locally.
 
 Once you have set up your Python 3 environment correctly you can use ``pip`` to install pVACtools. Make sure you have ``pip`` installed. ``pip`` is generally included in python distributions, but may need to be upgraded before use. See the `instructions <https://packaging.python.org/en/latest/installing/#install-pip-setuptools-and-wheel>`_ for installing or upgrading ``pip``.
 
@@ -232,7 +232,159 @@ You can check that DeepImmuno was installed successfully by running:
 
 This should show information about the DeepImmuno installation.
 
-.. _blast:
+Installing ImmuScope
+---------------------
+
+If you wish to run the Immuscope_IM prediction algorithm, you will need to
+install ImmuScope on your system. This package is not a direct dependency of
+the the ``pvactools`` packages and needs to be installed manually by running:
+
+.. code-block:: none
+
+   pip install git+https://github.com/griffithlab/ImmuScope.git#egg=ImmuScope
+
+In addition to installing the python package, you will also need to download the
+ImmuScope model weights:
+
+.. code-block:: none
+
+   immuscope-download-weights
+
+.. note::
+
+   ImmuScope needs to be installed in the same python 3
+   environment as the ``pvactools`` package.
+
+You can check that ImmuScope was installed successfully by running:
+
+.. code-block:: none
+
+   pip show immuscope
+
+This should show information about the ImmuScope installation.
+
+.. _mixmhcpred:
+
+Installing MixMHCpred
+---------------------
+
+If you wish to run the MixMHCpred prediction algorithm, you will need to
+install MixMHCpred on your system. This package not a direct dependency of
+the the ``pvactools`` packages and needs to be installed manually by running
+the following commands:
+
+.. code-block:: none
+
+   cd /opt
+   git clone https://github.com/GfellerLab/MixMHCpred.git
+   cd /opt/MixMHCpred
+   chmod +x MixMHCpred
+   pip install -r ./code/setup_pythonLibrary.txt
+   apt-get update && apt-get install -y mafft
+
+Additionally MixMHCpred needs to be added to your path. Please note, that
+MixMHCpred may be installed at any location on your system as long as that
+location is added to your PATH.
+
+.. code-block:: none
+
+   export PATH="$PATH:/opt/MixMHCpred"
+
+.. note::
+
+   MixMHCpred dependencies need to be installed in the same python 3
+   environment as the ``pvactools`` package.
+
+You can check that MixMHCpred was installed successfully by running:
+
+.. code-block:: none
+
+   MixMHCpred -h
+
+This should show information about the MixMHCpred installation.
+
+Installing MixMHC2pred
+----------------------
+
+If you wish to run the MixMHC2pred prediction algorithm, you will need to
+install MixMHC2pred on your system. This package not a direct dependency of
+the the ``pvactools`` packages and needs to be installed manually by running
+the following commands:
+
+.. code-block:: none
+
+   mkdir /opt/MixMHC2pred
+   cd /opt/MixMHC2pred
+   wget https://github.com/GfellerLab/MixMHC2pred/releases/download/v2.0.2.2/MixMHC2pred-2.0.zip
+   unzip MixMHC2pred-2.0.zip
+   rm MixMHC2pred-2.0.zip
+
+Depending on your system you need to ensure that the executable flag is set on
+the correct executable.
+
+.. code-block:: none
+
+   #On unix systems
+   chmod +x MixMHC2pred_unix
+
+   #On Mac OS:
+   chmod +x MixMHC2pred
+
+Additionally MixMHC2pred needs to be added to your path. Please note, that
+MixMHC2pred may be installed at any location on your system as long as that
+location is added to your PATH.
+
+.. code-block:: none
+
+   export PATH="$PATH:/opt/MixMHC2pred"
+
+You can check that MixMHC2pred was installed successfully by running:
+
+.. code-block:: none
+
+   MixMHC2pred -h
+
+This should show information about the MixMHC2pred installation.
+
+Installing PRIME
+----------------
+
+If you wish to run the PRIME prediction algorithm, you will need to
+install PRIME on your system. This package not a direct dependency of
+the the ``pvactools`` packages and needs to be installed manually by running
+the following commands:
+
+.. code-block:: none
+
+   cd /opt
+   git clone https://github.com/GfellerLab/PRIME.git
+   cd /opt/PRIME
+
+MixMHCpred is a direct dependency of PRIME so you will also need to install it
+on your system following :ref:`the instructions <mixmhcpred>`.
+
+Additionally PRIME needs to be added to your path. Please note, that
+PRIME may be installed at any location on your system as long as that
+location is added to your PATH.
+
+.. code-block:: none
+
+   export PATH="$PATH:/opt/PRIME"
+
+You can check that PRIME was installed successfully by running:
+
+.. code-block:: none
+
+   PRIME -h
+
+This should show information about the PRIME installation.
+
+On certain system you may need to recompile the PRIME executable:
+
+.. code-bloc:: none
+
+   cd /opt/PRIME/lib
+   g++ -O3 PRIME.cc -o PRIME.x
 
 Installing BLAST
 ----------------
@@ -274,7 +426,7 @@ An example on how to run pVACseq using Docker can be found on the :ref:`Getting 
 
 Common Workflow Language (CWL) and Workflow Description Language (WDL) tool wrappers for pVACseq, pVACfuse, and
 pVACvector (CWL only) can be downloaded using the ``pvactools download_cwls`` and
-``pvactools download_wdls`` commands, repectively.
+``pvactools download_wdls`` commands, respectively.
 
 Download CWL tool wrappers
 __________________________

@@ -233,3 +233,4 @@ class PvacfuseTests(unittest.TestCase):
                 output_file   = os.path.join(output_dir.name, 'combined', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'combined', file_name)
                 self.assertTrue(compare(output_file, expected_file))
+            output_dir.cleanup()

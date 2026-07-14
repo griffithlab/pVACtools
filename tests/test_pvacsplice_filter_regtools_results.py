@@ -14,11 +14,11 @@ class FilterRegtoolsResultsTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.python = sys.executable
-        cls.executable = os.path.join(pvactools_directory(), "pvactools", "tools", "pvacsplice", "filter_regtools_results.py")
+        cls.executable = os.path.join(pvactools_directory(), "pvactools", "lib", "filter_regtools_results.py")
         cls.test_data_dir = os.path.join(pvactools_directory(), "tests", "test_data", "pvacsplice")
         # inputs
 
-    def module_compiles(self):
+    def test_module_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))
 
     def test_filter_regtools_results_runs_and_produces_expected_output(self):

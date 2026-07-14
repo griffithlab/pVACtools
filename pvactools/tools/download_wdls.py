@@ -22,6 +22,7 @@ def main(args_input = sys.argv[1:]):
 
     wget.download('https://raw.githubusercontent.com/wustl-oncology/analysis-wdls/master/definitions/tools/pvacseq.wdl', final_dir)
     wget.download('https://raw.githubusercontent.com/wustl-oncology/analysis-wdls/master/definitions/tools/pvacfuse.wdl', final_dir)
+    wget.download('https://raw.githubusercontent.com/wustl-oncology/analysis-wdls/master/definitions/tools/pvacsplice.wdl', final_dir)
     print("")
 
 if __name__ == '__main__':

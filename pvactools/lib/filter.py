@@ -32,7 +32,7 @@ class Filter:
                     to_filter = any(process_criterion(criterion) for criterion in self.filter_criteria)
                 else:
                     to_filter = all(process_criterion(criterion) for criterion in self.filter_criteria)
-                
+
                 if not to_filter:
                     writer.writerow(line)
 

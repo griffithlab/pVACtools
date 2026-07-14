@@ -1,0 +1,8 @@
+recursive-include pvactools *
+
+# Exclude __pycache__ directory
+global-exclude __pycache__
+# Exclude individual bytecode files
+global-exclude *.py[co]
+# Exclude specialized python cache files
+global-exclude *$py.class

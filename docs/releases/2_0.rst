@@ -135,8 +135,8 @@ This is a bugfix release. It fixes the following problem(s):
 - This release adds handling of some more VCF edge cases that were previously
   unsupported. Variant transcripts that are annotated with * in the wildtype
   protein sequence or that have a stop_retained_variant consequence are now
-  skipped. In addition, some variants may encode their postion as ``-/1234``,
-  which was previsouly not supported but has now been added.
+  skipped. In addition, some variants may encode their position as ``-/1234``,
+  which was previously not supported but has now been added.
 - When running pVACseq, pVACbind, or pVACfuse with the
   ``--run-reference-proteome-similarity`` option enable this step would create
   a reference matches file but the pipeline previously failed to copy this

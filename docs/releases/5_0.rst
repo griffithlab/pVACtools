@@ -20,7 +20,7 @@ ____________
 
 - This release refactors the pVACvector graph building algorithm in order to increase the probability
   for finding a solution and reduce the number of iterations needed before a solution is found. Please
-  see the PR describtion for the full details. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1163
+  see the PR description for the full details. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1163
 - Add a new ``--aggregate-inclusion-count-limit`` parameter to set the maximum number of epitopes
   to include in the metrics.json detailed data for variants that have a large number of candidate
   neoantigens (e.g., frameshifts). by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1147
@@ -32,7 +32,7 @@ ____________
 Bugfixes
 ________
 
-- This relase fixes a bug with the ``--agregate-inclusion-binding-threshold`` which would not be used if
+- This release fixes a bug with the ``--agregate-inclusion-binding-threshold`` which would not be used if
   the ``--allele-specific-binding-thresholds`` flag was set. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1147
 - The pVACview percentile plots have been updated to include percentiles from elution and immunogenicity
   algorithms. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1149

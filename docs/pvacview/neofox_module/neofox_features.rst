@@ -31,7 +31,7 @@ Comparative Violin Plots
 ________________________
 
 Users can investigate how selected candidates relate to the the rest of the dataset using the **Comparative Violin Plots**. Users can select as many candidates
-as they would like which will then be highlighted in red in the violin plots. They can also select up to six features to view at a time. We have pre-selected
+as they would like which will then be highlighted in red in the violin plots. They can also select up to six features to view at a time. We have preselected
 five features which we found informative.
 
 .. figure:: ../../images/screenshots/pvacview-neofox-violin-two.png

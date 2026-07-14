@@ -16,7 +16,7 @@ class LoadGtfDataTests(unittest.TestCase):
         cls.load_gtf_data_path = os.path.join(pvactools_directory(), "pvactools", "lib", "load_gtf_data.py")
         cls.test_data_path= os.path.join(pvactools_directory(), "tests", "test_data", "pvacsplice")
 
-    def module_compiles(self):
+    def test_module_compiles(self):
         self.assertTrue(py_compile.compile(self.load_gtf_data_path))
 
     def test_load_gtf_data_runs_and_produces_expected_output(self):

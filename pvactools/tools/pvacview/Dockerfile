@@ -20,6 +20,7 @@ RUN R -e "install.packages(c('shiny',\
   'fresh', \
   'RCurl', \
   'shinyWidgets', \
+  'remotes', \
   'colourpicker'), repos='https://cran.rstudio.com/')"
 
 RUN R -e "devtools::install_github('eclarke/ggbeeswarm', ref='v0.6.1')"

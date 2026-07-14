@@ -43,7 +43,7 @@ well-binding junction epitopes, that junction will not be tested with any
 other spacers, even if a different spacer could potentially result in better
 junction scores. This reduces runtime. If a tested spacer for a junction doesn't
 yield a valid junction (i.e., there are well-binding junction epitopes) the junction
-is tested wtih the next spacer in the input list.
+is tested with the next spacer in the input list.
 
 If, after testing all spacers, no valid path is found, clipped versions of
 peptides are tested by removing leading and/or trailing amino acids and
@@ -52,7 +52,7 @@ acids to clip is controlled by the ``--max-clip-length`` argument.
 
 In some cases, the (core) neoantigen candidate of a peptide sequence may be located
 toward the beginning or end of the sequence. In these cases, clipping may
-accidentially remove amino acids of the core neoantigen. To prevent this, the
+accidentally remove amino acids of the core neoantigen. To prevent this, the
 ``--max-clip-length`` should be set to the shortest number of flanking amino
 acids of any of the peptides to include in the vector. Alternatively, pVACvector also
 supports specifying the core neoantigen in the FASTA header when using a FASTA

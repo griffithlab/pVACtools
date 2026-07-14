@@ -1,85 +1,19 @@
-from setuptools import setup
-import os
-
+from setuptools import setup, find_namespace_packages
 import sys
+
 if (sys.version_info.major, sys.version_info.minor) < (3, 9) or (sys.version_info.major, sys.version_info.minor) > (3, 11):
     print("This Python version is not supported:")
     print(sys.version)
     print("pVACtools supports Python versions 3.9, 3.10, and 3.11")
     sys.exit(1)
 
-try:
-    import pypandoc
-    pypandoc.download_pandoc()
-    long_description = pypandoc.convert_file('README.md', 'rst')
-except:
-    long_description = ""
-
-pvacseq_data_files = []
-for dirpath, dirnames, filenames in os.walk("pvactools/tools/pvacseq/example_data"):
-    for filename in filenames:
-        if not (filename.endswith(".py") or filename.endswith(".pyc")):
-            pvacseq_data_files.append(os.path.join(os.path.relpath(dirpath, 'pvactools/tools/pvacseq'), filename))
-pvacfuse_data_files = []
-for dirpath, dirnames, filenames in os.walk("pvactools/tools/pvacfuse/example_data"):
-    for filename in filenames:
-        if not (filename.endswith(".py") or filename.endswith(".pyc")):
-            pvacfuse_data_files.append(os.path.join(os.path.relpath(dirpath, 'pvactools/tools/pvacfuse'), filename))
-pvacvector_data_files = []
-for dirpath, dirnames, filenames in os.walk("pvactools/tools/pvacvector/example_data"):
-    for filename in filenames:
-        if not (filename.endswith(".py") or filename.endswith(".pyc")):
-            pvacvector_data_files.append(os.path.join(os.path.relpath(dirpath, 'pvactools/tools/pvacvector'), filename))
-pvacbind_data_files = []
-for dirpath, dirnames, filenames in os.walk("pvactools/tools/pvacbind/example_data"):
-    for filename in filenames:
-        if not (filename.endswith(".py") or filename.endswith(".pyc")):
-            pvacbind_data_files.append(os.path.join(os.path.relpath(dirpath, 'pvactools/tools/pvacbind'), filename))
-pvacsplice_data_files = []
-for dirpath, dirnames, filenames in os.walk("pvactools/tools/pvacsplice/example_data"):
-    for filename in filenames:
-        if not (filename.endswith(".py") or filename.endswith(".pyc")):
-            pvacbind_data_files.append(os.path.join(os.path.relpath(dirpath, 'pvactools/tools/pvacsplice'), filename))
-pvacview_data_files = []
-for dirpath, dirnames, filenames in os.walk("pvactools/tools/pvacview"):
-    for filename in filenames:
-        if not (filename.endswith(".py") or filename.endswith(".pyc")):
-            pvacview_data_files.append(os.path.join(os.path.relpath(dirpath, 'pvactools/tools/pvacview'), filename))
-for dirpath, dirnames, filenames in os.walk("pvactools/tools/pvacseq/VEP_plugins"):
-    for filename in filenames:
-        if not (filename.endswith(".py") or filename.endswith(".pyc")):
-            pvacseq_data_files.append(os.path.join(os.path.relpath(dirpath, 'pvactools/tools/pvacseq'), filename))
-for dirpath, dirnames, filenames in os.walk("pvactools/tools/pvacseq/iedb_alleles"):
-    for filename in filenames:
-        if not (filename.endswith(".py") or filename.endswith(".pyc")):
-            pvacseq_data_files.append(os.path.join(os.path.relpath(dirpath, 'pvactools/tools/pvacseq'), filename))
-for dirpath, dirnames, filenames in os.walk("pvactools/supporting_files"):
-    for filename in filenames:
-        if not (filename.endswith(".py") or filename.endswith(".pyc")):
-            pvacseq_data_files.append(os.path.join(os.path.relpath(dirpath, 'pvactools/tools/pvacseq'), filename))
-pvaccompare_data_files = []
-for dirpath, dirnames, filenames in os.walk("pvactools/tools/pvaccompare/html_report"):
-    for filename in filenames:
-        if not (filename.endswith(".py") or filename.endswith(".pyc")):
-            pvaccompare_data_files.append(os.path.join(os.path.relpath(dirpath, 'pvactools/tools/pvaccompare'), filename))
+def readme():
+    with open("README.md") as f:
+        return f.read()
 
 setup(
     name="pvactools",
-    version="6.1.0",
-    packages=[
-        "pvactools.tools",
-        "pvactools.tools.pvacbind",
-        "pvactools.tools.pvacfuse",
-        "pvactools.tools.pvacvector",
-        "pvactools.tools.pvacseq",
-        "pvactools.tools.pvacview",
-        "pvactools.tools.pvacsplice",
-        "pvactools.tools.pvaccompare",
-        "pvactools.tools.pvaccompare.compare_tools",
-        "pvactools.tools.pvaccompare.comparisons",
-        "pvactools.tools.pvaccompare.runners",
-        "pvactools.lib",
-    ],
+    version="7.0.1",
     entry_points={
         "console_scripts":[
             "pvactools = pvactools.tools.main:main",
@@ -98,6 +32,7 @@ setup(
         'biopython==1.77',
         'networkx',
         'simanneal',
+        'numpy==1.26.4',
         'pandas<2.1.0',
         'wget',
         'pysam',
@@ -118,16 +53,11 @@ setup(
         'XlsxWriter',
         'openpyxl',
         'deepdiff',
+        'scikit-learn>=1.6.0,<1.8.0',
+        'imblearn',
     ],
-    package_data={
-        'pvactools.tools.pvacseq': pvacseq_data_files,
-        'pvactools.tools.pvacfuse': pvacfuse_data_files,
-        'pvactools.tools.pvacvector': pvacvector_data_files,
-        'pvactools.tools.pvacbind': pvacbind_data_files,
-        'pvactools.tools.pvacview': pvacview_data_files,
-        'pvactools.tools.pvacsplice': pvacsplice_data_files,
-        'pvactools.tools.pvaccompare': pvaccompare_data_files,
-    },
+    packages=find_namespace_packages(),
+    include_package_data=True,
     classifiers=[
         'Development Status :: 5 - Production/Stable',
 
@@ -141,7 +71,8 @@ setup(
     author = "Susanna Kiwala, Jasreet Hundal, Joshua McMichael, Christopher A Miller, Luke Hendrickson, Alexander T Wollam, Huiming Xia, Miller Richters, Connor J Liu, Evelyn Schmidt, Jennie Yao, My Hoang, Sidi Zhao, Yang-Yang Feng, Aaron P Graubert, Jayden Zebrowski, Amber Z Wollam, Jonas Neichin, Megan Neveau, Jason Walker, William E Gillanders, Elaine R Mardis, Obi L Griffith, Malachi Griffith",
     author_email = "help@pvactools.org",
     description = "A cancer immunotherapy tools suite",
-    long_description = long_description,
+    long_description = readme(),
+    long_description_content_type="text/markdown",
     license = "BSD-3-Clause-Clear",
     keywords = "immunogenomics, immunotherapy, antigens, neoantigens, cancer, sequencing, variant, variants, fusion, fusions",
     #This needs to be the url where the code is being hosted

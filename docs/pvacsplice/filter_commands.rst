@@ -99,7 +99,7 @@ This filter is used to eliminate variant annotations based on poorly-supported t
 based on whether the transcript is the MANE Select transcripts, whether it is
 the canonical transcript or whether the transcript support level (TSL) meets the
 ``--maximum-transcript-support-level`` cutoff. The
-``--transcript-prioritizatio-strategy`` parameter controlls which ones of these three
+``--transcript-prioritizatio-strategy`` parameter controls which ones of these three
 criteria are considered. A neoantigen candidate passes this filter if its
 transcript passes at least one of the specified criteria.
 
@@ -111,15 +111,49 @@ Top Score Filter
 
 .. program-output:: pvacsplice top_score_filter -h
 
-This filter picks the top epitope for each splice site variant. The top epitope is
-determined by first selecting epitopes with no Problematic Positions
-and among those selecting the one with lowest median/best MT IC50 score for
-each splice site variant
+This filter picks the top epitope for each splice site. Epitopes with the same
+Junction are identified as coming from the same splice site.
 
-By default the ``--top-score-metric`` option is set to ``median`` which will apply this
-filter to the ``Median MT IC50 Score`` column. If the ``--top-score-metric``
-option is set to ``lowest``, the ``Best MT IC50  Score`` column is used
-instead.
+For each Junction the best epitope is determined as follows:
+
+- If ``--allow-inclomplete-transcripts`` flag is set, pick the entries without
+  a Transcript CDS Flags set.
+- Of the remaining entries, pick the entries where the Biotype is ``protein_coding``.
+- Of the remaining entries, pick the entries that pass at least one of the transcript criteria selected in the
+  ``--transcript-prioritization-strategy`` taking into consideration the
+  ``--maximum-transcript-support-level`` if ``tsl`` is one of the selected
+  criteria.
+- Of the remaining entries, pick the entries with no Problematic Positions.
+- For the remaining entries, calculate a rank for all the metrics specified
+  via the ``--top-score-metric2`` parameter and sum them. Whether the lowest or median value
+  is considered for each metric is controlled by the ``--top-score-metric`` parameter.
+  Sort the remaining entries on this sum rank followed by the rank of the first
+  ``--top-score-metric2`` specified (to break
+  any ties in the sum rank), MANE Select status, Canonical status,
+  Transcript Support Level, WT Protein Length, Transcript
+  Expression, and Tumor DNA VAF. Select the highest sorted entry.
+
+The selected top epitopes for each Junction are then sorted as follows:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Sort Criteria
+     - Sort Order
+   * - Sum of ascending ranks of ``Gene Expression`` and the ascending ranks of
+       the metrics selected via the ``--top-score-metric2`` parameter (possible values:
+       ``IC50 MT``, ``%ile MT``, ``IC50 %ile MT``, ``Pres %ile MT``; default: ``IC50 MT``,
+       ``%ile MT``).
+     - Ascending sum rank
+   * - Rank of the first metric specified in the ``--top-score-metric2`` as a tie breaker
+       for identical sum ranks
+     - Ascending rank
+   * - ``Gene Name`` column
+     - Alphabetical
+   * - ``Transcript`` column
+     - Alphabetical
+   * - ``Amino Acid Change`` column
+     - Alphabetical
 
 Aggregate Report Filter
 -----------------------

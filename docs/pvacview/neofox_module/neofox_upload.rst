@@ -42,7 +42,7 @@ There are three features that can be used to explore data:
 - **Annotated Neoantigen Candidates Table**
 
   - Main table showcasing all candidates
-  - Pre-selected columns of interest (denoted by an asterisk)
+  - Preselected columns of interest (denoted by an asterisk)
   - Colored heatmap and horizontal barplot cell backgrounds help quickly interpret the value of expression, VAF,
     binding affinity and rank columns
   - Evaluate candidates as accepted, rejected, or requiring further review
@@ -50,13 +50,13 @@ There are three features that can be used to explore data:
 - **Comparative Violin Plots**
 
   - Up to six violin plots showcasing spread of any NeoFox feature
-  - Pre-selected features are ones that we found most informative
+  - Preselected features are ones that we found most informative
   - Selected candidate are shown in red
 
 - **Dynamic Scatter Plot**
 
   - A scatter plot comparing multiple NeoFox features simultaneously
-  - Pre-selected features are ones that we found most informative
+  - Preselected features are ones that we found most informative
   - Users can change axis features, color feature, and size feature. They can also transform the data with natural log, log2, log10, and square root, adjust data range, and set different colors for minimum and maximum.
 
 

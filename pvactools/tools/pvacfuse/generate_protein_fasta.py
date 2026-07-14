@@ -89,14 +89,14 @@ def parse_input_tsv(input_tsv):
     indexes = []
     with open(input_tsv, 'r') as fh:
         reader = csv.DictReader(fh, delimiter = "\t")
-        if 'Mutation' in reader.fieldnames:
-            for line in reader:
-                indexes.append(line['Mutation'])
-            file_type = 'full'
-        else:
+        if 'ID' in reader.fieldnames:
             for line in reader:
                 indexes.append(line)
             file_type = 'aggregated'
+        else:
+            for line in reader:
+                indexes.append(line['Index'])
+            file_type = 'full'
     return (indexes, file_type)
 
 def parse_files(output_file, temp_dir, input_tsv, aggregate_report_evaluation):

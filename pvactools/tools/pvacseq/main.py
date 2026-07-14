@@ -107,6 +107,13 @@ def define_parser():
         )
     mark_genes_of_interest_parser.set_defaults(func=mark_genes_of_interest)
 
+    add_ml_predictions_parser = subparsers.add_parser(
+        "add_ml_predictions",
+        help="Add ML-based neoantigen evaluation predictions to pVACtools output files.",
+        add_help = False
+        )
+    add_ml_predictions_parser.set_defaults(func=add_ml_predictions)
+
     update_tiers_parser = subparsers.add_parser(
         "update_tiers",
         help="Update tiers in an aggregated report in order to, for example, use different thresholds or account for problematic position or reference match information if run after initial pipeline run.",
@@ -128,33 +135,6 @@ def define_parser():
     )
     install_vep_plugin_parser.set_defaults(func=install_vep_plugin)
 
-    valid_alleles_parser = subparsers.add_parser(
-        "valid_alleles",
-        help="Show a list of valid allele names.",
-        add_help=False
-    )
-    valid_alleles_parser.set_defaults(func=valid_alleles)
-
-    valid_algorithms_parser = subparsers.add_parser(
-        "valid_algorithms",
-        help="Show a list of algorithms supported given the specified species and/or allele",
-        add_help=False
-    )
-    valid_algorithms_parser.set_defaults(func=valid_algorithms)
-
-    valid_netmhciipan_versions_parser = subparsers.add_parser(
-        "valid_netmhciipan_versions",
-        help="Show a list of valid versions of NetMHCIIpan and NetMHCIIpanEL that can be used.",
-        add_help=False
-    )
-    valid_netmhciipan_versions_parser.set_defaults(func=valid_netmhciipan_versions)
-
-    allele_specific_cutoffs_parser = subparsers.add_parser(
-        "allele_specific_cutoffs",
-        help="Show the allele specific cutoffs.",
-        add_help=False,
-    )
-    allele_specific_cutoffs_parser.set_defaults(func=allele_specific_cutoffs)
     return parser
 
 def main():

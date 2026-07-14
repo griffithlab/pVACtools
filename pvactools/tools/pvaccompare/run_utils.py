@@ -126,6 +126,18 @@ def get_unique_entries(df1, df2, common_entries, contains_id=True):
     )
 
 
+def full_extract_id_parts(id_str):
+    """
+    Purpose:    Create a fully deterministic sort key using ID parts and the full ID
+    Modifies:   Nothing
+    Returns:    A tuple containing genomic sort fields and the full ID string
+    """
+    parts = extract_id_parts(id_str)
+    if parts == (None, None, None):
+        return (float("inf"), float("inf"), float("inf"), id_str)
+    return (*parts, id_str)
+
+
 def extract_id_parts(id_str):
     """
     Purpose:    Extract parts of the ID to use in sorting
@@ -166,12 +178,18 @@ def sort_unique_entries(unique_entries_file1, unique_entries_file2, contains_id)
     """
     if unique_entries_file1:
         if contains_id:
-            unique_entries_file1 = sorted(unique_entries_file1, key=extract_id_parts)
+            unique_entries_file1 = sorted(
+                unique_entries_file1,
+                key=full_extract_id_parts
+            )
         else:
             unique_entries_file1 = sorted(unique_entries_file1, key=split_replaced_id)
     if unique_entries_file2:
         if contains_id:
-            unique_entries_file2 = sorted(unique_entries_file2, key=extract_id_parts)
+            unique_entries_file2 = sorted(
+                unique_entries_file2,
+                key=full_extract_id_parts
+            )
         else:
             unique_entries_file2 = sorted(unique_entries_file2, key=split_replaced_id)
     return unique_entries_file1, unique_entries_file2
@@ -243,7 +261,7 @@ def get_file_differences(
     for col in differences:
         if contains_id:
             differences[col] = sorted(
-                differences[col], key=lambda x: extract_id_parts(x["ID"])
+                differences[col], key=lambda x: full_extract_id_parts(x["ID"])
             )
         else:
             differences[col] = sorted(

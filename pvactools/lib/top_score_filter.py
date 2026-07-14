@@ -7,6 +7,7 @@ from collections import defaultdict
 from itertools import groupby
 from operator import itemgetter
 import pandas as pd
+import numpy as np
 from abc import ABCMeta, abstractmethod
 
 from pvactools.lib.run_utils import *
@@ -44,6 +45,7 @@ class TopScoreFilter(metaclass=ABCMeta):
         parser.add_argument(
             '-m2', '--top-score-metric2', type=top_score_metric2(),
             help="Which metrics to consider when determining the top scoring peptide. All listed metrics will be rank scored and the sum of those rank scores will be used. "
+                 + "Available options are 'ic50', 'combined_percentile', 'binding_percentile', 'immunogenicity_percentile', and 'presentation_percentile'."
                  + "Whether the lowest or median is considered for each metric is controlled by the --top-score-metric parameter. "
                  + "This parameter is also used to control the sorting criteria for the variants in the output report evaluated in the order provided.",
             default=['ic50', 'combined_percentile'],
@@ -159,8 +161,6 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
             writer.writeheader()
             lines_per_variant = defaultdict(list)
             for line in reader:
-                if line["{} MT IC50 Score".format(self.mt_top_score_metric)] == 'NA':
-                    continue
                 chromosome = line['Chromosome']
                 start = line['Start']
                 stop = line['Stop']
@@ -194,11 +194,13 @@ class PvacseqTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
 
 
             sorted_rows = pvactools.lib.sort.pvacseq_sort(filtered_lines, self.top_score_metric, self.top_score_metric2)
+            sorted_rows = sorted_rows.fillna("NA")
             sorted_rows = sorted_rows.to_dict('records')
             writer.writerows(sorted_rows)
 
     def find_best_line(self, lines):
         df = pd.DataFrame(lines)
+        df.replace("NA", np.nan, inplace=True)
         df = df.astype({"{} MT IC50 Score".format(self.mt_top_score_metric):'float'})
         if 'MANE Select' in lines[0]:
             df['MANE Select'].map({'True': True, 'False': False})
@@ -232,8 +234,6 @@ class PvacfuseTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
             writer.writeheader()
             lines_per_variant = defaultdict(list)
             for line in reader:
-                if line["{} IC50 Score".format(self.formatted_top_score_metric)] == 'NA':
-                    continue
                 chromosome = line['Chromosome']
                 start = line['Start']
                 stop = line['Stop']
@@ -242,33 +242,35 @@ class PvacfuseTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
 
             filtered_lines = []
             for index, lines in lines_per_variant.items():
-                lines = sorted(lines, key = itemgetter('Mutation'))
+                lines = sorted(lines, key = itemgetter('Index'))
                 variant_tracker = defaultdict(set)
                 for line in lines:
-                    variant, consequence = line['Mutation'].split('.', 1)
+                    variant, consequence = line['Index'].split('.', 1)
                     variant_tracker[consequence].add(variant)
                 transcripts_with_same_epitopes = defaultdict(list)
-                for transcript, transcript_lines in groupby(lines, key = itemgetter('Mutation')):
+                for transcript, transcript_lines in groupby(lines, key = itemgetter('Index')):
                     transcript_lines = list(transcript_lines)
                     epitopes = ','.join(sorted([x['Epitope Seq'] for x in transcript_lines]))
                     transcripts_with_same_epitopes[epitopes].append(transcript)
                 for transcripts in transcripts_with_same_epitopes.values():
-                    transcript_set_lines = [x for x in lines if x['Mutation'] in transcripts]
+                    transcript_set_lines = [x for x in lines if x['Index'] in transcripts]
                     best_line = self.find_best_line(transcript_set_lines)
                     filtered_lines.append(best_line)
-                    best_line_variant, best_line_consequence = best_line['Mutation'].split('.', 1)
+                    best_line_variant, best_line_consequence = best_line['Index'].split('.', 1)
                     for variant in variant_tracker[best_line_consequence]:
                         if variant != best_line_variant:
                             duplicate_variant_line = best_line.copy()
-                            duplicate_variant_line['Mutation'] = "{}.{}".format(variant, best_line_consequence)
+                            duplicate_variant_line['Index'] = "{}.{}".format(variant, best_line_consequence)
                             filtered_lines.append(duplicate_variant_line)
 
             sorted_rows = pvactools.lib.sort.pvacfuse_sort(filtered_lines, self.top_score_metric, self.top_score_metric2)
+            sorted_rows = sorted_rows.fillna("NA")
             sorted_rows = sorted_rows.to_dict('records')
             writer.writerows(sorted_rows)
 
     def find_best_line(self, lines):
         df = pd.DataFrame(lines)
+        df.replace("NA", np.nan, inplace=True)
         df = df.astype({"{} IC50 Score".format(self.formatted_top_score_metric):'float'})
         return PvacfuseBestCandidate(
             self.top_score_metric,
@@ -293,9 +295,7 @@ class PvacbindTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
             writer.writeheader()
             lines_per_variant = defaultdict(list)
             for line in reader:
-                if line["{} IC50 Score".format(self.formatted_top_score_metric)] == 'NA':
-                    continue
-                lines_per_variant[line['Mutation']].append(line)
+                lines_per_variant[line['Index']].append(line)
 
             filtered_lines = []
             for index, lines in lines_per_variant.items():
@@ -303,11 +303,13 @@ class PvacbindTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
                 filtered_lines.append(best_line)
 
             sorted_rows = pvactools.lib.sort.pvacbind_sort(filtered_lines, self.top_score_metric, self.top_score_metric2)
+            sorted_rows = sorted_rows.fillna("NA")
             sorted_rows = sorted_rows.to_dict('records')
             writer.writerows(sorted_rows)
 
     def find_best_line(self, lines):
         df = pd.DataFrame(lines)
+        df.replace("NA", np.nan, inplace=True)
         df = df.astype({"{} IC50 Score".format(self.formatted_top_score_metric):'float'})
         return PvacbindBestCandidate(
             self.top_score_metric,
@@ -344,8 +346,6 @@ class PvacspliceTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
             writer.writeheader()
             lines_per_variant = defaultdict(list)
             for line in reader:
-                if line["{} IC50 Score".format(self.formatted_top_score_metric)] == 'NA':
-                    continue
                 lines_per_variant[line['Junction']].append(line)
 
             filtered_lines = []
@@ -354,11 +354,13 @@ class PvacspliceTopScoreFilter(TopScoreFilter, metaclass=ABCMeta):
                 filtered_lines.append(best_line)
 
             sorted_rows = pvactools.lib.sort.pvacsplice_sort(filtered_lines, self.top_score_metric, self.top_score_metric2)
+            sorted_rows = sorted_rows.fillna("NA")
             sorted_rows = sorted_rows.to_dict('records')
             writer.writerows(sorted_rows)
 
     def find_best_line(self, lines):
         df = pd.DataFrame(lines)
+        df.replace("NA", np.nan, inplace=True)
         df = df.astype({"{} IC50 Score".format(self.formatted_top_score_metric):'float'})
         return PvacspliceBestCandidate(
             self.transcript_prioritization_strategy,

@@ -47,7 +47,7 @@ This is a hotfix release. It fixes the following issues:
 
 This is a hotfix release. It fixes the following issues:
 
-- This releases fixes a concurrency issue with pVACapi/pVACviz that would occurr when
+- This releases fixes a concurrency issue with pVACapi/pVACviz that would occur when
   users would try to visualize multiple files at the same time.
 
 1.4.3

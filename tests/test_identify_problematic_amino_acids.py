@@ -16,7 +16,7 @@ class IdentifyProblematicAminoAcidsTests(unittest.TestCase):
         cls.identify_problematic_amino_acids_path = os.path.join(pvactools_directory(), "pvactools", "lib", "identify_problematic_amino_acids.py")
         cls.test_data_path= os.path.join(pvactools_directory(), "tests", "test_data", "identify_problematic_amino_acids")
 
-    def module_compiles(self):
+    def test_module_compiles(self):
         self.assertTrue(py_compile.compile(self.identify_problematic_amino_acids_path))
 
     def test_invalid_problematic_amino_acid_entry(self):

@@ -14,8 +14,7 @@ which prediction algorithms were chosen:
 - ``MHC_Class_II``: for MHC class II prediction algorithms
 - ``combined``: If both MHC class I and MHC class II prediction algorithms were run, this folder combines the neoepitope predictions from both
 
-Each folder will contain the same list of output files (listed in the order
-created):
+Each folder will contain the same list of output files (listed in the order created):
 
 .. list-table::
    :header-rows: 1
@@ -30,7 +29,7 @@ created):
    * - ``<sample_name>.fasta``
      - A fasta file with mutant and wildtype peptide subsequences for all
        processable variant-transcript combinations.
-   * - ``<sample_name>.net_chop.fa``
+   * - ``<sample_name>.net_chop.fa`` (optional)
      - A fasta file with mutant and wildtype peptide subsequences specific for use in running the net_chop tool.
    * - ``<sample_name>.<MHC_I|MHC_II|Combined>.all_epitopes.tsv``
      - A list of all predicted epitopes and their binding affinity scores, with
@@ -51,11 +50,13 @@ created):
      - A JSON file with detailed information about the predicted epitopes,
        formatted for pVACview. This file, in combination with the
        aggregated.tsv file, is required to visualize your results
-       in pVACview. Not generated when running only with presentation and immunogenicity algorithms.
-   * - ``ui.R``, ``app.R``, ``server.R``, ``styling.R``, ``anchor_and_helper_functions.R``
-     - pVACview R Shiny application files. Not generated when running only with presentation and immunogenicity algorithms.
+       in pVACview.
+   * - Various R files
+     - pVACview R Shiny application files.
    * - ``www`` (directory)
-     - Directory containing image files for pVACview. Not generated when running only with presentation and immunogenicity algorithms only.
+     - Directory containing image files for pVACview.
+   * - ``<sample_name>.MHC_I.all_epitopes.aggregated.ML_predict.tsv`` (optional)
+     - A version of the ``<sample_name>.MHC_I.all_epitopes.aggregated.tsv`` with ML-based neoantigen evaluation predictions. Generated when both MHC Class I and Class II predictions are run and the ``--run-ml-predictions`` flag is set. Written only to the ``MHC_Class_I`` folder.
 
 
 Filters applied to the filtered.tsv file
@@ -73,46 +74,6 @@ Please see the :ref:`Standalone Filter Commands<filter_commands>`
 documentation for more information on each individual filter. The standalone
 filter commands may be useful to reproduce the filtering or to chose different
 filtering thresholds.
-
-Prediction Algorithms Supporting Presentation Scores
-____________________________________________________
-
-- MHCflurryEL (Presentation and Processing)
-- NetMHCpanEL
-- NetMHCIIpanEL
-- BigMHC_EL
-
-Prediction Algorithms Supporting Immunogenicity Scores
-______________________________________________________
-
-- BigMHC_IM
-- DeepImmuno
-
-Please note that when running pVACseq with only presentation or immunogenicity algorithms, no
-aggregate report and pVACview files are created.
-
-Prediction Algorithms Supporting Percentile Information
-_______________________________________________________
-
-pVACseq outputs percentile rank information when provided by
-a chosen binding affinity, presentation, or immunogenicity prediction algorithm.
-The following prediction algorithms calculate a
-percentile rank:
-
-- MHCflurry
-- MHCflurryEL (Presentation)
-- MHCnuggets
-- NetMHC
-- NetMHCcons
-- NetMHCpan
-- NetMHCpanEL
-- NetMHCIIpan
-- NetMHCIIpanEL
-- NNalign
-- PickPocket
-- SMM
-- SMMPMBEC
-- SMMalign
 
 .. _all_ep_and_filtered:
 
@@ -141,8 +102,18 @@ all_epitopes.tsv and filtered.tsv Report Columns
        of the affected transcript. ``Not Supported`` if the VCF entry doesn't contain TSL information.
    * - ``Transcript Length``
      - The protein sequence length of the affected transcript
+   * - ``MANE Select`` (True/False/Not Run)
+     - Whether or not the Best Transcript is the MANE Select transcript.
+       ``Not Run`` if VCF was VEP-annotated without the ``--mane_select``
+       flag.
+   * - ``Canonical`` (True/False/Not Run)
+     - Whether or not the Best Transcript is the Canonical transcript. ``Not
+       Run`` if VCF was VEP-annotated without the ``--canonical`` flag.
    * - ``Biotype``
      - The biotype of the affected transcript
+   * - ``Transcript CDS Flags``
+     - A list of CDS flags set on the transcript by VEP. ``None`` if there are
+       none.
    * - ``Ensembl Gene ID``
      - The Ensembl ID of the affected gene
    * - ``Variant Type``
@@ -170,20 +141,46 @@ all_epitopes.tsv and filtered.tsv Report Columns
      - The mutant epitope sequence
    * - ``WT Epitope Seq``
      - The wildtype (reference) epitope sequence at the same position in the full protein sequence. ``NA`` if there is no wildtype sequence at this position or if more than half of the amino acids of the mutant epitope are mutated
+
+
+
    * - ``Best MT IC50 Score Method``
-     - Prediction algorithm with the lowest mutant ic50 binding affinity for this epitope
+     - Prediction algorithm with the lowest mutant IC50 binding affinity for this epitope
    * - ``Best MT IC50 Score``
-     - Lowest ic50 binding affinity of all prediction algorithms used
+     - Lowest IC50 binding affinity of all prediction algorithms used
    * - ``Corresponding WT IC50 Score``
-     - ic50 binding affinity of the wildtype epitope. ``NA`` if there is no ``WT Epitope Seq``.
+     - IC50 binding affinity of the wildtype epitope. ``NA`` if there is no ``WT Epitope Seq``.
    * - ``Corresponding Fold Change``
      - ``Corresponding WT IC50 Score`` / ``Best MT IC50 Score``. ``NA`` if there is no ``WT Epitope Seq``.
    * - ``Best MT Percentile Method``
-     - Prediction algorithm with the lowest binding affinity percentile rank for this epitope
+     - Prediction algorithm with the lowest percentile rank for this epitope
    * - ``Best MT Percentile``
-     - Lowest percentile rank of this epitope's ic50 binding affinity of all prediction algorithms used (those that provide percentile output)
+     - Lowest percentile rank of all prediction algorithms used (those that provide percentile output)
    * - ``Corresponding WT Percentile``
-     - binding affinity percentile rank of the wildtype epitope. ``NA`` if there is no ``WT Epitope Seq``.
+     - Percentile rank of the wildtype epitope using the ``Best MT Percentile
+       Method``. ``NA`` if there is no ``WT Epitope Seq``.
+
+   * - ``Best MT IC50 Percentile Method``
+     - Binding prediction algorithm with the lowest binding percentile rank for this epitope
+   * - ``Best MT IC50 Percentile``
+     - Lowest binding percentile rank of all binding prediction algorithms used (those that provide percentile output)
+   * - ``Corresponding WT IC50 Percentile``
+     - Binding percentile rank of the wildtype epitope using the ``Best MT
+       IC50 Percentile Method``. ``NA`` if there is no ``WT Epitope Seq``.
+   * - ``Best MT Immunogenicity Percentile Method``
+     - Immunogenicity prediction algorithm with the lowest immunogenicity percentile rank for this epitope
+   * - ``Best MT Immunogenicity Percentile``
+     - Lowest immunogenicity percentile rank of all immunogenicity prediction algorithms used (those that provide percentile output)
+   * - ``Corresponding WT Immunogenicity Percentile``
+     - Immunogenicity percentile rank of the wildtype epitope using the ``Best
+       MT Immunogenicity Percentile Method``. ``NA`` if there is no ``WT Epitope Seq``.
+   * - ``Best MT Presentation Percentile Method``
+     - Presentation prediction algorithm with the lowest presentation percentile rank for this epitope
+   * - ``Best MT Presentation Percentile``
+     - Lowest presentation percentile rank of all presentation prediction algorithms used (those that provide percentile output)
+   * - ``Corresponding WT Presentation Percentile``
+     - Presentation percentile rank of the wildtype epitope using the ``Best
+       MT Presentation Percentile Method``. ``NA`` if there is no ``WT Epitope Seq``.
    * - ``Tumor DNA Depth``
      - Tumor DNA depth at this position. ``NA`` if VCF entry does not contain tumor DNA readcount annotation.
    * - ``Tumor DNA VAF``
@@ -206,23 +203,41 @@ all_epitopes.tsv and filtered.tsv Report Columns
      - Transcript expression value for the annotated transcript containing the variant. ``NA`` if VCF entry does
        not contain transcript expression annotation.
    * - ``Median MT IC50 Score``
-     - Median ic50 binding affinity of the mutant epitope across all prediction algorithms used
+     - Median IC50 binding affinity of the mutant epitope across all binding prediction algorithms used
    * - ``Median WT IC50 Score``
-     - Median ic50 binding affinity of the wildtype epitope across all prediction algorithms used.
+     - Median IC50 binding affinity of the wildtype epitope across all binding prediction algorithms used.
        ``NA`` if there is no ``WT Epitope Seq``.
    * - ``Median Fold Change``
      - ``Median WT IC50 Score`` / ``Median MT IC50 Score``. ``NA`` if there is no ``WT Epitope Seq``.
    * - ``Median MT Percentile``
-     - Median binding affinity percentile rank of the mutant epitope across all prediction algorithms (those that provide percentile output)
+     - Median percentile rank of the mutant epitope across all prediction algorithms (those that provide percentile output)
    * - ``Median WT Percentile``
-     - Median binding affinity percentile rank of the wildtype epitope across all prediction algorithms used (those that provide percentile output)
+     - Median percentile rank of the wildtype epitope across all prediction algorithms used (those that provide percentile output)
        ``NA`` if there is no ``WT Epitope Seq``.
-   * - ``Individual Prediction Algorithm WT and MT IC50 Scores and Percentiles`` (multiple)
-     - ic50 binding affintity and percentile ranks for the ``MT Epitope Seq`` and ``WT Eptiope Seq`` for the individual prediction algorithms used
-   * - ``MHCflurryEL WT and MT Processing Score and Presentation Score and Percentile`` (optional)
-     - MHCflurry processing score and presentation score and percentiles
-       for the ``MT Epitope Seq`` and ``WT Epitiope Seq`` if the run included
-       MHCflurryEL as one of the prediction algorithms
+   * - ``Median MT IC50 Percentile``
+     - Median binding percentile rank of the mutant epitope across all binding prediction algorithms (those that provide percentile output)
+   * - ``Median WT IC50 Percentile``
+     - Median binding percentile rank of the wildtype epitope across all
+       binding prediction algorithms used (those that provide percentile output)
+       ``NA`` if there is no ``WT Epitope Seq``.
+   * - ``Median MT Immunogenicity Percentile``
+     - Median immunogenicity percentile rank of the mutant epitope across all
+       immunogenicity prediction algorithms (those that provide percentile output)
+   * - ``Median WT Immunogenicity Percentile``
+     - Median immunogenicity percentile rank of the wildtype epitope across
+       all immunogenicity prediction algorithms used (those that provide percentile output)
+       ``NA`` if there is no ``WT Epitope Seq``.
+   * - ``Median MT Presentation Percentile``
+     - Median presentation percentile rank of the mutant epitope across all
+       presentation prediction algorithms (those that provide percentile output)
+   * - ``Median WT Presentation Percentile``
+     - Median presentation percentile rank of the wildtype epitope across all
+       presentation prediction algorithms used (those that provide percentile output)
+       ``NA`` if there is no ``WT Epitope Seq``.
+   * - ``Individual Prediction Algorithm WT and MT Scores and Percentiles`` (multiple)
+     - ic50 binding affinity scores, binding scores, presentation scores, processing scores, or immunogenicity scores as well as percentile ranks
+       for the ``MT Epitope Seq`` and ``WT Eptiope Seq`` for the individual prediction algorithms used. Percentile scores may be ``NA`` if not
+       provided by the prediction algorithm.
    * - ``Index``
      - A unique idenitifer for this variant-transcript combination
    * - ``Problematic Positions`` (optional)
@@ -265,7 +280,7 @@ all_epitopes.tsv and filtered.tsv Report Columns
      - Nearest neighbor to the ``HLA Allele``. Used for NetMHCstab prediction
 
 .. image:: ../images/output_file_columns.png
-    :alt: pVACseq ouput file columns illustration
+    :alt: pVACseq output file columns illustration
 
 .. _aggregated:
 
@@ -305,10 +320,10 @@ If the Best Peptide does not meet the aggregate inclusion criteria, it will be s
 included in the metrics.json file and counted in the ``Num Included
 Peptides``.
 
-Whether the median or the lowest binding affinity metrics are used for determining the
-included epitopes, selecting the best-scoring epitope, and which values are output in the ``IC50 MT``,
-``IC50 WT``, ``%ile MT``, and ``%ile WT`` columns is controlled by the
-``--top-score-metric`` parameter.
+Whether the median or the lowest binding affinity metrics are used for determining
+the included epitopes, selecting the best-scoring epitope, and which values are
+output in the IC50 and %ile columns is controlled by the ``--top-score-metric``
+parameter.
 
 .. list-table::
    :header-rows: 1
@@ -330,7 +345,7 @@ included epitopes, selecting the best-scoring epitope, and which values are outp
      - The number of transcripts for this mutation that resulted in at least
        one well-binding peptide (median/lowest mutant binding affinity < 500).
    * - ``Best Peptide``
-     - The best-binding mutant epitope sequence (see Best Peptide Criteria
+     - The best mutant epitope sequence (see Best Peptide Criteria
        below for more details on how this is determined)
    * - ``Best Transcript``
      - The best transcript of all transcripts coding for the Best Peptide (see
@@ -362,13 +377,25 @@ included epitopes, selecting the best-scoring epitope, and which values are outp
    * - ``Num Passing Peptides``
      - The number of included peptides for this mutation that are well-binding.
    * - ``IC50 MT``
-     - Median or lowest ic50 binding affinity of the best-binding mutant epitope across all prediction algorithms used
+     - Median or lowest ic50 binding affinity of the Best Peptide across all prediction algorithms used
    * - ``IC50 WT``
      - Median or lowest ic50 binding affinity of the corresponding wildtype epitope across all prediction algorithms used.
    * - ``%ile MT``
-     - Median or lowest binding affinity percentile rank of the best-binding mutant epitope across all prediction algorithms used (those that provide percentile output)
+     - Median or lowest percentile rank of the Best Peptide across all prediction algorithms used
    * - ``%ile WT``
-     - Median or lowest binding affinity percentile rank of the corresponding wildtype epitope across all prediction algorithms used (those that provide percentile output)
+     - Median or lowest percentile rank of the corresponding wildtype epitope across all prediction algorithms used
+   * - ``IC50 %ile MT``
+     - Median or lowest binding percentile rank of the Best Peptide across all binding prediction algorithms used
+   * - ``IC50 %ile WT``
+     - Median or lowest binding percentile rank of the corresponding wildtype epitope across all binding prediction algorithms used
+   * - ``IM %ile MT``
+     - Median or lowest immunogenicity percentile rank of the Best Peptide across all immunogenicity prediction algorithms used
+   * - ``IM %ile WT``
+     - Median or lowest immunogenicity percentile rank of the corresponding wildtype epitope across all immunogenicity prediction algorithms used
+   * - ``Pres %ile MT``
+     - Median or lowest presentation percentile rank of the Best Peptide across all presentation prediction algorithms used
+   * - ``Pres %ile WT``
+     - Median or lowest presentation percentile rank of the corresponding wildtype epitope across all presentation prediction algorithms used
    * - ``RNA Expr``
      - Gene expression value for the annotated gene containing the variant.
    * - ``RNA VAF``
@@ -382,10 +409,33 @@ included epitopes, selecting the best-scoring epitope, and which values are outp
    * - ``Tier``
      - A tier suggesting the suitability of variants for use in vaccines.
    * - ``Ref Match`` (True/False/Not Run)
-     - Wether or not there a match of the mutated peptide sequence to the reference proteome. ``Not Run`` if ``--run-reference-proteome-simlarity``
+     - Whether or not there a match of the mutated peptide sequence to the reference proteome. ``Not Run`` if ``--run-reference-proteome-simlarity``
        flag was not set during the pVACseq run.
    * - ``Evaluation``
      - Column to store the evaluation of each variant when evaluating the run in pVACview. Either ``Accept``, ``Reject``, or ``Review``.
+
+.. _ml_prediction_output:
+
+<sample_name>.MHC_I.all_epitopes.aggregated.ML_predict.tsv Report Columns
+--------------------------------------------------
+
+The ``<sample_name>.MHC_I.all_epitopes.aggregated.ML_predict.tsv`` file is generated when using the :ref:`add_ml_predictions <optional_downstream_analysis_tools_label>` 
+tool or when running pVACseq with both MHC Class I and Class II predictions and the ``--run-ml-predictions`` flag enabled. 
+This file contains all columns from the Class I aggregated file (``all_epitopes.aggregated.tsv``) with one additional ML prediction column added.  
+
+The file is written to the same folder as the Class I aggregated file (``MHC_Class_I`` within the output directory).
+
+.. list-table::
+   :header-rows: 1
+
+   * - Column Name
+     - Description
+   * - All columns from ``<sample_name>.MHC_I.all_epitopes.aggregated.tsv``
+     - All columns described in the :ref:`aggregated` section above are included in this file.
+   * - ``Evaluation``
+     - Populated with ML-predicted evaluation status for each candidate. Values: ``Accept`` for variants with prediction probability >= ``ml-threshold-accept`` (default: 0.55), ``Reject`` for variants with prediction probability <= ``ml-threshold-reject`` (default: 0.30), and ``Pending`` for variants with prediction probability between ``ml-threshold-reject`` and ``ml-threshold-accept`` or when the ML model cannot make a prediction due to missing data.
+   * - ``ML Prediction (score)``
+     - ML-based prediction evaluation with probability score. Format: ``"<Evaluation> (<probability_score>)"`` (e.g., ``"Accept (0.72)"``, ``"Reject (0.15)"``, ``"Review (0.48)"``). Shows ``"NA"`` when the ML model cannot make a prediction due to missing data (e.g., when Class I and Class II aggregated files have different numbers of rows).
 
 .. _pvacseq_best_peptide:
 
@@ -406,9 +456,12 @@ To determine the Best Peptide, all peptides meeting the
 - Of the remaining entries, pick the entries with no ``Problematic Positions``.
 - Of the remaining entries, pick the ones passing the Anchor Criteria (see
   Criteria Details section below)
-- Sort the remaining entries by lowest ``Median|Best MT IC50 Score|Percentile``
-  (depending on the selected ``--top-score-metric`` and
-  ``--top-score-metric2``), ``MANE Select`` (True), ``Canonical`` (True),
+- For the remaining entries, calculate a rank for all the metrics specified
+  via the ``--top-score-metric2`` parameter and sum them. Whether the lowest or median value
+  is considered for each metric is controlled by the ``--top-score-metric`` parameter.
+  Sort the remaining entries on this sum rank followed by the rank of the first
+  ``--top-score-metric2`` specified (to break
+  any ties in the sum rank), ``MANE Select`` (True), ``Canonical`` (True),
   ``Transcript Support Level``, ``Transcript Length``, and ``Transcript
   Expression``. Select the highest sorted entry.
 
@@ -438,13 +491,21 @@ To tier the Best Peptide, several cutoffs can be adjusted using arguments provid
        ``--binding-threshold`` as a fallback. To print a list of alleles that have
        specific binding thresholds and the value of those thresholds, run ``pvacseq allele_specific_cutoffs``.
      - False
-   * - ``--percentile-threshold``
-     - When set, use this threshold to filter epitopes on the %ile MT score in addition to having to meet the binding threshold.
-     - None
+   * - ``--binding-percentile-threshold``
+     - Use this threshold to filter epitopes on the IC50 %ile MT score.
+     - 2.0
+   * - ``--presentation-percentile-threshold``
+     - Use this threshold to filter epitopes on the Pres %ile MT score.
+     - 2.0
+   * - ``--immunogenicity-percentile-threshold``
+     - Use this threshold to filter epitopes on the IM %ile MT score.
+     - 2.0
    * - ``--percentile-threshold-strategy``
-     - Specify the candidate inclusion strategy. The ``conservative`` option requires a candidate to pass BOTH the binding threshold
-       and percentile threshold (if set). The ``exploratory`` option requires a candidate to pass EITHER the binding threshold or
-       the percentile threshold.
+     - Specify the candidate inclusion strategy. The ``conservative`` option requires a candidate to pass the
+       binding threshold, the binding percentile threshold, the presentation percentile threshold, AND the
+       immunogenicity percentile threshold. The ``exploratory`` option requires a candidate to pass EITHER the
+       binding threshold, the binding percentile threshold, the presentation percentile threshold, OR the
+       immunogenicity percentile threshold.
      - conservative
    * - ``--tumor-purity``
      - Value between 0 and 1 indicating the fraction of tumor cells in the tumor sample. Information is used for a simple estimation of
@@ -496,23 +557,27 @@ Given the thresholds provided above, the Best Peptide is evaluated and binned in
    :header-rows: 1
 
    * - Tier
-     - Citeria
+     - Criteria
    * - ``Pass``
-     - Best Peptide passes the binding, reference match, expression, transcript, clonal, problematic position, and anchor criteria
+     - Best Peptide passes the scores, reference match, expression, transcript, clonal, problematic position, and anchor criteria
    * - ``PoorBinder``
-     - Best Peptide fails the binding criteria but passed the reference match, expression, transcript, clonal, problematic position, and anchor criteria
+     - Best Peptide fails the binding criteria but passed the presentation, immunogenicity, reference match, expression, transcript, clonal, problematic position, and anchor criteria
+   * - ``PoorPresentation``
+     - Best Peptide fails the presentation criteria but passed the binding, immunogenicity, reference match, expression, transcript, clonal, problematic position, and anchor criteria
+   * - ``PoorImmunogenicity``
+     - Best Peptide fails the immunogenicity criteria but passed the binding, presentation, reference match, expression, transcript, clonal, problematic position, and anchor criteria
    * - ``RefMatch``
-     - Best Peptide fails the reference match criteria but passes the binding, expression, transcript, clonal, problematic position, and anchor criteria
+     - Best Peptide fails the reference match criteria but passes the scores, expression, transcript, clonal, problematic position, and anchor criteria
    * - ``PoorTranscript``
-     - Best Peptide fails the transcript criteria but passes the binding, reference match, expression, clonal, problematic position, and anchor criteria
+     - Best Peptide fails the transcript criteria but passes the scores, reference match, expression, clonal, problematic position, and anchor criteria
    * - ``LowExpr``
-     - Best Peptide meets the low expression criteria and passes the binding, reference match, transcript, clonal, problematic position, and anchor criteria
+     - Best Peptide meets the low expression criteria and passes the scores, reference match, transcript, clonal, problematic position, and anchor criteria
    * - ``Anchor``
-     - Best Peptide fails the anchor criteria but  passes the binding, reference match, expression, transcript, clonal, and problematic position criteria
+     - Best Peptide fails the anchor criteria but  passes the scores, reference match, expression, transcript, clonal, and problematic position criteria
    * - ``Subclonal``
-     - Best Peptide fails the clonal criteria but passes the binding, reference match, expression, transcript, problematic position, and anchor criteria
+     - Best Peptide fails the clonal criteria but passes the scores, reference match, expression, transcript, problematic position, and anchor criteria
    * - ``ProbPos``
-     - Best Peptide fails the problematic position criteria but passes the binding, reference match, expression, transcript, clonal, and anchor criteria
+     - Best Peptide fails the problematic position criteria but passes the scores, reference match, expression, transcript, clonal, and anchor criteria
    * - ``Poor``
      - Best Peptide doesn't fit in any of the above tiers, usually if it fails
        two or more criteria
@@ -532,19 +597,32 @@ Criteria Details
      - Pass if Best Peptide is strong binder
      - binding score criteria: ``IC50 MT < binding_threshold``
 
-       percentile score criteria (if ``--percentile-threshold`` parameter is
-       set): ``%ile MT < percentile_threshold``
+       binding percentile score criteria: ``IC50 %ile MT < binding_percentile_threshold``
 
        ``conservative`` ``--percentile-threshold-strategy``: needs to pass
-       BOTH the binding score criteria AND the percentile score criteria
+       BOTH the binding score criteria AND the binding percentile score criteria
 
        ``exploratory`` ``--percentile-threshold-strategy``: needs to pass
-       EITHER the binding score criteria OR the percentile score criteria
+       EITHER the binding score criteria OR the binding percentile score criteria
+   * - Presentation Criteria
+     - Pass if the Best Peptide is presented by the MHC
+     - ``Pres %ile MT < presentation_percentile_threshold``
+   * - Immunogenicity Criteria
+     - Pass if the Best Peptide is immunogenic
+     - ``IM %ile MT < immunogenicity_percentile_threshold``
+   * - Scores Criteria
+     - Pass if the Best Peptide is a strong binder, presented by the MHC,
+       and/or immunogenic
+     - ``conservative`` ``--percentile-threshold-strategy``: needs to pass
+       the binding criteria, the presentation criteria, AND the immunogenicity criteria
+
+       ``exploratory`` ``--percentile-threshold-strategy``: needs to pass
+       the binding criteria, the presentation criteria, OR the immunogenicity criteria
    * - Expression Criteria
      - Pass if Best Transcript is expressed
      - ``Allele Expr > trna_vaf * expn_val``
    * - Reference Match Criteria
-     - Pass if there are no reference protome matches
+     - Pass if there are no reference proteome matches
      - ``Ref Match == False``
    * - Transcript Criteria
      - Pass if Best Transcript matches any of the user-specified ``--transcript-prioritization-strategy`` criteria
@@ -582,11 +660,15 @@ The aggregate report is sorted as follows:
    * - Sort Criteria
      - Sort Order
    * - ``Tier`` column
-     - "Pass", "PoorBinder", "RefMatch", "PoorTranscript", "LowExpr", "Anchor", "Subclonal", "ProbPos", "Poor", "NoExpr"
-   * - Ascending rank of ``Allele Expr`` column + ascending rank of either ``IC50 MT`` column (if
-       ``--top-score-metric`` is ``ic50``) or ``%ile MT`` column (if
-       ``--top-score-metric`` is ``percentile``)
+     - "Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "PoorTranscript", "LowExpr", "Anchor", "Subclonal", "ProbPos", "Poor", "NoExpr"
+   * - Sum of ascending ranks of ``Allele Expr`` and the ascending ranks of
+       the metrics selected via the ``--top-score-metric2`` parameter (possible values:
+       ``IC50 MT``, ``%ile MT``, ``IC50 %ile MT``, ``Pres %ile MT``; default: ``IC50 MT``,
+       ``%ile MT``).
      - Ascending sum rank
+   * - First metric specified in the ``--top-score-metric2`` as a tie breaker
+       for identical sum ranks
+     - Ascending rank
    * - ``Gene`` column
      - Alphabetical
    * - ``AA Change`` column

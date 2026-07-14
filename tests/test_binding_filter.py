@@ -16,7 +16,7 @@ class BindingFilterTests(unittest.TestCase):
         cls.binding_filter_path = os.path.join(pvactools_directory(), "pvactools", "lib", "binding_filter.py")
         cls.test_data_path= os.path.join(pvactools_directory(), "tests", "test_data", "binding_filter")
 
-    def module_compiles(self):
+    def test_module_compiles(self):
         self.assertTrue(py_compile.compile(self.binding_filter_path))
 
     def test_binding_filter_runs_and_produces_expected_output_top_score_metric_median_percentile_strategy_conservative(self):
@@ -148,5 +148,20 @@ class BindingFilterTests(unittest.TestCase):
         self.assertTrue(cmp(
             output_file.name,
             os.path.join(self.test_data_path, "Test.filtered.allele_specific_binding.exploratory.tsv"),
+            False
+        ))
+
+    def test_binding_filter_runs_and_produces_expected_output_immunogenicity_only(self):
+        output_file = tempfile.NamedTemporaryFile()
+        self.assertFalse(BindingFilter(
+            os.path.join(
+                self.test_data_path,
+                'HCC1395.im_only.all_epitopes.short.tsv'
+            ),
+            output_file.name,
+        ).execute())
+        self.assertTrue(cmp(
+            output_file.name,
+            os.path.join(self.test_data_path, "HCC1395.im_only.filtered.tsv"),
             False
         ))

@@ -25,7 +25,7 @@ tools:
    users in reviewing, exploring and prioritizing neoantigens from the results of
    pVACtools processes for personalized cancer vaccine design.
 
-.. image:: images/pVACtools_main-figure_v8.png
+.. image:: images/pVACtools_workflow_6.0.0.png
     :align: center
     :alt: pVACtools immunotherapy workflow
 
@@ -59,81 +59,118 @@ Contents
    mailing_list
 
 
-New in Version |release|
-------------------------
+Version 7.0.1
+-------------
 
-This is a minor version release. It adds the following features:
+This is a bugfix release. It fixes the following problem(s):
 
-* Add ability to change port to serve pVACview to (``--port`` parameter). by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1354
-* Add a ``pvacseq|fuse|bind|splice aggregate_report_filter`` command to filter aggregated report on variant Tier. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1368
-* Add a ``--length`` parameter to the ``pvacseq|fuse|splice|bind|vector valid_alleles`` commands to filter alleles to ones that work for a specific epitope length. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1372
-* Clarify help texts to differentiate between hard filtering and prioritizing/tiering. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1373
-* Add codemeta.json file to repo. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1374
+* Bring sort_included_df logic in line with getting the best peptide so that
+  when the number of included peptides exceeds the
+  aggregate_inclusion_count_limit the logic for picking the included peptides
+  is the same as for getting the best peptide. by @susannasiebert in
+  https://github.com/griffithlab/pVACtools/pull/1403
+* Add missing argument hook up for transcript_prioritization_strategy and
+  aggregate_inclusion_count_limit in standalone top score filter and aggregate
+  report creation commands, respectively. by @susannasiebert in
+  https://github.com/griffithlab/pVACtools/pull/1404
+* Fully hook up normalized percentile calculation for pVACfuse and pVACsplice pipelines.
+  by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1405
+  and https://github.com/griffithlab/pVACtools/pull/1406
+* Resolved nondeterministic sorting in reference match comparisons. by
+  @ldhtnp in https://github.com/griffithlab/pVACtools/pull/1402
 
-Additionally, it fixes the following problem(s):
-
-* Fix an error in the output parser that occurs with very long insertions. by @CSi-Ti in https://github.com/griffithlab/pVACtools/pull/1367
-* Support splice site with multiple matching somatic variants that would previously throw an error. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1369
-
-New in Version 6
+New in Version 7
 ----------------
 
-This is a major version release. Please note that pVACtools 6.0 is not guaranteed to be
-backwards-compatible and certain changes could break old workflows. It also
-removes support for Python 3.7 and 3.8.
+This is a major version release. Please note that pVACtools 7.0 is not guaranteed to be
+backwards-compatible and certain changes could break old workflows.
 
 New Tools
 _________
 
-- A new tool, pVACcompare allows users to visualize differences between output
-  files from different pVACtools versions. This tool may be useful when
-  investigating changes to predicted neoantigens between versions in
-  controlled experiments where enumerating and explaning such differences may be
-  crucial, e.g. in clinical trials. The tool can be run using the ``pvactools
-  compare`` command. For more information please see the
-  `Comparison Tool documentation
-  <https://pvactools.readthedocs.io/en/staging/helper_tools/comparison_tool.html>`_.
-- A new standalone command ``pvacseq create_peptide_ordering_form`` generates
-  peptide ordering files (FASTA, annotated ordering Excel spreadsheet,
-  and review template Excel spreadsheet) to streamline preparation of peptides
-  for synthesis and review. For more information please see the `documentation
-  <https://pvactools.readthedocs.io/en/latest/pvacseq/optional_downstream_analysis_tools.html#create-peptide-ordering-form>`_
+* pVACseq now has the option of running machine learning (ML)-based neoantigen prioritization
+  predictions. The ML predictor uses a trained random forest model to predict whether neoantigen
+  candidates in the aggregated report should be evaluated as "Accept", "Reject", or "Pending"
+  based on a comprehensive set of features derived from binding affinity predictions, expression
+  data, and variant characteristics. The ML predictor can be enabled by adding the ``--run-ml-predictions``
+  parameter to a pVACseq run. More details can be found in the :ref:`output file documentation <ml_prediction_output>`,
+  the :ref:`vignette <pvacseq_vignette>`.
 
 New Features
 ____________
 
-- pVACseq and pVACsplice now take into account the MANE Select and Canonical status of a transcript
-  for filtering, prioritizing, and tiering a neoantigen candidate. MANE Select, Canonical, and TSL
-  status is evaluated according to the new ``--transcript-prioritization-strategy`` parameter. This
-  parameter allows users to list one or more critieria (``mane_select``, ``canonical``, ``tsl``) to
-  take into consideration. As part of this update the "transcript support level filter" has been
-  renamed to "transcript filter" including the standalone command which is now
-  ``pvacseq|pvacsplice transcript_filer`` instead of ``pvacseq|pvacsplice transcript_support_level_filter``.
-- The aggregate report tiers have been updated to add four new tier:
+- pVACtools now supports multiple additional prediction algorithms:
 
-  - ``PoorBinder``: candidate fails the binding criteria but passes all other critieria.
-  - ``RefMatch``: candidate has a reference match but passes all other criteria.
-  - ``ProbPos``: candidate has a problematic amino acid but passes all other criteria.
-  - ``PoorTranscript``: a candidate's best transcript is neither MANE Select, Canonical, nor meets
-    the TSL cutoff (depending on the specified ``transcript-prioritization-strategy``; only available
-    in pVACseq and pVACsplice).
+  - MixMHCpred (class I binding score and percentile)
+  - MixMHC2pred (class II binding score and percentile)
+  - PRIME (class I immunogenicity score and percentile)
+  - ImmuScope (class II immunogenicity score)
 
-- A new set of standalone commands, ``pvacseq|fuse|splice|bind update_tiers``,
-  has been added to update the tiering in an aggregate report if different
-  tiering thresholds are desired after the initial pipeline run.
-- By default, transcripts where the FLAGS VEP annotation is set will now be filtered out before processing
-  by pVACseq and pVACsplice. This field identifies transcripts where the CDS 5' or 3' is incomplete. A new
-  parameter ``--allow-incomplete-transcripts`` has been added which can be used to replicate the previous
-  behavior where such transcripts were included.
-- The pVACsplice logic for aggregating variants in the aggregate report creation has been updated to
-  aggregate neoantigen candidates from the same Junction together instead of using the Index.
-- Output file names of the reports have been updated to include MHC_I/MHC_II/Combined prefixes for easier
-  identification of the type of output file.
+- In order to support a more comprehensive evaluation of candidates, aggregate binding, presentation,
+  and immunogenicity information is now available in the final reports and is used to filter, prioritize,
+  and tier candidates:
 
-Bugfixes
-________
+  - Best and median binding percentiles, presentation percentiles and
+    immunogenicity percentiles are now calculate in the all_epitopes.tsv,
+    filtered.tsv, and aggregated.tsv files in addition to the previously
+    available combined percentiles that were aggregating percentile ranks
+    over all prediction algorithms regardless of algorithm type.
+  - Three new parameters - ``--binding-percentile-threshold``, ``--presentation-percentile-threshold``,
+    and ``--immunogenicity-percentile-threshold`` replace the old
+    ``--percentile-threshold``. These three new thresholds have been updated
+    to use a default of 2.0 instead of not having a default. This means that
+    filtering and tiering will now by default include evaluation of binding,
+    presentation, and immunogenicity percentiles.
+  - The aggregate report ``PoorBinding`` tier now evaluates the IC50
+    binding affinity as well as the binding percentile. Candidates failing
+    either threshold (when a ``conservative`` ``--percentile-threshold strategy`` is
+    selected, default) or both thresholds (when a ``exploratory``
+    ``--percentile-threshold-strategy`` is selected) will be binned in this
+    tier when all other evaluation criteria are passed.
+  - Two new tiers, ``PoorPresentation`` and ``PoorImmunogenicity``, are
+    added to bin candidates that failed the
+    ``--presentation-percentile-threshold`` or
+    ``--immunogenicity-percentile--threshold``, respectively, when all other
+    evaluation criteria are passed.
+  - pVACvector has been updated to work on the binding percentile instead of the
+    combined percentile. The corresponding parameter has been renamed to
+    ``--binding-percentile-threshold`` with a new default of 2.0. The junction
+    output file header recording each junction's binding percentile has been
+    updated from ``percentile`` to ``binding_percentile`` to reflect this change.
+  - pVACview has been updated to display more information regarding
+    immunogenicity and presentation scores.
+  - pVACtools runs that do not use a binding predictor would previously skip
+    the binding filter, top score filter, and the aggregate report creation. These
+    steps will now be run.
 
-- This relase fixes a bug with sorting of pVACfuse output files.
+- The ``--top-score-metric2`` has been updated for sorting candidates and
+  determining the criteria for selecting the Best
+  Peptide (in the aggregate report) and top candidate (in the top score
+  filter). It is now a list of criteria to consider. All listed criteria are
+  assigned a rank and the sum of those ranks is used. By default both the IC50
+  (``ic50``) and the combined percentile (``combined_percentile``) are used.
+  Other allowed values are the binding percentile (``binding_percentile``),
+  the presentation percentile (``presentation percentile``), and the
+  immunogenicity percentile (``immunogenicity_percentile``). Any number and
+  combination of these five criteria may be specified.
+- Not all prediction algorithms supported by pVACtools may support a
+  percentile rank. In order to alleviate this issue, and to provide percentile
+  ranks that have been consistently calculated, we have run predictions for
+  all class I algorithms supported by pVACtools on 100,000 reference peptides each in
+  lengths 8-11 and for the most common 1,000 human class I MHC alleles. These
+  predictions support a new feature in pVACtools: normalized percentiles
+  (``--use-normalized-percentiles``). With this option enabled, any of the
+  pVACtools pipelines will calculate normalized percentiles scores for all
+  predicted neoantigen candidates and selected prediction algorithms. These
+  normalized percentile ranks will be used in place of percentile ranks
+  calculated by the algorithms natively. Predictions for allele or lengths we
+  have not calculated reference scores will result in ``NA`` percentile ranks.
+  Turning on this option in class II runs or with non-human data will be
+  ignored. The peptides used in our predictions and the raw scores we calculated are
+  available at https://github.com/griffithlab/pvactools_percentiles_data.
+- In pVACbind and pVACfuse the ``Mutation`` column name in the various report
+  files has been renamed to ``Index`` in order to ensure consistency between
+  these and other tools.
 
 Past release notes can be found on our :ref:`releases` page.
 

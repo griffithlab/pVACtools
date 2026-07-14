@@ -178,10 +178,12 @@ class OutputParserTests(unittest.TestCase):
     def test_parse_output_runs_and_produces_expected_output_with_all_class_ii_files(self):
         parse_output_input_iedb_files = [
             os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.MHCnuggetsII.DRB1*04:05.12.tsv_1-200"),
+            os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.MixMHC2pred.DRB1*04:05.12.tsv_1-200"),
             os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.netmhciipan_ba.DRB1*04:05.12.tsv_1-200"),
             os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.netmhciipan_el.DRB1*04:05.12.tsv_1-200"),
             os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.nn_align.DRB1*04:05.12.tsv_1-200"),
             os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.smm_align.DRB1*04:05.12.tsv_1-200"),
+            os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.ImmuScope_IM.DRB1*04:05.12.tsv_1-200"),
         ]
         parse_output_input_tsv_file = os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.tsv_1-100")
         parse_output_key_file = os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.12.fa.split_1-200.key")

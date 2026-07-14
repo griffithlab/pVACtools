@@ -279,7 +279,7 @@ class CalculateReferenceProteomeSimilarity:
                 full_peptide = mt_records_dict[line['ID']]
                 epitope = line['Best Peptide']
             else:
-                full_peptide = mt_records_dict[line['Mutation']]
+                full_peptide = mt_records_dict[line['Index']]
                 epitope = line['Epitope Seq']
             index = full_peptide.index(epitope)
             start_pos = index - (self.match_length-1)
@@ -292,7 +292,7 @@ class CalculateReferenceProteomeSimilarity:
             if self._input_tsv_type(line) == 'aggregated':
                 identifier = line['ID']
             else:
-                identifier = line['Mutation']
+                identifier = line['Index']
             if identifier in mt_records_dict:
                 peptide = mt_records_dict[identifier]
             else:
@@ -527,7 +527,7 @@ class CalculateReferenceProteomeSimilarity:
                         metric_line['Reference'] = ref
                         metric_line['Variant'] = alt
                     if 'ID' not in line:
-                        metric_line['ID'] = line['Mutation']
+                        metric_line['ID'] = line['Index']
                     metric_line['Peptide'] = peptide
                     if self._input_tsv_type(line) == 'aggregated':
                         epitope_seq_header = 'MT Epitope Seq' if self.file_type == 'pVACseq' else 'Epitope Seq'

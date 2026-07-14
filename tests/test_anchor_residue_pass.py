@@ -12,7 +12,7 @@ class AnchorResiduePassTests(unittest.TestCase):
         cls.utils_path = os.path.join(pvactools_directory(), "pvactools", "lib", "anchor_residue_pass.py")
         cls.test_data_dir = os.path.join(pvactools_directory(), "tests", "test_data", "anchor_residue_pass")
 
-    def module_compiles(self):
+    def test_module_compiles(self):
         self.assertTrue(py_compile.compile(self.utils_path))
 
     def test_get_anchor_positions(self):

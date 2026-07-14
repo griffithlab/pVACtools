@@ -18,7 +18,7 @@ class RunUtilsTests(unittest.TestCase):
         cls.utils_path = os.path.join(pvactools_directory(), "pvactools", "lib", "run_utils.py")
         cls.test_data_dir = os.path.join(pvactools_directory(), "tests", "test_data", "run_utils")
 
-    def module_compiles(self):
+    def test_module_compiles(self):
         self.assertTrue(py_compile.compile(self.utils_path))
 
     def test_combine_class_ii_alleles(self):

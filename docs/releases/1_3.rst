@@ -123,7 +123,7 @@ This version is a hotfix release. It fixes the following issues:
   multiple retries hitting at the same time has now been reduced.
 - When encountering a truncated input VCF, the VCF parser used by pVACtools
   would throw an error that was not indicative of the real error source.
-  pVACseq now catches these errors and emmits a more descriptive error message
+  pVACseq now catches these errors and emits a more descriptive error message
   when encountering a truncated VCF.
 - One option when annotating a VCF with VEP is the ``-total-length`` flag. When
   using this flag, the total length would be written to the

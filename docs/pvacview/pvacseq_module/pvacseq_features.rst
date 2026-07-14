@@ -31,16 +31,20 @@ helping you in prioritizing which variants to focus on first. Details on the rep
 
 As shown, different cells of the report table are highlighted in various ways:
 
-- :bold:`IC50 MT and %ile MT columns:`
-    The IC50 MT and %ile MT columns represent the median/lowest predicted IC50 binding affinities and median/lowest predicted binding
-    percentiles. Whether these columns contain median or lowest data depends on the value set for the ``--top-score-metric`` in the
-    original pVACseq run. Different colors are used to give a general idea of where predictions fall in relation to the binding threshold
-    and percentile threshold set:
+- :bold:`IC50 MT, %ile MT, IC50 %ile MT, Pres %ile MT, and IM %ile MT columns:`
+    The IC50 MT, %ile MT, IC50 %ile MT, Pred %ile MT, and IM %ile MT columns represent the median/lowest
+    predicted IC50 binding affinities, combined percentiles, binding percentiles, presentation percentiles,
+    and immunogenicity percentiles, respectively. Whether these columns contain median or lowest data depends
+    on the value set for the ``--top-score-metric`` in the original pVACseq run. Different background colors
+    are used to give a general idea of where predictions fall in relation to their respective thresholds set:
 
-    - IC50 MT < binding threshold and %ile MT < percentile threshold colored with shades of green
-    - binding threshold < IC50 MT < (2 * binding threshold) and percentile threshold < %ile MT < (2 * percentile threshold) colored with shades of orange
-    - IC50 MT > (2 * binding threshold) and %ile MT > (2 * percentile
-      threshold) colored with red
+    - If a value is less than the respective threshold set it is colored with shades of green
+    - If a value falls between its threshold and double its threshold it is colored with shades of orange
+    - If a value is above double its respective threshold it is colored with red
+
+    Since no user-specified threshold for the (combined) %ile MT column is available, a hardcoded threshold of
+    2 determines this column's background coloring to still allow for easy interpretation of the combined
+    percentile compared to our default percentile cutoff.
 
 - :bold:`RNA expression, RNA VAF, Allele Expr, RNA Depth, DNA VAF columns:`
     These columns have bar graphs as cell backgrounds to give an idea where specific values fall across the entire patient sample:
@@ -50,7 +54,17 @@ As shown, different cells of the report table are highlighted in various ways:
     - RNA expression ranges from 0 to 50. This is done in order to highlight expression values that are in the lower range, based on the reasoning that, for neoantigen candidates, when the RNA expression reaches a certain level it is considered expressed without the need to specify how high the exact RNA expression value is.
     - Allele Expression ranges from 0 to max of RNA VAF column multiplied by 50 (which is the max for the RNA expression bar graph range).
 
-- The ``Tier`` column is colored based on the specific cell value and red boxes across the row are used to highlight values that did not pass filters and resulted in the tier given.
+- :bold:`Tier column and failing criteria:`
+    The ``Tier`` column is colored based on the specific cell value with the
+    Pass tier in green, the Poor and NoExpr tiers in red, and all other tiers
+    in orange. Red cell borders are used to highlight values that did not pass
+    filters and resulted in the tier given. For example, poor binders will have
+    the IC50 MT and/or IC50 %ile MT columns outlined in red, depending on which
+    value fails its threshold. A poor transcript will have the Transcript Pass
+    column outlined in red if the transcript fails all of the criteria specified
+    in the ``--transcript-proritization-strategy``. This allows for easy
+    identification of the criteria that are causing a candidate to be binned into
+    its respective tier.
 
 For more details on what each column represent, you can hover over the column names and/or click the tool icon on the top right where ``Help`` documentation is located.
 
@@ -86,7 +100,7 @@ There are three separate boxes in this section as shown, from left to right you 
   - Additional data
 
     The data displayed in this tab is dependent on the additional data file that you provided in the ``Upload`` page. The IC50 MT value and %ile MT values are shown if the app
-    was able to locate the same variant in the data file provided. Values will show up as N/A if IC50 MT or %ile MT values are not provided in the additional file. Additionaly, the Best Peptide of the variant from that file will be listed as well as the HLA Allele the Best Peptide prediction was binding to and the Best Transcript for the prediction.
+    was able to locate the same variant in the data file provided. Values will show up as N/A if IC50 MT or %ile MT values are not provided in the additional file. Additionally, the Best Peptide of the variant from that file will be listed as well as the HLA Allele the Best Peptide prediction was binding to and the Best Transcript for the prediction.
 
 - :bold:`Variant & Gene Info`
 
@@ -176,10 +190,21 @@ ________________________________________________________________________________
 
 There are four different tabs in this section of the app, providing peptide-level details on the MT/WT peptide pair that you selected in the peptide table.
 
+- :bold:`%ile Plot:`
+
+  Shown in this tab are violin plots of the individual percentile-based binding, presentation, and immunogenicity predictions
+  of the MT and WT peptides for HLA alleles that have predictions included in the aggregate report. These peptides
+  each have up to 16 binding, presentation, and immunogenicity algorithm percentile scores for Class I alleles or up to 7 for Class II alleles. Binding percentiles are shown in blue, presentation in yellow, and immunogenicity in purple. The plot may be filtered to display only binding, presentation or immunogenicity percentiles by changing the option in the "Specify what data to show" dropdown.
+
+  .. figure:: ../../images/screenshots/pvacview-additional_info_2.png
+      :width: 1000px
+      :align: center
+
+
 - :bold:`IC50 Plot:`
 
   Shown in this tab are violin plots of the individual IC50-based binding affinity predictions of the MT and WT peptides for HLA alleles that have predictions
-  included in the aggregate report. These peptides each have up to 8 binding algorithm scores for Class I alleles or up to 4 algorithm scores for Class II alleles.
+  included in the aggregate report. These peptides each have up to 8 IC50 binding algorithm scores for Class I alleles or up to 4 IC50 binding algorithm scores for Class II alleles.
 
   .. figure:: ../../images/screenshots/pvacview-additional_info_1.png
       :width: 1000px
@@ -187,20 +212,9 @@ There are four different tabs in this section of the app, providing peptide-leve
       :alt: pVACview Upload
 
 
-- :bold:`%ile Plot:`
-
-  Shown in this tab are violin plots of the individual percentile-based binding affinity and elution predictions
-  of the MT and WT peptides for HLA alleles that have predictions included in the aggregate report. These peptides
-  each have up to 10 binding and elution algorithm scores for Class I alleles or up to 4 algorithm scores for Class II alleles.
-
-  .. figure:: ../../images/screenshots/pvacview-additional_info_2.png
-      :width: 1000px
-      :align: center
-
-
 - :bold:`Binding Data:`
 
-  Here, we provide the specific IC50 and percentile binding affinity predictions generated from each individual algorithm.
+  Here, we provide the specific binding score and percentile binding affinity predictions generated from each individual algorithm. Most algorithms output an IC50 binding affinity, although some(e.g. MixMHCpred) output a more generic score. This table is shaded with a heatmap cell background to show where each value falls in relation to the specified binding affinity or percentile cutoffs. The "Cell heatmap background coloring" dropdown allows switch between these two options.
   This data is specific to the MT/WT peptide pair selected in the peptide table.
 
   .. figure:: ../../images/screenshots/pvacview-additional_info_3.png
@@ -208,11 +222,21 @@ There are four different tabs in this section of the app, providing peptide-leve
       :align: center
 
 
-- :bold:`Elution and Immunogenicity Data:`
+- :bold:`Presentation Data:`
 
-  Here, we provide the specific presentation and immunogenicity scores and percentiles generated from each individual algorithm.
+  Here, we provide the specific presentation scores and percentiles generated from each individual presentation algorithm. This table is shaded with a heatmap cell background to show where each percentile value falls in relation to the specified presentation percentile cutoff.
   This data is specific to the MT/WT peptide pair selected in the peptide table.
 
   .. figure:: ../../images/screenshots/pvacview-additional_info_4.png
+      :width: 1000px
+      :align: center
+
+
+- :bold:`Immunogenicity Data:`
+
+  Here, we provide the specific immunogenicity scores and percentiles generated from each individual immunogenicity algorithm. This table is shaded with a heatmap cell background to show where each percentile value falls in relation to the specified immunogenicity percentile cutoff.
+  This data is specific to the MT/WT peptide pair selected in the peptide table.
+
+  .. figure:: ../../images/screenshots/pvacview-additional_info_5.png
       :width: 1000px
       :align: center

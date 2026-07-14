@@ -1,5 +1,4 @@
 __all__ = [
-    'allele_specific_cutoffs',
     'binding_filter',
     'calculate_reference_proteome_similarity',
     'coverage_filter',
@@ -10,13 +9,10 @@ __all__ = [
     'mark_genes_of_interest',
     'net_chop',
     'netmhc_stab',
-    'valid_netmhciipan_versions',
     'run',
     'top_score_filter',
     'transcript_filter',
-    'valid_alleles',
     'update_tiers',
-    'valid_algorithms',
     'aggregate_report_filter',
 ]
 

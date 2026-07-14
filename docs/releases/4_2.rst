@@ -23,7 +23,7 @@ Version 4.2.1
 
 This is a bugfix release. It fixes the following problem(s):
 
-- When running the reference protome similarity step with a reference protome
+- When running the reference proteome similarity step with a reference protome
   peptide fasta file and a species other than human or mouse, the run would be aborted
   with an error that the refseq_protein_prot BLASTp database was incompatible with
   the species. This error should not be emitted in this circumstance since

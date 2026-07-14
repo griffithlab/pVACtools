@@ -14,7 +14,7 @@ _________
 - A new tool, pVACcompare allows users to visualize differences between output
   files from different pVACtools versions. This tool may be useful when
   investigating changes to predicted neoantigens between versions in
-  controlled experiments where enumerating and explaning such differences may be
+  controlled experiments where enumerating and explaining such differences may be
   crucial, e.g. in clinical trials. The tool can be run using the ``pvactools
   compare`` command. For more information please see the
   `Comparison Tool documentation
@@ -31,13 +31,13 @@ ____________
 - pVACseq and pVACsplice now take into account the MANE Select and Canonical status of a transcript
   for filtering, prioritizing, and tiering a neoantigen candidate. MANE Select, Canonical, and TSL
   status is evaluated according to the new ``--transcript-prioritization-strategy`` parameter. This
-  parameter allows users to list one or more critieria (``mane_select``, ``canonical``, ``tsl``) to
+  parameter allows users to list one or more criteria (``mane_select``, ``canonical``, ``tsl``) to
   take into consideration. As part of this update the "transcript support level filter" has been
   renamed to "transcript filter" including the standalone command which is now
   ``pvacseq|pvacsplice transcript_filer`` instead of ``pvacseq|pvacsplice transcript_support_level_filter``.
 - The aggregate report tiers have been updated to add four new tier:
 
-  - ``PoorBinder``: candidate fails the binding criteria but passes all other critieria.
+  - ``PoorBinder``: candidate fails the binding criteria but passes all other criteria.
   - ``RefMatch``: candidate has a reference match but passes all other criteria.
   - ``ProbPos``: candidate has a problematic amino acid but passes all other criteria.
   - ``PoorTranscript``: a candidate's best transcript is neither MANE Select, Canonical, nor meets
@@ -59,7 +59,7 @@ ____________
 Bugfixes
 ________
 
-- This relase fixes a bug with sorting of pVACfuse output files.
+- This release fixes a bug with sorting of pVACfuse output files.
 
 Version 6.0.1
 -------------

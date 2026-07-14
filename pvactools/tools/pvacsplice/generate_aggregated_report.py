@@ -68,6 +68,11 @@ def define_parser():
         default=5000,
     )
     parser.add_argument(
+        '--aggregate-inclusion-count-limit', type=int,
+        help="Limit neoantigen candidates included in the aggregate report to only the best n candidates per variant. This ensures performance when loading results into pVACview, e.g. for frameshifts with potentially hundreds of predictions.",
+        default=15,
+    )
+    parser.add_argument(
         '-m', '--top-score-metric',
         choices=['lowest', 'median'],
         default='median',
@@ -78,6 +83,7 @@ def define_parser():
     parser.add_argument(
         '-m2', '--top-score-metric2', type=top_score_metric2(),
         help="Which metrics to consider when selecting the best peptide and when sorting candidates within a tier. Each specified metric will be ranked and the sum of these ranks will be used."
+             + "Available options are 'ic50', 'combined_percentile', 'binding_percentile', 'immunogenicity_percentile', and 'presentation_percentile'."
              + "Whether the lowest or median is considered for each metric is controlled by the --top-score-metric parameter. ",
         default=['ic50', 'combined_percentile'],
     )
@@ -141,6 +147,7 @@ def main(args_input = sys.argv[1:]):
         top_score_metric=args.top_score_metric,
         top_score_metric2=args.top_score_metric2,
         aggregate_inclusion_binding_threshold=args.aggregate_inclusion_binding_threshold,
+        aggregate_inclusion_count_limit=args.aggregate_inclusion_count_limit,
     ).execute()
     print("Completed")
 

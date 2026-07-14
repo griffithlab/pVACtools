@@ -1,0 +1,26 @@
+name: Check spelling in documentation
+
+on: [push, pull_request]
+
+jobs:
+  spellcheck:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.11
+    - uses: actions/cache@v4
+      name: Configure pip caching
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-spellcheck
+        restore-keys: |
+          ${{ runner.os }}-pip-spellcheck
+    - name: Install dependencies
+      run: |
+        pip install codespell
+    - name: Check spelling
+      run: codespell docs --ignore-words docs/codespell-ignore-words.txt
+

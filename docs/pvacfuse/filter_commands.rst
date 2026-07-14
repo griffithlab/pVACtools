@@ -90,24 +90,42 @@ Top Score Filter
 
 .. program-output:: pvacfuse top_score_filter -h
 
-This filter picks the top epitope for a variant. Epitopes with the same
-Chromosome - Start - Stop - Reference - Variant are identified as coming from
-the same variant.
+This filter picks the top epitope for a fusion. Epitopes with the same
+Chromosome - Start - Stop are identified as coming from the same fusion.
 
 In order to account for different splice sites among the transcripts of a
-variant that would lead to different peptides, this filter also takes into
-account the different transcripts returned by AGFusion/Arriba and will return
-the top epitope for each transcript if they are non-identical. If the
-resulting list of top epitopes for the transcripts of a variant is identical,
-the epitope for the transcript with the highest expression is returned. If
-this information is not available, the transcript with the lowest Ensembl ID is returned.
+fusion that would lead to different peptides, this filter also takes into
+account the different transcripts returned by AGFusion/Arriba and bins the
+ones resulting in the same set of epitopes together into a transcript set.
+For each transcript set the filter will return the top epitope as follows:
 
-By default the
-``--top-score-metric`` option is set to ``median`` which will apply this
-filter to the ``Median IC50 Score`` column and pick the epitope with the lowest
-median mutant ic50 score for each variant. If the ``--top-score-metric``
-option is set to ``lowest``, the ``Best IC50 Score`` column is instead used to
-make this determination.
+- Pick the entries with no Problematic Positions.
+- For the remaining entries, calculate a rank for all the metrics specified
+  via the ``--top-score-metric2`` parameter and sum them. Whether the lowest
+  or median value is considered for each metric is controlled by the
+  ``--top-score-metric`` parameter. Sort the remaining entries on this sum
+  rank followed by the rank of the first ``top-score-metric2``  specified
+  (to break any ties in the sum rank), and Expression. Select the highest
+  sorted entry.
+
+The selected top epitopes for each transcript set are then sorted as follows:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Sort Criteria
+     - Sort Order
+   * - Sum of ascending ranks of ``Exprission`` and the ascending ranks of
+       the metrics selected via the ``--top-score-metric2`` parameter (possible values:
+       ``IC50 MT``, ``%ile MT``, ``IC50 %ile MT``, ``Pres %ile MT``; default: ``IC50 MT``,
+       ``%ile MT``).
+     - Ascending sum rank
+   * - First metric specified in the ``--top-score-metric2`` as a tie breaker
+       for identical sum ranks
+     - Ascending rank
+   * - ``Index`` column
+     - Alphabetical
+
 
 Aggregate Report Filter
 -----------------------

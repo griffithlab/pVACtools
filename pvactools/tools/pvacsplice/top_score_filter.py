@@ -15,6 +15,7 @@ def main(args_input = sys.argv[1:]):
         top_score_metric=args.top_score_metric,
         top_score_metric2=args.top_score_metric2,
         maximum_transcript_support_level=args.maximum_transcript_support_level,
+        transcript_prioritization_strategy=args.transcript_prioritization_strategy,
     ).execute()
 
 if __name__ == "__main__":

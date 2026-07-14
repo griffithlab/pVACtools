@@ -11,5 +11,47 @@ tool and others included here can help users compare results, generate reports, 
    :glob:
 
    helper_tools/comparison_tool.rst
-   helper_tools/download_wdls.rst
-   helper_tools/download_cwls.rst
+
+.. _download_wdls:
+
+Download WDL tool wrappers
+--------------------------
+
+Workflow Description Language (WDL) tool wrappers for pVACseq and pVACfuse
+can be downloaded using the ``pvactools download_wdls`` command.
+
+.. program-output:: pvactools download_wdls -h
+
+.. _download_cwls:
+
+Download CWL tool wrappers
+--------------------------
+
+Common Workflow Language (CWL) tool wrappers for pVACseq, pVACfuse, and
+pVACvector can be downloaded using the ``pvactools download_cwls`` command.
+
+.. program-output:: pvactools download_cwls -h
+
+.. _valid_alleles:
+
+List Valid Alleles
+------------------
+
+.. program-output:: pvactools valid_alleles -h
+
+.. _valid_algorithms:
+
+List Valid Algorithms
+---------------------
+
+.. program-output:: pvactools valid_algorithms -h
+
+List Valid NetMHCIIpan/NetMHCIIpanEL Versions
+---------------------------------------------
+
+.. program-output:: pvactools valid_netmhciipan_versions -h
+
+List Allele-Specific Cutoffs
+----------------------------
+
+.. program-output:: pvactools allele_specific_cutoffs -h

@@ -114,6 +114,7 @@ class UpdateTiers:
         parser.add_argument(
             '-m2', '--top-score-metric2', type=top_score_metric2(),
             help="Which metrics to consider when sorting candidates within a tier. Each specified metric will be ranked and the sum of these ranks will be used for sorting."
+                 + "Available options are 'ic50', 'combined_percentile', 'binding_percentile', 'immunogenicity_percentile', and 'presentation_percentile'."
                  + "Whether the lowest or median is considered for each metric is controlled by the --top-score-metric parameter. ",
             default=['ic50', 'combined_percentile'],
         )

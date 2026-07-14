@@ -53,7 +53,7 @@ def pvacfuse_sort(rows, top_score_metric, top_score_metric2, file_type='full'):
         sort_columns = ["rank_tier", "rank", f"rank_{top_score_metric2[0]}", "ID"]
         expression_column = 'Expr'
     elif file_type == 'full':
-        sort_columns = ["rank", f"rank_{top_score_metric2[0]}", "Mutation"]
+        sort_columns = ["rank", f"rank_{top_score_metric2[0]}", "Index"]
         expression_column = 'Expression'
 
     rows["rank_expr"] = pd.to_numeric(rows[expression_column], errors='coerce').rank(ascending=False, method='dense', na_option="bottom")
@@ -130,7 +130,7 @@ def pvacbind_sort(rows, top_score_metric, top_score_metric2, file_type='full'):
         rows["rank_tier"] = rows['Tier'].map(sorter_index)
         sort_columns = ["rank_tier", "rank", f"rank_{top_score_metric2[0]}", "ID"]
     elif file_type == 'full':
-        sort_columns = ["rank", f"rank_{top_score_metric2[0]}", "Mutation"]
+        sort_columns = ["rank", f"rank_{top_score_metric2[0]}", "Index"]
 
     rows["rank"] = 0
     if file_type == 'aggregated':

@@ -1,7 +1,8 @@
 import os
 import sys
 import yaml
-import pkg_resources
+import importlib.metadata
+
 from pvactools.lib.run_argument_parser import *
 
 
@@ -12,7 +13,7 @@ def print_log(log_dir, args_dict, output_file_prefix):
         with open(log_file, 'r') as log_fh:
             past_inputs = yaml.load(log_fh, Loader=yaml.FullLoader)
             current_inputs = args_dict
-            current_inputs['pvactools_version'] = pkg_resources.get_distribution("pvactools").version
+            current_inputs['pvactools_version'] = importlib.metadata.version("pvactools")
             if past_inputs['pvactools_version'] != current_inputs['pvactools_version']:
                 print('dif inputs!')
                 sys.exit(
@@ -39,5 +40,5 @@ def print_log(log_dir, args_dict, output_file_prefix):
     else:
         with open(log_file, 'w') as log_fh:
             inputs = args_dict
-            inputs['pvactools_version'] = pkg_resources.get_distribution("pvactools").version
+            inputs['pvactools_version'] = importlib.metadata.version("pvactools")
             yaml.dump(inputs, log_fh, default_flow_style=False)

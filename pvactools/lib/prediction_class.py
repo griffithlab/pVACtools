@@ -145,7 +145,7 @@ class MHCnuggets(metaclass=ABCMeta):
 
     def valid_allele_names_for_class(self, class_type):
         base_dir          = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-        alleles_dir       = os.path.join(base_dir, 'tools', 'pvacseq', 'iedb_alleles', class_type)
+        alleles_dir       = os.path.join(base_dir, 'supporting_files', 'alleles', class_type)
         alleles_file_name = os.path.join(alleles_dir, "MHCnuggets.txt")
         with open(alleles_file_name, 'r') as fh:
             return list(filter(None, fh.read().split('\n')))
@@ -313,8 +313,8 @@ class PredictionClass(metaclass=ABCMeta):
     @classmethod
     def parse_allele_cutoff_file(cls):
         base_dir                = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-        iedb_alleles_dir        = os.path.join(base_dir, 'tools', 'pvacseq', 'iedb_alleles')
-        allele_cutoff_file_name = os.path.join(iedb_alleles_dir, "cutoffs.csv")
+        alleles_dir             = os.path.join(base_dir, 'supporting_files', 'alleles')
+        allele_cutoff_file_name = os.path.join(alleles_dir, "cutoffs.csv")
         cutoffs = {}
         with open(allele_cutoff_file_name) as allele_cutoff_file:
             csv_reader = csv.DictReader(allele_cutoff_file)
@@ -358,7 +358,7 @@ class MHCI(PredictionClass, metaclass=ABCMeta):
 class DeepImmuno(MHCI):
     def valid_allele_names(self):
         base_dir          = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-        alleles_dir       = os.path.join(base_dir, 'tools', 'pvacseq', 'iedb_alleles', 'class_i')
+        alleles_dir       = os.path.join(base_dir, 'supporting_files', 'alleles', 'class_i')
         alleles_file_name = os.path.join(alleles_dir, "DeepImmuno.tsv")
         alleles           = []
         with open(alleles_file_name) as alleles_file:
@@ -421,7 +421,7 @@ class DeepImmuno(MHCI):
 class BigMHC(metaclass=ABCMeta):
     def valid_allele_names(self):
         base_dir          = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-        alleles_dir       = os.path.join(base_dir, 'tools', 'pvacseq', 'iedb_alleles', 'class_i')
+        alleles_dir       = os.path.join(base_dir, 'supporting_files', 'alleles', 'class_i')
         alleles_file_name = os.path.join(alleles_dir, "BigMHC.txt")
         with open(alleles_file_name, 'r') as fh:
             return list(filter(None, fh.read().split('\n')))
@@ -490,7 +490,7 @@ class BigMHC_IM(BigMHC, MHCI):
 class MHCflurry(MHCI):
     def valid_allele_names(self):
         base_dir          = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-        alleles_dir       = os.path.join(base_dir, 'tools', 'pvacseq', 'iedb_alleles', 'class_i')
+        alleles_dir       = os.path.join(base_dir, 'supporting_files', 'alleles', 'class_i')
         alleles_file_name = os.path.join(alleles_dir, "MHCflurry.txt")
         with open(alleles_file_name, 'r') as fh:
             return list(filter(None, fh.read().split('\n')))
@@ -552,7 +552,7 @@ class MHCflurryEL(MHCflurry):
 class MixMHCpred(MHCI):
     def valid_allele_names(self):
         base_dir          = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-        alleles_dir       = os.path.join(base_dir, 'tools', 'pvacseq', 'iedb_alleles', 'class_i')
+        alleles_dir       = os.path.join(base_dir, 'supporting_files', 'alleles', 'class_i')
         alleles_file_name = os.path.join(alleles_dir, "MixMHCpred.txt")
         with open(alleles_file_name, 'r') as fh:
             return list(filter(None, fh.read().split('\n')))
@@ -614,7 +614,7 @@ class MixMHCpred(MHCI):
 class PRIME(MHCI):
     def valid_allele_names(self):
         base_dir          = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-        alleles_dir       = os.path.join(base_dir, 'tools', 'pvacseq', 'iedb_alleles', 'class_i')
+        alleles_dir       = os.path.join(base_dir, 'supporting_files', 'alleles', 'class_i')
         alleles_file_name = os.path.join(alleles_dir, "PRIME.txt")
         with open(alleles_file_name, 'r') as fh:
             return list(filter(None, fh.read().split('\n')))
@@ -678,7 +678,7 @@ class PRIME(MHCI):
 class TLBind(MHCI):
     def valid_allele_names(self):
         base_dir          = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-        alleles_dir       = os.path.join(base_dir, 'tools', 'pvacseq', 'iedb_alleles', 'class_i')
+        alleles_dir       = os.path.join(base_dir, 'supporting_files', 'alleles', 'class_i')
         alleles_file_name = os.path.join(alleles_dir, "TL-MHC.txt")
         with open(alleles_file_name, 'r') as fh:
             return list(filter(None, fh.read().split('\n')))
@@ -737,7 +737,7 @@ class TLBind(MHCI):
 class TLImm(MHCI):
     def valid_allele_names(self):
         base_dir          = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-        alleles_dir       = os.path.join(base_dir, 'tools', 'pvacseq', 'iedb_alleles', 'class_i')
+        alleles_dir       = os.path.join(base_dir, 'supporting_files', 'alleles', 'class_i')
         alleles_file_name = os.path.join(alleles_dir, "TL-MHC.txt")
         with open(alleles_file_name, 'r') as fh:
             return list(filter(None, fh.read().split('\n')))
@@ -815,8 +815,8 @@ class IEDBMHCI(MHCI, IEDB, metaclass=ABCMeta):
         #Ultimately we probably want this method to call out to IEDB but their command is currently broken
         #curl --data "method=ann&species=human" http://tools-api.iedb.org/tools_api/mhci/
         base_dir               = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-        iedb_alleles_dir       = os.path.join(base_dir, 'tools', 'pvacseq', 'iedb_alleles', 'class_i')
-        iedb_alleles_file_name = os.path.join(iedb_alleles_dir, "%s.tsv" % self.iedb_prediction_method)
+        alleles_dir            = os.path.join(base_dir, 'supporting_files', 'alleles', 'class_i')
+        iedb_alleles_file_name = os.path.join(alleles_dir, "%s.tsv" % self.iedb_prediction_method)
         alleles = {}
         with open(iedb_alleles_file_name) as iedb_alleles_file:
             tsv_reader = csv.DictReader(iedb_alleles_file, delimiter='\t')
@@ -916,8 +916,8 @@ class IEDBMHCII(MHCII, IEDB, metaclass=ABCMeta):
             self.iedb_prediction_method
         )
         base_dir               = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-        iedb_alleles_dir       = os.path.join(base_dir, 'tools', 'pvacseq', 'iedb_alleles', 'class_ii')
-        iedb_alleles_file_name = os.path.join(iedb_alleles_dir, "%s.tsv" % file_name)
+        alleles_dir            = os.path.join(base_dir, 'supporting_files', 'alleles', 'class_ii')
+        iedb_alleles_file_name = os.path.join(alleles_dir, "%s.tsv" % file_name)
         alleles = []
         with open(iedb_alleles_file_name) as iedb_alleles_file:
             for row in iedb_alleles_file:
@@ -939,6 +939,153 @@ class IEDBMHCII(MHCII, IEDB, metaclass=ABCMeta):
 
 class NetMHCIIVersion:
     netmhciipan_version = None
+
+class ImmuScope_IM(MHCII):
+    immuscope_score_col = 'ImmuScope_IM'
+    immuscope_weights_dir = '/opt/ImmuScope/weights'
+
+    def resolved_immuscope_weights_dir(self):
+        xdg_data_home = os.environ.get('XDG_DATA_HOME')
+        if xdg_data_home:
+            user_dir = os.path.join(xdg_data_home, 'ImmuScope', 'weights')
+        else:
+            user_dir = os.path.join(os.path.expanduser('~/.local/share'), 'ImmuScope', 'weights')
+
+        if os.path.isdir(os.path.join(user_dir, 'IM')):
+            return user_dir
+
+        return self.immuscope_weights_dir
+
+    def valid_allele_names(self):
+        """Return allele names supported by ImmuScope.
+
+        Allele support is maintained as a static list in
+        `tools/pvacseq/iedb_alleles/class_ii/Immuscope.txt`.
+        """
+
+        base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+        alleles_dir = os.path.join(base_dir, 'tools', 'pvacseq', 'iedb_alleles', 'class_ii')
+        alleles_file_name = os.path.join(alleles_dir, 'Immuscope.txt')
+        with open(alleles_file_name, 'r') as fh:
+            return list(filter(None, (line.strip() for line in fh)))
+
+    def valid_lengths_for_allele(self, allele):
+        return [11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]
+
+    def check_length_valid_for_allele(self, length, allele):
+        if length not in self.valid_lengths_for_allele(allele):
+            sys.exit(
+                "Epitope length %s not supported for method %s. Valid lengths are: %s" % (
+                    length,
+                    self.__class__.__name__,
+                    ','.join(map(str, self.valid_lengths_for_allele(allele)))
+                )
+            )
+
+    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None):
+        weights_dir = self.resolved_immuscope_weights_dir()
+        if not os.path.isdir(os.path.join(weights_dir, 'IM')):
+            raise Exception(
+                "ImmuScope weights directory not found at {}. "
+                "Install weights (e.g. run `immuscope-download-weights`) or set IMMU_SCOPE_WEIGHTS_DIR.".format(weights_dir)
+            )
+
+        results = pd.DataFrame()
+
+        metadata_rows = []
+        unique_pairs = set()
+        for record in SeqIO.parse(input_file, "fasta"):
+            seq_num = record.id
+            peptide = str(record.seq)
+            epitopes = pvactools.lib.run_utils.determine_neoepitopes(peptide, epitope_length)
+            for start, epitope in epitopes.items():
+                metadata_rows.append({
+                    'allele': allele,
+                    'peptide': epitope,
+                    'seq_num': seq_num,
+                    'start': start,
+                })
+                unique_pairs.add((allele, epitope))
+
+        all_epitopes = [peptide for _, peptide in unique_pairs]
+
+        if len(all_epitopes) == 0:
+            return (results, 'pandas')
+
+        tmp_input_file = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False, newline='')
+        writer = csv.writer(tmp_input_file, delimiter='\t', lineterminator='\n')
+        writer.writerow(["allele", "peptide", "seq_num", "start"])
+        for epitope in all_epitopes:
+            writer.writerow([allele, epitope, "", ""])
+        tmp_input_file.close()
+
+        tmp_output_file = tempfile.NamedTemporaryFile('r', dir=tmp_dir, delete=False)
+        tmp_output_file.close()
+
+        arguments = [
+            'immuscope-wrapper',
+            '--input', tmp_input_file.name,
+            '--output', tmp_output_file.name,
+            '--allele-col', 'allele',
+            '--peptide-col', 'peptide',
+            '--seq-num-col', 'seq_num',
+            '--start-col', 'start',
+        ]
+        stderr_fh = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
+        try:
+            run(arguments, check=True, stdout=DEVNULL, stderr=stderr_fh)
+        except:
+            stderr_fh.close()
+            with open(stderr_fh.name, 'r') as fh:
+                err = fh.read()
+            os.unlink(stderr_fh.name)
+            os.unlink(tmp_input_file.name)
+            if os.path.exists(tmp_output_file.name):
+                os.unlink(tmp_output_file.name)
+            raise Exception("An error occurred while calling ImmuScope:\n{}".format(err))
+        stderr_fh.close()
+        os.unlink(stderr_fh.name)
+        os.unlink(tmp_input_file.name)
+
+        df = pd.read_csv(tmp_output_file.name, sep='\t')
+        os.unlink(tmp_output_file.name)
+
+        # Wrapper emits: allele peptide tgt len ImmuScope_IM seq_num start
+        if self.immuscope_score_col not in df.columns:
+            raise Exception(
+                "ImmuScope wrapper output missing expected score column '{}'. Found columns: {}".format(
+                    self.immuscope_score_col,
+                    ','.join(df.columns),
+                )
+            )
+
+        required_columns = {'allele', 'peptide', self.immuscope_score_col}
+        missing_columns = required_columns.difference(df.columns)
+        if missing_columns:
+            raise Exception(
+                "ImmuScope wrapper output missing expected columns {}. Found columns: {}".format(
+                    ','.join(sorted(missing_columns)),
+                    ','.join(df.columns),
+                )
+            )
+
+        metadata_df = pd.DataFrame(metadata_rows)
+        score_df = df.drop(columns=[col for col in ['seq_num', 'start'] if col in df.columns])
+        results = metadata_df.merge(
+            score_df,
+            on=['allele', 'peptide'],
+            how='left',
+            validate='many_to_one',
+        )
+
+        ordered_columns = [
+            col for col in ['allele', 'peptide', 'tgt', 'len', self.immuscope_score_col, 'seq_num', 'start']
+            if col in results.columns
+        ]
+        remaining_columns = [col for col in results.columns if col not in ordered_columns]
+        results = results[ordered_columns + remaining_columns]
+
+        return (results, 'pandas')
 
 class NetMHCIIpan(IEDBMHCII):
     @property
@@ -963,3 +1110,82 @@ class SMMalign(IEDBMHCII):
     @property
     def iedb_prediction_method(self):
         return 'smm_align'
+
+class MixMHC2pred(MHCII):
+    def valid_allele_names(self):
+        base_dir          = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+        alleles_dir       = os.path.join(base_dir, 'supporting_files', 'alleles', 'class_ii')
+        alleles_file_name = os.path.join(alleles_dir, "MixMHC2pred.tsv")
+        alleles           = []
+        with open(alleles_file_name) as alleles_file:
+            tsv_reader = csv.DictReader(alleles_file, delimiter='\t')
+            for row in tsv_reader:
+                alleles.append(row['OfficialName'])
+        return alleles
+
+    def check_length_valid_for_allele(self, length, allele):
+        return True
+
+    def valid_lengths_for_allele(self, allele):
+        return [12,13,14,15,16,17,18,19,20,21]
+
+    def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None):
+        results = pd.DataFrame()
+        all_epitopes = []
+        for record in SeqIO.parse(input_file, "fasta"):
+            seq_num = record.id
+            peptide = str(record.seq)
+            epitopes = pvactools.lib.run_utils.determine_neoepitopes(peptide, epitope_length)
+            all_epitopes.extend(epitopes.values())
+
+        all_epitopes = list(set(all_epitopes))
+        if len(all_epitopes) > 0:
+            tmp_input_file = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
+            for epitope in all_epitopes:
+                tmp_input_file.write("{}\n".format(epitope))
+            tmp_input_file.close()
+            tmp_output_file = tempfile.NamedTemporaryFile('r', dir=tmp_dir, delete=False)
+            base_dir          = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+            alleles_dir       = os.path.join(base_dir, 'supporting_files', 'alleles', 'class_ii')
+            alleles_file_name = os.path.join(alleles_dir, "MixMHC2pred.tsv")
+            with open(alleles_file_name) as alleles_file:
+                tsv_reader = csv.DictReader(alleles_file, delimiter='\t')
+                for row in tsv_reader:
+                    if allele == row['OfficialName']:
+                        mixmhc2pred_allele = row['AlleleName']
+                        break
+            if sys.platform == "darwin":
+                arguments = ["MixMHC2pred"]
+            else:
+                arguments = ["MixMHC2pred_unix"]
+            arguments.extend(["-i", tmp_input_file.name, "-o", tmp_output_file.name, "-a", mixmhc2pred_allele, "--no_context", "--extra_out"])
+            stderr_fh = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
+            try:
+                response = run(arguments, check=True, stdout=DEVNULL, stderr=stderr_fh)
+            except:
+                stderr_fh.close()
+                with open(stderr_fh.name, 'r') as fh:
+                    err = fh.read()
+                os.unlink(stderr_fh.name)
+                raise Exception("An error occurred while calling MixMHC2pred:\n{}".format(err))
+            stderr_fh.close()
+            os.unlink(stderr_fh.name)
+            tmp_output_file.close()
+            df = pd.read_csv(tmp_output_file.name, sep="\t", skiprows=19)
+            os.unlink(tmp_output_file.name)
+            df.rename(columns={
+                '%Rank_best': 'percentile',
+                'Peptide': 'peptide',
+                f'Score_{mixmhc2pred_allele}': 'score',
+            }, inplace=True)
+            for record in SeqIO.parse(input_file, "fasta"):
+                seq_num = record.id
+                peptide = str(record.seq)
+                epitopes = pvactools.lib.run_utils.determine_neoepitopes(peptide, epitope_length)
+                for start, epitope in epitopes.items():
+                    epitope_df = df[df['peptide'] == epitope]
+                    epitope_df['seq_num'] = seq_num
+                    epitope_df['start'] = start
+                    epitope_df['allele'] = allele
+                    results = pd.concat((results, epitope_df), axis=0)
+        return (results, 'pandas')

@@ -1,4 +1,4 @@
-left_peptide	left_partner_clip	spacer	right_partner_clip	right_peptide	junction_score	percentile	selected
+left_peptide	left_partner_clip	spacer	right_partner_clip	right_peptide	junction_score	binding_percentile	selected
 MT.ACSL3.S345N	0	None	0	MT.NRCAM.P838H	24642.55	42.0	False
 MT.ACSL3.S345N	0	None	0	MT.SUMF2.G23A	30926.52	58.0	False
 MT.ACSL3.S345N	0	None	0	MT.POM121C.G3107R	28221.36	51.0	False

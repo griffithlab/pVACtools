@@ -51,7 +51,7 @@ ____________
 - Users may provide an optional STAR-fusion output file to their pVACfuse run
   in order to extract expression and read support data for their candidates.
   These will be used for filtering, as well as for tiering in the aggregate
-  report. Please see the :ref:`output file section <pvacfuse_output_files>` of the documention for
+  report. Please see the :ref:`output file section <pvacfuse_output_files>` of the documentation for
   more details.
 - When running the ``pvacseq generate_protein_fasta`` command, users are now
   able to specify an aggregated report as the ``--input-tsv``. When using such
@@ -89,7 +89,7 @@ This is a bugfix release. It fixes the following problem(s):
 - The ``--aggregate-report-evaluation`` parameter in the standalone ``pvacseq
   generate_protein_fasta`` command was previously set up with
   nargs in order to allow specifying multiple values. However, this
-  conflicts with required positional parameters. The parameter definiton was
+  conflicts with required positional parameters. The parameter definition was
   updated so that multiple values are now specified as a comma-separated list.
 - pVACfuse would previously fail in an odd way when none of the fusions in the
   input were processable. This update now exits pVACfuse more gracefully in
@@ -161,7 +161,7 @@ This is a bugfix release. It fixes the following problem(s):
 - TSL parsing of the input VCF in pVACseq used to be limited to human data
   only. This release adds support for TSL parsing in mouse data.
 - When running with the --noncanonical flag, the exons.csv file will contain
-  exon postions for all possible transcript combinations. However, the transcripts
+  exon positions for all possible transcript combinations. However, the transcripts
   weren't being taken into account when parsing this file to determine the fusion
   positions. This release fixes this issue by looking up the positions for the
   specific transcripts of the record currently being parsed.

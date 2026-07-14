@@ -14,20 +14,3 @@ Download Example Data
 ---------------------
 
 .. program-output:: pvacsplice download_example_data -h
-
-.. _pvacsplice_valid_alleles:
-
-List Valid Alleles
-------------------
-
-.. program-output:: pvacsplice valid_alleles -h
-
-List Valid NetMHCIIpan/NetMHCIIpanEL Versions
----------------------------------------------
-
-.. program-output:: pvacsplice valid_netmhciipan_versions -h
-
-List Allele-Specific Cutoffs
-----------------------------
-
-.. program-output:: pvacsplice allele_specific_cutoffs -h

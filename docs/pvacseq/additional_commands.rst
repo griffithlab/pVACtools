@@ -31,36 +31,3 @@ Install VEP Plugin
     :func: define_parser
     :prog: pvacseq install_vep_plugin
 
-.. _valid_alleles:
-
-List Valid Alleles
-------------------
-
-.. program-output:: pvacseq valid_alleles -h
-
-.. .. argparse::
-    :module: lib.valid_alleles
-    :func: define_parser
-    :prog: pvacseq valid_alleles
-
-.. _valid_algorithms:
-
-List Valid Algorithms
----------------------
-
-.. program-output:: pvacseq valid_algorithms -h
-
-.. .. argparse::
-    :module: lib.valid_algorithms
-    :func: define_parser
-    :prog: pvacseq valid_algorithms
-
-List Valid NetMHCIIpan/NetMHCIIpanEL Versions
----------------------------------------------
-
-.. program-output:: pvacseq valid_netmhciipan_versions -h
-
-List Allele-Specific Cutoffs
-----------------------------
-
-.. program-output:: pvacseq allele_specific_cutoffs -h

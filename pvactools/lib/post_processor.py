@@ -32,29 +32,6 @@ class PostProcessor:
         self.file_type = kwargs.pop('file_type', None)
         self.fasta = kwargs.pop('fasta', None)
         self.net_chop_fasta = kwargs.pop('net_chop_fasta', None)
-        if not hasattr(self, 'flurry_state'):
-            self.flurry_state = self.get_flurry_state()
-        self.el_only = all([self.is_el(a) for a in self.prediction_algorithms])
-
-    def get_flurry_state(self):
-        if 'MHCflurry' in self.prediction_algorithms and 'MHCflurryEL' in self.prediction_algorithms:
-            self.prediction_algorithms.remove('MHCflurryEL')
-            return 'both'
-        elif 'MHCflurry' in self.prediction_algorithms:
-            return 'BA_only'
-        elif 'MHCflurryEL' in self.prediction_algorithms:
-            pred_idx = self.prediction_algorithms.index('MHCflurryEL')
-            self.prediction_algorithms[pred_idx] = 'MHCflurry'
-            return 'EL_only'
-        else:
-            return None
-
-    def is_el(self, algorithm):
-        if algorithm == 'MHCflurry' and self.flurry_state == 'EL_only':
-            return True
-        if algorithm in ['NetMHCIIpanEL', 'NetMHCpanEL', 'BigMHC_EL', 'BigMHC_IM', 'DeepImmuno', 'MixMHCpred', 'PRIME']:
-            return True
-        return False
 
     def execute(self):
         self.identify_problematic_amino_acids()
@@ -87,9 +64,6 @@ class PostProcessor:
             print("Completed")
 
     def aggregate_all_epitopes(self):
-        if self.el_only:
-            print("WARNING: No binding affinity algorithm(s) specified, skipping aggregated report creation.")
-            return
         print("Creating aggregated report")
         if self.file_type == 'pVACseq':
             aggregator = PvacseqAggregateAllEpitopes(
@@ -183,9 +157,6 @@ class PostProcessor:
             print("Completed")
 
     def execute_binding_filter(self):
-        if self.el_only:
-            shutil.copy(self.input_file, self.binding_filter_fh.name)
-            return
         print("Running Binding Filters")
         BindingFilter(
             self.input_file,
@@ -246,9 +217,6 @@ class PostProcessor:
             shutil.copy(self.coverage_filter_fh.name, self.transcript_support_level_filter_fh.name)
 
     def execute_top_score_filter(self):
-        if self.el_only:
-            shutil.copy(self.transcript_support_level_filter_fh.name, self.top_score_filter_fh.name)
-            return
         print("Running Top Score Filter")
         if self.file_type == 'pVACseq':
             PvacseqTopScoreFilter(
@@ -305,8 +273,6 @@ class PostProcessor:
             shutil.copy(self.net_chop_fh.name, self.netmhc_stab_fh.name)
 
     def calculate_reference_proteome_similarity(self):
-        if self.el_only:
-            return
         if self.run_reference_proteome_similarity:
             print("Calculating Reference Proteome Similarity")
             if self.file_type == 'pVACseq':

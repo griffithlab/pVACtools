@@ -237,6 +237,7 @@ class NetMHCStab:
         parser.add_argument(
             '-m2', '--top-score-metric2', type=pvactools.lib.run_utils.top_score_metric2(),
             help="Which metrics to consider when sorting the results. All listed metrics will be rank scored and the sum of those rank scores will be used. "
+                 + "Available options are 'ic50', 'combined_percentile', 'binding_percentile', 'immunogenicity_percentile', and 'presentation_percentile'."
                  + "Whether the lowest or median is considered for each metric is controlled by the --top-score-metric parameter. ",
             default=['ic50', 'combined_percentile'],
         )

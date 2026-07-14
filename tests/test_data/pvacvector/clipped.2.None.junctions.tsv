@@ -1,4 +1,4 @@
-left_peptide	left_partner_clip	spacer	right_partner_clip	right_peptide	junction_score	percentile	selected
+left_peptide	left_partner_clip	spacer	right_partner_clip	right_peptide	junction_score	binding_percentile	selected
 AFAP1.ENST00000420658.5.missense.798R/L_pos8_len8	2	None	2	USP15.ENST00000280377.9.FS.345-346G/GT_pos11_len9	32431.99	62.0	False
 AFAP1.ENST00000420658.5.missense.798R/L_pos8_len8	2	None	1	FAM129C.ENST00000335393.8.FS.291CG/C_pos7_len9	34542.94	69.0	False
 AFAP1.ENST00000420658.5.missense.798R/L_pos8_len8	2	None	0	FAM129C.ENST00000335393.8.FS.291CG/C_pos15_len10	34542.94	69.0	True

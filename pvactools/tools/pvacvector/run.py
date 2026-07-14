@@ -107,7 +107,7 @@ def run_pipelines(input_file, base_output_dir, args, junctions_to_test, spacer, 
 def write_junctions_file(graph, current_output_dir):
     junctions_file = os.path.join(current_output_dir, 'junctions.tsv')
     with open(junctions_file, 'w') as fh:
-        fieldnames = ['left_peptide', 'left_partner_clip', 'spacer', 'right_partner_clip', 'right_peptide', 'junction_score', 'percentile']
+        fieldnames = ['left_peptide', 'left_partner_clip', 'spacer', 'right_partner_clip', 'right_peptide', 'junction_score', 'binding_percentile']
         writer = csv.DictWriter(fh, delimiter="\t", fieldnames=fieldnames)
         writer.writeheader()
         for (left_peptide, right_peptide, edge_data) in graph.edges.data():
@@ -118,7 +118,7 @@ def write_junctions_file(graph, current_output_dir):
                 'right_partner_clip': edge_data['right_partner_trim'],
                 'right_peptide': right_peptide,
                 'junction_score': edge_data['weight'],
-                'percentile': edge_data['percentile'],
+                'binding_percentile': edge_data['binding_percentile'],
             }
             writer.writerow(row)
     return junctions_file
@@ -136,31 +136,31 @@ def find_min_scores(parsed_output_files, current_output_dir, args, min_scores, m
         with open(parsed_output_file, 'r') as parsed:
             reader = csv.DictReader(parsed, delimiter="\t")
             for row in reader:
-                index = row['Mutation']
+                index = row['Index']
                 processed_junctions.add(index)
                 if args.top_score_metric == 'lowest':
                     score = float(row['Best IC50 Score'])
-                    percentile = float(row['Best Percentile'])
+                    percentile = float(row['Best IC50 Percentile'])
                 elif args.top_score_metric == 'median':
                     score = float(row[f'Median IC50 Score'])
-                    percentile = float(row['Median Percentile'])
+                    percentile = float(row['Median IC50 Percentile'])
                 if args.allele_specific_binding_thresholds:
                     allele = row['HLA Allele']
                     threshold = PredictionClass.cutoff_for_allele(allele)
                     threshold = float(args.binding_threshold) if threshold is None else float(threshold)
                 else:
                     threshold = float(args.binding_threshold)
-                if args.percentile_threshold is None:
+                if args.binding_percentile_threshold is None:
                     if score < threshold:
                         junctions_with_good_binders.add(index)
                 else:
                     if args.percentile_threshold_strategy == 'conservative':
                         #a conservative strategy would invalidate junctions that fail the binding threshold or the percentile threshold
-                        if score < threshold or percentile < args.percentile_threshold:
+                        if score < threshold or percentile < args.binding_percentile_threshold:
                             junctions_with_good_binders.add(index)
                     elif args.percentile_threshold_strategy == 'exploratory':
                         #a exploratory strategy is more relaxed and only invalidates a junction if it fails both the binding and percentile thresholds
-                        if score < threshold and percentile < args.percentile_threshold:
+                        if score < threshold and percentile < args.binding_percentile_threshold:
                             junctions_with_good_binders.add(index)
 
                 if index not in junction_min_scores:
@@ -202,12 +202,12 @@ def add_valid_junctions_to_graph(graph, min_scores, min_percentiles):
             (id_1, left_partner_trim, spacer, right_partner_trim, id_2) = key.split("|")
         if graph.has_edge(id_1, id_2) and graph[id_1][id_2]['weight'] < worst_case:
             graph[id_1][id_2]['weight'] = worst_case
-            graph[id_1][id_2]['percentile'] = percentile
+            graph[id_1][id_2]['binding_percentile'] = percentile
             graph[id_1][id_2]['spacer'] = spacer
             graph[id_1][id_2]['left_partner_trim'] = int(left_partner_trim)
             graph[id_1][id_2]['right_partner_trim'] = int(right_partner_trim)
         elif not graph.has_edge(id_1, id_2):
-            graph.add_edge(id_1, id_2, weight=worst_case, percentile=percentile, spacer=spacer, left_partner_trim=int(left_partner_trim), right_partner_trim=int(right_partner_trim))
+            graph.add_edge(id_1, id_2, weight=worst_case, binding_percentile=percentile, spacer=spacer, left_partner_trim=int(left_partner_trim), right_partner_trim=int(right_partner_trim))
     return graph
 
 def check_graph_valid(Paths, seq_dict):
@@ -569,7 +569,7 @@ def main(args_input=sys.argv[1:]):
             'A vaccine design using the parameters specified could not be found. Some options that you may want to consider:\n' +
             '1) decreasing the acceptable junction binding score to allow more possible connections (-b parameter)\n' +
             '2) using the "median" binding score instead of the "best" binding score for each junction, (best may be too conservative, -m parameter)\n' +
-            '3) if running with a percentile threshold set, either remove this parameter, reduce the acceptable threshold to allow more possible connections (--percentile-threshold parameter) or use the \'exploratory\' strategry (--percentile-threshold-strategy parameter)\n' +
+            '3) reduce the acceptable binding percentile threshold to allow more possible connections (--binding-percentile-threshold parameter) or use the \'exploratory\' strategry (--percentile-threshold-strategy parameter)\n' +
             '4) increase the number of peptides that can be excluded from the vector (--allow-n-peptide-exclusion parameter)'
         )
 

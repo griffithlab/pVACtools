@@ -16,7 +16,7 @@ class CalculateManufacturabilityTests(unittest.TestCase):
         cls.executable    = os.path.join(pvactools_directory(), "pvactools", "lib", "calculate_manufacturability.py")
         cls.test_data_dir = os.path.join(pvactools_directory(), "tests", "test_data", "calculate_manufacturability")
 
-    def module_compiles(self):
+    def test_module_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))
 
     def test_calculate_manufacturability(self):

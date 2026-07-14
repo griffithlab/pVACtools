@@ -210,7 +210,7 @@ def main(args_input = sys.argv[1:]):
                 sys.exit("IEDB MHC I executable path doesn't exist %s" % iedb_mhc_i_executable)
         else:
             iedb_mhc_i_executable = None
-        
+
         if args.use_normalized_percentiles and species != 'human':
             print("WARNING: Normalized percentiles are only available for human alleles. Option will be ignored.")
             args.use_normalized_percentiles = False

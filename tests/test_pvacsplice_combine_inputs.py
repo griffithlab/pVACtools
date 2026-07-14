@@ -13,10 +13,10 @@ class CombineInputsTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.python        = sys.executable
-        cls.executable    = os.path.join(pvactools_directory(), "pvactools", "tools", "pvacsplice", "combine_inputs.py")
+        cls.executable    = os.path.join(pvactools_directory(), "pvactools", "lib", "combine_inputs.py")
         cls.test_data_dir = os.path.join(pvactools_directory(), "tests", "test_data", "pvacsplice", 'results')
 
-    def module_compiles(self):
+    def test_module_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))
 
     def test_combine_inputs_runs_and_produces_expected_output(self):

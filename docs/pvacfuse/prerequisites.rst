@@ -25,11 +25,11 @@ For a full list see the `AGFusion documentation <https://github.com/murphycj/AGF
    --middlestar \
    --noncanonical
 
-The ``--middlestar`` flag is required in order to use the ouput with pVACfuse.
+The ``--middlestar`` flag is required in order to use the output with pVACfuse.
 This will indicate the fusion position in the fusion peptide sequence.
 
 The ``--noncanonical`` flag is optional and can be used to annotate the fusion
-with informations from all possible transcripts. By default only canonical
+with information from all possible transcripts. By default only canonical
 transcripts are used.
 
 Fusion detection and annotation using Arriba

@@ -16,3 +16,13 @@ Additionally, it fixes the following problem(s):
 
 * Fix an error in the output parser that occurs with very long insertions. by @CSi-Ti in https://github.com/griffithlab/pVACtools/pull/1367
 * Support splice site with multiple matching somatic variants that would previously throw an error. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1369
+
+Version 6.1.1
+-------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+* Revert accidental tdna-cov parameter default value change. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1388
+* Add missing pvacsplice.wdl to download_wdls command. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1389
+* Fix top score filter to work with presentation/immunogenicity-only reports. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1391
+* Replace deprecated pkg_resources with importlib.metadata. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1392
