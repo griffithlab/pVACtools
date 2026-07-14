@@ -4,7 +4,7 @@ import logging
 from pvactools.lib.run_pipeline import RunPipeline
 from pvactools.lib.variant_to_kmer_pipeline import VariantToKmerPipeline
 from pvactools.lib.pvacseq_prediction_pipeline import PvacseqPredictionPipeline
-from pvactools.tools.pvacseq.generate_protein_fasta import PvacseqGenerateProteinFasta
+from pvactools.lib.generate_protein_fasta import PvacseqGenerateProteinFasta
 from pvactools.lib.post_processor import PvacseqPostProcessor
 
 class PvacseqRunPipeline(RunPipeline):

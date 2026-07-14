@@ -10,6 +10,7 @@ from subprocess import PIPE
 import re
 
 from pvactools.tools.pvacsplice import generate_protein_fasta
+from pvactools.lib.generate_protein_fasta import PvacspliceGenerateProteinFasta
 from tests.utils import *
 
 def test_input_data_directory():
@@ -36,7 +37,7 @@ class GenerateFastaTests(unittest.TestCase):
         cls.executable           = os.path.join(cls.executable_dir, 'generate_protein_fasta.py')
         cls.test_input_data_dir  = test_input_data_directory()
         cls.test_output_data_dir = test_output_data_directory()
-        cls.flanking_sequence_length = '10'
+        cls.flanking_sequence_length = 10
 
     def test_command(self):
         pvac_script_path = os.path.join(
@@ -83,22 +84,24 @@ class GenerateFastaTests(unittest.TestCase):
         generate_protein_fasta_output_file = tempfile.NamedTemporaryFile()
         generate_protein_fasta_output_tsv  = "{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name)
 
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            generate_protein_fasta_input_file,
-            self.flanking_sequence_length,
-            generate_protein_fasta_output_file.name,
-            generate_protein_fasta_input_vcf,
-            unzipped_fasta_file,
-            generate_protein_fasta_input_gtf,
-            '-s', 'HCC1395_TUMOR_DNA',
-        ], shell=False))
+        params = {
+            'input_file': generate_protein_fasta_input_file,
+            'flanking_sequence_length': self.flanking_sequence_length,
+            'output_file': generate_protein_fasta_output_file.name,
+            'annotated_vcf': generate_protein_fasta_input_vcf,
+            'ref_fasta': unzipped_fasta_file,
+            'gtf_file': generate_protein_fasta_input_gtf,
+            'sample_name': 'HCC1395_TUMOR_DNA',
+        }
+        generator = PvacspliceGenerateProteinFasta(**params)
+        self.assertFalse(generator.execute())
+
         expected_output_file = os.path.join(self.test_output_data_dir, 'output.fasta')
         self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
 
         expected_tsv_file = os.path.join(self.test_output_data_dir, 'output.tsv')
         self.assertTrue(cmp(generate_protein_fasta_output_tsv, expected_tsv_file))
+
         os.unlink(generate_protein_fasta_output_tsv)
         os.unlink(unzipped_fasta_file)
 
@@ -112,18 +115,19 @@ class GenerateFastaTests(unittest.TestCase):
         generate_protein_fasta_output_file = tempfile.NamedTemporaryFile()
         generate_protein_fasta_output_tsv  = "{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name)
 
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            generate_protein_fasta_input_file,
-            self.flanking_sequence_length,
-            generate_protein_fasta_output_file.name,
-            generate_protein_fasta_input_vcf,
-            unzipped_fasta_file,
-            generate_protein_fasta_input_gtf,
-            '-s', 'HCC1395_TUMOR_DNA',
-            '--input-tsv', generate_protein_fasta_input_tsv,
-        ], shell=False))
+        params = {
+            'input_file': generate_protein_fasta_input_file,
+            'flanking_sequence_length': self.flanking_sequence_length,
+            'output_file': generate_protein_fasta_output_file.name,
+            'annotated_vcf': generate_protein_fasta_input_vcf,
+            'ref_fasta': unzipped_fasta_file,
+            'gtf_file': generate_protein_fasta_input_gtf,
+            'sample_name': 'HCC1395_TUMOR_DNA',
+            'input_tsv': generate_protein_fasta_input_tsv,
+        }
+        generator = PvacspliceGenerateProteinFasta(**params)
+        self.assertFalse(generator.execute())
+
         expected_output_file = os.path.join(self.test_output_data_dir, 'output_with_tsv.fasta')
         self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
 
@@ -140,24 +144,26 @@ class GenerateFastaTests(unittest.TestCase):
         generate_protein_fasta_output_file = tempfile.NamedTemporaryFile()
         generate_protein_fasta_output_tsv  = "{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name)
 
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            generate_protein_fasta_input_file,
-            self.flanking_sequence_length,
-            generate_protein_fasta_output_file.name,
-            generate_protein_fasta_input_vcf,
-            unzipped_fasta_file,
-            generate_protein_fasta_input_gtf,
-            '-s', 'HCC1395_TUMOR_DNA',
-            '--input-tsv', generate_protein_fasta_input_tsv,
-            '--aggregate-report-evaluation', 'Pending'
-        ], shell=False))
+        params = {
+            'input_file': generate_protein_fasta_input_file,
+            'flanking_sequence_length': self.flanking_sequence_length,
+            'output_file': generate_protein_fasta_output_file.name,
+            'annotated_vcf': generate_protein_fasta_input_vcf,
+            'ref_fasta': unzipped_fasta_file,
+            'gtf_file': generate_protein_fasta_input_gtf,
+            'sample_name': 'HCC1395_TUMOR_DNA',
+            'input_tsv': generate_protein_fasta_input_tsv,
+            'aggregate_report_evaluation': ['Pending'],
+        }
+        generator = PvacspliceGenerateProteinFasta(**params)
+        self.assertFalse(generator.execute())
+
         expected_output_file = os.path.join(self.test_output_data_dir, 'output.aggregated.fasta')
         self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
 
         expected_tsv_file = os.path.join(self.test_output_data_dir, 'output.aggregated.tsv')
         self.assertTrue(cmp(generate_protein_fasta_output_tsv, expected_tsv_file))
+
         os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))
         os.unlink(unzipped_fasta_file)
 
@@ -170,22 +176,24 @@ class GenerateFastaTests(unittest.TestCase):
         generate_protein_fasta_output_file = tempfile.NamedTemporaryFile()
         generate_protein_fasta_output_tsv  = "{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name)
 
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            generate_protein_fasta_input_file,
-            '25',
-            generate_protein_fasta_output_file.name,
-            generate_protein_fasta_input_vcf,
-            unzipped_fasta_file,
-            generate_protein_fasta_input_gtf,
-            '-s', 'TumorDNA',
-        ], shell=False))
+        params = {
+            'input_file': generate_protein_fasta_input_file,
+            'flanking_sequence_length': 25,
+            'output_file': generate_protein_fasta_output_file.name,
+            'annotated_vcf': generate_protein_fasta_input_vcf,
+            'ref_fasta': unzipped_fasta_file,
+            'gtf_file': generate_protein_fasta_input_gtf,
+            'sample_name': 'TumorDNA',
+        }
+        generator = PvacspliceGenerateProteinFasta(**params)
+        self.assertFalse(generator.execute())
+
         expected_output_file = os.path.join(self.test_output_data_dir, 'output.short.fasta')
         self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
 
         expected_tsv_file = os.path.join(self.test_output_data_dir, 'output.short.tsv')
         self.assertTrue(cmp(generate_protein_fasta_output_tsv, expected_tsv_file))
+
         os.unlink(generate_protein_fasta_output_tsv)
         os.unlink(unzipped_fasta_file)
 
@@ -199,22 +207,24 @@ class GenerateFastaTests(unittest.TestCase):
         generate_protein_fasta_output_file = tempfile.NamedTemporaryFile()
         generate_protein_fasta_output_tsv  = "{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name)
 
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            generate_protein_fasta_input_file,
-            '25',
-            generate_protein_fasta_output_file.name,
-            generate_protein_fasta_input_vcf,
-            unzipped_fasta_file,
-            unzipped_gtf_file,
-            '-s', 'TumorDNA',
-        ], shell=False))
+        params = {
+            'input_file': generate_protein_fasta_input_file,
+            'flanking_sequence_length': 25,
+            'output_file': generate_protein_fasta_output_file.name,
+            'annotated_vcf': generate_protein_fasta_input_vcf,
+            'ref_fasta': unzipped_fasta_file,
+            'gtf_file': unzipped_gtf_file,
+            'sample_name': 'TumorDNA',
+        }
+        generator = PvacspliceGenerateProteinFasta(**params)
+        self.assertFalse(generator.execute())
+
         expected_output_file = os.path.join(self.test_output_data_dir, 'output.unsupported_aa.fasta')
         self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
 
         expected_tsv_file = os.path.join(self.test_output_data_dir, 'output.unsupported_aa.tsv')
         self.assertTrue(cmp(generate_protein_fasta_output_tsv, expected_tsv_file))
+
         os.unlink(generate_protein_fasta_output_tsv)
         os.unlink(unzipped_fasta_file)
         os.unlink(unzipped_gtf_file)
@@ -228,22 +238,24 @@ class GenerateFastaTests(unittest.TestCase):
         generate_protein_fasta_output_file = tempfile.NamedTemporaryFile()
         generate_protein_fasta_output_tsv  = "{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name)
 
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            generate_protein_fasta_input_file,
-            self.flanking_sequence_length,
-            generate_protein_fasta_output_file.name,
-            generate_protein_fasta_input_vcf,
-            unzipped_fasta_file,
-            generate_protein_fasta_input_gtf,
-            '-s', 'HCC1395_TUMOR_DNA',
-            '--mutant-only',
-        ], shell=False))
+        params = {
+            'input_file': generate_protein_fasta_input_file,
+            'flanking_sequence_length': self.flanking_sequence_length,
+            'output_file': generate_protein_fasta_output_file.name,
+            'annotated_vcf': generate_protein_fasta_input_vcf,
+            'ref_fasta': unzipped_fasta_file,
+            'gtf_file': generate_protein_fasta_input_gtf,
+            'sample_name': 'HCC1395_TUMOR_DNA',
+            'mutant_only': True
+        }
+        generator = PvacspliceGenerateProteinFasta(**params)
+        self.assertFalse(generator.execute())
+
         expected_output_file = os.path.join(self.test_output_data_dir, 'output.mutant_only.fasta')
         self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
 
         expected_tsv_file = os.path.join(self.test_output_data_dir, 'output.mutant_only.tsv')
         self.assertTrue(cmp(generate_protein_fasta_output_tsv, expected_tsv_file))
+
         os.unlink(generate_protein_fasta_output_tsv)
         os.unlink(unzipped_fasta_file)
