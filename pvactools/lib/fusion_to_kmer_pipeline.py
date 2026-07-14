@@ -12,6 +12,7 @@ class FusionToKmerPipeline(InputToKmerPipeline):
         self.output_dir = kwargs['output_dir']
         self.transcript_fasta = kwargs['transcript_fasta']
         self.starfusion_file = kwargs.pop('starfusion_file', None)
+        self.downstream_sequence_length = kwargs.pop('downstream_sequence_length', None)
         self.class_i_epitope_length = kwargs.pop('class_i_epitope_length', None)
         self.class_ii_epitope_length = kwargs.pop('class_ii_epitope_length', None)
         self.class_i_hla = kwargs.pop('class_i_hla', None)
@@ -47,8 +48,9 @@ class FusionToKmerPipeline(InputToKmerPipeline):
         else:
             print('Creating fusion fastas')
             params = {
-                'input_file' : self.create_file_path('tsv'),
+                'input_file': self.create_file_path('tsv'),
                 'transcript_fasta': self.transcript_fasta,
+                'downstream_sequence_length': self.downstream_sequence_length,
                 'output_file': self.create_file_path('fasta'),
             }
             fusion_to_fasta = FusionToFasta(**params)
