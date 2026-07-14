@@ -518,12 +518,12 @@ class OutputParser(metaclass=ABCMeta):
             return {
                 **self._make_score_entry(
                     line, 'TLBind', 'ic50',
-                    line.get('BA_score'), method,
+                    line.get('BA_score'), 'TLBind_Binding',
                     percentile_keys=None, percentile_fallback='NA',
                 ),
                 **self._make_score_entry(
                     line, 'TLBind Presentation', 'presentation',
-                    line.get('EL_score'), 'TLBind Presentation',
+                    line.get('EL_score'), 'TLBind_Presentation',
                     percentile_keys=None, percentile_fallback='NA',
                     is_reversed=True
                 )
