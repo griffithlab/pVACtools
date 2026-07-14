@@ -918,8 +918,6 @@ class OutputParser(metaclass=ABCMeta):
             elif method == 'TLBind':
                 headers.append("TLBind WT IC50 Score")
                 headers.append("TLBind MT IC50 Score")
-                headers.append("TLBind WT Percentile")
-                headers.append("TLBind MT Percentile")
                 headers.append("TLBind WT Presentation Score")
                 headers.append("TLBind MT Presentation Score")
                 headers.append("TLBind WT Presentation Percentile")
@@ -1304,7 +1302,6 @@ class UnmatchedSequencesOutputParser(OutputParser):
                 headers.append("%s Binding Score" % pretty_method)
             elif method == 'TLBind':
                 headers.append("TLBind IC50 Score")
-                headers.append("TLBind Percentile")
                 headers.append("TLBind Presentation Score")
                 headers.append("TLBind Presentation Percentile")
             elif method in ['BigMHC_EL', 'netmhciipan_el', 'netmhcpan_el', 'MixMHC2pred']:
