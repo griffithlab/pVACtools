@@ -370,6 +370,7 @@ class CallClassIIPredictorsTests(CallPredictorsTests):
             )
 
     def test_netmhciipan_method_with_version(self):
+        input_file = os.path.join(self.test_data_dir, 'input.12.fasta')
         with tempfile.TemporaryDirectory() as output_dir:
             iedb_path = os.getenv('IEDB_PATH')
             if iedb_path is None:
@@ -378,7 +379,7 @@ class CallClassIIPredictorsTests(CallPredictorsTests):
             NetMHCIIVersion.netmhciipan_version = '4.2'
 
             predictor_arguments = {
-                'input_file': self.input_file,
+                'input_file': input_file,
                 'sample_name': 'tmp',
                 'fasta_size': 800,
                 'allele': 'DRB1*01:01',
@@ -406,6 +407,7 @@ class CallClassIIPredictorsTests(CallPredictorsTests):
             )
 
     def test_netmhciipan_el_method_with_version(self):
+        input_file = os.path.join(self.test_data_dir, 'input.12.fasta')
         with tempfile.TemporaryDirectory() as output_dir:
             iedb_path = os.getenv('IEDB_PATH')
             if iedb_path is None:
@@ -414,7 +416,7 @@ class CallClassIIPredictorsTests(CallPredictorsTests):
             NetMHCIIVersion.netmhciipan_version = '4.2'
 
             predictor_arguments = {
-                'input_file': self.input_file,
+                'input_file': input_file,
                 'sample_name': 'tmp',
                 'fasta_size': 800,
                 'allele': 'DRB1*01:01',
@@ -442,9 +444,10 @@ class CallClassIIPredictorsTests(CallPredictorsTests):
             )
 
     def test_mixmhc2pred_method_generates_expected_files(self):
+        input_file = os.path.join(self.test_data_dir, 'input.12.fasta')
         with tempfile.TemporaryDirectory() as output_dir:
             predictor_arguments = {
-                'input_file': self.input_file,
+                'input_file': input_file,
                 'sample_name': 'tmp',
                 'fasta_size': 800,
                 'allele': 'DRB1*04:05',
@@ -469,7 +472,7 @@ class CallClassIIPredictorsTests(CallPredictorsTests):
                 'sample_name': 'tmp',
                 'fasta_size': 800,
                 'allele': 'DRB1*01:01',
-                'epitope_length': 15,
+                'epitope_length': self.epitope_length,
                 'prediction_algorithms': ['ImmuScope_IM'],
                 'iedb_executable_path': None,
                 'iedb_retries': 5,
