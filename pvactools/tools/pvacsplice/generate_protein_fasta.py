@@ -2,7 +2,7 @@ import sys
 import argparse
 
 from pvactools.lib.generate_protein_fasta import PvacspliceGenerateProteinFasta
-from pvactools.lib.run_utils import *
+from pvactools.lib.run_argument_utils import *
 
 def define_parser():
     parser = argparse.ArgumentParser(
@@ -92,7 +92,8 @@ def define_parser():
         "-d", "--downstream-sequence-length",
         default="1000",
         help="Cap to limit the downstream sequence length for frameshift splice sites when creating the fasta file. "
-            + "Use 'full' to include the full downstream sequence."
+            + "Use 'full' to include the full downstream sequence.",
+        type=downstream_sequence_length()
     )
     parser.add_argument(
         "-s", "--sample-name",
@@ -104,13 +105,6 @@ def main(args_input = sys.argv[1:]):
     parser = define_parser()
     args = parser.parse_args(args_input)
 
-    if args.downstream_sequence_length == 'full':
-        downstream_sequence_length = None
-    elif args.downstream_sequence_length.isdigit():
-        downstream_sequence_length = int(args.downstream_sequence_length)
-    else:
-        sys.exit("The downstream sequence length needs to be a positive integer or 'full'")
-
     params = {
         'input_file': args.input_file,
         'annotated_vcf': args.annotated_vcf,
@@ -120,7 +114,7 @@ def main(args_input = sys.argv[1:]):
         'pass_only': args.pass_only,
         'biotypes': args.biotypes,
         'allow_incomplete_transcripts': args.allow_incomplete_transcripts,
-        'downstream_sequence_length': downstream_sequence_length,
+        'downstream_sequence_length': args.downstream_sequence_length,
         'flanking_sequence_length': args.flanking_sequence_length,
         'mutant_only': args.mutant_only,
         'junction_score': args.junction_score,

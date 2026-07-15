@@ -20,8 +20,8 @@ class VariantToFasta(metaclass=ABCMeta):
     def __init__(self, **kwargs):
         self.input_file                 = kwargs['input_file']
         self.output_file                = kwargs['output_file']
-        self.downstream_sequence_length = kwargs.pop('downstream_sequence_length', None)
-        self.proximal_variants_file     = kwargs.pop('proximal_variants_file', None)
+        self.downstream_sequence_length = kwargs['downstream_sequence_length']
+        self.proximal_variants_file     = kwargs['proximal_variants_file']
         self.proximal_variants          = self.parse_proximal_variants_file()
 
     def parse_proximal_variants_file(self):

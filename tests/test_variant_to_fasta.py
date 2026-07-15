@@ -27,6 +27,7 @@ class VariantToFastaTests(unittest.TestCase):
             'input_file'                : generate_fasta_input_file,
             'output_file'               : generate_fasta_output_file.name,
             'downstream_sequence_length': None,
+            'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
 
@@ -42,6 +43,7 @@ class VariantToFastaTests(unittest.TestCase):
             'input_file'                : generate_fasta_input_file,
             'output_file'               : generate_fasta_output_file.name,
             'downstream_sequence_length': None,
+            'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
 
@@ -57,6 +59,7 @@ class VariantToFastaTests(unittest.TestCase):
             'input_file'                : generate_fasta_input_file,
             'output_file'               : generate_fasta_output_file.name,
             'downstream_sequence_length': None,
+            'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
 
@@ -72,6 +75,7 @@ class VariantToFastaTests(unittest.TestCase):
             'input_file'                : generate_fasta_input_file,
             'output_file'               : generate_fasta_output_file.name,
             'downstream_sequence_length': None,
+            'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
 
@@ -87,6 +91,7 @@ class VariantToFastaTests(unittest.TestCase):
             'input_file'                : generate_fasta_input_file,
             'output_file'               : generate_fasta_output_file.name,
             'downstream_sequence_length': None,
+            'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
 
@@ -101,6 +106,7 @@ class VariantToFastaTests(unittest.TestCase):
             'input_file'                : generate_fasta_input_file,
             'output_file'               : generate_fasta_output_file.name,
             'downstream_sequence_length': None,
+            'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
 
@@ -116,6 +122,7 @@ class VariantToFastaTests(unittest.TestCase):
             'input_file'                : generate_fasta_input_file,
             'output_file'               : generate_fasta_output_file.name,
             'downstream_sequence_length': None,
+            'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
 
@@ -131,6 +138,7 @@ class VariantToFastaTests(unittest.TestCase):
             'input_file'                : generate_fasta_input_file,
             'output_file'               : generate_fasta_output_file.name,
             'downstream_sequence_length': None,
+            'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
 
@@ -146,6 +154,7 @@ class VariantToFastaTests(unittest.TestCase):
             'input_file'                : generate_fasta_input_file,
             'output_file'               : generate_fasta_output_file.name,
             'downstream_sequence_length': None,
+            'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
 
@@ -161,6 +170,7 @@ class VariantToFastaTests(unittest.TestCase):
             'input_file'                : generate_fasta_input_file,
             'output_file'               : generate_fasta_output_file.name,
             'downstream_sequence_length': None,
+            'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
 
@@ -176,6 +186,7 @@ class VariantToFastaTests(unittest.TestCase):
             'input_file'                : generate_fasta_input_file,
             'output_file'               : generate_fasta_output_file.name,
             'downstream_sequence_length': None,
+            'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
 
@@ -191,6 +202,7 @@ class VariantToFastaTests(unittest.TestCase):
             'input_file'                : generate_fasta_input_file,
             'output_file'               : generate_fasta_output_file.name,
             'downstream_sequence_length': 100,
+            'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
 
@@ -206,6 +218,7 @@ class VariantToFastaTests(unittest.TestCase):
             'input_file'                : generate_fasta_input_file,
             'output_file'               : generate_fasta_output_file.name,
             'downstream_sequence_length': None,
+            'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
 
@@ -221,6 +234,7 @@ class VariantToFastaTests(unittest.TestCase):
             'input_file'                : generate_fasta_input_file,
             'output_file'               : generate_fasta_output_file.name,
             'downstream_sequence_length': None,
+            'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
 
@@ -236,6 +250,7 @@ class VariantToFastaTests(unittest.TestCase):
             'input_file'                : generate_fasta_input_file,
             'output_file'               : generate_fasta_output_file.name,
             'downstream_sequence_length': None,
+            'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
 
@@ -251,6 +266,7 @@ class VariantToFastaTests(unittest.TestCase):
             'input_file'                : generate_fasta_input_file,
             'output_file'               : generate_fasta_output_file.name,
             'downstream_sequence_length': 20,
+            'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
 
@@ -266,6 +282,7 @@ class VariantToFastaTests(unittest.TestCase):
             'input_file'                : generate_fasta_input_file,
             'output_file'               : generate_fasta_output_file.name,
             'downstream_sequence_length': None,
+            'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
 
@@ -282,6 +299,7 @@ class VariantToFastaTests(unittest.TestCase):
             'input_file'                : generate_fasta_input_file,
             'output_file'               : generate_fasta_output_file.name,
             'downstream_sequence_length': None,
+            'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
 
@@ -297,6 +315,7 @@ class VariantToFastaTests(unittest.TestCase):
             'input_file'                : generate_fasta_input_file,
             'output_file'               : generate_fasta_output_file.name,
             'proximal_variants_file'    : generate_fasta_proximal_variants_file,
+            'downstream_sequence_length': None,
         }
         generator = VariantToFasta(**generate_fasta_params)
 
@@ -313,6 +332,7 @@ class VariantToFastaTests(unittest.TestCase):
             'input_file'                : generate_fasta_input_file,
             'output_file'               : generate_fasta_output_file.name,
             'downstream_sequence_length': None,
+            'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
 
@@ -328,6 +348,7 @@ class VariantToFastaTests(unittest.TestCase):
             'input_file'                : generate_fasta_input_file,
             'output_file'               : generate_fasta_output_file.name,
             'downstream_sequence_length': None,
+            'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
 
@@ -343,6 +364,7 @@ class VariantToFastaTests(unittest.TestCase):
             'input_file'                : generate_fasta_input_file,
             'output_file'               : generate_fasta_output_file.name,
             'proximal_variants_file'    : generate_fasta_proximal_variants_file,
+            'downstream_sequence_length': None,
         }
         generator = VariantToFasta(**generate_fasta_params)
 
@@ -359,6 +381,7 @@ class VariantToFastaTests(unittest.TestCase):
             'input_file'                : generate_fasta_input_file,
             'output_file'               : generate_fasta_output_file.name,
             'downstream_sequence_length': None,
+            'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
 
@@ -373,6 +396,7 @@ class VariantToFastaTests(unittest.TestCase):
             'input_file'                : generate_fasta_input_file,
             'output_file'               : generate_fasta_output_file.name,
             'downstream_sequence_length': None,
+            'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
 
@@ -389,6 +413,7 @@ class VariantToFastaTests(unittest.TestCase):
             'input_file'                : generate_fasta_input_file,
             'output_file'               : generate_fasta_output_file.name,
             'proximal_variants_file'    : generate_fasta_proximal_variants_file,
+            'downstream_sequence_length': None,
         }
         generator = VariantToFasta(**generate_fasta_params)
 
@@ -406,6 +431,7 @@ class VariantToFastaTests(unittest.TestCase):
             'input_file'                : generate_fasta_input_file,
             'output_file'               : generate_fasta_output_file.name,
             'proximal_variants_file'    : generate_fasta_proximal_variants_file,
+            'downstream_sequence_length': None,
         }
         generator = VariantToFasta(**generate_fasta_params)
 
@@ -423,6 +449,7 @@ class VariantToFastaTests(unittest.TestCase):
             'input_file'                : generate_fasta_input_file,
             'output_file'               : generate_fasta_output_file.name,
             'proximal_variants_file'    : generate_fasta_proximal_variants_file,
+            'downstream_sequence_length': None,
         }
         generator = VariantToFasta(**generate_fasta_params)
 
@@ -440,6 +467,7 @@ class VariantToFastaTests(unittest.TestCase):
             'input_file'                : generate_fasta_input_file,
             'output_file'               : generate_fasta_output_file.name,
             'proximal_variants_file'    : generate_fasta_proximal_variants_file,
+            'downstream_sequence_length': None,
         }
         generator = VariantToFasta(**generate_fasta_params)
 
@@ -457,6 +485,7 @@ class VariantToFastaTests(unittest.TestCase):
             'input_file'                : generate_fasta_input_file,
             'output_file'               : generate_fasta_output_file.name,
             'proximal_variants_file'    : generate_fasta_proximal_variants_file,
+            'downstream_sequence_length': None,
         }
         generator = VariantToFasta(**generate_fasta_params)
 
@@ -472,15 +501,13 @@ class VariantToFastaTests(unittest.TestCase):
             'input_file'                : generate_fasta_input_file,
             'output_file'               : generate_fasta_output_file.name,
             'downstream_sequence_length': None,
+            'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
 
         self.assertFalse(generator.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_protein_altering_variant_insertion.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
-
-
-#Test for fusion position at relative beginning or end of fusion sequence
 
 if __name__ == '__main__':
     unittest.main()

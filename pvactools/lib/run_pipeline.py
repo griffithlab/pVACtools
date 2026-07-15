@@ -44,27 +44,10 @@ class RunPipeline:
             logging.info("Normalized percentiles are only available for human alleles. Option will be ignored.")
             self.use_normalized_percentiles = False
 
-        self.check_tumor_purity_argument()
-        self.check_downstream_sequence_length_argument()
         self.extra_argument_checks()
 
         self.base_output_dir = os.path.abspath(self.output_dir)
         os.makedirs(self.base_output_dir, exist_ok=True)
-
-    def check_tumor_purity_argument(self):
-        if self.tumor_purity is not None:
-            if self.tumor_purity > 1:
-                raise Exception("--tumor-purity must be a float between 0 and 1. Value too large: {}".format(args.tumor_purity))
-            elif self.tumor_purity < 0:
-                raise Exception("--tumor-purity must be a float between 0 and 1. Value too small: {}".format(args.tumor_purity))
-
-    def check_downstream_sequence_length_argument(self):
-        if self.downstream_sequence_length == 'full':
-            self.downstream_sequence_length = None
-        elif self.downstream_sequence_length.isdigit():
-            self.downstream_sequence_length = int(self.downstream_sequence_length)
-        else:
-            raise Exception("The downstream sequence length needs to be a positive integer or 'full'")
 
     def extra_argument_checks(self):
         pass

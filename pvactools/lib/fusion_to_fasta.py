@@ -22,7 +22,7 @@ class FusionToFasta(metaclass=ABCMeta):
             self.transcript_fasta = kwargs['transcript_fasta']
         self.transcript_fasta_dict_versioned = SeqIO.to_dict(SeqIO.parse(self.transcript_fasta, "fasta"))
         self.transcript_fasta_dict_unversioned = { k.split('.')[0]: v for k, v in self.transcript_fasta_dict_versioned.items() }
-        self.downstream_sequence_length = kwargs.pop('downstream_sequence_length', None)
+        self.downstream_sequence_length = kwargs['downstream_sequence_length']
         self.output_file = kwargs['output_file']
 
     def execute(self):

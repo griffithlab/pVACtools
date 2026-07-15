@@ -238,7 +238,7 @@ class PvacseqTests(unittest.TestCase):
             self.assertEqual(
                 str(cm.exception),
                 "Restart inputs are different from past inputs: \n" +
-                "Past input: downstream_sequence_length - full\n" +
+                "Past input: downstream_sequence_length - None\n" +
                 "Current input: downstream_sequence_length - 1000\nAborting."
             )
 

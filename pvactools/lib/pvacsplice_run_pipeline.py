@@ -9,9 +9,6 @@ from pvactools.lib.generate_protein_fasta import PvacspliceGenerateProteinFasta
 from pvactools.lib.post_processor import PvacsplicePostProcessor
 
 class PvacspliceRunPipeline(RunPipeline):
-    def check_downstream_sequence_length_argument(self):
-        pass
-
     def extra_argument_checks(self):
         # ref fasta
         if Path(self.ref_fasta).suffix not in ['.fa', '.fasta']:
