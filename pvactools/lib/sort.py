@@ -1,5 +1,5 @@
 import pandas as pd
-from pvactools.lib.run_utils import metrics_to_column, metric2_to_aggregate_column
+from pvactools.lib.run_utils import metrics_to_column, metric2_to_aggregate_column, valid_tiers
 
 def pvacseq_sort(rows, top_score_metric, top_score_metric2, file_type='full'):
     if isinstance(rows, list):
@@ -8,7 +8,7 @@ def pvacseq_sort(rows, top_score_metric, top_score_metric2, file_type='full'):
         return rows
 
     if file_type == 'aggregated':
-        tier_sorter = ["Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "PoorTranscript", "LowExpr", "Anchor", "Subclonal", "ProbPos", "Poor", "NoExpr"]
+        tier_sorter = valid_tiers('pvacseq')
         sorter_index = dict(zip(tier_sorter,range(len(tier_sorter))))
         rows["rank_tier"] = rows['Tier'].map(sorter_index)
         sort_columns = ["rank_tier", "rank", f"rank_{top_score_metric2[0]}", "Gene", "AA Change"]
@@ -47,7 +47,7 @@ def pvacfuse_sort(rows, top_score_metric, top_score_metric2, file_type='full'):
         return rows
 
     if file_type == 'aggregated':
-        tier_sorter = ["Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "LowReadSupport", "LowExpr", "Anchor", "ProbPos", "Poor"]
+        tier_sorter = valid_tiers('pvacfuse')
         sorter_index = dict(zip(tier_sorter,range(len(tier_sorter))))
         rows["rank_tier"] = rows['Tier'].map(sorter_index)
         sort_columns = ["rank_tier", "rank", f"rank_{top_score_metric2[0]}", "ID"]
@@ -86,7 +86,7 @@ def pvacsplice_sort(rows, top_score_metric, top_score_metric2, file_type='full')
         return rows
 
     if file_type == 'aggregated':
-        tier_sorter = ["Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "PoorTranscript", "LowExpr", "Anchor", "Subclonal", "ProbPos", "Poor", "NoExpr"]
+        tier_sorter = valid_tiers('pvacsplice')
         sorter_index = dict(zip(tier_sorter,range(len(tier_sorter))))
         rows["rank_tier"] = rows['Tier'].map(sorter_index)
         sort_columns = ["rank_tier", "rank", f"rank_{top_score_metric2[0]}", "Gene", "Best Transcript", "AA Change"]
@@ -125,7 +125,7 @@ def pvacbind_sort(rows, top_score_metric, top_score_metric2, file_type='full'):
         return rows
 
     if file_type == 'aggregated':
-        tier_sorter = ["Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "ProbPos", "Poor"]
+        tier_sorter = valid_tiers('pvacbind')
         sorter_index = dict(zip(tier_sorter,range(len(tier_sorter))))
         rows["rank_tier"] = rows['Tier'].map(sorter_index)
         sort_columns = ["rank_tier", "rank", f"rank_{top_score_metric2[0]}", "ID"]

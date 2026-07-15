@@ -190,3 +190,13 @@ def first_difference(s1, s2):
     for i, (c1, c2) in enumerate(zip(s1, s2)):
         if c1 != c2:
             return i
+
+def valid_tiers(tool):
+    if tool == 'pvacseq':
+        return ["Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "PoorTranscript", "LowExpr", "Anchor", "Subclonal", "ProbPos", "Poor", "NoExpr"]
+    elif tool == 'pvacfuse':
+        return ["Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "LowReadSupport", "LowExpr", "Anchor", "ProbPos", "Poor"]
+    elif tool == 'pvacsplice':
+        return ["Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "PoorTranscript", "LowExpr", "Anchor", "Subclonal", "ProbPos", "Poor", "NoExpr"]
+    elif tool == 'pvacbind':
+        return ["Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "ProbPos", "Poor"]

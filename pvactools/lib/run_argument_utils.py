@@ -1,5 +1,7 @@
 import argparse
 
+from pvactools.lib.run_utils import valid_tiers
+
 def float_range(minimum, maximum):
     """Return function handle of an argument type function for
        ArgumentParser checking a float range: minimum <= arg <= maximum
@@ -94,14 +96,7 @@ def pvacsplice_anchors():
     return pvacsplice_anchors_checker
 
 def tiers(tool):
-    if tool == 'pvacseq':
-        tiers = ["Pass", "PoorBinder", "RefMatch", "PoorTranscript", "LowExpr", "Anchor", "Subclonal", "ProbPos", "Poor", "NoExpr"]
-    elif tool == 'pvacfuse':
-        tiers = ["Pass", "PoorBinder", "RefMatch", "LowReadSupport", "LowExpr", "ProbPos", "Poor"]
-    elif tool == 'pvacsplice':
-        tiers = ["Pass", "PoorBinder", "RefMatch", "PoorTranscript", "LowExpr", "Subclonal", "ProbPos", "Poor", "NoExpr"]
-    elif tool == 'pvacbind':
-        tiers = ["Pass", "PoorBinder", "RefMatch", "ProbPos", "Poor"]
+    tiers = valid_tiers(tool)
     tiers_string = ", ".join(['"{}"'.format(x) for x in tiers])
     """Return function handle of an argument type function for
        ArgumentParser checking of the pVACseq tiers
