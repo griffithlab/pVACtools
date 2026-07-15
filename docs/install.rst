@@ -391,7 +391,8 @@ Installing TL-MHC
 
 If you wish to run the TLBind and TLImm prediction algorithms, you will need to
 install TL-MHC on your system. This package not a direct dependency of
->>>>>>> c61d5908 (Add installation instructions for MixMHCpred, MixMHC2pred, PRIME, and TL-MHC)
+the ``pvactools`` packages and needs to be installed manually by running
+the following command:
 
 .. code-block:: none
 
