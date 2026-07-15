@@ -259,3 +259,34 @@ class GenerateFastaTests(unittest.TestCase):
 
         os.unlink(generate_protein_fasta_output_tsv)
         os.unlink(unzipped_fasta_file)
+
+    def test_downstream_sequence_length_generates_expected_file(self):
+        generate_protein_fasta_input_file  = os.path.join(self.test_input_data_dir, "inputs", "splice_junctions_chr1.tsv")
+        generate_protein_fasta_input_vcf   = os.path.join(self.test_input_data_dir, "inputs", "annotated.expression_chr1.vcf.gz")
+        generate_protein_fasta_input_fasta = os.path.join(self.test_input_data_dir, "inputs", "all_sequences_chr1.fa.gz")
+        unzipped_fasta_file = gunzip_file(generate_protein_fasta_input_fasta)
+        generate_protein_fasta_input_gtf   = os.path.join(self.test_input_data_dir, "inputs", "Homo_sapiens.GRCh38.105_chr1.sorted.gtf.gz")
+        generate_protein_fasta_output_file = tempfile.NamedTemporaryFile()
+        generate_protein_fasta_output_tsv  = "{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name)
+
+        params = {
+            'input_file': generate_protein_fasta_input_file,
+            'flanking_sequence_length': self.flanking_sequence_length,
+            'output_file': generate_protein_fasta_output_file.name,
+            'annotated_vcf': generate_protein_fasta_input_vcf,
+            'ref_fasta': unzipped_fasta_file,
+            'gtf_file': generate_protein_fasta_input_gtf,
+            'sample_name': 'HCC1395_TUMOR_DNA',
+            'downstream_sequence_length': 10,
+        }
+        generator = PvacspliceGenerateProteinFasta(**params)
+        self.assertFalse(generator.execute())
+
+        expected_output_file = os.path.join(self.test_output_data_dir, 'output.downstream_sequence_length.fasta')
+        self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
+
+        expected_tsv_file = os.path.join(self.test_output_data_dir, 'output.downstream_sequence_length.tsv')
+        self.assertTrue(cmp(generate_protein_fasta_output_tsv, expected_tsv_file))
+
+        os.unlink(generate_protein_fasta_output_tsv)
+        os.unlink(unzipped_fasta_file)

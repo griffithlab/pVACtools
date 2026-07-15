@@ -217,7 +217,7 @@ class PvacspliceGenerateProteinFasta(GenerateProteinFasta):
             'junction_score'                   : self.junction_score,
             'variant_distance'                 : self.variant_distance,
             'anchor_types'                     : self.anchor_types,
-            'downstream_sequence_length'  : self.downstream_sequence_length,
+            'downstream_sequence_length'       : self.downstream_sequence_length,
             'normal_sample_name'               : None,
             'keep_tmp_files'                   : False,
             'class_i_epitope_length'           : [],

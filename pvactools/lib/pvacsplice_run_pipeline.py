@@ -53,6 +53,7 @@ class PvacspliceRunPipeline(RunPipeline):
             'class_i_hla'                  : self.class_i_alleles,
             'class_ii_hla'                 : self.class_ii_alleles,
             'keep_tmp_files'               : self.keep_tmp_files,
+            'downstream_sequence_length'   : self.downstream_sequence_length,
         }
         input_to_kmer_pipeline = JunctionToKmerPipeline(**params)
         input_to_kmer_pipeline.execute()

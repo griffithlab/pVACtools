@@ -545,6 +545,7 @@ class PvacspliceRunArgumentParser(RunArgumentParser):
         self.pass_only_args()
         self.expression_coverage_args()
         self.prediction_args()
+        self.fasta_generation()
         self.anchor_args()
         self.genes_of_interest_args()
         self.aggregated_report_args()

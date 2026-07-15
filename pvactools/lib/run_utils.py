@@ -304,3 +304,9 @@ def determine_total_matches(mt_epitope_seq, wt_epitope_seq):
         if a == b:
             matches += 1
     return matches
+
+def first_difference(s1, s2):
+    # Zip stops at the shorter string length
+    for i, (c1, c2) in enumerate(zip(s1, s2)):
+        if c1 != c2:
+            return i

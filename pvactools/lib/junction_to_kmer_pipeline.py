@@ -33,6 +33,7 @@ class JunctionToKmerPipeline(InputToKmerPipeline):
         self.keep_tmp_files = kwargs['keep_tmp_files']
         self.biotypes = kwargs['biotypes']
         self.allow_incomplete_transcripts = kwargs.pop('allow_incomplete_transcripts', False)
+        self.downstream_sequence_length = kwargs.pop('downstream_sequence_length', 1000)
         self.gtf_data = self.load_gtf_data()
         self.tmp_dir = os.path.join(self.output_dir, 'tmp')
         os.makedirs(self.tmp_dir, exist_ok=True)
@@ -165,6 +166,7 @@ class JunctionToKmerPipeline(InputToKmerPipeline):
                         'output_dir': self.output_dir,
                         'sample_name': self.sample_name,
                         'vcf': self.annotated_vcf,
+                        'downstream_sequence_length': self.downstream_sequence_length,
                     }
                     junctions = JunctionToFasta(**junction_params)
                     wt = junctions.create_wt_df()
@@ -173,8 +175,8 @@ class JunctionToKmerPipeline(InputToKmerPipeline):
                     alt = junctions.create_alt_df()
                     if alt.empty:
                         continue
-                    wt_aa, wt_fs = junctions.get_aa_sequence(wt)
-                    alt_aa, alt_fs = junctions.get_aa_sequence(alt)
+                    wt_aa, wt_fs = junctions.get_aa_sequence(wt, 'wt')
+                    alt_aa, alt_fs = junctions.get_aa_sequence(alt, 'alt', wt_aa)
                     if wt_aa == '' or alt_aa == '':
                         print('No amino acid sequence was produced. Skipping.')
                         continue
