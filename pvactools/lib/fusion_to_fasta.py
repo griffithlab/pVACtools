@@ -8,12 +8,12 @@ import tempfile
 import gzip
 import shutil
 
-import pvactools.lib.run_utils
+from pvactools.lib.run_utils import is_gz_file
 
 class FusionToFasta(metaclass=ABCMeta):
     def __init__(self, **kwargs):
         self.input_file = kwargs['input_file']
-        if pvactools.lib.run_utils.is_gz_file(kwargs['transcript_fasta']):
+        if is_gz_file(kwargs['transcript_fasta']):
             unzipped_file = tempfile.NamedTemporaryFile('wb')
             with gzip.open(kwargs['transcript_fasta'], "rb") as f_in:
                 shutil.copyfileobj(f_in, unzipped_file)

@@ -3,7 +3,6 @@ import sys
 import os
 from pvactools.lib.csq_parser import CsqParser
 from Bio.Seq import translate
-import pvactools.lib.run_utils
 
 class ProximalVariant:
     #flanking_nucleotide_bases is the number of bases (not amino acids!) to search on each side of a variant position

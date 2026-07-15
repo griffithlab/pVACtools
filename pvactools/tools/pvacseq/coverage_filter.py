@@ -5,7 +5,7 @@ import os
 import csv
 
 from pvactools.lib.filter import Filter, FilterCriterion
-from pvactools.lib.run_utils import *
+from pvactools.lib.run_argument_utils import float_range
 
 def define_parser():
     parser = argparse.ArgumentParser(

@@ -9,7 +9,8 @@ import argparse
 import json
 
 from pvactools.lib.prediction_class import PredictionClass
-from pvactools.lib.run_utils import is_preferred_transcript, float_range, transcript_prioritization_strategy, top_score_metric2, metric2_to_aggregate_column
+from pvactools.lib.run_utils import is_preferred_transcript, metric2_to_aggregate_column
+from pvactools.lib.run_argument_utils import float_range, transcript_prioritization_strategy, top_score_metric2
 from pvactools.lib.anchor_residue_pass import AnchorResiduePass
 from pvactools.lib.sort import pvacseq_sort, pvacfuse_sort, pvacsplice_sort, pvacbind_sort
 

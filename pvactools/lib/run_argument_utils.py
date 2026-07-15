@@ -1,3 +1,5 @@
+import argparse
+
 def float_range(minimum, maximum):
     """Return function handle of an argument type function for
        ArgumentParser checking a float range: minimum <= arg <= maximum
@@ -129,6 +131,6 @@ def downstream_sequence_length():
         elif arg.isdigit():
             return int(arg)
         else:
-            raise Exception("Argument needs to be a positive integer or 'full'")
+            raise argparse.ArgumentTypeError("Argument needs to be a positive integer or 'full'")
 
     return downstream_sequence_length_checker

@@ -2,7 +2,7 @@ import sys
 import argparse
 
 from pvactools.lib.generate_protein_fasta import PvacspliceGenerateProteinFasta
-from pvactools.lib.run_argument_utils import *
+from pvactools.lib.run_argument_utils import aggregate_report_evaluations, pvacsplice_anchors, downstream_sequence_length
 
 def define_parser():
     parser = argparse.ArgumentParser(

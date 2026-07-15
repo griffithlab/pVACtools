@@ -14,7 +14,7 @@ import random
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
-from pvactools.lib.run_utils import *
+from pvactools.lib.run_utils import split_file
 
 methods = ['cterm', '20s']
 

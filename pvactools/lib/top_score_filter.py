@@ -10,7 +10,7 @@ import pandas as pd
 import numpy as np
 from abc import ABCMeta, abstractmethod
 
-from pvactools.lib.run_utils import *
+from pvactools.lib.run_argument_utils import float_range, transcript_prioritization_strategy, top_score_metric2
 import pvactools.lib.sort
 from pvactools.lib.prediction_class import PredictionClass
 from pvactools.lib.anchor_residue_pass import AnchorResiduePass

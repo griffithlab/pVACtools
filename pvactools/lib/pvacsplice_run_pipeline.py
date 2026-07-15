@@ -1,7 +1,8 @@
 from pathlib import Path
 import shutil
+import os
 
-from pvactools.lib.run_utils import *
+from pvactools.lib.run_utils import is_gz_file
 from pvactools.lib.run_pipeline import RunPipeline
 from pvactools.lib.junction_to_kmer_pipeline import JunctionToKmerPipeline
 from pvactools.lib.pvacsplice_prediction_pipeline import PvacsplicePredictionPipeline

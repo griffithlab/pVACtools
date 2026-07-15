@@ -1,5 +1,5 @@
 import pandas as pd
-from pvactools.lib.run_utils import *
+from pvactools.lib.run_utils import metrics_to_column, metric2_to_aggregate_column
 
 def pvacseq_sort(rows, top_score_metric, top_score_metric2, file_type='full'):
     if isinstance(rows, list):

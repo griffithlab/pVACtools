@@ -5,7 +5,7 @@ import logging
 
 from pvactools.lib.prediction_class import NetMHCIIVersion
 from pvactools.lib.print_log import *
-from pvactools.lib.run_utils import *
+from pvactools.lib.run_utils import combine_reports, change_permissions_recursive
 from pvactools.lib.prediction_class_utils import *
 
 class RunPipeline:

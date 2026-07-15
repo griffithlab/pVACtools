@@ -12,7 +12,6 @@ import itertools
 import logging
 
 from pvactools.lib.proximal_variant import ProximalVariant
-from pvactools.lib.run_utils import *
 
 csv.field_size_limit(sys.maxsize)
 

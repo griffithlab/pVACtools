@@ -2,7 +2,9 @@ import argparse
 import sys
 import re
 import csv
-from pvactools.lib.run_utils import *
+
+from pvactools.lib.run_argument_utils import transcript_prioritization_strategy
+from pvactools.lib.run_utils import is_preferred_transcript
 
 class TranscriptFilter:
     def __init__(self, input_file, output_file, transcript_prioritization_strategy= ['canonical', 'mane_select', 'tsl'], maximum_transcript_support_level=1):

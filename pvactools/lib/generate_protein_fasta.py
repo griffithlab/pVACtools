@@ -9,7 +9,7 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
 from pvactools.lib.calculate_manufacturability import CalculateManufacturability
-from pvactools.lib.run_utils import *
+from pvactools.lib.run_utils import get_mutated_peptide_with_flanking_sequence, get_mutated_frameshift_peptide_with_flanking_sequence
 
 class GenerateProteinFasta:
     def __init__(self, **kwargs):

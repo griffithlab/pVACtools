@@ -4,7 +4,7 @@ import pandas as pd
 import pyfaidx
 from Bio.Seq import Seq
 
-from pvactools.lib.run_utils import *
+from pvactools.lib.run_utils import first_difference
 
 class JunctionToFasta():
     def __init__(self, **kwargs):
