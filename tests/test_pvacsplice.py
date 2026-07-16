@@ -90,7 +90,7 @@ class PvacspliceTests(unittest.TestCase):
         self.assertTrue(compiled_run_path)
 
     def test_pvacsplice_pipeline_class_I(self):
-        with patch('pvactools.lib.call_iedb.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+        with patch('pvactools.lib.call_predictors.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
             data,
             files,
             os.path.join(test_data_directory(), 'mock_files'),
@@ -308,7 +308,7 @@ class PvacspliceTests(unittest.TestCase):
         self.assertTrue('Requested alleles are not from the same species.' in str(context.exception))
 
     def test_pvacsplice_pipeline_multiple_somatic_variants_overlapping_splice_site(self):
-        with patch('pvactools.lib.call_iedb.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+        with patch('pvactools.lib.call_predictors.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
             data,
             files,
             os.path.join(test_data_directory(), 'mock_files'),

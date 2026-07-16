@@ -107,7 +107,7 @@ class PvacbindTests(unittest.TestCase):
         output_dir.cleanup()
 
     def test_pvacbind_pipeline(self):
-        with patch('pvactools.lib.call_iedb.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+        with patch('pvactools.lib.call_predictors.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
             data,
             files,
             test_data_directory()
