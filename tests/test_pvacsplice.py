@@ -42,6 +42,7 @@ class PvacspliceTests(unittest.TestCase):
                 'HLA-E*01:01': [9, 10],
             },
         }
+        cls.gtf_file_chr1 = os.path.join(cls.test_data_directory, "inputs", "Homo_sapiens.GRCh38.105_chr1.sorted.filtered.gtf")
         cls.peptide_fasta = os.path.join(pvactools_directory(), "tests", "test_data", "Homo_sapiens.GRCh38.pep.short.fa.gz")
 
     def test_pvacsplice_compiles(self):
@@ -118,7 +119,7 @@ class PvacspliceTests(unittest.TestCase):
                 output_dir.name,
                 os.path.join(self.test_data_directory, "inputs", "annotated.expression_chr1.vcf.gz"),
                 unzipped_fasta_file,
-                os.path.join(self.test_data_directory, "inputs", "Homo_sapiens.GRCh38.105_chr1.sorted.gtf.gz"),
+                self.gtf_file_chr1,
                 '-e1', '9,10',
                 '--normal-sample-name', 'HCC1395_NORMAL_DNA',
                 '--keep-tmp-files',
@@ -187,7 +188,7 @@ class PvacspliceTests(unittest.TestCase):
                     output_dir.name,
                     os.path.join(self.test_data_directory, "inputs", "annotated.expression_chr1.vcf.gz"),
                     unzipped_fasta_file,
-                    os.path.join(self.test_data_directory, "inputs", "Homo_sapiens.GRCh38.105_chr1.sorted.gtf.gz"),
+                    self.gtf_file_chr1,
                     '-e1', '9,10',
                     '--normal-sample-name', 'HCC1395_NORMAL_DNA',
                     '-b', '2000',
@@ -228,7 +229,7 @@ class PvacspliceTests(unittest.TestCase):
                 output_dir.name,
                 os.path.join(self.test_data_directory, "inputs", "annotated.expression_chr1.vcf.gz"),
                 unzipped_fasta_file,
-                os.path.join(self.test_data_directory, "inputs", "Homo_sapiens.GRCh38.105_chr1.sorted.gtf.gz"),
+                self.gtf_file_chr1,
                 '-e2', '15',
                 '--normal-sample-name', 'HCC1395_NORMAL_DNA',
                 '--keep-tmp-files',
@@ -300,7 +301,7 @@ class PvacspliceTests(unittest.TestCase):
                 output_dir.name,
                 os.path.join(self.test_data_directory, "inputs", "annotated.expression_chr1.vcf.gz"),
                 unzipped_fasta_file,
-                os.path.join(self.test_data_directory, "inputs", "Homo_sapiens.GRCh38.105_chr1.sorted.gtf.gz"),
+                self.gtf_file_chr1,
                 '-e1', '9,10',
             ])
             output_dir.cleanup()
