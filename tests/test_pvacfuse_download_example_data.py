@@ -7,7 +7,7 @@ from subprocess import PIPE
 from subprocess import run as subprocess_run
 from tempfile import TemporaryDirectory
 
-from pvactools.tools.pvacfuse import *
+from pvactools.tools.pvacfuse import download_example_data
 from tests.utils import *
 
 class PvacfuseDownloadExampleDataTests(unittest.TestCase):

@@ -6,7 +6,7 @@ import py_compile
 from subprocess import PIPE
 from subprocess import run as subprocess_run
 
-from pvactools.tools.pvacseq import *
+from pvactools.tools.pvacseq import update_tiers
 from tests.utils import *
 
 def test_data_directory():

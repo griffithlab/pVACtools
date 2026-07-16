@@ -6,7 +6,7 @@ import py_compile
 from subprocess import PIPE
 from subprocess import run as subprocess_run
 
-from pvactools.tools import *
+from pvactools.tools import valid_netmhciipan_versions
 from tests.utils import *
 
 class PvacseqValidNetmhciipanVersionsTests(unittest.TestCase):

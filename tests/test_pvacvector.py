@@ -12,7 +12,7 @@ import unittest.mock
 from mock import patch
 import argparse
 
-from pvactools.tools.pvacvector import *
+from pvactools.tools.pvacvector import run, visualize, download_example_data
 import pvactools.tools.pvacvector.main as pvacvector_main
 from tests.utils import *
 

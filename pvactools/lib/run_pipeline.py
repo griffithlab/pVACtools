@@ -4,9 +4,9 @@ import platform
 import logging
 
 from pvactools.lib.prediction_class import NetMHCIIVersion
-from pvactools.lib.print_log import *
+from pvactools.lib.print_log import print_log
 from pvactools.lib.run_utils import combine_reports, change_permissions_recursive
-from pvactools.lib.prediction_class_utils import *
+from pvactools.lib.prediction_class_utils import split_algorithms, combine_class_ii_alleles, split_alleles
 
 class RunPipeline:
     def __init__(self, **kwargs):

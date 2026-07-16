@@ -3,25 +3,19 @@ import unittest.mock
 import os
 import re
 import sys
-import tempfile
 import py_compile
 from subprocess import PIPE
 from subprocess import run as subprocess_run
 from filecmp import cmp
-import yaml
-import datetime
 from mock import patch
-from urllib.request import urlopen
-from shutil import copyfileobj
-from tempfile import NamedTemporaryFile
 import argparse
+import logging
+from testfixtures import LogCapture, StringComparison as S
 
 from pvactools.lib.fasta_to_kmers import SequenceFastaToKmers
 import pvactools.tools.pvacbind.main as pvacbind_main
-from pvactools.tools.pvacbind import *
+from pvactools.tools.pvacbind import run
 from tests.utils import *
-import logging
-from testfixtures import LogCapture, StringComparison as S
 
 def test_data_directory():
     return os.path.join(

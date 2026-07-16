@@ -16,7 +16,7 @@ from urllib.request import urlopen
 from shutil import copyfileobj
 from tempfile import NamedTemporaryFile
 
-from pvactools.tools.pvacfuse import *
+from pvactools.tools.pvacfuse import run
 import pvactools.tools.pvacfuse.main as pvacfuse_main
 from tests.utils import *
 

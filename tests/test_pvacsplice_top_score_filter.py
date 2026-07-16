@@ -7,7 +7,7 @@ from subprocess import PIPE
 from subprocess import run as subprocess_run
 from tempfile import NamedTemporaryFile
 
-from pvactools.tools.pvacsplice import *
+from pvactools.tools.pvacsplice import top_score_filter
 from tests.utils import *
 
 def test_data_directory():

@@ -6,7 +6,7 @@ from filecmp import cmp
 import py_compile
 import pandas as pd
 
-from pvactools.lib.fasta_to_kmers import *
+from pvactools.lib.fasta_to_kmers import JunctionFastaToKmers, FusionFastaToKmers, VariantFastaToKmers
 from tests.utils import *
 
 #python -m unittest tests/test_pvacsplice_filter_regtools_results.py

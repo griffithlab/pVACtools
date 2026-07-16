@@ -1,7 +1,23 @@
 import argparse
 import sys
 import os
-from pvactools.tools.pvacfuse import *
+
+from pvactools.tools.pvacfuse import (
+    run,
+    binding_filter,
+    coverage_filter,
+    top_score_filter,
+    aggregate_report_filter,
+    net_chop,
+    netmhc_stab,
+    calculate_reference_proteome_similarity,
+    generate_protein_fasta,
+    generate_aggregated_report,
+    identify_problematic_amino_acids,
+    mark_genes_of_interest,
+    update_tiers,
+    download_example_data,
+)
 
 def define_parser():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)

@@ -4,7 +4,16 @@ try:
     from importlib.metadata import version
 except:
     from importlib_metadata import version
-from pvactools.tools import *
+
+from pvactools.tools import (
+    allele_specific_cutoffs,
+    compare,
+    download_cwls,
+    download_wdls,
+    valid_alleles,
+    valid_algorithms,
+    valid_netmhciipan_versions,
+)
 
 def define_parser():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
