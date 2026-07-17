@@ -526,9 +526,6 @@ class MHCflurry(MHCI):
                 results = pd.concat((results, epitope_df), axis=0)
         return (results, 'pandas')
 
-class MHCflurryEL(MHCflurry):
-    pass
-
 class MixMHCpred(MHCI):
     def valid_allele_names(self):
         base_dir          = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))

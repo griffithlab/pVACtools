@@ -20,7 +20,6 @@ class OutputParser(metaclass=ABCMeta):
         self.output_file             = kwargs['output_file']
         self.sample_name             = kwargs['sample_name']
         self.add_sample_name         = kwargs.get('add_sample_name_column')
-        self.flurry_state            = kwargs.get('flurry_state')
         self.use_normalized_percentiles = kwargs.get('use_normalized_percentiles', False)
         reference_scores_path        = kwargs.get('reference_scores_path', '/tmp')
         self.normalized_percentile_calculator = NormalizedPercentileCalculator(reference_scores_path = reference_scores_path)
@@ -52,15 +51,10 @@ class OutputParser(metaclass=ABCMeta):
 
     def get_percentiles(self, line, method):
         if method.lower() == 'mhcflurry':
-            if self.flurry_state == 'both':
-                percentiles = {
-                    'percentile': line['percentile'],
-                    'mhcflurry_presentation_percentile': line['mhcflurry_presentation_percentile'],
-                }
-            elif self.flurry_state == 'EL_only':
-                percentiles = {'mhcflurry_presentation_percentile': line['mhcflurry_presentation_percentile']}
-            else:
-                percentiles = {'percentile': line['percentile']}
+            percentiles = {
+                'percentile': line['percentile'],
+                'mhcflurry_presentation_percentile': line['mhcflurry_presentation_percentile'],
+            }
         elif 'percentile' in line:
             percentiles = {'percentile': line['percentile']}
         elif 'percentile_rank' in line:
@@ -136,44 +130,23 @@ class OutputParser(metaclass=ABCMeta):
         m = method.lower()
 
         if m == 'mhcflurry':
-            if self.flurry_state == 'both':
-                return {
-                    **self._make_score_entry(
-                        line, 'MHCflurry', 'ic50',
-                        line.get('ic50'), method,
-                        percentile_keys=['percentile']
-                    ),
-                    **self._make_score_entry(
-                        line, 'MHCflurryEL Processing', 'presentation',
-                        line.get('mhcflurry_processing_score'), 'MHCflurry_EL_Processing',
-                        percentile_keys=None, percentile_fallback='NA', is_reversed=True
-                    ),
-                    **self._make_score_entry(
-                        line, 'MHCflurryEL Presentation', 'presentation',
-                        line.get('mhcflurry_presentation_score'), 'MHCflurry_EL_Presentation',
-                        percentile_keys=['mhcflurry_presentation_percentile'], is_reversed=True
-                    )
-                }
-
-            if self.flurry_state == 'el_only':
-                return {
-                    **self._make_score_entry(
-                        line, 'MHCflurryEL Processing', 'presentation',
-                        line.get('mhcflurry_processing_score'), 'MHCflurry_EL_Processing',
-                        percentile_keys=None, percentile_fallback='NA', is_reversed=True
-                    ),
-                    **self._make_score_entry(
-                        line, 'MHCflurryEL Presentation', 'presentation',
-                        line.get('mhcflurry_presentation_score'), 'MHCflurry_EL_Presentation',
-                        percentile_keys=['mhcflurry_presentation_percentile'], is_reversed=True
-                    )
-                }
-
-            return self._make_score_entry(
-                line, 'MHCflurry', 'ic50',
-                line.get('ic50'), method,
-                percentile_keys=['percentile']
-            )
+            return {
+                **self._make_score_entry(
+                    line, 'MHCflurry', 'ic50',
+                    line.get('ic50'), method,
+                    percentile_keys=['percentile']
+                ),
+                **self._make_score_entry(
+                    line, 'MHCflurryEL Processing', 'presentation',
+                    line.get('mhcflurry_processing_score'), 'MHCflurry_EL_Processing',
+                    percentile_keys=None, percentile_fallback='NA', is_reversed=True
+                ),
+                **self._make_score_entry(
+                    line, 'MHCflurryEL Presentation', 'presentation',
+                    line.get('mhcflurry_presentation_score'), 'MHCflurry_EL_Presentation',
+                    percentile_keys=['mhcflurry_presentation_percentile'], is_reversed=True
+                )
+            }
 
         if m == 'deepimmuno':
             return self._make_score_entry(
@@ -453,20 +426,18 @@ class MatchedSequencesOutputParser(OutputParser):
     def add_prediction_scores(self, row, mt_scores, wt_scores):
         for method in self.prediction_methods():
             if method == 'MHCflurry':
-                if self.flurry_state == 'EL_only' or self.flurry_state == 'both':
-                    row['MHCflurryEL Processing MT Score'] = self.score_or_na(mt_scores, 'MHCflurryEL Processing', 'presentation')
-                    row['MHCflurryEL Processing MT Percentile'] = self.score_or_na(mt_scores, 'MHCflurryEL Processing', 'percentile')
-                    row['MHCflurryEL Processing WT Score'] = self.score_or_na(wt_scores, 'MHCflurryEL Processing', 'presentation')
-                    row['MHCflurryEL Processing WT Percentile'] = self.score_or_na(wt_scores, 'MHCflurryEL Processing', 'percentile')
-                    row['MHCflurryEL Presentation MT Score'] = self.score_or_na(mt_scores, 'MHCflurryEL Presentation', 'presentation')
-                    row['MHCflurryEL Presentation MT Percentile'] = self.score_or_na(mt_scores, 'MHCflurryEL Presentation', 'percentile')
-                    row['MHCflurryEL Presentation WT Score'] = self.score_or_na(wt_scores, 'MHCflurryEL Presentation', 'presentation')
-                    row['MHCflurryEL Presentation WT Percentile'] = self.score_or_na(wt_scores, 'MHCflurryEL Presentation', 'percentile')
-                if self.flurry_state in ['both', 'BA_only', None]:
-                    row['MHCflurry MT IC50 Score'] = self.score_or_na(mt_scores, 'MHCflurry', 'ic50')
-                    row['MHCflurry MT Percentile'] = self.score_or_na(mt_scores, 'MHCflurry', 'percentile')
-                    row['MHCflurry WT IC50 Score'] = self.score_or_na(wt_scores, 'MHCflurry', 'ic50')
-                    row['MHCflurry WT Percentile'] = self.score_or_na(wt_scores, 'MHCflurry', 'percentile')
+                row['MHCflurryEL Processing MT Score'] = self.score_or_na(mt_scores, 'MHCflurryEL Processing', 'presentation')
+                row['MHCflurryEL Processing MT Percentile'] = self.score_or_na(mt_scores, 'MHCflurryEL Processing', 'percentile')
+                row['MHCflurryEL Processing WT Score'] = self.score_or_na(wt_scores, 'MHCflurryEL Processing', 'presentation')
+                row['MHCflurryEL Processing WT Percentile'] = self.score_or_na(wt_scores, 'MHCflurryEL Processing', 'percentile')
+                row['MHCflurryEL Presentation MT Score'] = self.score_or_na(mt_scores, 'MHCflurryEL Presentation', 'presentation')
+                row['MHCflurryEL Presentation MT Percentile'] = self.score_or_na(mt_scores, 'MHCflurryEL Presentation', 'percentile')
+                row['MHCflurryEL Presentation WT Score'] = self.score_or_na(wt_scores, 'MHCflurryEL Presentation', 'presentation')
+                row['MHCflurryEL Presentation WT Percentile'] = self.score_or_na(wt_scores, 'MHCflurryEL Presentation', 'percentile')
+                row['MHCflurry MT IC50 Score'] = self.score_or_na(mt_scores, 'MHCflurry', 'ic50')
+                row['MHCflurry MT Percentile'] = self.score_or_na(mt_scores, 'MHCflurry', 'percentile')
+                row['MHCflurry WT IC50 Score'] = self.score_or_na(wt_scores, 'MHCflurry', 'ic50')
+                row['MHCflurry WT Percentile'] = self.score_or_na(wt_scores, 'MHCflurry', 'percentile')
             else:
                 if method in ['MixMHCpred']:
                     row[f'{method} MT Binding Score'] = self.score_or_na(mt_scores, method, 'binding_score')
@@ -488,11 +459,11 @@ class MatchedSequencesOutputParser(OutputParser):
         headers = self.base_headers()
         for method in self.prediction_methods():
             if method.lower() == 'mhcflurry':
-                if self.flurry_state == 'EL_only':
-                    self.flurry_headers(headers)
-                    continue
-                elif self.flurry_state == 'both':
-                    self.flurry_headers(headers)
+                for subtype in ['Processing', 'Presentation']:
+                    headers.append(f"MHCflurryEL {subtype} WT Score")
+                    headers.append(f"MHCflurryEL {subtype} MT Score")
+                    headers.append(f"MHCflurryEL {subtype} WT Percentile")
+                    headers.append(f"MHCflurryEL {subtype} MT Percentile")
 
             if method in ['MixMHCpred']:
                 headers.append("%s WT Binding Score" % method)
@@ -513,16 +484,6 @@ class MatchedSequencesOutputParser(OutputParser):
         headers.append("Index")
 
         return headers
-
-    def flurry_headers(self, headers):
-        headers.append("MHCflurryEL Processing WT Score")
-        headers.append("MHCflurryEL Processing MT Score")
-        headers.append("MHCflurryEL Processing WT Percentile")
-        headers.append("MHCflurryEL Processing MT Percentile")
-        headers.append("MHCflurryEL Presentation WT Score")
-        headers.append("MHCflurryEL Presentation MT Score")
-        headers.append("MHCflurryEL Presentation WT Percentile")
-        headers.append("MHCflurryEL Presentation MT Percentile")
 
     def add_summary_metrics(self, prediction_results):
         prediction_results_with_metrics = {}
@@ -653,11 +614,9 @@ class UnmatchedSequencesOutputParser(OutputParser):
         headers = self.base_headers()
         for method in self.prediction_methods():
             if method.lower() == 'mhcflurry':
-                if self.flurry_state == 'EL_only':
-                    self.flurry_headers(headers)
-                    continue
-                elif self.flurry_state == 'both':
-                    self.flurry_headers(headers)
+                for subtype in ['Processing', 'Presentation']:
+                    headers.append(f"MHCflurryEL {subtype} Score")
+                    headers.append(f"MHCflurryEL {subtype} Percentile")
 
             if method in ['MixMHCpred']:
                 headers.append("%s Binding Score" % method)
@@ -672,23 +631,15 @@ class UnmatchedSequencesOutputParser(OutputParser):
             headers.append("Sample Name")
         return headers
 
-    def flurry_headers(self, headers):
-        headers.append("MHCflurryEL Processing Score")
-        headers.append("MHCflurryEL Processing Percentile")
-        headers.append("MHCflurryEL Presentation Score")
-        headers.append("MHCflurryEL Presentation Percentile")
-
     def add_prediction_scores(self, row, mt_scores):
         for method in self.prediction_methods():
             if method == 'MHCflurry':
-                if self.flurry_state == 'EL_only' or self.flurry_state == 'both':
-                    row['MHCflurryEL Processing Score'] = self.score_or_na(mt_scores, 'MHCflurryEL Processing', 'presentation')
-                    row['MHCflurryEL Processing Percentile'] = self.score_or_na(mt_scores, 'MHCflurryEL Processing', 'percentile')
-                    row['MHCflurryEL Presentation Score'] = self.score_or_na(mt_scores, 'MHCflurryEL Presentation', 'presentation')
-                    row['MHCflurryEL Presentation Percentile'] = self.score_or_na(mt_scores, 'MHCflurryEL Presentation', 'percentile')
-                if self.flurry_state in ['both', 'BA_only', None]:
-                    row['MHCflurry IC50 Score'] = self.score_or_na(mt_scores, 'MHCflurry', 'ic50')
-                    row['MHCflurry Percentile'] = self.score_or_na(mt_scores, 'MHCflurry', 'percentile')
+                row['MHCflurryEL Processing Score'] = self.score_or_na(mt_scores, 'MHCflurryEL Processing', 'presentation')
+                row['MHCflurryEL Processing Percentile'] = self.score_or_na(mt_scores, 'MHCflurryEL Processing', 'percentile')
+                row['MHCflurryEL Presentation Score'] = self.score_or_na(mt_scores, 'MHCflurryEL Presentation', 'presentation')
+                row['MHCflurryEL Presentation Percentile'] = self.score_or_na(mt_scores, 'MHCflurryEL Presentation', 'percentile')
+                row['MHCflurry IC50 Score'] = self.score_or_na(mt_scores, 'MHCflurry', 'ic50')
+                row['MHCflurry Percentile'] = self.score_or_na(mt_scores, 'MHCflurry', 'percentile')
             else:
                 if method in ['MixMHCpred']:
                     row[f'{method} Binding Score'] = self.score_or_na(mt_scores, method, 'binding_score')
