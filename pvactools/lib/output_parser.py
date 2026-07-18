@@ -565,11 +565,19 @@ class OutputParser(metaclass=ABCMeta):
         #The WT epitope at the same position is the match
         match_position = mt_position
         mt_epitope_seq = result['mt_epitope_seq']
-        try:
-            wt_result      = wt_results[match_position]
-        except:
-            import pdb
-            pdb.set_trace()
+        if match_position not in wt_results:
+            available_positions = ', '.join(
+                sorted(str(position) for position in wt_results)
+            ) or 'none'
+            raise ValueError(
+                "Unable to match missense mutant epitope to a wildtype epitope "
+                f"at position {match_position} for TSV index "
+                f"{result.get('tsv_index', 'unknown')} (allele "
+                f"{result.get('allele', 'unknown')}, mutant epitope "
+                f"{mt_epitope_seq}). Available wildtype positions: "
+                f"{available_positions}."
+            )
+        wt_result = wt_results[match_position]
         wt_epitope_seq = wt_result['wt_epitope_seq']
         result['wt_epitope_position'] = match_position
         total_matches  = self.determine_total_matches(mt_epitope_seq, wt_epitope_seq)

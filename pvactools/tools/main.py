@@ -73,12 +73,11 @@ def main():
     if args[0].version is True:
         print(version('pvactools'))
     else:
-        try:
-            args[0].func.main(args[1])
-        except AttributeError as e:
+        if not hasattr(args[0], 'func'):
             parser.print_help()
             print("Error: No command specified")
             sys.exit(-1)
+        args[0].func.main(args[1])
 
 
 if __name__ == '__main__':
