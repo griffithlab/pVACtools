@@ -54,6 +54,7 @@ jobs:
           pip cache purge
           pip install git+https://github.com/griffithlab/bigmhc.git#egg=bigmhc
           pip install git+https://github.com/griffithlab/deepimmuno.git#egg=deepimmuno
+          pip install git+https://github.com/griffithlab/TL-MHC.git#egg=TL-MHC
           pip install git+https://github.com/griffithlab/ImmuScope.git#egg=ImmuScope
           pip install -e .
           mhcflurry-downloads fetch

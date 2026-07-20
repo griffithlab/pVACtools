@@ -145,13 +145,13 @@ def pvacsplice_anchors():
 
 def tiers(tool):
     if tool == 'pvacseq':
-        tiers = ["Pass", "PoorBinder", "RefMatch", "PoorTranscript", "LowExpr", "Anchor", "Subclonal", "ProbPos", "Poor", "NoExpr"]
+        tiers = ["Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "PoorTranscript", "LowExpr", "Anchor", "Subclonal", "ProbPos", "Poor", "NoExpr"]
     elif tool == 'pvacfuse':
-        tiers = ["Pass", "PoorBinder", "RefMatch", "LowReadSupport", "LowExpr", "ProbPos", "Poor"]
+        tiers = ["Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "LowReadSupport", "LowExpr", "ProbPos", "Poor"]
     elif tool == 'pvacsplice':
-        tiers = ["Pass", "PoorBinder", "RefMatch", "PoorTranscript", "LowExpr", "Subclonal", "ProbPos", "Poor", "NoExpr"]
+        tiers = ["Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "PoorTranscript", "LowExpr", "Subclonal", "ProbPos", "Poor", "NoExpr"]
     elif tool == 'pvacbind':
-        tiers = ["Pass", "PoorBinder", "RefMatch", "ProbPos", "Poor"]
+        tiers = ["Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "ProbPos", "Poor"]
     tiers_string = ", ".join(['"{}"'.format(x) for x in tiers])
     """Return function handle of an argument type function for
        ArgumentParser checking of the pVACseq tiers

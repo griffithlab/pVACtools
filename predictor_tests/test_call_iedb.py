@@ -272,6 +272,54 @@ class CallIEDBClassITests(CallIEDBTests):
                 atol=2e-2
             )
 
+    def test_tlbind_method_generates_expected_files(self):
+        call_iedb_output_file = tempfile.NamedTemporaryFile()
+        tmp_call_iedb_output_dir = tempfile.TemporaryDirectory()
+
+        pvactools.lib.call_iedb.main([
+            self.input_file,
+            call_iedb_output_file.name,
+            'TLBind',
+            self.allele,
+            '-l', str(self.epitope_length),
+            '--tmp-dir', tmp_call_iedb_output_dir.name,
+        ])
+        expected_output_file = os.path.join(self.test_data_dir, 'output_tlbind.tsv')
+        expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,4,5])
+        actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[0,4,5])
+        pd.testing.assert_frame_equal(
+            expected_df,
+            actual_df,
+            check_like=True,
+            check_exact=False,
+            rtol=1e-3,
+            atol=2e-2
+        )
+
+    def test_tlimm_method_generates_expected_files(self):
+        call_iedb_output_file = tempfile.NamedTemporaryFile()
+        tmp_call_iedb_output_dir = tempfile.TemporaryDirectory()
+
+        pvactools.lib.call_iedb.main([
+            self.input_file,
+            call_iedb_output_file.name,
+            'TLImm',
+            self.allele,
+            '-l', str(self.epitope_length),
+            '--tmp-dir', tmp_call_iedb_output_dir.name,
+        ])
+        expected_output_file = os.path.join(self.test_data_dir, 'output_tlimm.tsv')
+        expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,3,4])
+        actual_df = pd.read_csv(call_iedb_output_file.name, sep="\t", index_col=[0,3,4])
+        pd.testing.assert_frame_equal(
+            expected_df,
+            actual_df,
+            check_like=True,
+            check_exact=False,
+            rtol=1e-3,
+            atol=2e-2
+        )
+
 class CallIEDBClassIITests(CallIEDBTests):
     @classmethod
     def additional_setup(cls):

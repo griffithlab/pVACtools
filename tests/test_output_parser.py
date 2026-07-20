@@ -119,6 +119,8 @@ class OutputParserTests(unittest.TestCase):
             os.path.join(self.test_data_dir, "input.MHCnuggetsI.HLA-A*02:01.9.tsv_1-48"),
             os.path.join(self.test_data_dir, "input.MixMHCpred.HLA-A*02:01.9.tsv_1-48"),
             os.path.join(self.test_data_dir, "input.PRIME.HLA-A*02:01.9.tsv_1-48"),
+            os.path.join(self.test_data_dir, "input.TLBind.HLA-A*02:01.9.tsv_1-48"),
+            os.path.join(self.test_data_dir, "input.TLImm.HLA-A*02:01.9.tsv_1-48"),
         ]
         parse_output_input_tsv_file = os.path.join(self.test_data_dir, "Test.tsv")
         parse_output_key_file = [os.path.join(self.test_data_dir, "Test_21.fa.split_1-48.key")]
@@ -152,6 +154,8 @@ class OutputParserTests(unittest.TestCase):
             os.path.join(self.test_data_dir, "input.MHCnuggetsI.HLA-A*02:01.9.tsv_1-48"),
             os.path.join(self.test_data_dir, "input.MixMHCpred.HLA-A*02:01.9.tsv_1-48"),
             os.path.join(self.test_data_dir, "input.PRIME.HLA-A*02:01.9.tsv_1-48"),
+            os.path.join(self.test_data_dir, "input.TLBind.HLA-A*02:01.9.tsv_1-48"),
+            os.path.join(self.test_data_dir, "input.TLImm.HLA-A*02:01.9.tsv_1-48"),
         ]
         parse_output_input_tsv_file = os.path.join(self.test_data_dir, "Test.tsv")
         parse_output_key_file = [os.path.join(self.test_data_dir, "Test_21.fa.split_1-48.key")]

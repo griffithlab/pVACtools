@@ -134,6 +134,20 @@ _____
 
 - License: `Academic License <https://github.com/GfellerLab/PRIME/blob/master/PRIME_license.pdf>`_
 
+TL-MHC
+______
+
+- Website: https://www.kavrakilab.org/publications/fasoulis2024-transfer.html
+- GitHub: https://github.com/KavrakiLab/TL-MHC
+- Citation: Fasoulis R, Rigo MM, Antunes DA, Paliouras G, Kavraki LE. Transfer learning improves pMHC
+  kinetic stability and immunogenicity predictions. Immunoinformatics (Amst). 2024 Mar;13:100030.
+
+  doi: http://dx.doi.org/10.1016/j.immuno.2023.100030
+
+  PubMed PMID: `38577265 <https://pubmed.ncbi.nlm.nih.gov/38577265/>`_
+
+- License: None provided
+
 ImmuScope
 _________
 
