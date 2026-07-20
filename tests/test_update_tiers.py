@@ -1,6 +1,7 @@
 import unittest
 import unittest.mock
 import os
+import csv
 import tempfile
 from filecmp import cmp
 import sys
@@ -59,6 +60,49 @@ class UpdateTiersTests(unittest.TestCase):
             os.path.join(self.test_data_dir, "HCC1395.pvacsplice.all_epitopes.aggregated.out.tsv"),
         ))
         tmp_input_file.close()
+
+    def test_pvacseq_missing_rna_depth_is_not_low_expression(self):
+        input_file = os.path.join(self.test_data_dir, 'HCC1395.all_epitopes.aggregated.tsv')
+        with open(input_file) as input_fh:
+            mutation = next(csv.DictReader(input_fh, delimiter='\t'))
+        mutation.update({
+            'IC50 MT': '1',
+            'IC50 %ile MT': '1',
+            'IM %ile MT': '1',
+            'Pres %ile MT': '1',
+            'RNA Expr': '0',
+            'RNA VAF': '0.5',
+            'Allele Expr': '0',
+            'RNA Depth': 'NA',
+            'DNA VAF': '1',
+        })
+
+        updater = PvacseqUpdateTiers(input_file, 0.5)
+        updater.anchor_calculator.is_anchor_residue_pass = unittest.mock.Mock(return_value=True)
+        self.addCleanup(updater.output_file.close)
+
+        self.assertEqual(updater.get_tier(mutation), 'NoExpr')
+
+    def test_pvacsplice_missing_rna_depth_is_not_low_expression(self):
+        input_file = os.path.join(self.test_data_dir, 'HCC1395.pvacsplice.all_epitopes.aggregated.tsv')
+        with open(input_file) as input_fh:
+            mutation = next(csv.DictReader(input_fh, delimiter='\t'))
+        mutation.update({
+            'IC50 MT': '1',
+            'IC50 %ile MT': '1',
+            'IM %ile MT': '1',
+            'Pres %ile MT': '1',
+            'RNA Expr': '0',
+            'RNA VAF': '0.5',
+            'Allele Expr': '0',
+            'RNA Depth': 'NA',
+            'DNA VAF': '1',
+        })
+
+        updater = PvacspliceUpdateTiers(input_file, 0.5)
+        self.addCleanup(updater.output_file.close)
+
+        self.assertEqual(updater.get_tier(mutation), 'NoExpr')
 
     def test_update_tiers_pvacbind(self):
         input_file = os.path.join(self.test_data_dir, 'pvacbind.aggregated.tsv')
