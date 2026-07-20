@@ -381,7 +381,7 @@ This should show information about the PRIME installation.
 
 On certain system you may need to recompile the PRIME executable:
 
-.. code-bloc:: none
+.. code-block:: none
 
    cd /opt/PRIME/lib
    g++ -O3 PRIME.cc -o PRIME.x
