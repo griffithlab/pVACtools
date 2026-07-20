@@ -987,7 +987,7 @@ class OutputParser(metaclass=ABCMeta):
                 row['TLBind MT Presentation Score'] = self.score_or_na(mt_scores, 'TLBind Presentation', 'presentation')
                 row['TLBind MT Presentation Percentile'] = self.score_or_na(mt_scores, 'TLBind Presentation', 'percentile')
                 row['TLBind WT Presentation Score'] = self.score_or_na(wt_scores, 'TLBind Presentation', 'presentation')
-                row['TLBind WT Presentation Percentile'] = self.score_or_na(wt_scores, 'TLImm Presentation', 'percentile')
+                row['TLBind WT Presentation Percentile'] = self.score_or_na(wt_scores, 'TLBind Presentation', 'percentile')
             else:
                 if pretty_method in ['MixMHCpred']:
                     row[f'{pretty_method} MT Binding Score'] = self.score_or_na(mt_scores, pretty_method, 'binding_score')
