@@ -5,6 +5,8 @@ import sys
 import py_compile
 from subprocess import PIPE
 from subprocess import run as subprocess_run
+import shutil
+import tempfile
 
 from pvactools.tools.pvacbind import *
 from tests.utils import *
@@ -53,4 +55,7 @@ class PvacbindUpdateTiersTests(unittest.TestCase):
 
     def test_runs(self):
         input_file = os.path.join(self.test_data_directory, 'MHC_Class_I', 'Test.MHC_I.all_epitopes.aggregated.tsv')
-        self.assertFalse(update_tiers.main([input_file]))
+        tmp_input_file = tempfile.NamedTemporaryFile()
+        shutil.copy(input_file, tmp_input_file.name)
+        self.assertFalse(update_tiers.main([tmp_input_file.name]))
+        os.unlink(tmp_input_file.name)
