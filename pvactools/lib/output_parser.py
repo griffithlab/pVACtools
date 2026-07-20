@@ -514,6 +514,29 @@ class OutputParser(metaclass=ABCMeta):
                 is_reversed=True
             )
 
+        if m == 'tlbind':
+            return {
+                **self._make_score_entry(
+                    line, 'TLBind', 'ic50',
+                    line.get('BA_score'), 'TLBind_Binding',
+                    percentile_keys=None, percentile_fallback='NA',
+                ),
+                **self._make_score_entry(
+                    line, 'TLBind Presentation', 'presentation',
+                    line.get('EL_score'), 'TLBind_Presentation',
+                    percentile_keys=None, percentile_fallback='NA',
+                    is_reversed=True
+                )
+            }
+
+        if m == 'tlimm':
+            return self._make_score_entry(
+                line, 'TLImm', 'immunogenicity',
+                line.get('Immunogenicity'), method,
+                percentile_keys=None, percentile_fallback='NA',
+                is_reversed=True
+            )
+
         pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
         percentile_keys = [
             key for key in ('percentile', 'percentile_rank', 'rank') if key in line
@@ -892,10 +915,17 @@ class OutputParser(metaclass=ABCMeta):
             if method in ['MixMHCpred']:
                 headers.append("%s WT Binding Score" % pretty_method)
                 headers.append("%s MT Binding Score" % pretty_method)
+            elif method == 'TLBind':
+                headers.append("TLBind WT IC50 Score")
+                headers.append("TLBind MT IC50 Score")
+                headers.append("TLBind WT Presentation Score")
+                headers.append("TLBind MT Presentation Score")
+                headers.append("TLBind WT Presentation Percentile")
+                headers.append("TLBind MT Presentation Percentile")
             elif method in ['BigMHC_EL', 'netmhciipan_el', 'netmhcpan_el', 'MixMHC2pred']:
                 headers.append("%s WT Presentation Score" % pretty_method)
                 headers.append("%s MT Presentation Score" % pretty_method)
-            elif method in ['BigMHC_IM', 'DeepImmuno', 'PRIME', 'ImmuScope_IM']:
+            elif method in ['BigMHC_IM', 'DeepImmuno', 'PRIME', 'ImmuScope_IM', 'TLImm']:
                 headers.append("%s WT Immunogenicity Score" % pretty_method)
                 headers.append("%s MT Immunogenicity Score" % pretty_method)
             else:
@@ -949,6 +979,15 @@ class OutputParser(metaclass=ABCMeta):
                     row['MHCflurry MT Percentile'] = self.score_or_na(mt_scores, 'MHCflurry', 'percentile')
                     row['MHCflurry WT IC50 Score'] = self.score_or_na(wt_scores, 'MHCflurry', 'ic50')
                     row['MHCflurry WT Percentile'] = self.score_or_na(wt_scores, 'MHCflurry', 'percentile')
+            elif pretty_method == 'TLBind':
+                row['TLBind MT IC50 Score'] = self.score_or_na(mt_scores, 'TLBind', 'ic50')
+                row['TLBind MT Percentile'] = self.score_or_na(mt_scores, 'TLBind', 'percentile')
+                row['TLBind WT IC50 Score'] = self.score_or_na(wt_scores, 'TLBind', 'ic50')
+                row['TLBind WT Percentile'] = self.score_or_na(wt_scores, 'TLBind', 'percentile')
+                row['TLBind MT Presentation Score'] = self.score_or_na(mt_scores, 'TLBind Presentation', 'presentation')
+                row['TLBind MT Presentation Percentile'] = self.score_or_na(mt_scores, 'TLBind Presentation', 'percentile')
+                row['TLBind WT Presentation Score'] = self.score_or_na(wt_scores, 'TLBind Presentation', 'presentation')
+                row['TLBind WT Presentation Percentile'] = self.score_or_na(wt_scores, 'TLImm Presentation', 'percentile')
             else:
                 if pretty_method in ['MixMHCpred']:
                     row[f'{pretty_method} MT Binding Score'] = self.score_or_na(mt_scores, pretty_method, 'binding_score')
@@ -956,7 +995,7 @@ class OutputParser(metaclass=ABCMeta):
                 elif pretty_method in ['BigMHC_EL', 'NetMHCIIpanEL', 'NetMHCpanEL', 'MixMHC2pred']:
                     row[f'{pretty_method} MT Presentation Score'] = self.score_or_na(mt_scores, pretty_method, 'presentation')
                     row[f'{pretty_method} WT Presentation Score'] = self.score_or_na(wt_scores, pretty_method, 'presentation')
-                elif pretty_method in ['BigMHC_IM', 'DeepImmuno', 'PRIME', 'ImmuScope_IM']:
+                elif pretty_method in ['BigMHC_IM', 'DeepImmuno', 'PRIME', 'ImmuScope_IM', 'TLImm']:
                     row[f'{pretty_method} MT Immunogenicity Score'] = self.score_or_na(mt_scores, pretty_method, 'immunogenicity')
                     row[f'{pretty_method} WT Immunogenicity Score'] = self.score_or_na(wt_scores, pretty_method, 'immunogenicity')
                 else:
@@ -1261,9 +1300,13 @@ class UnmatchedSequencesOutputParser(OutputParser):
             pretty_method = PredictionClass.prediction_class_name_for_iedb_prediction_method(method)
             if method in ['MixMHCpred']:
                 headers.append("%s Binding Score" % pretty_method)
+            elif method == 'TLBind':
+                headers.append("TLBind IC50 Score")
+                headers.append("TLBind Presentation Score")
+                headers.append("TLBind Presentation Percentile")
             elif method in ['BigMHC_EL', 'netmhciipan_el', 'netmhcpan_el', 'MixMHC2pred']:
                 headers.append("%s Presentation Score" % pretty_method)
-            elif method in ['BigMHC_IM', 'DeepImmuno', 'PRIME', 'ImmuScope_IM']:
+            elif method in ['BigMHC_IM', 'DeepImmuno', 'PRIME', 'ImmuScope_IM', 'TLImm']:
                 headers.append("%s Immunogenicity Score" % pretty_method)
             else:
                 headers.append("%s IC50 Score" % pretty_method)
@@ -1290,12 +1333,17 @@ class UnmatchedSequencesOutputParser(OutputParser):
                 if self.flurry_state in ['both', 'BA_only', None]:
                     row['MHCflurry IC50 Score'] = self.score_or_na(mt_scores, 'MHCflurry', 'ic50')
                     row['MHCflurry Percentile'] = self.score_or_na(mt_scores, 'MHCflurry', 'percentile')
+            elif pretty_method == 'TLBind':
+                row['TLBind IC50 Score'] = self.score_or_na(mt_scores, 'TLBind', 'ic50')
+                row['TLBind Percentile'] = self.score_or_na(mt_scores, 'TLBind', 'percentile')
+                row['TLBind Presentation Score'] = self.score_or_na(mt_scores, 'TLBind Presentation', 'presentation')
+                row['TLBind Presentation Percentile'] = self.score_or_na(mt_scores, 'TLBind Presentation', 'percentile')
             else:
                 if pretty_method in ['MixMHCpred']:
                     row[f'{pretty_method} Binding Score'] = self.score_or_na(mt_scores, pretty_method, 'binding_score')
                 elif pretty_method in ['BigMHC_EL', 'NetMHCIIpanEL', 'NetMHCpanEL', 'MixMHC2pred']:
                     row[f'{pretty_method} Presentation Score'] = self.score_or_na(mt_scores, pretty_method, 'presentation')
-                elif pretty_method in ['BigMHC_IM', 'DeepImmuno', 'PRIME', 'ImmuScope_IM']:
+                elif pretty_method in ['BigMHC_IM', 'DeepImmuno', 'PRIME', 'ImmuScope_IM', 'TLImm']:
                     row[f'{pretty_method} Immunogenicity Score'] = self.score_or_na(mt_scores, pretty_method, 'immunogenicity')
                 else:
                     row[f'{pretty_method} IC50 Score'] = self.score_or_na(mt_scores, pretty_method, 'ic50')

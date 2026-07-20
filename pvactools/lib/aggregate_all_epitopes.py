@@ -134,7 +134,7 @@ class AggregateAllEpitopes:
 
     def determine_used_ic50_algorithms(self):
         headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
-        potential_algorithms = ["NetMHCpan", "NetMHC", "NetMHCcons", "PickPocket", "SMM", "SMMPMBEC", "MHCflurry", "MHCnuggetsI", "NetMHCIIpan", "SMMalign", "NNalign", "MHCnuggetsII"]
+        potential_algorithms = ["NetMHCpan", "NetMHC", "NetMHCcons", "PickPocket", "SMM", "SMMPMBEC", "MHCflurry", "MHCnuggetsI", "NetMHCIIpan", "SMMalign", "NNalign", "MHCnuggetsII", "TLBind"]
         prediction_algorithms = []
         for algorithm in potential_algorithms:
             if "{} MT IC50 Score".format(algorithm) in headers or "{} IC50 Score".format(algorithm) in headers:
@@ -152,7 +152,7 @@ class AggregateAllEpitopes:
 
     def determine_used_binding_percentile_algorithms(self):
         headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
-        potential_algorithms = ["NetMHCpan", "NetMHC", "NetMHCcons", "PickPocket", "SMM", "SMMPMBEC", "MHCflurry", "MHCnuggetsI", "NetMHCIIpan", "SMMalign", "NNalign", "MHCnuggetsII", "MixMHCpred"]
+        potential_algorithms = ["NetMHCpan", "NetMHC", "NetMHCcons", "PickPocket", "SMM", "SMMPMBEC", "MHCflurry", "MHCnuggetsI", "NetMHCIIpan", "SMMalign", "NNalign", "MHCnuggetsII", "MixMHCpred", "TLBind"]
         prediction_algorithms = []
         for algorithm in potential_algorithms:
             if "{} MT Percentile".format(algorithm) in headers or "{} Percentile".format(algorithm) in headers:
@@ -161,7 +161,7 @@ class AggregateAllEpitopes:
 
     def determine_used_immunogenicity_score_algorithms(self):
         headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
-        potential_algorithms = ["BigMHC_IM", "DeepImmuno", "PRIME", "ImmuScope_IM"]
+        potential_algorithms = ["BigMHC_IM", "DeepImmuno", "PRIME", "ImmuScope_IM", "TLImm"]
         prediction_algorithms = []
         for algorithm in potential_algorithms:
             if "{} MT Immunogenicity Score".format(algorithm) in headers or "{} Immunogenicity Score".format(algorithm) in headers:
@@ -170,7 +170,7 @@ class AggregateAllEpitopes:
 
     def determine_used_immunogenicity_percentile_algorithms(self):
         headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
-        potential_algorithms = ["BigMHC_IM", "DeepImmuno", "PRIME", "ImmuScope_IM"]
+        potential_algorithms = ["BigMHC_IM", "DeepImmuno", "PRIME", "ImmuScope_IM", "TLImm"]
         prediction_algorithms = []
         for algorithm in potential_algorithms:
             if "{} MT Percentile".format(algorithm) in headers or "{} Percentile".format(algorithm) in headers:
@@ -188,7 +188,7 @@ class AggregateAllEpitopes:
 
     def determine_used_presentation_score_algorithms(self):
         headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
-        potential_algorithms = ["NetMHCpanEL", "NetMHCIIpanEL", "BigMHC_EL", "MixMHC2pred"]
+        potential_algorithms = ["NetMHCpanEL", "NetMHCIIpanEL", "BigMHC_EL", "MixMHC2pred", "TLBind Presentation"]
         prediction_algorithms = []
         for algorithm in potential_algorithms:
             if "{} MT Presentation Score".format(algorithm) in headers or "{} Presentation Score".format(algorithm) in headers:
@@ -197,7 +197,7 @@ class AggregateAllEpitopes:
 
     def determine_used_presentation_percentile_algorithms(self):
         headers = pd.read_csv(self.input_file, delimiter="\t", nrows=0).columns.tolist()
-        potential_algorithms = ["NetMHCpanEL", "NetMHCIIpanEL", "BigMHC_EL", "MHCflurryEL Presentation", "MHCflurryEL Processing", "MixMHC2pred"]
+        potential_algorithms = ["NetMHCpanEL", "NetMHCIIpanEL", "BigMHC_EL", "MHCflurryEL Presentation", "MHCflurryEL Processing", "MixMHC2pred", "TLBind Presentation"]
         prediction_algorithms = []
         for algorithm in potential_algorithms:
             if "{} MT Percentile".format(algorithm) in headers or "{} Percentile".format(algorithm) in headers:
