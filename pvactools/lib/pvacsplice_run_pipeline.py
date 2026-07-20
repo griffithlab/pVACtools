@@ -28,7 +28,7 @@ class PvacspliceRunPipeline(RunPipeline):
             raise Exception('The vcf input path does not point to a vcf file.')
 
         # vcf gz.tbi index file
-        if is_gz_file(self.annotated_vcf) and not Path(f'{self.annotated_vcf}.tbi'):
+        if is_gz_file(self.annotated_vcf) and not Path(f'{self.annotated_vcf}.tbi').exists():
             raise Exception('Gzipped VCF files must be indexed. (tabix -p vcf <vcf_file>)')
 
     def call_input_to_kmer_pipeline(self):

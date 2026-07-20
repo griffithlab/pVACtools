@@ -365,7 +365,7 @@ class PvacseqUpdateTiers(UpdateTiers, metaclass=ABCMeta):
 
         #relax expression.  Include sites that have reasonable vaf but zero overall gene expression
         lowexpr=False
-        if mutation['RNA VAF'] != 'NA' and mutation['RNA Expr'] != 'NA' and ['RNA Depth'] != 'NA' and mutation['Allele Expr'] != 'NA':
+        if mutation['RNA VAF'] != 'NA' and mutation['RNA Expr'] != 'NA' and mutation['RNA Depth'] != 'NA' and mutation['Allele Expr'] != 'NA':
             if ((float(mutation["Allele Expr"]) > 0) or
                (float(mutation["RNA Expr"]) == 0 and
                float(mutation["RNA Depth"]) > self.trna_cov and
@@ -783,7 +783,7 @@ class PvacspliceUpdateTiers(UpdateTiers, metaclass=ABCMeta):
 
         #relax expression.  Include sites that have reasonable vaf but zero overall gene expression
         lowexpr=False
-        if mutation['RNA VAF'] != 'NA' and mutation['RNA Expr'] != 'NA' and ['RNA Depth'] != 'NA' and mutation['Allele Expr'] != 'NA':
+        if mutation['RNA VAF'] != 'NA' and mutation['RNA Expr'] != 'NA' and mutation['RNA Depth'] != 'NA' and mutation['Allele Expr'] != 'NA':
             if ((float(mutation["Allele Expr"]) > 0) or
                (float(mutation["RNA Expr"]) == 0 and
                float(mutation["RNA Depth"]) > self.trna_cov and

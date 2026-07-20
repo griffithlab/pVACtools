@@ -34,6 +34,8 @@ jobs:
           pip install pypandoc==1.7.2
           pip install coverage
           pip install coveralls
+          pip install pytest
+          pip install pytest-cov
       - name: Install Python dependencies
         run: |
           pip install polars==0.16.18
@@ -48,7 +50,7 @@ jobs:
       - name: Run tests
         env:
           TEST_FLAG: 1
-        run: coverage run --source=pvactools.lib,pvactools.tools -m unittest discover -v -s tests
+        run: pytest --cov pvactools.lib --cov pvactools.tools --cov-report term-missing --durations=0 tests/test*.py
       - name: Coveralls
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
