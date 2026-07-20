@@ -116,7 +116,7 @@ def main(args_input = sys.argv[1:]):
     if Path(args.annotated_vcf).suffix != '.vcf' and not is_gz_file(args.annotated_vcf):
         sys.exit('The vcf input path does not point to a vcf file.')
     # vcf gz.tbi index file
-    if is_gz_file(args.annotated_vcf) and not Path(f'{args.annotated_vcf}.tbi'):
+    if is_gz_file(args.annotated_vcf) and not Path(f'{args.annotated_vcf}.tbi').exists():
         sys.exit('Gzipped VCF files must be indexed. (tabix -p vcf <vcf_file>)')
     # iedb retries - default 5
     if args.iedb_retries > 100:
