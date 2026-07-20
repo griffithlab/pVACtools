@@ -45,10 +45,6 @@ class GenerateProteinFasta:
 
     def trim_sequences(self):
         raise Exception("Implement in child class")
-
-    def filter_fasta(self):
-        raise Exception("Implement in child class")
-
     def parse_input_tsv(self):
         if self.input_tsv is None:
             return (None, None)
