@@ -17,7 +17,6 @@ class CallPredictors:
         self.allele = kwargs['allele']
         self.epitope_length = kwargs['epitope_length']
         self.prediction_algorithms = kwargs['prediction_algorithms'].copy()
-        self.flurry_state = self.__get_flurry_state()
         self.iedb_executable_path = kwargs['iedb_executable_path']
         self.iedb_retries = kwargs['iedb_retries']
         self.n_threads = kwargs['n_threads']
@@ -28,19 +27,6 @@ class CallPredictors:
         os.makedirs(self.log_dir, exist_ok=True),
         self.output_files = []
         self.output_key_files = []
-
-    def __get_flurry_state(self):
-        if 'MHCflurry' in self.prediction_algorithms and 'MHCflurryEL' in self.prediction_algorithms:
-            self.prediction_algorithms.remove('MHCflurryEL')
-            return 'both'
-        elif 'MHCflurry' in self.prediction_algorithms:
-            return 'BA_only'
-        elif 'MHCflurryEL' in self.prediction_algorithms:
-            pred_idx = self.prediction_algorithms.index('MHCflurryEL')
-            self.prediction_algorithms[pred_idx] = 'MHCflurry'
-            return 'EL_only'
-        else:
-            return None
 
     def execute(self):
         split_fasta_files = self.split_input_file()

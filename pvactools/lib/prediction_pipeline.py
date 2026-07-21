@@ -66,7 +66,6 @@ class PredictionPipeline:
                     'output_file'               : parsed_file_path,
                     'use_normalized_percentiles': self.use_normalized_percentiles,
                     'reference_scores_path'     : self.reference_scores_path,
-                    'flurry_state'              : call_predictors.flurry_state,
                     'sample_name'               : self.sample_name,
                 }
                 if self.additional_report_columns and 'sample_name' in self.additional_report_columns:

@@ -152,5 +152,5 @@ class OutputParserTests(unittest.TestCase):
         line = {'allele': 'HLA-C*15:05', 'peptide': 'QPKPVIDG', 'ic50': '28394.79812418208', 'percentile': '', 'mhcflurry_processing_score': '0.0385892167687416', 'mhcflurry_presentation_score': '0.0040710675126724', 'mhcflurry_presentation_percentile': '62.74467391304348', 'seq_num': '1', 'start': '1'}
         method = 'MHCflurry'
         scores = parser.get_scores(line, method)
-        expected_scores = {'MHCflurry': {'ic50': 28394.79812418208, 'percentile': 'NA'}}
+        expected_scores = {'MHCflurry': {'ic50': 28394.79812418208, 'percentile': 'NA'}, 'MHCflurryEL Processing': {'presentation': 0.0385892167687416, 'percentile': 'NA'}, 'MHCflurryEL Presentation': {'presentation': 0.0040710675126724, 'percentile': 62.74467391304348}}
         self.assertEqual(scores, expected_scores)
