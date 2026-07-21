@@ -45,6 +45,7 @@ class NetChop:
         start = ep_start - self.flanking_sequence_length
         if start < 0:
             start = 0
+        #start diff is 0-based
         start_diff = ep_start - start
         end = ep_start + len(epitope) + self.flanking_sequence_length
         return full_peptide[start:end], start_diff

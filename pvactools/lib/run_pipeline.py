@@ -103,7 +103,13 @@ class RunPipeline:
                         post_processing_params['fasta'] = self.generate_flanked_protein_fasta(7)
                     # generate net_chop fasta to output dir if specified
                     if self.net_chop_method:
-                        post_processing_params['net_chop_fasta'] = self.generate_flanked_protein_fasta(10)
+                        #NetChop requires a flanking sequence of 9 amino acids around the epitope
+                        #(not mutation) in order to provide consistent cleavage scores.
+                        #A flanking sequence length of 9 + max(epitope_lengths) ensures that there
+                        #are always sufficient flanking amino acids around all possible epitopes,
+                        #no matter where they fall in relation to the mutation
+                        flanking_sequence_length  = 9 + max(params['epitope_lengths'])
+                        post_processing_params['net_chop_fasta'] = self.generate_flanked_protein_fasta(flanking_sequence_length)
                     filtered_file = os.path.join(self.predictor.output_dir, f"{self.sample_name}.MHC_{mhc_class}.filtered.tsv")
                     post_processing_params["filename_addition"] = f"MHC_{mhc_class}"
                     post_processing_params["species"] = self.species
