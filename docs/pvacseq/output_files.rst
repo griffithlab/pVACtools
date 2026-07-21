@@ -417,7 +417,7 @@ parameter.
 .. _ml_prediction_output:
 
 <sample_name>.MHC_I.all_epitopes.aggregated.ML_predict.tsv Report Columns
---------------------------------------------------
+-------------------------------------------------------------------------
 
 The ``<sample_name>.MHC_I.all_epitopes.aggregated.ML_predict.tsv`` file is generated when using the :ref:`add_ml_predictions <optional_downstream_analysis_tools_label>` 
 tool or when running pVACseq with both MHC Class I and Class II predictions and the ``--run-ml-predictions`` flag enabled. 

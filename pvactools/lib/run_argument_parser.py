@@ -574,7 +574,7 @@ class PvacseqRunArgumentParser(RunArgumentParser):
 class PvacvectorRunArgumentParser(RunArgumentParser):
     def __init__(self):
         tool_name = 'pvacvector'
-        input_file_help = "A .fa file with peptides or to use for vector design."
+        input_file_help = "A .fa file with peptides to use for vector design."
         RunArgumentParser.__init__(self, tool_name, input_file_help)
         self.parser.add_argument(
             "-e1", "--class-i-epitope-length", type=lambda s:[int(epl) for epl in s.split(',')],
