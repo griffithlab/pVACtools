@@ -37,66 +37,6 @@ def run_pipelines(input_file, base_output_dir, args, junctions_to_test, spacer, 
     pipeline.execute()
     return pipeline.predictor.output_files
 
-    parsed_output_files = []
-    if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0:
-        if args.iedb_install_directory:
-            iedb_mhc_i_executable = os.path.join(args.iedb_install_directory, 'mhc_i', 'src', 'predict_binding.py')
-            if not os.path.exists(iedb_mhc_i_executable):
-                sys.exit("IEDB MHC I executable path doesn't exist %s" % iedb_mhc_i_executable)
-        else:
-            iedb_mhc_i_executable = None
-
-        if args.use_normalized_percentiles and species != 'human':
-            print("WARNING: Normalized percentiles are only available for human alleles. Option will be ignored.")
-            args.use_normalized_percentiles = False
-
-        print("Executing MHC Class I predictions")
-
-        output_dir = os.path.join(base_output_dir, 'MHC_Class_I')
-        os.makedirs(output_dir, exist_ok=True)
-
-        class_i_arguments = shared_arguments.copy()
-        class_i_arguments['alleles']                 = class_i_alleles
-        class_i_arguments['iedb_executable']         = iedb_mhc_i_executable
-        class_i_arguments['epitope_lengths']         = args.class_i_epitope_length
-        class_i_arguments['prediction_algorithms']   = class_i_prediction_algorithms
-        class_i_arguments['output_dir']              = output_dir
-        class_i_arguments['filename_addition']         = "MHC_I"
-        class_i_arguments['use_normalized_percentiles']  = args.use_normalized_percentiles
-        class_i_arguments['reference_scores_path']    = args.reference_scores_path
-        pipeline_i = Pipeline(**class_i_arguments)
-        pipeline_i.generate_fasta()
-        pipeline_i.call_iedb()
-        parsed_output_files.extend(pipeline_i.parse_outputs())
-
-    if len(class_ii_prediction_algorithms) > 0 and len(class_ii_alleles) > 0:
-        if args.iedb_install_directory:
-            iedb_mhc_ii_executable = os.path.join(args.iedb_install_directory, 'mhc_ii', 'mhc_II_binding.py')
-            if not os.path.exists(iedb_mhc_ii_executable):
-                sys.exit("IEDB MHC II executable path doesn't exist %s" % iedb_mhc_ii_executable)
-        else:
-            iedb_mhc_ii_executable = None
-
-        print("Executing MHC Class II predictions")
-
-        output_dir = os.path.join(base_output_dir, 'MHC_Class_II')
-        os.makedirs(output_dir, exist_ok=True)
-
-        class_ii_arguments = shared_arguments.copy()
-        class_ii_arguments['alleles']                 = class_ii_alleles
-        class_ii_arguments['prediction_algorithms']   = class_ii_prediction_algorithms
-        class_ii_arguments['iedb_executable']         = iedb_mhc_ii_executable
-        class_ii_arguments['epitope_lengths']         = args.class_ii_epitope_length
-        class_ii_arguments['output_dir']              = output_dir
-        class_ii_arguments['netmhc_stab']             = False
-        class_ii_arguments['filename_addition']         = "MHC_II"
-        pipeline_ii = Pipeline(**class_ii_arguments)
-        pipeline_ii.generate_fasta()
-        pipeline_ii.call_iedb()
-        parsed_output_files.extend(pipeline_ii.parse_outputs())
-
-    return parsed_output_files
-
 def write_junctions_file(graph, current_output_dir):
     junctions_file = os.path.join(current_output_dir, 'junctions.tsv')
     with open(junctions_file, 'w') as fh:

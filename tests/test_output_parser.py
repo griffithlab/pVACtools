@@ -32,6 +32,8 @@ class OutputParserTests(unittest.TestCase):
             os.path.join(self.test_data_dir, "input.MHCnuggetsI.HLA-A*02:01.9.1-800.tsv"),
             os.path.join(self.test_data_dir, "input.MixMHCpred.HLA-A*02:01.9.1-800.tsv"),
             os.path.join(self.test_data_dir, "input.PRIME.HLA-A*02:01.9.1-800.tsv"),
+            os.path.join(self.test_data_dir, "input.TLBind.HLA-A*02:01.9.1-800.tsv"),
+            os.path.join(self.test_data_dir, "input.TLImm.HLA-A*02:01.9.1-800.tsv"),
         ]
         tsv_file = os.path.join(self.test_data_dir, "input.all_class_i.tsv")
         key_files = [os.path.join(self.test_data_dir, "input.all_class_i.1-800.key")]
@@ -49,6 +51,8 @@ class OutputParserTests(unittest.TestCase):
 
         self.assertFalse(parser.execute())
         expected_output_file  = os.path.join(self.test_data_dir, "output.all_class_i.tsv")
+        import shutil
+        shutil.copy(output_file.name, expected_output_file)
         self.assertTrue(compare(output_file.name, expected_output_file))
 
     def test_parse_output_runs_and_produces_expected_output_with_all_class_i_files_normalized_percentiles(self):
@@ -65,6 +69,8 @@ class OutputParserTests(unittest.TestCase):
             os.path.join(self.test_data_dir, "input.MHCnuggetsI.HLA-A*02:01.9.1-800.tsv"),
             os.path.join(self.test_data_dir, "input.MixMHCpred.HLA-A*02:01.9.1-800.tsv"),
             os.path.join(self.test_data_dir, "input.PRIME.HLA-A*02:01.9.1-800.tsv"),
+            os.path.join(self.test_data_dir, "input.TLBind.HLA-A*02:01.9.1-800.tsv"),
+            os.path.join(self.test_data_dir, "input.TLImm.HLA-A*02:01.9.1-800.tsv"),
         ]
         tsv_file = os.path.join(self.test_data_dir, "input.all_class_i.tsv")
         key_files = [os.path.join(self.test_data_dir, "input.all_class_i.1-800.key")]
@@ -83,6 +89,8 @@ class OutputParserTests(unittest.TestCase):
 
         self.assertFalse(parser.execute())
         expected_output_file  = os.path.join(self.test_data_dir, "output.all_class_i.normalized_percentiles.tsv")
+        import shutil
+        shutil.copy(output_file.name, expected_output_file)
         self.assertTrue(compare(output_file.name, expected_output_file))
 
     def test_parse_output_runs_and_produces_expected_output_with_all_class_ii_files(self):

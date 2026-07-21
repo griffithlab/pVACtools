@@ -381,10 +381,37 @@ This should show information about the PRIME installation.
 
 On certain system you may need to recompile the PRIME executable:
 
-.. code-bloc:: none
+.. code-block:: none
 
    cd /opt/PRIME/lib
    g++ -O3 PRIME.cc -o PRIME.x
+
+Installing TL-MHC
+-----------------
+
+If you wish to run the TLBind and TLImm prediction algorithms, you will need to
+install TL-MHC on your system. This package not a direct dependency of
+the ``pvactools`` packages and needs to be installed manually by running
+the following command:
+
+.. code-block:: none
+
+   pip install git+https://github.com/griffithlab/TL-MHC.git#egg=TL-MHC
+
+.. note::
+
+   TL-MHC needs to be installed in the same python 3
+   environment as the ``pvactools`` package.
+
+You can check that TL-MHC was installed successfully by running:
+
+.. code-block:: none
+
+   pip show TL-MHC
+
+This should show information about the TL-MHC installation.
+
+.. _blast:
 
 Installing BLAST
 ----------------
