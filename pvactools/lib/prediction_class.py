@@ -16,8 +16,6 @@ import uuid
 import io
 from datetime import datetime
 
-from pvactools.lib.run_utils import determine_neoepitopes
-
 class IEDB(metaclass=ABCMeta):
     @classmethod
     def iedb_prediction_methods(cls):
@@ -377,11 +375,7 @@ class DeepImmuno(MHCI):
         results = pd.DataFrame()
         all_epitopes = []
         for record in SeqIO.parse(input_file, "fasta"):
-            seq_num = record.id
-            peptide = str(record.seq)
-            epitopes = determine_neoepitopes(peptide, epitope_length)
-            all_epitopes.extend(epitopes.values())
-        all_epitopes = list(set(all_epitopes))
+            all_epitopes.append(str(record.seq))
 
         if len(all_epitopes) > 0:
             tmp_input_file = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
@@ -407,14 +401,12 @@ class DeepImmuno(MHCI):
             output_dir.cleanup()
             for record in SeqIO.parse(input_file, "fasta"):
                 seq_num = record.id
-                peptide = str(record.seq)
-                epitopes = determine_neoepitopes(peptide, epitope_length)
-                for start, epitope in epitopes.items():
-                    epitope_df = df[df['peptide'] == epitope]
-                    epitope_df['seq_num'] = seq_num
-                    epitope_df['start'] = start
-                    epitope_df['allele'] = allele
-                    results = pd.concat((results, epitope_df), axis=0)
+                epitope = str(record.seq)
+                epitope_df = df[df['peptide'] == epitope]
+                epitope_df['seq_num'] = seq_num
+                epitope_df['start'] = 1
+                epitope_df['allele'] = allele
+                results = pd.concat((results, epitope_df), axis=0)
         return (results, 'pandas')
 
 
@@ -436,11 +428,7 @@ class BigMHC(metaclass=ABCMeta):
         results = pd.DataFrame()
         all_epitopes = []
         for record in SeqIO.parse(input_file, "fasta"):
-            seq_num = record.id
-            peptide = str(record.seq)
-            epitopes = determine_neoepitopes(peptide, epitope_length)
-            all_epitopes.extend(epitopes.values())
-        all_epitopes = list(set(all_epitopes))
+            all_epitopes.append(str(record.seq))
 
         if len(all_epitopes) > 0:
             tmp_input_file = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
@@ -470,13 +458,11 @@ class BigMHC(metaclass=ABCMeta):
             os.unlink(tmp_output_file.name)
             for record in SeqIO.parse(input_file, "fasta"):
                 seq_num = record.id
-                peptide = str(record.seq)
-                epitopes = determine_neoepitopes(peptide, epitope_length)
-                for start, epitope in epitopes.items():
-                    epitope_df = df[df['peptide'] == epitope]
-                    epitope_df['seq_num'] = seq_num
-                    epitope_df['start'] = start
-                    results = pd.concat((results, epitope_df), axis=0)
+                epitope = str(record.seq)
+                epitope_df = df[df['peptide'] == epitope]
+                epitope_df['seq_num'] = seq_num
+                epitope_df['start'] = 1
+                results = pd.concat((results, epitope_df), axis=0)
         return (results, 'pandas')
 
 class BigMHC_EL(BigMHC, MHCI):
@@ -505,12 +491,8 @@ class MHCflurry(MHCI):
         results = pd.DataFrame()
         all_epitopes = []
         for record in SeqIO.parse(input_file, "fasta"):
-            seq_num = record.id
-            peptide = str(record.seq)
-            epitopes = determine_neoepitopes(peptide, epitope_length)
-            all_epitopes.extend(epitopes.values())
+            all_epitopes.append(str(record.seq))
 
-        all_epitopes = list(set(all_epitopes))
         if len(all_epitopes) > 0:
             tmp_output_file = tempfile.NamedTemporaryFile('r', dir=tmp_dir, delete=False)
             arguments = ["mhcflurry-predict", "--alleles", allele, "--out", tmp_output_file.name, "--peptides"]
@@ -537,13 +519,11 @@ class MHCflurry(MHCI):
             }, inplace=True)
             for record in SeqIO.parse(input_file, "fasta"):
                 seq_num = record.id
-                peptide = str(record.seq)
-                epitopes = determine_neoepitopes(peptide, epitope_length)
-                for start, epitope in epitopes.items():
-                    epitope_df = df[df['peptide'] == epitope]
-                    epitope_df['seq_num'] = seq_num
-                    epitope_df['start'] = start
-                    results = pd.concat((results, epitope_df), axis=0)
+                epitope = str(record.seq)
+                epitope_df = df[df['peptide'] == epitope]
+                epitope_df['seq_num'] = seq_num
+                epitope_df['start'] = 1
+                results = pd.concat((results, epitope_df), axis=0)
         return (results, 'pandas')
 
 class MHCflurryEL(MHCflurry):
@@ -567,10 +547,7 @@ class MixMHCpred(MHCI):
         results = pd.DataFrame()
         all_epitopes = []
         for record in SeqIO.parse(input_file, "fasta"):
-            seq_num = record.id
-            peptide = str(record.seq)
-            epitopes = determine_neoepitopes(peptide, epitope_length)
-            all_epitopes.extend(epitopes.values())
+            all_epitopes.append(str(record.seq))
 
         all_epitopes = list(set(all_epitopes))
         if len(all_epitopes) > 0:
@@ -601,14 +578,12 @@ class MixMHCpred(MHCI):
             }, inplace=True)
             for record in SeqIO.parse(input_file, "fasta"):
                 seq_num = record.id
-                peptide = str(record.seq)
-                epitopes = determine_neoepitopes(peptide, epitope_length)
-                for start, epitope in epitopes.items():
-                    epitope_df = df[df['peptide'] == epitope]
-                    epitope_df['seq_num'] = seq_num
-                    epitope_df['start'] = start
-                    epitope_df['allele'] = allele
-                    results = pd.concat((results, epitope_df), axis=0)
+                epitope = str(record.seq)
+                epitope_df = df[df['peptide'] == epitope]
+                epitope_df['seq_num'] = seq_num
+                epitope_df['start'] = 1
+                epitope_df['allele'] = allele
+                results = pd.concat((results, epitope_df), axis=0)
         return (results, 'pandas')
 
 class PRIME(MHCI):
@@ -626,15 +601,11 @@ class PRIME(MHCI):
         return [8,9,10,11,12,13,14]
 
     def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None):
-        results = pd.DataFrame()
         all_epitopes = []
         for record in SeqIO.parse(input_file, "fasta"):
-            seq_num = record.id
-            peptide = str(record.seq)
-            epitopes = determine_neoepitopes(peptide, epitope_length)
-            all_epitopes.extend(epitopes.values())
+            all_epitopes.append(str(record.seq))
 
-        all_epitopes = list(set(all_epitopes))
+        results = pd.DataFrame()
         if len(all_epitopes) > 0:
             tmp_input_file = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
             for epitope in all_epitopes:
@@ -665,14 +636,12 @@ class PRIME(MHCI):
             }, inplace=True)
             for record in SeqIO.parse(input_file, "fasta"):
                 seq_num = record.id
-                peptide = str(record.seq)
-                epitopes = determine_neoepitopes(peptide, epitope_length)
-                for start, epitope in epitopes.items():
-                    epitope_df = df[df['peptide'] == epitope]
-                    epitope_df['seq_num'] = seq_num
-                    epitope_df['start'] = start
-                    epitope_df['allele'] = allele
-                    results = pd.concat((results, epitope_df), axis=0)
+                epitope = str(record.seq)
+                epitope_df = df[df['peptide'] == epitope]
+                epitope_df['seq_num'] = seq_num
+                epitope_df['start'] = 1
+                epitope_df['allele'] = allele
+                results = pd.concat((results, epitope_df), axis=0)
         return (results, 'pandas')
 
 class TLBind(MHCI):
@@ -693,12 +662,8 @@ class TLBind(MHCI):
         results = pd.DataFrame()
         all_epitopes = []
         for record in SeqIO.parse(input_file, "fasta"):
-            seq_num = record.id
-            peptide = str(record.seq)
-            epitopes = pvactools.lib.run_utils.determine_neoepitopes(peptide, epitope_length)
-            all_epitopes.extend(epitopes.values())
+            all_epitopes.append(str(record.seq))
 
-        all_epitopes = list(set(all_epitopes))
         if len(all_epitopes) > 0:
             tmp_input_file = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
             writer = csv.writer(tmp_input_file)
@@ -724,14 +689,12 @@ class TLBind(MHCI):
             os.unlink(tmp_output_file.name)
             for record in SeqIO.parse(input_file, "fasta"):
                 seq_num = record.id
-                peptide = str(record.seq)
-                epitopes = pvactools.lib.run_utils.determine_neoepitopes(peptide, epitope_length)
-                for start, epitope in epitopes.items():
-                    epitope_df = df[df['peptide'] == epitope]
-                    epitope_df['seq_num'] = seq_num
-                    epitope_df['start'] = start
-                    epitope_df['allele'] = allele
-                    results = pd.concat((results, epitope_df), axis=0)
+                epitope = str(record.seq)
+                epitope_df = df[df['peptide'] == epitope]
+                epitope_df['seq_num'] = seq_num
+                epitope_df['start'] = 1
+                epitope_df['allele'] = allele
+                results = pd.concat((results, epitope_df), axis=0)
         return (results, 'pandas')
 
 class TLImm(MHCI):
@@ -752,12 +715,8 @@ class TLImm(MHCI):
         results = pd.DataFrame()
         all_epitopes = []
         for record in SeqIO.parse(input_file, "fasta"):
-            seq_num = record.id
-            peptide = str(record.seq)
-            epitopes = pvactools.lib.run_utils.determine_neoepitopes(peptide, epitope_length)
-            all_epitopes.extend(epitopes.values())
+            all_epitopes.append(str(record.seq))
 
-        all_epitopes = list(set(all_epitopes))
         if len(all_epitopes) > 0:
             tmp_input_file = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
             writer = csv.writer(tmp_input_file)
@@ -783,14 +742,12 @@ class TLImm(MHCI):
             os.unlink(tmp_output_file.name)
             for record in SeqIO.parse(input_file, "fasta"):
                 seq_num = record.id
-                peptide = str(record.seq)
-                epitopes = pvactools.lib.run_utils.determine_neoepitopes(peptide, epitope_length)
-                for start, epitope in epitopes.items():
-                    epitope_df = df[df['peptide'] == epitope]
-                    epitope_df['seq_num'] = seq_num
-                    epitope_df['start'] = start
-                    epitope_df['allele'] = allele
-                    results = pd.concat((results, epitope_df), axis=0)
+                epitope = str(record.seq)
+                epitope_df = df[df['peptide'] == epitope]
+                epitope_df['seq_num'] = seq_num
+                epitope_df['start'] = 1
+                epitope_df['allele'] = allele
+                results = pd.concat((results, epitope_df), axis=0)
         return (results, 'pandas')
 
 class MHCnuggetsI(MHCI, MHCnuggets):
@@ -996,19 +953,16 @@ class ImmuScope_IM(MHCII):
         unique_pairs = set()
         for record in SeqIO.parse(input_file, "fasta"):
             seq_num = record.id
-            peptide = str(record.seq)
-            epitopes = determine_neoepitopes(peptide, epitope_length)
-            for start, epitope in epitopes.items():
-                metadata_rows.append({
-                    'allele': allele,
-                    'peptide': epitope,
-                    'seq_num': seq_num,
-                    'start': start,
-                })
-                unique_pairs.add((allele, epitope))
+            epitope = str(record.seq)
+            metadata_rows.append({
+                'allele': allele,
+                'peptide': epitope,
+                'seq_num': seq_num,
+                'start': 1,
+            })
+            unique_pairs.add((allele, epitope))
 
         all_epitopes = [peptide for _, peptide in unique_pairs]
-
         if len(all_epitopes) == 0:
             return (results, 'pandas')
 
@@ -1133,12 +1087,8 @@ class MixMHC2pred(MHCII):
         results = pd.DataFrame()
         all_epitopes = []
         for record in SeqIO.parse(input_file, "fasta"):
-            seq_num = record.id
-            peptide = str(record.seq)
-            epitopes = determine_neoepitopes(peptide, epitope_length)
-            all_epitopes.extend(epitopes.values())
+            all_epitopes.append(str(record.seq))
 
-        all_epitopes = list(set(all_epitopes))
         if len(all_epitopes) > 0:
             tmp_input_file = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
             for epitope in all_epitopes:
@@ -1180,12 +1130,10 @@ class MixMHC2pred(MHCII):
             }, inplace=True)
             for record in SeqIO.parse(input_file, "fasta"):
                 seq_num = record.id
-                peptide = str(record.seq)
-                epitopes = determine_neoepitopes(peptide, epitope_length)
-                for start, epitope in epitopes.items():
-                    epitope_df = df[df['peptide'] == epitope]
-                    epitope_df['seq_num'] = seq_num
-                    epitope_df['start'] = start
-                    epitope_df['allele'] = allele
-                    results = pd.concat((results, epitope_df), axis=0)
+                epitope = str(record.seq)
+                epitope_df = df[df['peptide'] == epitope]
+                epitope_df['seq_num'] = seq_num
+                epitope_df['start'] = 1
+                epitope_df['allele'] = allele
+                results = pd.concat((results, epitope_df), axis=0)
         return (results, 'pandas')
