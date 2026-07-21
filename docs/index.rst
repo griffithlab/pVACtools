@@ -59,25 +59,25 @@ Contents
    mailing_list
 
 
-Version 7.0.1
+Version 7.1.0
 -------------
 
-This is a bugfix release. It fixes the following problem(s):
+This is a minor version release. It adds the following features:
 
-* Bring sort_included_df logic in line with getting the best peptide so that
-  when the number of included peptides exceeds the
-  aggregate_inclusion_count_limit the logic for picking the included peptides
-  is the same as for getting the best peptide. by @susannasiebert in
-  https://github.com/griffithlab/pVACtools/pull/1403
-* Add missing argument hook up for transcript_prioritization_strategy and
-  aggregate_inclusion_count_limit in standalone top score filter and aggregate
-  report creation commands, respectively. by @susannasiebert in
-  https://github.com/griffithlab/pVACtools/pull/1404
-* Fully hook up normalized percentile calculation for pVACfuse and pVACsplice pipelines.
-  by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1405
-  and https://github.com/griffithlab/pVACtools/pull/1406
-* Resolved nondeterministic sorting in reference match comparisons. by
-  @ldhtnp in https://github.com/griffithlab/pVACtools/pull/1402
+* pVACtools now supports additional prediction algorithms:
+
+  * TLBind (binding and presentation)
+  * TLImm (immunogenicity)
+
+  These algorithms also support normalized percentiles using the
+  ``--use-normalized-percentiles`` flags. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1377
+
+Additionally, it fixes the following problem(s):
+
+* Fix tiers argument type to have the most up-to-date tier list by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1423
+* Fix NetChop bug that would include position before epitope (0) by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1432
+* Fix bug in lowexpr logic by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1433
+* Fix tbi file existence check in pVACsplice runs by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1434
 
 New in Version 7
 ----------------

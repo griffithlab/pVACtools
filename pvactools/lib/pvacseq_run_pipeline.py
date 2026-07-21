@@ -46,7 +46,7 @@ class PvacseqRunPipeline(RunPipeline):
             if self.run_ml_predictions:
                 logging.info("Running ML predictions...")
                 if not 'all' in self.prediction_algorithms:
-                    logging.info("Caution: Use 'all' in prediction_algorithms is strongly recommended. Missing features will be filled with NA and will cause predictions to be inaccurate. Running ML predictions regardless...")
+                    logging.warning("Caution: Use 'all' in prediction_algorithms is strongly recommended. Missing features will be filled with NA and will cause predictions to be inaccurate. Running ML predictions regardless...")
 
                 # Locate input files
                 file1 = os.path.join(self.base_output_dir, 'MHC_Class_I', f"{self.sample_name}.MHC_I.all_epitopes.aggregated.tsv")
