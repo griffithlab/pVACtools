@@ -5,7 +5,7 @@ from pvactools.lib.run_utils import *
 from pvactools.lib.run_pipeline import RunPipeline
 from pvactools.lib.junction_to_kmer_pipeline import JunctionToKmerPipeline
 from pvactools.lib.pvacsplice_prediction_pipeline import PvacsplicePredictionPipeline
-from pvactools.tools.pvacsplice.generate_protein_fasta import PvacspliceGenerateProteinFasta
+from pvactools.lib.generate_protein_fasta import PvacspliceGenerateProteinFasta
 from pvactools.lib.post_processor import PvacsplicePostProcessor
 
 class PvacspliceRunPipeline(RunPipeline):

@@ -1,7 +1,7 @@
 from pvactools.lib.run_pipeline import RunPipeline
 from pvactools.lib.fusion_to_kmer_pipeline import FusionToKmerPipeline
 from pvactools.lib.pvacfuse_prediction_pipeline import PvacfusePredictionPipeline
-from pvactools.tools.pvacfuse.generate_protein_fasta import PvacfuseGenerateProteinFasta
+from pvactools.lib.generate_protein_fasta import PvacfuseGenerateProteinFasta
 from pvactools.lib.post_processor import PvacfusePostProcessor
 
 class PvacfuseRunPipeline(RunPipeline):

@@ -11,7 +11,7 @@ import re
 import shutil
 
 from pvactools.tools.pvacseq import generate_protein_fasta
-from pvactools.tools.pvacseq.generate_protein_fasta import PvacseqGenerateProteinFasta
+from pvactools.lib.generate_protein_fasta import PvacseqGenerateProteinFasta
 from tests.utils import *
 
 class GenerateFastaTests(unittest.TestCase):
@@ -21,7 +21,7 @@ class GenerateFastaTests(unittest.TestCase):
         cls.executable_dir = os.path.join(pvactools_directory(), 'pvactools', 'tools', 'pvacseq')
         cls.executable     = os.path.join(cls.executable_dir, 'generate_protein_fasta.py')
         cls.test_data_dir  = os.path.join(pvactools_directory(), 'tests', 'test_data', 'pvacseq_generate_protein_fasta')
-        cls.flanking_sequence_length = '10'
+        cls.flanking_sequence_length = 10
 
     def test_command(self):
         pvac_script_path = os.path.join(
@@ -52,19 +52,22 @@ class GenerateFastaTests(unittest.TestCase):
         generate_protein_fasta_output_file = tempfile.NamedTemporaryFile()
         generate_protein_fasta_output_tsv = "{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name)
 
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            generate_protein_fasta_input_file,
-            self.flanking_sequence_length,
-            generate_protein_fasta_output_file.name,
-            '-d', 'full',
-            '--biotypes', 'protein_coding,IG_V_gene',
-        ], shell=False))
+        params = {
+            'input_vcf': generate_protein_fasta_input_file,
+            'flanking_sequence_length': self.flanking_sequence_length,
+            'output_file': generate_protein_fasta_output_file.name,
+            'downstream_sequence_length': None,
+            'biotypes': ['protein_coding', 'IG_V_gene'],
+        }
+        generator = PvacseqGenerateProteinFasta(**params)
+        self.assertFalse(generator.execute())
+
         expected_output_file = os.path.join(self.test_data_dir, 'output.fasta')
         self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
+
         expected_tsv_file = os.path.join(self.test_data_dir, 'output.tsv')
         self.assertTrue(cmp(generate_protein_fasta_output_tsv, expected_tsv_file))
+
         os.unlink(generate_protein_fasta_output_tsv)
 
     def test_input_vcf_multi_sample_generates_expected_file(self):
@@ -72,78 +75,86 @@ class GenerateFastaTests(unittest.TestCase):
         generate_protein_fasta_output_file = tempfile.NamedTemporaryFile()
         generate_protein_fasta_output_tsv = "{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name)
 
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            generate_protein_fasta_input_file,
-            self.flanking_sequence_length,
-            generate_protein_fasta_output_file.name,
-            '-d', 'full',
-            '-s', 'H_NJ-HCC1395-HCC1395',
-            '--biotypes', 'protein_coding,IG_V_gene',
-        ], shell=False))
+        params = {
+            'input_vcf': generate_protein_fasta_input_file,
+            'flanking_sequence_length': self.flanking_sequence_length,
+            'output_file': generate_protein_fasta_output_file.name,
+            'downstream_sequence_length': None,
+            'sample_name': 'H_NJ-HCC1395-HCC1395',
+            'biotypes': ['protein_coding', 'IG_V_gene'],
+        }
+        generator = PvacseqGenerateProteinFasta(**params)
+        self.assertFalse(generator.execute())
+
         expected_output_file = os.path.join(self.test_data_dir, 'output.fasta')
         self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
+
         expected_tsv_file = os.path.join(self.test_data_dir, 'output.tsv')
         self.assertTrue(cmp(generate_protein_fasta_output_tsv, expected_tsv_file))
+
         os.unlink(generate_protein_fasta_output_tsv)
 
     def test_mutant_only(self):
         generate_protein_fasta_input_file  = os.path.join(self.test_data_dir, 'input.vcf')
         generate_protein_fasta_output_file = tempfile.NamedTemporaryFile()
 
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            generate_protein_fasta_input_file,
-            self.flanking_sequence_length,
-            generate_protein_fasta_output_file.name,
-            '-d', 'full',
-            '--mutant-only',
-            '--biotypes', 'protein_coding,IG_V_gene',
-        ], shell=False))
+        params = {
+            'input_vcf': generate_protein_fasta_input_file,
+            'flanking_sequence_length': self.flanking_sequence_length,
+            'output_file': generate_protein_fasta_output_file.name,
+            'downstream_sequence_length': None,
+            'mutant_only': True,
+            'biotypes': ['protein_coding', 'IG_V_gene'],
+        }
+        generator = PvacseqGenerateProteinFasta(**params)
+        self.assertFalse(generator.execute())
+
         expected_output_file = os.path.join(self.test_data_dir, 'output_mutant_only.fasta')
-        os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))
         self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
+
+        os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))
 
     def test_input_tsv(self):
         generate_protein_fasta_input_file  = os.path.join(self.test_data_dir, 'input.vcf')
         generate_protein_fasta_input_tsv   = os.path.join(self.test_data_dir, 'input.tsv')
         generate_protein_fasta_output_file = tempfile.NamedTemporaryFile()
 
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            generate_protein_fasta_input_file,
-            self.flanking_sequence_length,
-            generate_protein_fasta_output_file.name,
-            '-d', 'full',
-            '--input-tsv', generate_protein_fasta_input_tsv,
-        ], shell=False))
+        params = {
+            'input_vcf': generate_protein_fasta_input_file,
+            'flanking_sequence_length': self.flanking_sequence_length,
+            'output_file': generate_protein_fasta_output_file.name,
+            'downstream_sequence_length': None,
+            'input_tsv': generate_protein_fasta_input_tsv,
+        }
+        generator = PvacseqGenerateProteinFasta(**params)
+        self.assertFalse(generator.execute())
+
         expected_output_file = os.path.join(self.test_data_dir, 'output_with_tsv.fasta')
-        os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))
         self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
+
+        os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))
 
     def test_input_aggregated_tsv(self):
         generate_protein_fasta_input_file  = os.path.join(self.test_data_dir, 'input.vcf')
         generate_protein_fasta_input_tsv   = os.path.join(self.test_data_dir, 'input.aggregated.tsv')
         generate_protein_fasta_output_file = tempfile.NamedTemporaryFile()
 
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            generate_protein_fasta_input_file,
-            self.flanking_sequence_length,
-            generate_protein_fasta_output_file.name,
-            '-d', 'full',
-            '--input-tsv', generate_protein_fasta_input_tsv,
-            '--aggregate-report-evaluation', 'Accept',
-            '--aggregate-report-evaluation', 'Pending',
-            '--biotypes', 'protein_coding,IG_V_gene',
-        ], shell=False))
+        params = {
+            'input_vcf': generate_protein_fasta_input_file,
+            'flanking_sequence_length': self.flanking_sequence_length,
+            'output_file': generate_protein_fasta_output_file.name,
+            'downstream_sequence_length': None,
+            'input_tsv': generate_protein_fasta_input_tsv,
+            'aggregate_report_evaluation': ['Accept', 'Pending'],
+            'biotypes': ['protein_coding', 'IG_V_gene'],
+        }
+        generator = PvacseqGenerateProteinFasta(**params)
+        self.assertFalse(generator.execute())
+
         expected_output_file = os.path.join(self.test_data_dir, 'output_with_aggregated_tsv.fasta')
-        os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))
         self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
+
+        os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))
 
     def test_phase_proximal_variants_vcf(self):
         generate_protein_fasta_input_file = os.path.join(self.test_data_dir, 'input_somatic.vcf.gz')
@@ -174,12 +185,12 @@ class GenerateFastaTests(unittest.TestCase):
         generate_protein_fasta_input_file  = os.path.join(self.test_data_dir, 'input.vcf')
         generate_protein_fasta_output_file = tempfile.NamedTemporaryFile()
 
-        self.assertFalse(call([
-            self.python,
-            self.executable,
-            generate_protein_fasta_input_file,
-            flanking_sequence_length,
-            generate_protein_fasta_output_file.name,
-            '-d', 'full',
-        ], shell=False))
+        params = {
+            'input_vcf': generate_protein_fasta_input_file,
+            'flanking_sequence_length': 300,
+            'output_file': generate_protein_fasta_output_file.name,
+            'downstream_sequence_length': None,
+        }
+        generator = PvacseqGenerateProteinFasta(**params)
+        self.assertFalse(generator.execute())
         os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))
