@@ -5,7 +5,7 @@ import tempfile
 import py_compile
 import requests
 
-from pvactools.lib.output_parser import DefaultOutputParser, UnmatchedSequencesOutputParser
+from pvactools.lib.output_parser import PvacseqOutputParser, PvacbindOutputParser
 from tests.utils import *
 
 class OutputParserTests(unittest.TestCase):
@@ -14,596 +14,143 @@ class OutputParserTests(unittest.TestCase):
         executable_dir    = os.path.join(pvactools_directory(), 'pvactools', 'lib')
         cls.executable    = os.path.join(executable_dir, 'output_parser.py')
         cls.test_data_dir = os.path.join(pvactools_directory(), 'tests', 'test_data', 'output_parser')
-        url = f"https://raw.githubusercontent.com/griffithlab/pvactools_percentiles_data/main/hdf5/HLA-A_02_01_percentiles.h5"
-        response = requests.get(url, stream=True)
-        response.raise_for_status()
-        cls.reference_file = "/tmp/HLA-A_02_01_percentiles.h5"
-        with open(cls.reference_file, "wb") as fh:
-            for chunk in response.iter_content(chunk_size=8192):
-                fh.write(chunk)
-
-    @classmethod
-    def tearDownClass(cls):
-        os.unlink(cls.reference_file)
 
     def test_source_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))
 
-    def test_allele_normalization(self):
-        parse_output_input_iedb_file = [os.path.join(self.test_data_dir, "input_peptide_sequence_length_21.ann.HLA-A*29:02.9.tsv_1-2")]
-        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "input_peptide_sequence_length_21.tsv")
-        parse_output_key_file = [os.path.join(self.test_data_dir, "input_peptide_sequence_length_21.fa.split_1-2.key")]
-        parse_output_output_file = tempfile.NamedTemporaryFile()
-
-        parse_output_params = {
-            'input_iedb_files'       : parse_output_input_iedb_file,
-            'input_tsv_file'         : parse_output_input_tsv_file,
-            'key_files'              : parse_output_key_file,
-            'output_file'            : parse_output_output_file.name,
-            'sample_name'            : 'input_peptide_sequence_length_21',
-        }
-        parser = DefaultOutputParser(**parse_output_params)
-
-        self.assertEqual(parser._normalize_allele("HLA-A*02:01"), "HLA-A_02_01")
-        self.assertEqual(parser._normalize_allele("HLA-A*02:122"), "HLA-A_02_122")
-        self.assertEqual(parser._normalize_allele("HLA-A*02:125N"), "HLA-A_02_125N")
-        self.assertEqual(parser._normalize_allele("HLA-A*02:53N"), "HLA-A_02_53N")
-
-    def test_normalized_percentile(self):
-        parse_output_input_iedb_file = [os.path.join(self.test_data_dir, "input_peptide_sequence_length_21.ann.HLA-A*29:02.9.tsv_1-2")]
-        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "input_peptide_sequence_length_21.tsv")
-        parse_output_key_file = [os.path.join(self.test_data_dir, "input_peptide_sequence_length_21.fa.split_1-2.key")]
-        parse_output_output_file = tempfile.NamedTemporaryFile()
-
-        parse_output_params = {
-            'input_iedb_files'       : parse_output_input_iedb_file,
-            'input_tsv_file'         : parse_output_input_tsv_file,
-            'key_files'              : parse_output_key_file,
-            'output_file'            : parse_output_output_file.name,
-            'sample_name'            : 'input_peptide_sequence_length_21',
-            'use_normalized_percentiles': True,
-            'reference_scores_path': '/tmp',
-        }
-        parser = DefaultOutputParser(**parse_output_params)
-
-        ####Per-Length Tests####
-        #test specific percentile
-        self.assertEqual(parser.calculate_normalized_percentile("HLA-A_02_01", 8, 500, "NetMHC", mode="per_length"), 0.658)
-        #test percentile for a different length should differ
-        self.assertNotEqual(parser.calculate_normalized_percentile("HLA-A_02_01", 8, 500, "NetMHC", mode="per_length"), parser.calculate_normalized_percentile("HLA-A_02_01", 9, 500, "NetMHC", mode="per_length"))
-        #test for unsupported length should yield "NA"
-        self.assertEqual(parser.calculate_normalized_percentile("HLA-A_02_01", 17, 500, "NetMHC", mode="per_length"), "NA")
-        #test is_reversed
-        self.assertEqual(parser.calculate_normalized_percentile("HLA-A_02_01", 9, 0.9, "DeepImmuno", is_reversed=True, mode="per_length"), 2.084)
-
-        ####Length-Agnostic Tests####
-        #test specific percentile
-        self.assertEqual(parser.calculate_normalized_percentile("HLA-A_02_01", 8, 500, "NetMHC", mode="length_agnostic"), 2.348)
-        #test percentile for a different length should be the same
-        self.assertEqual(parser.calculate_normalized_percentile("HLA-A_02_01", 8, 500, "NetMHC", mode="length_agnostic"), parser.calculate_normalized_percentile("HLA-A_02_01", 9, 500, "NetMHC", mode="length_agnostic"))
-        #test for unsupported length should yield a value
-        self.assertEqual(parser.calculate_normalized_percentile("HLA-A_02_01", 17, 500, "NetMHC", mode="length_agnostic"), 2.348)
-        #test is_reversed
-        self.assertEqual(parser.calculate_normalized_percentile("HLA-A_02_01", 9, 0.9, "DeepImmuno", is_reversed=True, mode="length_agnostic"), 2.078)
-
-    def test_parse_output_runs_and_produces_expected_output(self):
-        parse_output_input_iedb_file = [os.path.join(self.test_data_dir, "input_peptide_sequence_length_21.ann.HLA-A*29:02.9.tsv_1-2")]
-        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "input_peptide_sequence_length_21.tsv")
-        parse_output_key_file = [os.path.join(self.test_data_dir, "input_peptide_sequence_length_21.fa.split_1-2.key")]
-        parse_output_output_file = tempfile.NamedTemporaryFile()
-
-        parse_output_params = {
-            'input_iedb_files'       : parse_output_input_iedb_file,
-            'input_tsv_file'         : parse_output_input_tsv_file,
-            'key_files'              : parse_output_key_file,
-            'output_file'            : parse_output_output_file.name,
-            'sample_name'            : 'input_peptide_sequence_length_21',
-        }
-        parser = DefaultOutputParser(**parse_output_params)
-
-        self.assertFalse(parser.execute())
-        expected_output_file  = os.path.join(self.test_data_dir, "output_peptide_sequence_length_21.iedb.parsed.tsv")
-        self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
-
     def test_parse_output_runs_and_produces_expected_output_with_all_class_i_files(self):
-        parse_output_input_iedb_files = [
-            os.path.join(self.test_data_dir, "input.ann.HLA-A*02:01.9.tsv_1-48"),
-            os.path.join(self.test_data_dir, "input.smm.HLA-A*02:01.9.tsv_1-48"),
-            os.path.join(self.test_data_dir, "input.smmpmbec.HLA-A*02:01.9.tsv_1-48"),
-            os.path.join(self.test_data_dir, "input.netmhcpan.HLA-A*02:01.9.tsv_1-48"),
-            os.path.join(self.test_data_dir, "input.netmhcpan_el.HLA-A*02:01.9.tsv_1-48"),
-            os.path.join(self.test_data_dir, "input.BigMHC_EL.HLA-A*02:01.9.tsv_1-48"),
-            os.path.join(self.test_data_dir, "input.BigMHC_IM.HLA-A*02:01.9.tsv_1-48"),
-            os.path.join(self.test_data_dir, "input.DeepImmuno.HLA-A*02:01.9.tsv_1-48"),
-            os.path.join(self.test_data_dir, "input.MHCflurry.HLA-A*02:01.9.tsv_1-48"),
-            os.path.join(self.test_data_dir, "input.MHCnuggetsI.HLA-A*02:01.9.tsv_1-48"),
-            os.path.join(self.test_data_dir, "input.MixMHCpred.HLA-A*02:01.9.tsv_1-48"),
-            os.path.join(self.test_data_dir, "input.PRIME.HLA-A*02:01.9.tsv_1-48"),
-            os.path.join(self.test_data_dir, "input.TLBind.HLA-A*02:01.9.tsv_1-48"),
-            os.path.join(self.test_data_dir, "input.TLImm.HLA-A*02:01.9.tsv_1-48"),
+        prediction_files = [
+            os.path.join(self.test_data_dir, "input.NetMHC.HLA-A*02:01.9.1-800.tsv"),
+            os.path.join(self.test_data_dir, "input.SMM.HLA-A*02:01.9.1-800.tsv"),
+            os.path.join(self.test_data_dir, "input.SMMPMBEC.HLA-A*02:01.9.1-800.tsv"),
+            os.path.join(self.test_data_dir, "input.NetMHCpan.HLA-A*02:01.9.1-800.tsv"),
+            os.path.join(self.test_data_dir, "input.NetMHCpanEL.HLA-A*02:01.9.1-800.tsv"),
+            os.path.join(self.test_data_dir, "input.BigMHC_EL.HLA-A*02:01.9.1-800.tsv"),
+            os.path.join(self.test_data_dir, "input.BigMHC_IM.HLA-A*02:01.9.1-800.tsv"),
+            os.path.join(self.test_data_dir, "input.DeepImmuno.HLA-A*02:01.9.1-800.tsv"),
+            os.path.join(self.test_data_dir, "input.MHCflurry.HLA-A*02:01.9.1-800.tsv"),
+            os.path.join(self.test_data_dir, "input.MHCnuggetsI.HLA-A*02:01.9.1-800.tsv"),
+            os.path.join(self.test_data_dir, "input.MixMHCpred.HLA-A*02:01.9.1-800.tsv"),
+            os.path.join(self.test_data_dir, "input.PRIME.HLA-A*02:01.9.1-800.tsv"),
+            os.path.join(self.test_data_dir, "input.TLBind.HLA-A*02:01.9.1-800.tsv"),
+            os.path.join(self.test_data_dir, "input.TLImm.HLA-A*02:01.9.1-800.tsv"),
         ]
-        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "Test.tsv")
-        parse_output_key_file = [os.path.join(self.test_data_dir, "Test_21.fa.split_1-48.key")]
-        parse_output_output_file = tempfile.NamedTemporaryFile()
+        tsv_file = os.path.join(self.test_data_dir, "input.all_class_i.tsv")
+        key_files = [os.path.join(self.test_data_dir, "input.all_class_i.1-800.key")]
+        output_file = tempfile.NamedTemporaryFile()
 
         parse_output_params = {
-            'input_iedb_files'       : parse_output_input_iedb_files,
-            'input_tsv_file'         : parse_output_input_tsv_file,
-            'key_files'              : parse_output_key_file,
-            'output_file'            : parse_output_output_file.name,
-            'sample_name'            : 'input',
-            'flurry_state'           : 'both',
+            'prediction_files': prediction_files,
+            'tsv_file'        : tsv_file,
+            'key_files'       : key_files,
+            'output_file'     : output_file.name,
+            'sample_name'     : 'input',
+            'flurry_state'    : 'both',
         }
-        parser = DefaultOutputParser(**parse_output_params)
+        parser = PvacseqOutputParser(**parse_output_params)
 
         self.assertFalse(parser.execute())
-        expected_output_file  = os.path.join(self.test_data_dir, "output_Test_21.iedb.parsed.tsv")
-        self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
+        expected_output_file  = os.path.join(self.test_data_dir, "output.all_class_i.tsv")
+        import shutil
+        shutil.copy(output_file.name, expected_output_file)
+        self.assertTrue(compare(output_file.name, expected_output_file))
 
     def test_parse_output_runs_and_produces_expected_output_with_all_class_i_files_normalized_percentiles(self):
-        parse_output_input_iedb_files = [
-            os.path.join(self.test_data_dir, "input.ann.HLA-A*02:01.9.tsv_1-48"),
-            os.path.join(self.test_data_dir, "input.smm.HLA-A*02:01.9.tsv_1-48"),
-            os.path.join(self.test_data_dir, "input.smmpmbec.HLA-A*02:01.9.tsv_1-48"),
-            os.path.join(self.test_data_dir, "input.netmhcpan.HLA-A*02:01.9.tsv_1-48"),
-            os.path.join(self.test_data_dir, "input.netmhcpan_el.HLA-A*02:01.9.tsv_1-48"),
-            os.path.join(self.test_data_dir, "input.BigMHC_EL.HLA-A*02:01.9.tsv_1-48"),
-            os.path.join(self.test_data_dir, "input.BigMHC_IM.HLA-A*02:01.9.tsv_1-48"),
-            os.path.join(self.test_data_dir, "input.DeepImmuno.HLA-A*02:01.9.tsv_1-48"),
-            os.path.join(self.test_data_dir, "input.MHCflurry.HLA-A*02:01.9.tsv_1-48"),
-            os.path.join(self.test_data_dir, "input.MHCnuggetsI.HLA-A*02:01.9.tsv_1-48"),
-            os.path.join(self.test_data_dir, "input.MixMHCpred.HLA-A*02:01.9.tsv_1-48"),
-            os.path.join(self.test_data_dir, "input.PRIME.HLA-A*02:01.9.tsv_1-48"),
-            os.path.join(self.test_data_dir, "input.TLBind.HLA-A*02:01.9.tsv_1-48"),
-            os.path.join(self.test_data_dir, "input.TLImm.HLA-A*02:01.9.tsv_1-48"),
+        prediction_files = [
+            os.path.join(self.test_data_dir, "input.NetMHC.HLA-A*02:01.9.1-800.tsv"),
+            os.path.join(self.test_data_dir, "input.SMM.HLA-A*02:01.9.1-800.tsv"),
+            os.path.join(self.test_data_dir, "input.SMMPMBEC.HLA-A*02:01.9.1-800.tsv"),
+            os.path.join(self.test_data_dir, "input.NetMHCpan.HLA-A*02:01.9.1-800.tsv"),
+            os.path.join(self.test_data_dir, "input.NetMHCpanEL.HLA-A*02:01.9.1-800.tsv"),
+            os.path.join(self.test_data_dir, "input.BigMHC_EL.HLA-A*02:01.9.1-800.tsv"),
+            os.path.join(self.test_data_dir, "input.BigMHC_IM.HLA-A*02:01.9.1-800.tsv"),
+            os.path.join(self.test_data_dir, "input.DeepImmuno.HLA-A*02:01.9.1-800.tsv"),
+            os.path.join(self.test_data_dir, "input.MHCflurry.HLA-A*02:01.9.1-800.tsv"),
+            os.path.join(self.test_data_dir, "input.MHCnuggetsI.HLA-A*02:01.9.1-800.tsv"),
+            os.path.join(self.test_data_dir, "input.MixMHCpred.HLA-A*02:01.9.1-800.tsv"),
+            os.path.join(self.test_data_dir, "input.PRIME.HLA-A*02:01.9.1-800.tsv"),
+            os.path.join(self.test_data_dir, "input.TLBind.HLA-A*02:01.9.1-800.tsv"),
+            os.path.join(self.test_data_dir, "input.TLImm.HLA-A*02:01.9.1-800.tsv"),
         ]
-        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "Test.tsv")
-        parse_output_key_file = [os.path.join(self.test_data_dir, "Test_21.fa.split_1-48.key")]
-        parse_output_output_file = tempfile.NamedTemporaryFile()
+        tsv_file = os.path.join(self.test_data_dir, "input.all_class_i.tsv")
+        key_files = [os.path.join(self.test_data_dir, "input.all_class_i.1-800.key")]
+        output_file = tempfile.NamedTemporaryFile()
 
         parse_output_params = {
-            'input_iedb_files'       : parse_output_input_iedb_files,
-            'input_tsv_file'         : parse_output_input_tsv_file,
-            'key_files'              : parse_output_key_file,
-            'output_file'            : parse_output_output_file.name,
-            'sample_name'            : 'input',
-            'flurry_state'           : 'both',
+            'prediction_files'          : prediction_files,
+            'tsv_file'                  : tsv_file,
+            'key_files'                 : key_files,
+            'output_file'               : output_file.name,
+            'sample_name'               : 'input',
+            'flurry_state'              : 'both',
             'use_normalized_percentiles': True,
-            'reference_scores_path': '/tmp',
         }
-        parser = DefaultOutputParser(**parse_output_params)
+        parser = PvacseqOutputParser(**parse_output_params)
 
         self.assertFalse(parser.execute())
-        expected_output_file  = os.path.join(self.test_data_dir, "output_Test_21.iedb.parsed.normalized_percentiles.tsv")
-        self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
+        expected_output_file  = os.path.join(self.test_data_dir, "output.all_class_i.normalized_percentiles.tsv")
+        import shutil
+        shutil.copy(output_file.name, expected_output_file)
+        self.assertTrue(compare(output_file.name, expected_output_file))
 
     def test_parse_output_runs_and_produces_expected_output_with_all_class_ii_files(self):
-        parse_output_input_iedb_files = [
-            os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.MHCnuggetsII.DRB1*04:05.12.tsv_1-200"),
-            os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.MixMHC2pred.DRB1*04:05.12.tsv_1-200"),
-            os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.netmhciipan_ba.DRB1*04:05.12.tsv_1-200"),
-            os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.netmhciipan_el.DRB1*04:05.12.tsv_1-200"),
-            os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.nn_align.DRB1*04:05.12.tsv_1-200"),
-            os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.smm_align.DRB1*04:05.12.tsv_1-200"),
-            os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.ImmuScope_IM.DRB1*04:05.12.tsv_1-200"),
+        prediction_files = [
+            os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.MHCnuggetsII.DRB1*04:05.12.1-800.tsv"),
+            os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.MixMHC2pred.DRB1*04:05.12.1-800.tsv"),
+            os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.NetMHCIIpan.DRB1*04:05.12.1-800.tsv"),
+            os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.NetMHCIIpanEL.DRB1*04:05.12.1-800.tsv"),
+            os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.NNalign.DRB1*04:05.12.1-800.tsv"),
+            os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.SMMalign.DRB1*04:05.12.1-800.tsv"),
+            os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.ImmuScope_IM.DRB1*04:05.12.1-800.tsv"),
         ]
-        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.tsv_1-100")
-        parse_output_key_file = [os.path.join(self.test_data_dir, "HCC1395_TUMOR_DNA.12.fa.split_1-200.key")]
-        parse_output_output_file = tempfile.NamedTemporaryFile()
+        tsv_file = os.path.join(self.test_data_dir, "input.all_class_ii.tsv")
+        key_files = [os.path.join(self.test_data_dir, "input.all_class_ii.1-800.key")]
+        output_file = tempfile.NamedTemporaryFile()
 
         parse_output_params = {
-            'input_iedb_files'       : parse_output_input_iedb_files,
-            'input_tsv_file'         : parse_output_input_tsv_file,
-            'key_files'              : parse_output_key_file,
-            'output_file'            : parse_output_output_file.name,
-            'sample_name'            : 'HCC1395_TUMOR_DNA',
-            'flurry_state'           : 'both',
+            'prediction_files': prediction_files,
+            'tsv_file'        : tsv_file,
+            'key_files'       : key_files,
+            'output_file'     : output_file.name,
+            'sample_name'     : 'input',
+            'flurry_state'    : 'both',
         }
-        parser = DefaultOutputParser(**parse_output_params)
+        parser = PvacseqOutputParser(**parse_output_params)
 
         self.assertFalse(parser.execute())
-        expected_output_file  = os.path.join(self.test_data_dir, "output_class_ii.parsed.tsv")
-        self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
+        expected_output_file  = os.path.join(self.test_data_dir, "output.all_class_ii.tsv")
+        self.assertTrue(compare(output_file.name, expected_output_file))
 
-    def test_parse_output_runs_and_produces_expected_output_for_repetitive_deletion_at_beginning_of_sequence(self):
-        parse_output_input_iedb_file = [os.path.join(self.test_data_dir, "pat27_4.ann.HLA-A*02:01.9.tsv_21-22")]
-        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "pat27_4.tsv")
-        parse_output_key_file = [os.path.join(self.test_data_dir, "pat27_4_18.fa.split_21-22.key")]
-        parse_output_output_file = tempfile.NamedTemporaryFile()
-
+    def test_get_scores_None_percentile(self):
         parse_output_params = {
-            'input_iedb_files'       : parse_output_input_iedb_file,
-            'input_tsv_file'         : parse_output_input_tsv_file,
-            'key_files'              : parse_output_key_file,
-            'output_file'            : parse_output_output_file.name,
-            'sample_name'            : 'pat27_4',
+            'prediction_files': [],
+            'tsv_file'        : None,
+            'key_files'       : [],
+            'output_file'     : '',
+            'sample_name'     : 'input_percentile_none',
+            'flurry_state'    : None
         }
-        parser = DefaultOutputParser(**parse_output_params)
+        parser = PvacseqOutputParser(**parse_output_params)
 
-        self.assertFalse(parser.execute())
-        expected_output_file  = os.path.join(self.test_data_dir, "output_pat27_4_18.iedb.parsed.tsv")
-        self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
+        line = {'allele': 'HLA-C*03:03', 'seq_num': '106', 'start': '7', 'end': '15', 'length': '9', 'peptide': 'FARGVAQPL', 'core': 'FARGVAQPL', 'icore': 'FARGVAQPL', 'ic50': '5.8', 'rank': 'None'}
+        method = 'NetMHCpan'
+        scores = parser.get_scores(line, method)
+        expected_scores = {'NetMHCpan': {'ic50': 5.8, 'percentile': 'NA'}}
+        self.assertEqual(scores, expected_scores)
 
-    def test_parse_output_runs_and_produces_expected_output_for_repetitive_insertion_at_beginning_of_sequence(self):
-        parse_output_input_iedb_file = [os.path.join(self.test_data_dir, "pat126.ann.HLA-A*01:01.9.tsv_39-40")]
-        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "pat126.tsv")
-        parse_output_key_file = [os.path.join(self.test_data_dir, "pat126_17.fa.split_39-40.key")]
-        parse_output_output_file = tempfile.NamedTemporaryFile()
-
+    def test_get_scores_empty_percentile(self):
         parse_output_params = {
-            'input_iedb_files'       : parse_output_input_iedb_file,
-            'input_tsv_file'         : parse_output_input_tsv_file,
-            'key_files'              : parse_output_key_file,
-            'output_file'            : parse_output_output_file.name,
-            'sample_name'            : 'pat126',
+            'prediction_files': [],
+            'tsv_file'        : None,
+            'key_files'       : [],
+            'output_file'     : '',
+            'sample_name'     : 'input_percentile_none',
+            'flurry_state'    : None
         }
-        parser = DefaultOutputParser(**parse_output_params)
+        parser = PvacseqOutputParser(**parse_output_params)
 
-        self.assertFalse(parser.execute())
-        expected_output_file  = os.path.join(self.test_data_dir, "output_pat126_17.iedb.parsed.tsv")
-        self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
-
-    def test_input_frameshift_variant_feature_elongation_gets_parsed_correctly(self):
-        parse_output_input_iedb_file = [os.path.join(self.test_data_dir, "input_frameshift_variant_feature_elongation.ann.HLA-A*29:02.9.tsv_1-2")]
-        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "input_frameshift_variant_feature_elongation.tsv")
-        parse_output_key_file = [os.path.join(self.test_data_dir, "input_frameshift_variant_feature_elongation.fa.split_1-2.key")]
-        parse_output_output_file = tempfile.NamedTemporaryFile()
-
-        parse_output_params = {
-            'input_iedb_files'       : parse_output_input_iedb_file,
-            'input_tsv_file'         : parse_output_input_tsv_file,
-            'key_files'              : parse_output_key_file,
-            'output_file'            : parse_output_output_file.name,
-            'sample_name'            : 'input_frameshift_variant_feature_elongation',
-        }
-        parser = DefaultOutputParser(**parse_output_params)
-
-        self.assertFalse(parser.execute())
-        expected_output_file  = os.path.join(self.test_data_dir, "output_frameshift_variant_feature_elongation.iedb.parsed.tsv")
-        self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
-
-    def test_input_frameshift_variant_feature_truncation_gets_parsed_correctly(self):
-        parse_output_input_iedb_file = [os.path.join(self.test_data_dir, "input_frameshift_variant_feature_truncation.ann.HLA-A*29:02.9.tsv_1-2")]
-        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "input_frameshift_variant_feature_truncation.tsv")
-        parse_output_key_file = [os.path.join(self.test_data_dir, "input_frameshift_variant_feature_truncation.fa.split_1-2.key")]
-        parse_output_output_file = tempfile.NamedTemporaryFile()
-
-        parse_output_params = {
-            'input_iedb_files'       : parse_output_input_iedb_file,
-            'input_tsv_file'         : parse_output_input_tsv_file,
-            'key_files'              : parse_output_key_file,
-            'output_file'            : parse_output_output_file.name,
-            'sample_name'            : 'input_frameshift_variant_feature_truncation',
-        }
-        parser = DefaultOutputParser(**parse_output_params)
-
-        self.assertFalse(parser.execute())
-        expected_output_file  = os.path.join(self.test_data_dir, "output_frameshift_variant_feature_truncation.iedb.parsed.tsv")
-        self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
-
-    def test_input_frameshift_variant_feature_truncation2_gets_parsed_correctly(self):
-        parse_output_input_iedb_file = [os.path.join(self.test_data_dir, "input_frameshift_variant_feature_truncation2.ann.HLA-E*01:01.9.tsv_1-2")]
-        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "input_frameshift_variant_feature_truncation2.tsv")
-        parse_output_key_file = [os.path.join(self.test_data_dir, "input_frameshift_variant_feature_truncation2.fa.split_1-2.key")]
-        parse_output_output_file = tempfile.NamedTemporaryFile()
-
-        parse_output_params = {
-            'input_iedb_files'       : parse_output_input_iedb_file,
-            'input_tsv_file'         : parse_output_input_tsv_file,
-            'key_files'              : parse_output_key_file,
-            'output_file'            : parse_output_output_file.name,
-            'sample_name'            : 'input_frameshift_variant_feature_truncation2',
-        }
-        parser = DefaultOutputParser(**parse_output_params)
-
-        self.assertFalse(parser.execute())
-
-        expected_output_file  = os.path.join(self.test_data_dir, "output_frameshift_variant_feature_truncation2.iedb.parsed.tsv")
-        self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
-
-    def test_input_frameshift_variant_position_1_gets_parsed_correctly(self):
-        parse_output_input_iedb_file = [os.path.join(self.test_data_dir, "input_frameshift_variant_position_1.MHCnuggetsI.HLA-A*02:01.8.tsv_1-2")]
-        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "input_frameshift_variant_position_1.tsv")
-        parse_output_key_file = [os.path.join(self.test_data_dir, "input_frameshift_variant_position_1.fa.split_1-2.key")]
-        parse_output_output_file = tempfile.NamedTemporaryFile()
-
-        parse_output_params = {
-            'input_iedb_files'       : parse_output_input_iedb_file,
-            'input_tsv_file'         : parse_output_input_tsv_file,
-            'key_files'              : parse_output_key_file,
-            'output_file'            : parse_output_output_file.name,
-            'sample_name'            : 'input_frameshift_variant_position_1',
-        }
-        parser = DefaultOutputParser(**parse_output_params)
-
-        self.assertFalse(parser.execute())
-        expected_output_file  = os.path.join(self.test_data_dir, "output_frameshift_variant_position_1.iedb.parsed.tsv")
-        self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
-
-    def test_input_inframe_deletion_aa_deletion_gets_parsed_correctly(self):
-        parse_output_input_iedb_file = [os.path.join(self.test_data_dir, "input_inframe_deletion_aa_deletion.ann.HLA-A*29:02.9.tsv_1-2")]
-        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "input_inframe_deletion_aa_deletion.tsv")
-        parse_output_key_file = [os.path.join(self.test_data_dir, "input_inframe_deletion_aa_deletion.fa.split_1-2.key")]
-        parse_output_output_file = tempfile.NamedTemporaryFile()
-
-        parse_output_params = {
-            'input_iedb_files'       : parse_output_input_iedb_file,
-            'input_tsv_file'         : parse_output_input_tsv_file,
-            'key_files'              : parse_output_key_file,
-            'output_file'            : parse_output_output_file.name,
-            'sample_name'            : 'input_inframe_deletion_aa_deletion',
-        }
-        parser = DefaultOutputParser(**parse_output_params)
-
-        self.assertFalse(parser.execute())
-        expected_output_file  = os.path.join(self.test_data_dir, "output_inframe_deletion_aa_deletion.iedb.parsed.tsv")
-        self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
-
-    def test_input_inframe_deletion_aa_replacement_gets_parsed_correctly(self):
-        parse_output_input_iedb_file = [os.path.join(self.test_data_dir, "input_inframe_deletion_aa_replacement.ann.HLA-A*29:02.9.tsv_1-2")]
-        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "input_inframe_deletion_aa_replacement.tsv")
-        parse_output_key_file = [os.path.join(self.test_data_dir, "input_inframe_deletion_aa_replacement.fa.split_1-2.key")]
-        parse_output_output_file = tempfile.NamedTemporaryFile()
-
-        parse_output_params = {
-            'input_iedb_files'       : parse_output_input_iedb_file,
-            'input_tsv_file'         : parse_output_input_tsv_file,
-            'key_files'              : parse_output_key_file,
-            'output_file'            : parse_output_output_file.name,
-            'sample_name'            : 'input_inframe_deletion_aa_replacement',
-        }
-        parser = DefaultOutputParser(**parse_output_params)
-
-        self.assertFalse(parser.execute())
-        expected_output_file  = os.path.join(self.test_data_dir, "output_inframe_deletion_aa_replacement.iedb.parsed.tsv")
-        self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
-
-    def test_input_inframe_insertion_aa_insertion_gets_parsed_correctly(self):
-        parse_output_input_iedb_file = [os.path.join(self.test_data_dir, "input_inframe_insertion_aa_insertion.ann.HLA-A*29:02.9.tsv_1-2")]
-        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "input_inframe_insertion_aa_insertion.tsv")
-        parse_output_key_file = [os.path.join(self.test_data_dir, "input_inframe_insertion_aa_insertion.fa.split_1-2.key")]
-        parse_output_output_file = tempfile.NamedTemporaryFile()
-
-        parse_output_params = {
-            'input_iedb_files'       : parse_output_input_iedb_file,
-            'input_tsv_file'         : parse_output_input_tsv_file,
-            'key_files'              : parse_output_key_file,
-            'output_file'            : parse_output_output_file.name,
-            'sample_name'            : 'input_inframe_insertion_aa_insertion',
-        }
-        parser = DefaultOutputParser(**parse_output_params)
-
-        self.assertFalse(parser.execute())
-        expected_output_file  = os.path.join(self.test_data_dir, "output_inframe_insertion_aa_insertion.iedb.parsed.tsv")
-        self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
-
-    def test_input_inframe_insertion_aa_replacement_gets_parsed_correctly(self):
-        parse_output_input_iedb_file = [os.path.join(self.test_data_dir, "input_inframe_insertion_aa_replacement.ann.HLA-A*29:02.9.tsv_1-2")]
-        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "input_inframe_insertion_aa_replacement.tsv")
-        parse_output_key_file = [os.path.join(self.test_data_dir, "input_inframe_insertion_aa_replacement.fa.split_1-2.key")]
-        parse_output_output_file = tempfile.NamedTemporaryFile()
-
-        parse_output_params = {
-            'input_iedb_files'       : parse_output_input_iedb_file,
-            'input_tsv_file'         : parse_output_input_tsv_file,
-            'key_files'              : parse_output_key_file,
-            'output_file'            : parse_output_output_file.name,
-            'sample_name'            : 'input_inframe_insertion_aa_replacement',
-        }
-        parser = DefaultOutputParser(**parse_output_params)
-
-        self.assertFalse(parser.execute())
-        expected_output_file  = os.path.join(self.test_data_dir, "output_inframe_insertion_aa_replacement.iedb.parsed.tsv")
-        self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
-
-    def test_parse_output_runs_and_produces_expected_output_for_class_ii(self):
-        parse_output_input_iedb_file = [os.path.join(self.test_data_dir, "input.nn_align.H2-IAb.tsv_1-48")]
-        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "input_peptide_sequence_length_31.tsv")
-        parse_output_key_file = [os.path.join(self.test_data_dir, "input_peptide_sequence_length_31.fa.split_1-48.key")]
-        parse_output_output_file = tempfile.NamedTemporaryFile()
-
-        parse_output_params = {
-            'input_iedb_files'       : parse_output_input_iedb_file,
-            'input_tsv_file'         : parse_output_input_tsv_file,
-            'key_files'              : parse_output_key_file,
-            'output_file'            : parse_output_output_file.name,
-            'sample_name'            : 'input',
-        }
-        parser = DefaultOutputParser(**parse_output_params)
-
-        self.assertFalse(parser.execute())
-        expected_output_file  = os.path.join(self.test_data_dir, "output_nn_align.iedb.parsed.tsv")
-        self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
-
-    def test_parse_output_runs_and_produces_expected_output_for_duplicate_transcripts(self):
-        parse_output_input_iedb_file = [os.path.join(self.test_data_dir, "input_multiple_transcripts_per_alt.ann.HLA-A*29:02.9.tsv_1-2")]
-        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "input_multiple_transcripts_per_alt.tsv")
-        parse_output_key_file = [os.path.join(self.test_data_dir, "input_multiple_transcripts_per_alt.fa.split_1-2.key")]
-        parse_output_output_file = tempfile.NamedTemporaryFile()
-
-        parse_output_params = {
-            'input_iedb_files'       : parse_output_input_iedb_file,
-            'input_tsv_file'         : parse_output_input_tsv_file,
-            'key_files'              : parse_output_key_file,
-            'output_file'            : parse_output_output_file.name,
-            'sample_name'            : 'input_multiple_transcripts_per_alt',
-        }
-        parser = DefaultOutputParser(**parse_output_params)
-
-        self.assertFalse(parser.execute())
-        expected_output_file  = os.path.join(self.test_data_dir, "output_multiple_transcripts_per_alt.iedb.parsed.tsv")
-        self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
-
-    def test_parse_output_runs_and_produces_expected_output_for_mnps(self):
-        parse_output_input_iedb_file = [os.path.join(self.test_data_dir, "input_mnp.ann.HLA-A*01:01.9.tsv_1-2")]
-        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "input_mnp.tsv")
-        parse_output_key_file = [os.path.join(self.test_data_dir, "input_mnp.fa.split_1-2.key")]
-        parse_output_output_file = tempfile.NamedTemporaryFile()
-
-        parse_output_params = {
-            'input_iedb_files'       : parse_output_input_iedb_file,
-            'input_tsv_file'         : parse_output_input_tsv_file,
-            'key_files'              : parse_output_key_file,
-            'output_file'            : parse_output_output_file.name,
-            'sample_name'            : 'input_mnp',
-        }
-        parser = DefaultOutputParser(**parse_output_params)
-
-        self.assertFalse(parser.execute())
-        expected_output_file  = os.path.join(self.test_data_dir, "output_mnp.iedb.parsed.tsv")
-        self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
-
-    def test_parse_output_runs_and_produces_expected_output_for_mnp_at_beginning_of_sequence(self):
-        parse_output_input_iedb_file = [os.path.join(self.test_data_dir, "input_mnp2.ann.HLA-A*01:01.10.tsv_17-18")]
-        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "input_mnp2.tsv")
-        parse_output_key_file = [os.path.join(self.test_data_dir, "input_mnp2.fa.split_17-18.key")]
-        parse_output_output_file = tempfile.NamedTemporaryFile()
-
-        parse_output_params = {
-            'input_iedb_files'       : parse_output_input_iedb_file,
-            'input_tsv_file'         : parse_output_input_tsv_file,
-            'key_files'              : parse_output_key_file,
-            'output_file'            : parse_output_output_file.name,
-            'sample_name'            : 'input_mnp2',
-        }
-        parser = DefaultOutputParser(**parse_output_params)
-
-        self.assertFalse(parser.execute())
-        expected_output_file  = os.path.join(self.test_data_dir, "output_mnp2.iedb.parsed.tsv")
-        self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
-
-    def test_parse_output_runs_with_iedb_dna_warning(self):
-        parse_output_input_iedb_file = [os.path.join(self.test_data_dir, "input_iedb_dna_warning.ann.HLA-A*02:01.9.tsv_1-48")]
-        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "Test.tsv")
-        parse_output_key_file = [os.path.join(self.test_data_dir, "Test_21.fa.split_1-48.key")]
-        parse_output_output_file = tempfile.NamedTemporaryFile()
-
-        parse_output_params = {
-            'input_iedb_files'       : parse_output_input_iedb_file,
-            'input_tsv_file'         : parse_output_input_tsv_file,
-            'key_files'              : parse_output_key_file,
-            'output_file'            : parse_output_output_file.name,
-            'sample_name'            : 'input_iedb_dna_warning',
-        }
-        parser = DefaultOutputParser(**parse_output_params)
-        self.assertFalse(parser.execute())
-
-    def test_parse_output_runs_and_produces_expected_output_for_pvacvector(self):
-        parse_output_input_iedb_file = [os.path.join(self.test_data_dir, "input_pvacvector.ann.H-2-Kb.8.tsv_1-990")]
-        parse_output_key_file = [os.path.join(self.test_data_dir, "input_pvacvector.fa.split_1-990.key")]
-        parse_output_output_file = tempfile.NamedTemporaryFile()
-
-        parse_output_params = {
-            'input_iedb_files'       : parse_output_input_iedb_file,
-            'input_tsv_file'         : None,
-            'key_files'              : parse_output_key_file,
-            'output_file'            : parse_output_output_file.name,
-            'sample_name'            : 'input_pvacvector',
-        }
-        parser = UnmatchedSequencesOutputParser(**parse_output_params)
-
-        self.assertFalse(parser.execute())
-        expected_output_file  = os.path.join(self.test_data_dir, "output_pvacvector.iedb.parsed.tsv")
-        self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
-
-    def test_parse_output_runs_and_produces_expected_output_for_none_percentile(self):
-        parse_output_input_iedb_file = [os.path.join(self.test_data_dir, "input_percentile_none.netmhcpan.HLA-C*03:03.9.tsv_1-380")]
-        parse_output_key_file = [os.path.join(self.test_data_dir, "input_percentile_none.fa.split_1-380.key")]
-        parse_output_output_file = tempfile.NamedTemporaryFile()
-
-        parse_output_params = {
-            'input_iedb_files'       : parse_output_input_iedb_file,
-            'input_tsv_file'         : None,
-            'key_files'              : parse_output_key_file,
-            'output_file'            : parse_output_output_file.name,
-            'sample_name'            : 'input_percentile_none',
-        }
-        parser = UnmatchedSequencesOutputParser(**parse_output_params)
-
-        self.assertFalse(parser.execute())
-        expected_output_file  = os.path.join(self.test_data_dir, "output_percentile_none.iedb.parsed.tsv")
-        self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
-
-    def test_parse_output_runs_and_produces_expected_output_for_empty_percentile(self):
-        parse_output_input_iedb_file = [os.path.join(self.test_data_dir, "input_percentile_empty.MHCflurry.HLA-C*15:05.8.tsv_1-14")]
-        parse_output_key_file = [os.path.join(self.test_data_dir, "input_percentile_empty.fa.split_1-14.key")]
-        parse_output_output_file = tempfile.NamedTemporaryFile()
-
-        parse_output_params = {
-            'input_iedb_files'       : parse_output_input_iedb_file,
-            'input_tsv_file'         : None,
-            'key_files'              : parse_output_key_file,
-            'output_file'            : parse_output_output_file.name,
-            'sample_name'            : 'input_percentile_empty',
-        }
-        parser = UnmatchedSequencesOutputParser(**parse_output_params)
-
-        self.assertFalse(parser.execute())
-        expected_output_file  = os.path.join(self.test_data_dir, "output_percentile_empty.iedb.parsed.tsv")
-        self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
-
-    def test_parse_output_runs_and_produces_expected_output_for_empty_percentile_2(self):
-        parse_output_input_iedb_file = [os.path.join(self.test_data_dir, "mhcflurry_no_percentile", "input_no_percentile.MHCflurry.HLA-C*15:05.8.tsv_1-34")]
-        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "mhcflurry_no_percentile", "input_no_percentile.tsv")
-        parse_output_key_file = [os.path.join(self.test_data_dir, "mhcflurry_no_percentile", "input_no_percentile.fa.split_1-34.key")]
-        parse_output_output_file = tempfile.NamedTemporaryFile()
-
-        parse_output_params = {
-            'input_iedb_files'       : parse_output_input_iedb_file,
-            'input_tsv_file'         : parse_output_input_tsv_file,
-            'key_files'              : parse_output_key_file,
-            'output_file'            : parse_output_output_file.name,
-            'sample_name'            : 'input_no_percentile',
-            'flurry_state'           : 'both',
-        }
-        parser = DefaultOutputParser(**parse_output_params)
-
-        self.assertFalse(parser.execute())
-        expected_output_file  = os.path.join(self.test_data_dir, "mhcflurry_no_percentile", "output_no_percentile.iedb.parsed.tsv")
-        self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
-
-    def test_parse_output_runs_and_produces_expected_output_for_complex_inframe_insertion(self):
-        parse_output_input_iedb_file = [
-                os.path.join(self.test_data_dir, "complex_inframe_insertion", "input.MHCflurry.HLA-A*24:02.8.tsv_187-188"),
-                os.path.join(self.test_data_dir, "complex_inframe_insertion", "input.netmhccons.HLA-A*24:02.8.tsv_187-188"),
-        ]
-        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "complex_inframe_insertion", "input.tsv")
-        parse_output_key_file = [os.path.join(self.test_data_dir, "complex_inframe_insertion", "input.fa.split_187-188.key")]
-        parse_output_output_file = tempfile.NamedTemporaryFile()
-
-        parse_output_params = {
-            'input_iedb_files'       : parse_output_input_iedb_file,
-            'input_tsv_file'         : parse_output_input_tsv_file,
-            'key_files'              : parse_output_key_file,
-            'output_file'            : parse_output_output_file.name,
-            'sample_name'            : 'input',
-            'flurry_state'           : 'both',
-        }
-        parser = DefaultOutputParser(**parse_output_params)
-
-        self.assertFalse(parser.execute())
-        expected_output_file  = os.path.join(self.test_data_dir, "complex_inframe_insertion", "output.iedb.parsed.tsv")
-        self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
-
-    def test_parse_output_runs_and_produces_expected_output_for_very_long_insertion(self):
-        parse_output_input_iedb_file = [
-                os.path.join(self.test_data_dir, "very_long_insertion", "debug.netmhcpan.H-2-Kb.8.tsv_1-2"),
-                os.path.join(self.test_data_dir, "very_long_insertion", "debug.netmhcpan.H-2-Db.8.tsv_1-2"),
-        ]
-        parse_output_input_tsv_file = os.path.join(self.test_data_dir, "very_long_insertion", "input.tsv")
-        parse_output_key_file = [os.path.join(self.test_data_dir, "very_long_insertion", "input.fa.split_1-2.key")]
-        parse_output_output_file = tempfile.NamedTemporaryFile()
-
-        parse_output_params = {
-            'input_iedb_files'       : parse_output_input_iedb_file,
-            'input_tsv_file'         : parse_output_input_tsv_file,
-            'key_files'              : parse_output_key_file,
-            'output_file'            : parse_output_output_file.name,
-            'sample_name'            : 'debug',
-            'flurry_state'           : 'both',
-        }
-        parser = DefaultOutputParser(**parse_output_params)
-
-        self.assertFalse(parser.execute())
-        expected_output_file  = os.path.join(self.test_data_dir, "very_long_insertion", "output.iedb.parsed.tsv")
-        self.assertTrue(compare(parse_output_output_file.name, expected_output_file))
+        line = {'allele': 'HLA-C*15:05', 'peptide': 'QPKPVIDG', 'ic50': '28394.79812418208', 'percentile': '', 'mhcflurry_processing_score': '0.0385892167687416', 'mhcflurry_presentation_score': '0.0040710675126724', 'mhcflurry_presentation_percentile': '62.74467391304348', 'seq_num': '1', 'start': '1'}
+        method = 'MHCflurry'
+        scores = parser.get_scores(line, method)
+        expected_scores = {'MHCflurry': {'ic50': 28394.79812418208, 'percentile': 'NA'}}
+        self.assertEqual(scores, expected_scores)

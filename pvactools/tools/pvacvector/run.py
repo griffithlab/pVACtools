@@ -20,8 +20,7 @@ import shutil
 from pvactools.lib.optimal_peptide import OptimalPeptide
 from pvactools.lib.vector_visualization import VectorVisualization
 from pvactools.lib.run_argument_parser import PvacvectorRunArgumentParser
-from pvactools.lib.pvacvector_input_fasta_generator import PvacvectorInputFastaGenerator
-from pvactools.lib.pipeline import *
+from pvactools.lib.pvacvector_run_pipeline import PvacvectorRunPipeline
 from pvactools.lib.run_utils import *
 from pvactools.lib.prediction_class import NetMHCIIVersion
 from pvactools.lib.prediction_class_utils import *
@@ -29,80 +28,20 @@ from pvactools.lib.prediction_class_utils import *
 def define_parser():
     return PvacvectorRunArgumentParser().parser
 
-def run_pipelines(input_file, base_output_dir, args, junctions_to_test, spacer, tries, class_i_prediction_algorithms, class_ii_prediction_algorithms, class_i_alleles, class_ii_alleles, species):
-    shared_arguments = {
-        'input_file'      : input_file,
-        'input_file_type' : 'pvacvector_input_fasta',
-        'sample_name'     : args.sample_name,
-        'n_threads'       : args.n_threads,
-        'spacer'          : spacer,
-        'clip_length'     : tries,
-        'downstream_sequence_length': 200,
-        'iedb_retries'    : args.iedb_retries,
-        'additional_report_columns' : None,
-        'junctions_to_test': junctions_to_test,
-        'allow_incomplete_transcripts': args.allow_incomplete_transcripts,
-    }
-
-    parsed_output_files = []
-    if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0:
-        if args.iedb_install_directory:
-            iedb_mhc_i_executable = os.path.join(args.iedb_install_directory, 'mhc_i', 'src', 'predict_binding.py')
-            if not os.path.exists(iedb_mhc_i_executable):
-                sys.exit("IEDB MHC I executable path doesn't exist %s" % iedb_mhc_i_executable)
-        else:
-            iedb_mhc_i_executable = None
-
-        if args.use_normalized_percentiles and species != 'human':
-            print("WARNING: Normalized percentiles are only available for human alleles. Option will be ignored.")
-            args.use_normalized_percentiles = False
-
-        print("Executing MHC Class I predictions")
-
-        output_dir = os.path.join(base_output_dir, 'MHC_Class_I')
-        os.makedirs(output_dir, exist_ok=True)
-
-        class_i_arguments = shared_arguments.copy()
-        class_i_arguments['alleles']                 = class_i_alleles
-        class_i_arguments['iedb_executable']         = iedb_mhc_i_executable
-        class_i_arguments['epitope_lengths']         = args.class_i_epitope_length
-        class_i_arguments['prediction_algorithms']   = class_i_prediction_algorithms
-        class_i_arguments['output_dir']              = output_dir
-        class_i_arguments['filename_addition']         = "MHC_I"
-        class_i_arguments['use_normalized_percentiles']  = args.use_normalized_percentiles
-        class_i_arguments['reference_scores_path']    = args.reference_scores_path
-        pipeline_i = Pipeline(**class_i_arguments)
-        pipeline_i.generate_fasta()
-        pipeline_i.call_iedb()
-        parsed_output_files.extend(pipeline_i.parse_outputs())
-
-    if len(class_ii_prediction_algorithms) > 0 and len(class_ii_alleles) > 0:
-        if args.iedb_install_directory:
-            iedb_mhc_ii_executable = os.path.join(args.iedb_install_directory, 'mhc_ii', 'mhc_II_binding.py')
-            if not os.path.exists(iedb_mhc_ii_executable):
-                sys.exit("IEDB MHC II executable path doesn't exist %s" % iedb_mhc_ii_executable)
-        else:
-            iedb_mhc_ii_executable = None
-
-        print("Executing MHC Class II predictions")
-
-        output_dir = os.path.join(base_output_dir, 'MHC_Class_II')
-        os.makedirs(output_dir, exist_ok=True)
-
-        class_ii_arguments = shared_arguments.copy()
-        class_ii_arguments['alleles']                 = class_ii_alleles
-        class_ii_arguments['prediction_algorithms']   = class_ii_prediction_algorithms
-        class_ii_arguments['iedb_executable']         = iedb_mhc_ii_executable
-        class_ii_arguments['epitope_lengths']         = args.class_ii_epitope_length
-        class_ii_arguments['output_dir']              = output_dir
-        class_ii_arguments['netmhc_stab']             = False
-        class_ii_arguments['filename_addition']         = "MHC_II"
-        pipeline_ii = Pipeline(**class_ii_arguments)
-        pipeline_ii.generate_fasta()
-        pipeline_ii.call_iedb()
-        parsed_output_files.extend(pipeline_ii.parse_outputs())
-
-    return parsed_output_files
+def run_pipelines(input_file, base_output_dir, args, junctions_to_test, spacer, tries):
+    params = vars(args).copy()
+    params['input_file'] = input_file
+    params['output_dir'] = base_output_dir
+    params['junctions_to_test'] = junctions_to_test
+    params['spacer'] = spacer
+    params['clip_length'] = tries
+    params['netmhc_stab'] = False
+    params['additional_report_columns'] = None
+    params['run_reference_proteome_similarity'] = False
+    params['net_chop_method'] = None
+    pipeline = PvacvectorRunPipeline(**params)
+    pipeline.execute()
+    return pipeline.predictor.output_files
 
 def write_junctions_file(graph, current_output_dir):
     junctions_file = os.path.join(current_output_dir, 'junctions.tsv')
@@ -407,58 +346,16 @@ def main(args_input=sys.argv[1:]):
     args = parser.parse_args(args_input)
 
     if "." in args.sample_name:
-        sys.exit("Run name cannot contain '.'")
-
-    if args.iedb_retries > 100:
-        sys.exit("The number of IEDB retries must be less than or equal to 100")
-
-    if (os.path.splitext(args.input_file))[1] == '.fa':
-        input_file = args.input_file
-        generate_input_fasta = False
-    elif (os.path.splitext(args.input_file))[1] == '.tsv':
-        input_tsv = args.input_file
-        input_vcf = args.input_vcf
-        if input_vcf is None:
-            sys.exit("Input VCF is required when using a pVACseq TSV as input file")
-        generate_input_fasta = True
-    else:
-        sys.exit("Input file type not as expected. Needs to be a .fa or a .tsv file")
-
-    if args.n_threads > 1 and platform.system() == "Darwin":
-        raise Exception("Multithreading is not supported on MacOS")
-
-    (class_i_prediction_algorithms, class_ii_prediction_algorithms) = split_algorithms(args.prediction_algorithms)
-    if len(class_i_prediction_algorithms) == 0:
-        print("No MHC class I prediction algorithms chosen. Skipping MHC class I predictions.")
-    elif len(class_ii_prediction_algorithms) == 0:
-        print("No MHC class II prediction algorithms chosen. Skipping MHC class II predictions.")
-
-    alleles = combine_class_ii_alleles(args.allele)
-    (class_i_alleles, class_ii_alleles, species) = split_alleles(alleles)
-    if len(class_i_alleles) == 0:
-        print("No MHC class I alleles chosen. Skipping MHC class I predictions.")
-    elif len(class_ii_alleles) == 0:
-        print("No MHC class II alleles chosen. Skipping MHC class II predictions.")
-
-    if len(class_i_prediction_algorithms) == 0 and len(class_i_alleles) == 0 and len(class_ii_prediction_algorithms) == 0 and len(class_ii_alleles) == 0:
-        return
+        raise Exception("Run name cannot contain '.'")
 
     base_output_dir = os.path.abspath(args.output_dir)
     os.makedirs(base_output_dir, exist_ok=True)
 
-    if (args.netmhciipan_version == '4.0' and args.iedb_install_directory is not None):
-        raise Exception("Standalone IEDB does not support version 4.0")
-    NetMHCIIVersion.netmhciipan_version = args.netmhciipan_version
-
     if os.environ.get('TEST_FLAG') or os.environ.get('TEST_FLAG') == '1':
         random.seed(0.5)
-    if generate_input_fasta:
-        generator = PvacvectorInputFastaGenerator(input_tsv, input_vcf, base_output_dir, args.input_n_mer, args.sample_name, args.biotypes, args.allow_incomplete_transcripts)
-        generator.execute()
-        input_file = generator.output_file
 
     seq_dict = dict()
-    for record in SeqIO.parse(input_file, "fasta"):
+    for record in SeqIO.parse(args.input_file, "fasta"):
         seq_dict[record.id] = str(record.seq)
     seq_keys = sorted(seq_dict)
     graph = initialize_graph(seq_keys)
@@ -477,17 +374,12 @@ def main(args_input=sys.argv[1:]):
             print("Processing spacer {}".format(spacer))
             current_output_dir = os.path.join(base_output_dir, str(tries), spacer)
             parsed_output_files = run_pipelines(
-                input_file,
+                args.input_file,
                 current_output_dir,
                 args,
                 junctions_to_process,
                 spacer,
                 tries,
-                class_i_prediction_algorithms,
-                class_ii_prediction_algorithms,
-                class_i_alleles,
-                class_ii_alleles,
-                species
             )
             min_scores, min_percentiles = find_min_scores(parsed_output_files, current_output_dir, args, min_scores, min_percentiles)
             add_valid_junctions_to_graph(graph, min_scores, min_percentiles)

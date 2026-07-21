@@ -206,7 +206,7 @@ class PredictionClass(metaclass=ABCMeta):
         return module()
 
     @classmethod
-    def prediction_class_name_for_iedb_prediction_method(cls, method):
+    def prediction_class_name_for_prediction_method(cls, method):
         return cls.prediction_class_for_iedb_prediction_method(method).__class__.__name__
 
     @classmethod

@@ -57,5 +57,5 @@ class PvacbindUpdateTiersTests(unittest.TestCase):
         input_file = os.path.join(self.test_data_directory, 'run', 'MHC_Class_I', 'Test.MHC_I.all_epitopes.aggregated.tsv')
         tmp_input_file = tempfile.NamedTemporaryFile()
         shutil.copy(input_file, tmp_input_file.name)
-        self.assertFalse(update_tiers.main([tmp_input_file.name]))
+        self.assertFalse(update_tiers.main([tmp_input_file.name, "--top-score-metric2", "ic50"]))
         os.unlink(tmp_input_file.name)

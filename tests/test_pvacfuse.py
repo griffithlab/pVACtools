@@ -136,16 +136,11 @@ class PvacfuseTests(unittest.TestCase):
                 self.assertTrue(compare(output_file, expected_file),  "files don't match %s - %s" %(output_file, expected_file))
 
             for file_name in (
-                'sample.name.ann.HLA-A*29:02.9.tsv_1-594',
                 'sample.name.HLA-A*29:02.9.parsed.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', '9', 'tmp', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'fusions', 'MHC_Class_I', '9', 'tmp', file_name.replace('sample.name', 'Test'))
                 self.assertTrue(compare(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
-
-            mock_request.assert_has_calls([
-                generate_class_i_call('ann', 'HLA-A*29:02', 9, os.path.join(output_dir.name, "MHC_Class_I", "9", "tmp", "sample.name.9.fa.split_1-594"))
-            ])
 
             output_dir.cleanup()
 
@@ -199,7 +194,6 @@ class PvacfuseTests(unittest.TestCase):
                 self.assertTrue(compare(output_file, expected_file),  "files don't match %s - %s" %(output_file, expected_file))
 
             for file_name in (
-                'sample.name.ann.HLA-A*29:02.9.tsv_1-430',
                 'sample.name.HLA-A*29:02.9.parsed.tsv',
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_I', '9', 'tmp', file_name)

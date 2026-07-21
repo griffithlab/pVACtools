@@ -12,7 +12,7 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
-from pvactools.lib.variant_pipeline import VariantPipeline
+from pvactools.lib.variant_to_kmer_pipeline import VariantToKmerPipeline
 from pvactools.lib.calculate_manufacturability import CalculateManufacturability
 from pvactools.lib.run_utils import *
 
@@ -122,7 +122,7 @@ class PvacseqGenerateProteinFasta():
             'downstream_sequence_length'  : self.downstream_sequence_length,
             'flanking_bases'              : self.flanking_sequence_length,
         }
-        pipeline = VariantPipeline(**params)
+        pipeline = VariantToKmerPipeline(**params)
         pipeline.generate_fasta()
 
     def parse_input_tsv(self):

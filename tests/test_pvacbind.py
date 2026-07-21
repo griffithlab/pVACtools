@@ -107,7 +107,7 @@ class PvacbindTests(unittest.TestCase):
         output_dir.cleanup()
 
     def test_pvacbind_pipeline(self):
-        with patch('pvactools.lib.call_iedb.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+        with patch('pvactools.lib.call_predictors.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
             data,
             files,
             test_data_directory()
@@ -180,22 +180,6 @@ class PvacbindTests(unittest.TestCase):
                 self.assertTrue(cmp(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
 
             for file_name in (
-                'sample.name.9.fa.split_1-2787',
-                'sample.name.9.fa.split_1-2787.key',
-            ):
-                output_file   = os.path.join(output_dir.name, 'MHC_Class_I', '9', 'tmp', file_name)
-                expected_file = os.path.join(self.test_data_directory, 'run', 'MHC_Class_I', 'tmp', file_name.replace('sample.name', 'Test'))
-                self.assertTrue(cmp(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
-
-            for file_name in (
-                'sample.name.10.fa.split_1-2739',
-                'sample.name.10.fa.split_1-2739.key',
-            ):
-                output_file   = os.path.join(output_dir.name, 'MHC_Class_I', '10', 'tmp', file_name)
-                expected_file = os.path.join(self.test_data_directory, 'run', 'MHC_Class_I', 'tmp', file_name.replace('sample.name', 'Test'))
-                self.assertTrue(cmp(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
-
-            for file_name in (
                 'sample.name.HLA-G*01:09.9.parsed.tsv',
                 'sample.name.HLA-E*01:01.9.parsed.tsv',
             ):
@@ -227,14 +211,6 @@ class PvacbindTests(unittest.TestCase):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_II', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'run', 'MHC_Class_II', file_name.replace('sample.name', 'Test'))
                 self.assertTrue(cmp(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
-
-            for file_name in (
-                'sample.name.15.fa.split_1-2499',
-                'sample.name.15.fa.split_1-2499.key',
-            ):
-                output_file   = os.path.join(output_dir.name, 'MHC_Class_II', '15', 'tmp', file_name)
-                expected_file = os.path.join(self.test_data_directory, 'run', 'MHC_Class_II', 'tmp', file_name.replace('sample.name', 'Test'))
-                self.assertTrue(cmp(output_file, expected_file, False), "files don't match %s - %s" %(output_file, expected_file))
 
             for file_name in (
                 'sample.name.DRB1*11:01.15.parsed.tsv',

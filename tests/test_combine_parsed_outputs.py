@@ -6,6 +6,7 @@ import py_compile
 from subprocess import call
 
 from tests.utils import *
+from pvactools.lib.combine_parsed_outputs import CombineParsedOutputs
 
 class CombineParsedOutputsTests(unittest.TestCase):
     @classmethod
@@ -19,15 +20,15 @@ class CombineParsedOutputsTests(unittest.TestCase):
         self.assertTrue(py_compile.compile(self.executable))
 
     def test_combine_parsed_outputs_generates_expected_files(self):
-        combine_parsed_outputs_output_file = tempfile.NamedTemporaryFile()
-        combine_parsed_outputs_command = [
-            self.python,
-            self.executable,
-            os.path.join(self.test_data_dir, 'Test.HLA-E*01:01.9.parsed.tsv'),
-            os.path.join(self.test_data_dir, 'Test.HLA-G*01:09.9.parsed.tsv'),
-            combine_parsed_outputs_output_file.name,
-        ]
-        self.assertFalse(call(combine_parsed_outputs_command))
+        output_file = tempfile.NamedTemporaryFile()
+        params = {
+            'input_files': [
+                os.path.join(self.test_data_dir, 'Test.HLA-E*01:01.9.parsed.tsv'),
+                os.path.join(self.test_data_dir, 'Test.HLA-G*01:09.9.parsed.tsv'),
+            ],
+            'output_file': output_file.name,
+        }
+        self.assertFalse(CombineParsedOutputs(**params).execute())
 
         expected_output_file  = os.path.join(self.test_data_dir, "Test.combined.parsed.tsv")
-        self.assertTrue(compare(combine_parsed_outputs_output_file.name, expected_output_file))
+        self.assertTrue(compare(output_file.name, expected_output_file))

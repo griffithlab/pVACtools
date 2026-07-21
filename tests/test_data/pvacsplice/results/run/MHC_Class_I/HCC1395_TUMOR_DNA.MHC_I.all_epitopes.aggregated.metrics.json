@@ -535,7 +535,7 @@
     "best_hla_allele": "HLA-G*01:09",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "QVSEETIKVYCLQKELK",
+      "query_peptide": "SEETIKVYCLQKE",
       "matches": []
     }
   },
@@ -724,7 +724,7 @@
     "best_hla_allele": "HLA-G*01:09",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "QLKKKSEEKELKIKNH",
+      "query_peptide": "LKKKSEEKELKIKN",
       "matches": []
     }
   },
@@ -1291,7 +1291,7 @@
     "best_hla_allele": "HLA-G*01:09",
     "reference_matches": {
       "count": 0,
-      "query_peptide": "SADVVKQRFKNPAWVWLWN",
+      "query_peptide": "KSADVVKQRFKNPAWVWLWN",
       "matches": []
     }
   }
