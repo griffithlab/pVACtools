@@ -108,6 +108,8 @@ class GenerateFastaTests(unittest.TestCase):
         expected_tsv_file = os.path.join(self.test_output_data_dir, 'output.tsv')
         self.assertTrue(cmp(generate_protein_fasta_output_tsv, expected_tsv_file))
 
+        os.unlink(generate_protein_fasta_output_tsv)
+
     def test_input_tsv(self):
         generate_protein_fasta_input_file  = os.path.join(self.test_input_data_dir, "inputs", "splice_junctions_chr1.tsv")
         generate_protein_fasta_input_vcf   = os.path.join(self.test_input_data_dir, "inputs", "annotated.expression_chr1.vcf.gz")
@@ -131,7 +133,7 @@ class GenerateFastaTests(unittest.TestCase):
         expected_output_file = os.path.join(self.test_output_data_dir, 'output_with_tsv.fasta')
         self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
 
-        os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))
+        os.unlink(generate_protein_fasta_output_tsv)
 
     def test_input_aggregated_tsv(self):
         generate_protein_fasta_input_file  = os.path.join(self.test_input_data_dir, "inputs", "splice_junctions_chr1.tsv")
@@ -160,7 +162,7 @@ class GenerateFastaTests(unittest.TestCase):
         expected_tsv_file = os.path.join(self.test_output_data_dir, 'output.aggregated.tsv')
         self.assertTrue(cmp(generate_protein_fasta_output_tsv, expected_tsv_file))
 
-        os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))
+        os.unlink(generate_protein_fasta_output_tsv)
 
     def test_input_short_sequence_generates_expected_file(self):
         generate_protein_fasta_input_file  = os.path.join(self.test_input_data_dir, "inputs", "regtools.short_sequence.tsv")
@@ -185,6 +187,8 @@ class GenerateFastaTests(unittest.TestCase):
 
         expected_tsv_file = os.path.join(self.test_output_data_dir, 'output.short.tsv')
         self.assertTrue(cmp(generate_protein_fasta_output_tsv, expected_tsv_file))
+
+        os.unlink(generate_protein_fasta_output_tsv)
 
     def test_input_unsupported_amino_acid_generates_expected_file(self):
         generate_protein_fasta_input_file  = os.path.join(self.test_input_data_dir, "inputs", "regtools.unsupported_aa.tsv")

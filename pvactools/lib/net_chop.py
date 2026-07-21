@@ -133,7 +133,7 @@ class NetChop:
                             epitope_cleavage_scores = [
                                 (x[0] - start_diff, x[1])
                                 for x in map(lambda x: (int(x[0]), x[1]), cleavage_scores.items())
-                                if x[0] >= start_diff and x[0] <= start_diff + ep_len
+                                if x[0] > start_diff and x[0] <= start_diff + ep_len
                             ]
                             if len(epitope_cleavage_scores) == 0:
                                 best_cleavage_position = 'NA'

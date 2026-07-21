@@ -27,7 +27,7 @@ Additionally, the menu also has links to:
   additional questions
 
 :large:`Upload`
-______________
+_______________
 
 Once you've successfully launched pVACview by completing the :ref:`prerequisites <pvacview_prerequisites>` section, you can now upload your data by browsing through
 your local directories to load in the aggregate report and metrics files, usually located in the same directory as your ``app.R`` file.
