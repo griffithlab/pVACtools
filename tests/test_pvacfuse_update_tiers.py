@@ -5,6 +5,8 @@ import sys
 import py_compile
 from subprocess import PIPE
 from subprocess import run as subprocess_run
+import shutil
+import tempfile
 
 from pvactools.tools.pvacfuse import update_tiers
 from tests.utils import *
@@ -54,4 +56,10 @@ class PvacfuseUpdateTiersTests(unittest.TestCase):
     def test_runs(self):
         input_file = os.path.join(self.test_data_directory, 'arriba_fusions', 'MHC_Class_I', 'Test.MHC_I.all_epitopes.aggregated.tsv')
         input_metrics_file = os.path.join(self.test_data_directory, 'arriba_fusions', 'MHC_Class_I', 'Test.MHC_I.all_epitopes.aggregated.metrics.json')
-        self.assertFalse(update_tiers.main([input_file, input_metrics_file]))
+        tmp_input_file = tempfile.NamedTemporaryFile()
+        tmp_input_metrics_file = tempfile.NamedTemporaryFile()
+        shutil.copy(input_file, tmp_input_file.name)
+        shutil.copy(input_metrics_file, tmp_input_metrics_file.name)
+        self.assertFalse(update_tiers.main([tmp_input_file.name, tmp_input_metrics_file.name]))
+        os.unlink(tmp_input_file.name)
+        os.unlink(tmp_input_metrics_file.name)
