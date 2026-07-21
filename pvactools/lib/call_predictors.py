@@ -17,7 +17,7 @@ class CallPredictors:
         self.allele = kwargs['allele']
         self.epitope_length = kwargs['epitope_length']
         self.prediction_algorithms = kwargs['prediction_algorithms'].copy()
-        self.flurry_state = self.get_flurry_state()
+        self.flurry_state = self.__get_flurry_state()
         self.iedb_executable_path = kwargs['iedb_executable_path']
         self.iedb_retries = kwargs['iedb_retries']
         self.n_threads = kwargs['n_threads']
@@ -29,7 +29,7 @@ class CallPredictors:
         self.output_files = []
         self.output_key_files = []
 
-    def get_flurry_state(self):
+    def __get_flurry_state(self):
         if 'MHCflurry' in self.prediction_algorithms and 'MHCflurryEL' in self.prediction_algorithms:
             self.prediction_algorithms.remove('MHCflurryEL')
             return 'both'

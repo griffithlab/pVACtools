@@ -307,6 +307,62 @@ class CallClassIPredictorsTests(CallPredictorsTests):
                 atol=2e-2
             )
 
+    def test_tlbind_method_generates_expected_files(self):
+        with tempfile.TemporaryDirectory() as output_dir:
+            predictor_arguments = {
+                'input_file': self.input_file,
+                'sample_name': 'tmp',
+                'fasta_size': 800,
+                'allele': self.allele,
+                'epitope_length': self.epitope_length,
+                'prediction_algorithms': ['TLBind'],
+                'iedb_executable_path': None,
+                'iedb_retries': 5,
+                'n_threads': 1,
+                'output_dir': output_dir,
+            }
+            call_predictors = CallPredictors(**predictor_arguments)
+            self.assertFalse(call_predictors.execute())
+            expected_output_file = os.path.join(self.test_data_dir, 'output_tlbind.tsv')
+            expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,4,5])
+            actual_df = pd.read_csv(call_predictors.output_files[0], sep="\t", index_col=[0,4,5])
+            pd.testing.assert_frame_equal(
+                expected_df,
+                actual_df,
+                check_like=True,
+                check_exact=False,
+                rtol=1e-3,
+                atol=2e-2
+            )
+
+    def test_tlimm_method_generates_expected_files(self):
+        with tempfile.TemporaryDirectory() as output_dir:
+            predictor_arguments = {
+                'input_file': self.input_file,
+                'sample_name': 'tmp',
+                'fasta_size': 800,
+                'allele': self.allele,
+                'epitope_length': self.epitope_length,
+                'prediction_algorithms': ['TLImm'],
+                'iedb_executable_path': None,
+                'iedb_retries': 5,
+                'n_threads': 1,
+                'output_dir': output_dir,
+            }
+            call_predictors = CallPredictors(**predictor_arguments)
+            self.assertFalse(call_predictors.execute())
+            expected_output_file = os.path.join(self.test_data_dir, 'output_tlimm.tsv')
+            expected_df = pd.read_csv(expected_output_file, sep="\t", index_col=[0,3,4])
+            actual_df = pd.read_csv(call_predictors.output_files[0], sep="\t", index_col=[0,3,4])
+            pd.testing.assert_frame_equal(
+                expected_df,
+                actual_df,
+                check_like=True,
+                check_exact=False,
+                rtol=1e-3,
+                atol=2e-2
+            )
+
 class CallClassIIPredictorsTests(CallPredictorsTests):
     @classmethod
     def additional_setup(cls):

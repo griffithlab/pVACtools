@@ -62,7 +62,7 @@ that offer suggestions as to the suitability of variants for use in vaccines.
 For a full definition of these tiers, see the pVACseq :ref:`output file documentation <aggregated>`.
 
 Add Evaluation Predictions Using a Pre-Trained Machine Learning Model
-------------------
+---------------------------------------------------------------------
 
 .. program-output:: pvacseq add_ml_predictions -h
 
