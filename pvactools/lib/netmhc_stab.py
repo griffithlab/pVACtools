@@ -15,7 +15,7 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
-import pvactools.lib.run_utils
+from pvactools.lib.run_argument_utils import top_score_metric2
 from pvactools.lib.prediction_class import MHCI
 import pvactools.lib.sort
 
@@ -235,7 +235,7 @@ class NetMHCStab:
                  + "median: Use the median MT Score and Median Fold Change (i.e. the  median MT ic50 binding score and fold change of all chosen prediction methods)."
         )
         parser.add_argument(
-            '-m2', '--top-score-metric2', type=pvactools.lib.run_utils.top_score_metric2(),
+            '-m2', '--top-score-metric2', type=top_score_metric2(),
             help="Which metrics to consider when sorting the results. All listed metrics will be rank scored and the sum of those rank scores will be used. "
                  + "Available options are 'ic50', 'combined_percentile', 'binding_percentile', 'immunogenicity_percentile', and 'presentation_percentile'."
                  + "Whether the lowest or median is considered for each metric is controlled by the --top-score-metric parameter. ",

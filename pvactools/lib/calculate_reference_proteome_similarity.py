@@ -19,8 +19,6 @@ from itertools import groupby
 import json
 import logging
 
-from pvactools.lib.run_utils import *
-
 class CalculateReferenceProteomeSimilarity:
     '''
     Peforms blast search on the neoantigens found in the pipeline execution. 

@@ -4,12 +4,6 @@ from pvactools.lib.pvacbind_prediction_pipeline import PvacbindPredictionPipelin
 from pvactools.lib.post_processor import PvacbindPostProcessor
 
 class PvacbindRunPipeline(RunPipeline):
-    def check_tumor_purity_argument(self):
-        pass
-
-    def check_downstream_sequence_length_argument(self):
-        pass
-
     def call_input_to_kmer_pipeline(self):
         for length in set(self.class_i_epitope_length + self.class_ii_epitope_length):
             fasta_to_kmer_arguments = {

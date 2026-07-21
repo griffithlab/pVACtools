@@ -4,7 +4,7 @@ import textwrap
 
 from pvactools.lib.prediction_class import PredictionClass
 import pvactools.lib.net_chop
-from pvactools.lib.run_utils import *
+from pvactools.lib.run_argument_utils import float_range, transcript_prioritization_strategy, top_score_metric2, pvacsplice_anchors, downstream_sequence_length
 
 class RunArgumentParser(metaclass=ABCMeta):
     def __init__(self, tool_name, input_file_help):
@@ -251,7 +251,8 @@ class RunArgumentParser(metaclass=ABCMeta):
             "-d", "--downstream-sequence-length",
             default='1000',
             help="Cap to limit the downstream sequence length for frameshifts when creating the FASTA file. "
-                 + "Use 'full' to include the full downstream sequence."
+                 + "Use 'full' to include the full downstream sequence.",
+            type=downstream_sequence_length()
         )
 
     def expression_coverage_args(self):
@@ -545,6 +546,7 @@ class PvacspliceRunArgumentParser(RunArgumentParser):
         self.pass_only_args()
         self.expression_coverage_args()
         self.prediction_args()
+        self.fasta_generation()
         self.anchor_args()
         self.genes_of_interest_args()
         self.aggregated_report_args()

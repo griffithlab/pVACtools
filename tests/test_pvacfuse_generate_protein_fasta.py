@@ -128,3 +128,22 @@ class GenerateFastaTests(unittest.TestCase):
         self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
 
         os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))
+
+    def test_downstream_sequence_length(self):
+        generate_protein_fasta_input_file  = os.path.join(self.test_data_dir, 'agfusion')
+        generate_protein_fasta_output_file = tempfile.NamedTemporaryFile()
+
+        params = {
+            'input': generate_protein_fasta_input_file,
+            'ref_fasta': self.transcript_fasta,
+            'flanking_sequence_length': self.flanking_sequence_length,
+            'output_file': generate_protein_fasta_output_file.name,
+            'downstream_sequence_length': 50,
+        }
+        generator = PvacfuseGenerateProteinFasta(**params)
+        self.assertFalse(generator.execute())
+
+        expected_output_file = os.path.join(self.test_data_dir, 'output_agfusion.downstream_sequence_length.fasta')
+        self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))
+
+        os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))

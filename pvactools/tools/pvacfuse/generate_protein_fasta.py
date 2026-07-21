@@ -2,7 +2,7 @@ import sys
 import argparse
 
 from pvactools.lib.generate_protein_fasta import PvacfuseGenerateProteinFasta
-from pvactools.lib.run_utils import *
+from pvactools.lib.run_argument_utils import aggregate_report_evaluations, downstream_sequence_length
 
 def define_parser():
     parser = argparse.ArgumentParser(
@@ -47,7 +47,8 @@ def define_parser():
         "-d", "--downstream-sequence-length",
         default="1000",
         help="Cap to limit the downstream sequence length for frameshift fusion when creating the fasta file. "
-            + "Use 'full' to include the full downstream sequence."
+            + "Use 'full' to include the full downstream sequence.",
+        type=downstream_sequence_length()
     )
     return parser
 
@@ -55,17 +56,10 @@ def main(args_input = sys.argv[1:]):
     parser = define_parser()
     args = parser.parse_args(args_input)
 
-    if args.downstream_sequence_length == 'full':
-        downstream_sequence_length = None
-    elif args.downstream_sequence_length.isdigit():
-        downstream_sequence_length = int(args.downstream_sequence_length)
-    else:
-        sys.exit("The downstream sequence length needs to be a positive integer or 'full'")
-
     params = {
         'input': args.input,
         'ref_fasta': args.ref_fasta,
-        'downstream_sequence_length': downstream_sequence_length,
+        'downstream_sequence_length': args.downstream_sequence_length,
         'flanking_sequence_length': args.flanking_sequence_length,
         'mutant_only': args.mutant_only,
         'aggregate_report_evaluation': args.aggregate_report_evaluation,

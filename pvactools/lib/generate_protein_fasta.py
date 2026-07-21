@@ -9,13 +9,14 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
 from pvactools.lib.calculate_manufacturability import CalculateManufacturability
-from pvactools.lib.run_utils import *
+from pvactools.lib.run_utils import get_mutated_peptide_with_flanking_sequence, get_mutated_frameshift_peptide_with_flanking_sequence
 
 class GenerateProteinFasta:
     def __init__(self, **kwargs):
         self.sample_name = kwargs.pop('sample_name', 'tmp')
         if self.sample_name is None:
             self.sample_name = 'tmp'
+        self.downstream_sequence_length = kwargs.pop('downstream_sequence_length', 1000)
         self.pass_only = kwargs.pop('pass_only', False)
         self.biotypes = kwargs.pop('biotypes', ['protein_coding'])
         self.allow_incomplete_transcripts = kwargs.pop('allow_incomplete_transcripts', False)
@@ -100,7 +101,6 @@ class PvacseqGenerateProteinFasta(GenerateProteinFasta):
     def __init__(self, **kwargs):
         self.input_vcf = kwargs.pop('input_vcf', None)
         self.phased_proximal_variants_vcf = kwargs.pop('phased_proximal_variants_vcf', None)
-        self.downstream_sequence_length = kwargs.pop('downstream_sequence_length', 1000)
         super().__init__(**kwargs)
 
     def generate_fasta(self):
@@ -194,7 +194,6 @@ class PvacspliceGenerateProteinFasta(GenerateProteinFasta):
         self.junction_score = kwargs.pop('junction_score', 10)
         self.variant_distance = kwargs.pop('variant_distance', 100)
         self.anchor_types = kwargs.pop('anchor_types', ['A', 'D', 'NDA'])
-        #self.downstream_sequence_length = kwargs.pop('downstream_sequence_length', 1000)
         super().__init__(**kwargs)
 
     def generate_fasta(self):
@@ -214,6 +213,7 @@ class PvacspliceGenerateProteinFasta(GenerateProteinFasta):
             'junction_score'                   : self.junction_score,
             'variant_distance'                 : self.variant_distance,
             'anchor_types'                     : self.anchor_types,
+            'downstream_sequence_length'       : self.downstream_sequence_length,
             'normal_sample_name'               : None,
             'keep_tmp_files'                   : False,
             'class_i_epitope_length'           : [],
@@ -258,7 +258,6 @@ class PvacfuseGenerateProteinFasta(GenerateProteinFasta):
     def __init__(self, **kwargs):
         self.input = kwargs.pop('input', None)
         self.ref_fasta = kwargs.pop('ref_fasta', None)
-        self.downstream_sequence_length = kwargs.pop('downstream_sequence_length', 1000)
         super().__init__(**kwargs)
 
     def generate_fasta(self):
@@ -266,7 +265,8 @@ class PvacfuseGenerateProteinFasta(GenerateProteinFasta):
         params = {
             'input_file': self.input,
             'output_dir': self.temp_dir,
-            'transcript_fasta': self.ref_fasta
+            'transcript_fasta': self.ref_fasta,
+            'downstream_sequence_length': self.downstream_sequence_length,
         }
         pipeline = FusionToKmerPipeline(**params)
         pipeline.generate_fasta()
@@ -293,10 +293,7 @@ class PvacfuseGenerateProteinFasta(GenerateProteinFasta):
             if start_position < 0:
                 start_position = 0
             if variant_type == 'frameshift_fusion':
-                if self.downstream_sequence_length is None:
-                    trimmed_mt_seq = mt_seq[start_position:]
-                else:
-                    trimmed_mt_seq = mt_seq[start_position:(position + self.downstream_sequence_length)]
+                trimmed_mt_seq = mt_seq[start_position:]
                 output_records.append(SeqRecord(Seq(trimmed_mt_seq), id=f"MT.{key}", description=""))
                 if not self.mutant_only:
                     trimmed_wt5_seq = wt5_seq[start_position:(position + self.flanking_sequence_length)]

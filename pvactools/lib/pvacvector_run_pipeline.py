@@ -6,12 +6,6 @@ from pvactools.lib.fasta_to_kmers import SequenceFastaToKmers
 from pvactools.lib.pvacbind_prediction_pipeline import PvacbindPredictionPipeline
 
 class PvacvectorRunPipeline(RunPipeline):
-    def check_tumor_purity_argument(self):
-        pass
-
-    def check_downstream_sequence_length_argument(self):
-        pass
-
     def call_input_to_kmer_pipeline(self):
         for length in set(self.class_i_epitope_length + self.class_ii_epitope_length):
             tmp_dir = os.path.join(self.output_dir, 'tmp')

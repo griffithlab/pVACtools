@@ -4,15 +4,16 @@ import sys
 import os
 from abc import ABCMeta
 from collections import OrderedDict
-from pvactools.lib.csq_parser import CsqParser
-import pvactools.lib.run_utils
-from pvactools.lib.proximal_variant import ProximalVariant
 import binascii
 import re
 import glob
 from Bio import SeqIO
 import logging
 from collections import defaultdict
+
+from pvactools.lib.csq_parser import CsqParser
+from pvactools.lib.run_utils import is_gz_file, construct_index
+from pvactools.lib.proximal_variant import ProximalVariant
 
 class InputFileConverter(metaclass=ABCMeta):
     def __init__(self, **kwargs):
@@ -33,9 +34,9 @@ class VcfConverter(InputFileConverter):
         self.allow_incomplete_transcripts = kwargs.pop('allow_incomplete_transcripts', False)
         if self.proximal_variants_vcf and not (self.proximal_variants_tsv and self.flanking_nucleotide_bases):
             sys.exit("A proximal variants TSV output path and number of flanking nucleotide bases need to be specified if a proximal variants input VCF is provided.")
-        if self.proximal_variants_vcf and not pvactools.lib.run_utils.is_gz_file(self.input_file):
+        if self.proximal_variants_vcf and not is_gz_file(self.input_file):
             sys.exit("Input VCF {} needs to be bgzipped when running with a proximal variants VCF.".format(self.input_file))
-        if self.proximal_variants_vcf and not pvactools.lib.run_utils.is_gz_file(self.proximal_variants_vcf):
+        if self.proximal_variants_vcf and not is_gz_file(self.proximal_variants_vcf):
             sys.exit("Proximal variants VCF {} needs to be bgzipped.".format(self.proximal_variants_vcf))
         if self.proximal_variants_vcf and not os.path.exists(self.proximal_variants_vcf + '.tbi'):
             sys.exit('No .tbi file found for proximal variants VCF {}. Proximal variants VCF needs to be tabix indexed.'.format(self.proximal_variants_vcf))
@@ -370,7 +371,7 @@ class VcfConverter(InputFileConverter):
                     gene_name = transcript['SYMBOL']
                     if gene_name is None or gene_name == '':
                         gene_name = transcript['Gene']
-                    index = pvactools.lib.run_utils.construct_index(count, gene_name, transcript_name, consequence, amino_acid_change_position)
+                    index = construct_index(count, gene_name, transcript_name, consequence, amino_acid_change_position)
                     if index in indexes:
                         sys.exit("Warning: TSV index already exists: {}".format(index))
                     else:
@@ -790,7 +791,7 @@ class FusionInputConverter(InputFileConverter):
                     'variant_type'               : variant_type,
                     'protein_position'           : fusion_position,
                     'fusion_read_support'        : int(record['split_reads1']) + int(record['split_reads2']) + int(record['discordant_mates']),
-                    'index'                      : pvactools.lib.run_utils.construct_index(count, gene_name, transcript_name, variant_type, fusion_position),
+                    'index'                      : construct_index(count, gene_name, transcript_name, variant_type, fusion_position),
                 }
                 if starfusion_entry is not None:
                     output_row['fusion_expression']   = starfusion_entry['FFPM']
@@ -864,7 +865,7 @@ class FusionInputConverter(InputFileConverter):
                     'fusion_amino_acid_sequence' : fusion_amino_acid_sequence,
                     'variant_type'               : variant_type,
                     'protein_position'           : fusion_position,
-                    'index'                      : pvactools.lib.run_utils.construct_index(count, record_info['genes'], record_info['transcripts'], variant_type, fusion_position),
+                    'index'                      : construct_index(count, record_info['genes'], record_info['transcripts'], variant_type, fusion_position),
                 }
                 if starfusion_entry is not None:
                     output_row['fusion_read_support'] = starfusion_entry['JunctionReadCount'] + starfusion_entry['SpanningFragCount']

@@ -8,7 +8,7 @@ from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq, translate
 
-from pvactools.lib.run_utils import *
+from pvactools.lib.run_utils import supported_amino_acids, min_match_count, determine_consecutive_matches_from_left, determine_consecutive_matches_from_right, determine_total_matches
 
 class FastaToKmers:
     def __init__(self, **kwargs):

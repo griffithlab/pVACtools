@@ -1,7 +1,8 @@
 from pathlib import Path
 import shutil
+import os
 
-from pvactools.lib.run_utils import *
+from pvactools.lib.run_utils import is_gz_file
 from pvactools.lib.run_pipeline import RunPipeline
 from pvactools.lib.junction_to_kmer_pipeline import JunctionToKmerPipeline
 from pvactools.lib.pvacsplice_prediction_pipeline import PvacsplicePredictionPipeline
@@ -9,9 +10,6 @@ from pvactools.lib.generate_protein_fasta import PvacspliceGenerateProteinFasta
 from pvactools.lib.post_processor import PvacsplicePostProcessor
 
 class PvacspliceRunPipeline(RunPipeline):
-    def check_downstream_sequence_length_argument(self):
-        pass
-
     def extra_argument_checks(self):
         # ref fasta
         if Path(self.ref_fasta).suffix not in ['.fa', '.fasta']:
@@ -53,6 +51,7 @@ class PvacspliceRunPipeline(RunPipeline):
             'class_i_hla'                  : self.class_i_alleles,
             'class_ii_hla'                 : self.class_ii_alleles,
             'keep_tmp_files'               : self.keep_tmp_files,
+            'downstream_sequence_length'   : self.downstream_sequence_length,
         }
         input_to_kmer_pipeline = JunctionToKmerPipeline(**params)
         input_to_kmer_pipeline.execute()

@@ -4,6 +4,8 @@ import pandas as pd
 import pyfaidx
 from Bio.Seq import Seq
 
+from pvactools.lib.run_utils import first_difference
+
 class JunctionToFasta():
     def __init__(self, **kwargs):
         self.fasta_path     = kwargs['fasta_path']
@@ -35,6 +37,7 @@ class JunctionToFasta():
             self.alt_row  = "cds_start"
             self.reverse  = False
         self.personal_fasta = pyfaidx.FastaVariant(self.fasta_path, self.vcf_file, sample=self.sample_name)
+        self.downstream_sequence_length = kwargs['downstream_sequence_length']
 
     def load_gtf_data(self):
         # subset df by transcript_id, get coding coordinates
@@ -152,7 +155,7 @@ class JunctionToFasta():
             self.alt_df = self.alt_df.drop(index_list)
         return self.alt_df
 
-    def get_aa_sequence(self, dataframe):
+    def get_aa_sequence(self, dataframe, seq_type, wt_seq=None):
         # create coding_coors column for fasta indexing
         dataframe["coding_coors"] = dataframe["cds_start"].astype(str) + "," + dataframe["cds_stop"].astype(str)
         coordinates = dataframe["coding_coors"].tolist()
@@ -184,6 +187,9 @@ class JunctionToFasta():
         if aa_seq[0] != 'M':
             print(f'{self.tscript_id} does not begin with start codon...Skipping')
             aa_seq = ''
+        if seq_type == 'alt' and frameshift == 'yes' and self.downstream_sequence_length is not None:
+            splice_start = first_difference(aa_seq, wt_seq)
+            aa_seq = aa_seq[:(splice_start + self.downstream_sequence_length)]
 
         return aa_seq, frameshift
 

@@ -8,12 +8,12 @@ import tempfile
 import gzip
 import shutil
 
-import pvactools.lib.run_utils
+from pvactools.lib.run_utils import is_gz_file
 
 class FusionToFasta(metaclass=ABCMeta):
     def __init__(self, **kwargs):
         self.input_file = kwargs['input_file']
-        if pvactools.lib.run_utils.is_gz_file(kwargs['transcript_fasta']):
+        if is_gz_file(kwargs['transcript_fasta']):
             unzipped_file = tempfile.NamedTemporaryFile('wb')
             with gzip.open(kwargs['transcript_fasta'], "rb") as f_in:
                 shutil.copyfileobj(f_in, unzipped_file)
@@ -22,6 +22,7 @@ class FusionToFasta(metaclass=ABCMeta):
             self.transcript_fasta = kwargs['transcript_fasta']
         self.transcript_fasta_dict_versioned = SeqIO.to_dict(SeqIO.parse(self.transcript_fasta, "fasta"))
         self.transcript_fasta_dict_unversioned = { k.split('.')[0]: v for k, v in self.transcript_fasta_dict_versioned.items() }
+        self.downstream_sequence_length = kwargs['downstream_sequence_length']
         self.output_file = kwargs['output_file']
 
     def execute(self):
@@ -30,13 +31,14 @@ class FusionToFasta(metaclass=ABCMeta):
             reader = csv.DictReader(input_fh, delimiter='\t')
             for line in reader:
                 fusion_seq = line['fusion_amino_acid_sequence']
+                fusion_pos = int(line['protein_position'])
                 fusion_records = []
                 five_transcript, three_transcript = line['transcript_name'].split('-')
 
                 full_five_transcript_seq = self.get_transcript_peptide_sequence(five_transcript)
                 if full_five_transcript_seq is None:
                     continue
-                five_transcript_seq = self.trim_five_transcript_seq(full_five_transcript_seq, fusion_seq, int(line['protein_position']), line['index'])
+                five_transcript_seq = self.trim_five_transcript_seq(full_five_transcript_seq, fusion_seq, fusion_pos, line['index'])
                 if five_transcript_seq is None:
                     continue
                 if fusion_seq in five_transcript_seq:
@@ -48,11 +50,14 @@ class FusionToFasta(metaclass=ABCMeta):
                     full_three_transcript_seq = self.get_transcript_peptide_sequence(three_transcript)
                     if full_three_transcript_seq is None:
                         continue
-                    three_transcript_seq = self.trim_three_transcript_seq(full_three_transcript_seq, fusion_seq, int(line['protein_position']), line['index'])
+                    three_transcript_seq = self.trim_three_transcript_seq(full_three_transcript_seq, fusion_seq, fusion_pos, line['index'])
                     if three_transcript_seq is None:
                         continue
                     three_transcript_id = f'WT3.{line["index"]}'
                     fusion_records.append(SeqRecord(Seq(three_transcript_seq), id=three_transcript_id, description=""))
+                else:
+                    if self.downstream_sequence_length is not None:
+                        fusion_seq = fusion_seq[:(fusion_pos + self.downstream_sequence_length)]
 
                 fusion_transcript_id = f'MT.{line["index"]}'
                 fusion_records.append(SeqRecord(Seq(fusion_seq), id=fusion_transcript_id, description=""))

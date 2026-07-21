@@ -25,9 +25,10 @@ class FastaGeneratorTests(unittest.TestCase):
         output_file = tempfile.NamedTemporaryFile()
 
         generate_fasta_params = {
-            'input_file'       : input_file,
-            'transcript_fasta' : transcript_fasta,
-            'output_file'      : output_file.name,
+            'input_file'                : input_file,
+            'transcript_fasta'          : transcript_fasta,
+            'downstream_sequence_length': None,
+            'output_file'               : output_file.name,
         }
         generator = FusionToFasta(**generate_fasta_params)
 
@@ -42,12 +43,30 @@ class FastaGeneratorTests(unittest.TestCase):
         output_file = tempfile.NamedTemporaryFile()
 
         generate_fasta_params = {
-            'input_file'       : input_file,
-            'transcript_fasta' : unzipped_transcript_fasta,
-            'output_file'      : output_file.name,
+            'input_file'                : input_file,
+            'transcript_fasta'          : unzipped_transcript_fasta,
+            'downstream_sequence_length': None,
+            'output_file'               : output_file.name,
         }
         generator = FusionToFasta(**generate_fasta_params)
 
         self.assertFalse(generator.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_arriba.fasta')
+        self.assertTrue(cmp(output_file.name, expected_output_file))
+
+    def test_downstream_sequence_length_generates_expected_file(self):
+        input_file = os.path.join(self.test_data_dir, 'agfusion.tsv')
+        transcript_fasta = os.path.join(self.test_data_dir, 'Homo_sapiens.GRCh38.95.cds.all.fa.gz')
+        output_file = tempfile.NamedTemporaryFile()
+
+        generate_fasta_params = {
+            'input_file'                : input_file,
+            'transcript_fasta'          : transcript_fasta,
+            'downstream_sequence_length': 20,
+            'output_file'               : output_file.name,
+        }
+        generator = FusionToFasta(**generate_fasta_params)
+
+        self.assertFalse(generator.execute())
+        expected_output_file = os.path.join(self.test_data_dir, 'output_agfusion.downstream_sequence_length.fasta')
         self.assertTrue(cmp(output_file.name, expected_output_file))

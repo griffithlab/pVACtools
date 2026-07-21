@@ -15,7 +15,7 @@ class VariantToKmerPipeline(InputToKmerPipeline):
         self.proximal_variants_vcf = kwargs.pop('proximal_variants_vcf', None)
         self.biotypes = kwargs.pop('biotypes', ['protein_coding'])
         self.allow_incomplete_transcripts = kwargs.pop('allow_incomplete_transcripts', False)
-        self.downstream_sequence_length = kwargs.pop('downstream_sequence_length', None)
+        self.downstream_sequence_length = kwargs.pop('downstream_sequence_length', 1000)
         self.class_i_epitope_length = kwargs.pop('class_i_epitope_length', None)
         self.class_ii_epitope_length = kwargs.pop('class_ii_epitope_length', None)
         self.class_i_hla = kwargs.pop('class_i_hla', None)
@@ -65,9 +65,8 @@ class VariantToKmerPipeline(InputToKmerPipeline):
                 'input_file' : self.create_file_path('tsv'),
                 'output_file': self.create_file_path('fasta'),
                 'downstream_sequence_length': self.downstream_sequence_length,
+                'proximal_variants_file': None if self.proximal_variants_vcf is None else self.create_file_path('proximal_variants_tsv')
             }
-            if self.proximal_variants_vcf is not None:
-                params['proximal_variants_file'] = self.create_file_path('proximal_variants_tsv')
             variant_to_fasta = VariantToFasta(**params)
             variant_to_fasta.execute()
             print('Completed')

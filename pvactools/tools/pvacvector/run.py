@@ -21,9 +21,9 @@ from pvactools.lib.optimal_peptide import OptimalPeptide
 from pvactools.lib.vector_visualization import VectorVisualization
 from pvactools.lib.run_argument_parser import PvacvectorRunArgumentParser
 from pvactools.lib.pvacvector_run_pipeline import PvacvectorRunPipeline
-from pvactools.lib.run_utils import *
 from pvactools.lib.prediction_class import NetMHCIIVersion
 from pvactools.lib.prediction_class_utils import *
+from pvactools.lib.run_utils import change_permissions_recursive
 
 def define_parser():
     return PvacvectorRunArgumentParser().parser

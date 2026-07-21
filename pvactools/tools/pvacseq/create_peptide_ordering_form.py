@@ -7,7 +7,7 @@ from pvactools.tools.pvacseq.generate_protein_fasta import PvacseqGenerateProtei
 from pvactools.lib.calculate_manufacturability import CalculateManufacturability
 from pvactools.lib.generate_reviews_files import main as run_generate_reviews_files
 from pvactools.lib.color_peptides51mer import main as run_color_peptides
-from pvactools.lib.run_utils import aggregate_report_evaluations
+from pvactools.lib.run_argument_utils import aggregate_report_evaluations
 
 def define_parser():
     parser = argparse.ArgumentParser(

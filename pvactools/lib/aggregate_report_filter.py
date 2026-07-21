@@ -4,7 +4,7 @@ import re
 import csv
 import json
 
-from pvactools.lib.run_utils import *
+from pvactools.lib.run_argument_utils import tiers
 
 class AggregateReportFilter:
     def __init__(self, input_file, output_file, input_metrics_file=None, output_metrics_file=None, include_tiers=["Pass"]):

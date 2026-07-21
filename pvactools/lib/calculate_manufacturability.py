@@ -2,7 +2,7 @@ import csv
 from vaxrank.manufacturability import ManufacturabilityScores
 from Bio import SeqIO
 
-from pvactools.lib.run_utils import *
+from pvactools.lib.run_utils import supported_amino_acids
 
 class CalculateManufacturability:
     def __init__(self, input_file, output_file, file_type='pVACseq'):

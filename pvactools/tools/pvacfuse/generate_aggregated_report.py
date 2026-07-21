@@ -3,7 +3,7 @@ import argparse
 import tempfile
 
 from pvactools.lib.aggregate_all_epitopes import PvacfuseAggregateAllEpitopes
-from pvactools.lib.run_utils import float_range, top_score_metric2
+from pvactools.lib.run_argument_utils import float_range, top_score_metric2
 
 def define_parser():
     parser = argparse.ArgumentParser(
