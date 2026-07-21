@@ -662,12 +662,8 @@ class TLBind(MHCI):
         results = pd.DataFrame()
         all_epitopes = []
         for record in SeqIO.parse(input_file, "fasta"):
-            seq_num = record.id
-            peptide = str(record.seq)
-            epitopes = pvactools.lib.run_utils.determine_neoepitopes(peptide, epitope_length)
-            all_epitopes.extend(epitopes.values())
+            all_epitopes.append(str(record.seq))
 
-        all_epitopes = list(set(all_epitopes))
         if len(all_epitopes) > 0:
             tmp_input_file = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
             writer = csv.writer(tmp_input_file)
@@ -693,14 +689,12 @@ class TLBind(MHCI):
             os.unlink(tmp_output_file.name)
             for record in SeqIO.parse(input_file, "fasta"):
                 seq_num = record.id
-                peptide = str(record.seq)
-                epitopes = pvactools.lib.run_utils.determine_neoepitopes(peptide, epitope_length)
-                for start, epitope in epitopes.items():
-                    epitope_df = df[df['peptide'] == epitope]
-                    epitope_df['seq_num'] = seq_num
-                    epitope_df['start'] = start
-                    epitope_df['allele'] = allele
-                    results = pd.concat((results, epitope_df), axis=0)
+                epitope = str(record.seq)
+                epitope_df = df[df['peptide'] == epitope]
+                epitope_df['seq_num'] = seq_num
+                epitope_df['start'] = 1
+                epitope_df['allele'] = allele
+                results = pd.concat((results, epitope_df), axis=0)
         return (results, 'pandas')
 
 class TLImm(MHCI):
@@ -721,12 +715,8 @@ class TLImm(MHCI):
         results = pd.DataFrame()
         all_epitopes = []
         for record in SeqIO.parse(input_file, "fasta"):
-            seq_num = record.id
-            peptide = str(record.seq)
-            epitopes = pvactools.lib.run_utils.determine_neoepitopes(peptide, epitope_length)
-            all_epitopes.extend(epitopes.values())
+            all_epitopes.append(str(record.seq))
 
-        all_epitopes = list(set(all_epitopes))
         if len(all_epitopes) > 0:
             tmp_input_file = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
             writer = csv.writer(tmp_input_file)
@@ -752,14 +742,12 @@ class TLImm(MHCI):
             os.unlink(tmp_output_file.name)
             for record in SeqIO.parse(input_file, "fasta"):
                 seq_num = record.id
-                peptide = str(record.seq)
-                epitopes = pvactools.lib.run_utils.determine_neoepitopes(peptide, epitope_length)
-                for start, epitope in epitopes.items():
-                    epitope_df = df[df['peptide'] == epitope]
-                    epitope_df['seq_num'] = seq_num
-                    epitope_df['start'] = start
-                    epitope_df['allele'] = allele
-                    results = pd.concat((results, epitope_df), axis=0)
+                epitope = str(record.seq)
+                epitope_df = df[df['peptide'] == epitope]
+                epitope_df['seq_num'] = seq_num
+                epitope_df['start'] = 1
+                epitope_df['allele'] = allele
+                results = pd.concat((results, epitope_df), axis=0)
         return (results, 'pandas')
 
 class MHCnuggetsI(MHCI, MHCnuggets):
