@@ -2,7 +2,6 @@ __all__ = [
     "aggregate_all_epitopes",
     "binding_filter",
     "calculate_manufacturability",
-    "call_iedb",
     "combine_parsed_outputs",
     "csq_parser",
     "identify_problematic_amino_acids",

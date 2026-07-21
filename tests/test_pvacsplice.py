@@ -42,6 +42,7 @@ class PvacspliceTests(unittest.TestCase):
                 'HLA-E*01:01': [9, 10],
             },
         }
+        cls.gtf_file_chr1 = os.path.join(cls.test_data_directory, "inputs", "Homo_sapiens.GRCh38.105_chr1.sorted.filtered.gtf")
         cls.peptide_fasta = os.path.join(pvactools_directory(), "tests", "test_data", "Homo_sapiens.GRCh38.pep.short.fa.gz")
 
     def test_pvacsplice_compiles(self):
@@ -89,8 +90,35 @@ class PvacspliceTests(unittest.TestCase):
         ))
         self.assertTrue(compiled_run_path)
 
+    def test_gzipped_vcf_requires_tabix_index(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            annotated_vcf = os.path.join(tmp_dir, 'annotated.vcf.gz')
+            with open(os.path.join(self.test_data_directory, 'inputs', 'short_sequence.vcf.gz'), 'rb') as source_fh, open(annotated_vcf, 'wb') as output_fh:
+                copyfileobj(source_fh, output_fh)
+
+            ref_fasta = os.path.join(tmp_dir, 'reference.fa')
+            with open(ref_fasta, 'w') as output_fh:
+                output_fh.write('>chr1\nA\n')
+
+            with self.assertRaises(Exception) as cm:
+                run.main([
+                    os.path.join(self.test_data_directory, 'inputs', 'splice_junctions_chr1.tsv'),
+                    'test',
+                    'HLA-G*01:09',
+                    'NetMHC',
+                    tmp_dir,
+                    annotated_vcf,
+                    ref_fasta,
+                    self.gtf_file_chr1,
+                ])
+
+            self.assertEqual(
+                str(cm.exception),
+                'Gzipped VCF files must be indexed. (tabix -p vcf <vcf_file>)',
+            )
+
     def test_pvacsplice_pipeline_class_I(self):
-        with patch('pvactools.lib.call_iedb.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+        with patch('pvactools.lib.call_predictors.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
             data,
             files,
             os.path.join(test_data_directory(), 'mock_files'),
@@ -118,7 +146,7 @@ class PvacspliceTests(unittest.TestCase):
                 output_dir.name,
                 os.path.join(self.test_data_directory, "inputs", "annotated.expression_chr1.vcf.gz"),
                 unzipped_fasta_file,
-                os.path.join(self.test_data_directory, "inputs", "Homo_sapiens.GRCh38.105_chr1.sorted.gtf.gz"),
+                self.gtf_file_chr1,
                 '-e1', '9,10',
                 '--normal-sample-name', 'HCC1395_NORMAL_DNA',
                 '--keep-tmp-files',
@@ -187,7 +215,7 @@ class PvacspliceTests(unittest.TestCase):
                     output_dir.name,
                     os.path.join(self.test_data_directory, "inputs", "annotated.expression_chr1.vcf.gz"),
                     unzipped_fasta_file,
-                    os.path.join(self.test_data_directory, "inputs", "Homo_sapiens.GRCh38.105_chr1.sorted.gtf.gz"),
+                    self.gtf_file_chr1,
                     '-e1', '9,10',
                     '--normal-sample-name', 'HCC1395_NORMAL_DNA',
                     '-b', '2000',
@@ -228,7 +256,7 @@ class PvacspliceTests(unittest.TestCase):
                 output_dir.name,
                 os.path.join(self.test_data_directory, "inputs", "annotated.expression_chr1.vcf.gz"),
                 unzipped_fasta_file,
-                os.path.join(self.test_data_directory, "inputs", "Homo_sapiens.GRCh38.105_chr1.sorted.gtf.gz"),
+                self.gtf_file_chr1,
                 '-e2', '15',
                 '--normal-sample-name', 'HCC1395_NORMAL_DNA',
                 '--keep-tmp-files',
@@ -300,7 +328,7 @@ class PvacspliceTests(unittest.TestCase):
                 output_dir.name,
                 os.path.join(self.test_data_directory, "inputs", "annotated.expression_chr1.vcf.gz"),
                 unzipped_fasta_file,
-                os.path.join(self.test_data_directory, "inputs", "Homo_sapiens.GRCh38.105_chr1.sorted.gtf.gz"),
+                self.gtf_file_chr1,
                 '-e1', '9,10',
             ])
             output_dir.cleanup()
@@ -308,7 +336,7 @@ class PvacspliceTests(unittest.TestCase):
         self.assertTrue('Requested alleles are not from the same species.' in str(context.exception))
 
     def test_pvacsplice_pipeline_multiple_somatic_variants_overlapping_splice_site(self):
-        with patch('pvactools.lib.call_iedb.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
+        with patch('pvactools.lib.call_predictors.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
             data,
             files,
             os.path.join(test_data_directory(), 'mock_files'),
