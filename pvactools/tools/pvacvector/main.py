@@ -1,6 +1,7 @@
 import argparse
 import sys
-from pvactools.tools.pvacvector import *
+
+from pvactools.tools.pvacvector import run, visualize, download_example_data
 
 def define_parser():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)

@@ -16,7 +16,7 @@ from urllib.request import urlopen
 from shutil import copyfileobj
 from tempfile import NamedTemporaryFile
 
-from pvactools.tools.pvacsplice import *
+from pvactools.tools.pvacsplice import run
 import pvactools.tools.pvacsplice.main as pvacsplice_main
 from tests.utils import *
 

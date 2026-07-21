@@ -2,7 +2,8 @@ import argparse
 import sys
 from subprocess import call
 import os
-from pvactools.tools.pvacview import *
+
+from pvactools.tools.pvacview import run
 
 def define_parser():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)

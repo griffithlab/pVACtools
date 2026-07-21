@@ -8,7 +8,7 @@ from subprocess import run as subprocess_run
 import shutil
 import tempfile
 
-from pvactools.tools.pvacfuse import *
+from pvactools.tools.pvacfuse import update_tiers
 from tests.utils import *
 
 def test_data_directory():

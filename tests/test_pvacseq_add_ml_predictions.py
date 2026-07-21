@@ -7,7 +7,7 @@ import tempfile
 from subprocess import PIPE
 from subprocess import run as subprocess_run
 
-from pvactools.tools.pvacseq import *
+from pvactools.tools.pvacseq import add_ml_predictions
 from tests.utils import *
 
 

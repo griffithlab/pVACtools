@@ -2,7 +2,20 @@ import argparse
 import sys
 from subprocess import call
 import os
-from pvactools.tools.pvacbind import *
+
+from pvactools.tools.pvacbind import (
+    run,
+    binding_filter,
+    top_score_filter,
+    aggregate_report_filter,
+    net_chop,
+    netmhc_stab,
+    calculate_reference_proteome_similarity,
+    generate_aggregated_report,
+    identify_problematic_amino_acids,
+    update_tiers,
+    download_example_data,
+)
 
 def define_parser():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)

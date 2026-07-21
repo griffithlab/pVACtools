@@ -7,7 +7,7 @@ from subprocess import PIPE
 from subprocess import run as subprocess_run
 from tempfile import TemporaryDirectory
 
-from pvactools.tools.pvacseq import *
+from pvactools.tools.pvacseq import install_vep_plugin
 from tests.utils import *
 
 class PvacseqInstallVepPluginTests(unittest.TestCase):

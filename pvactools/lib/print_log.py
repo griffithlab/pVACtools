@@ -3,9 +3,6 @@ import sys
 import yaml
 import importlib.metadata
 
-from pvactools.lib.run_argument_parser import *
-
-
 def print_log(log_dir, args_dict, output_file_prefix):
     os.makedirs(log_dir, exist_ok=True)
     log_file = os.path.join(log_dir, f'{output_file_prefix}.yml')

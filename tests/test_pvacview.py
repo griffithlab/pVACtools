@@ -12,7 +12,7 @@ from subprocess import run as subprocess_run
 import socket
 import argparse
 
-from pvactools.tools.pvacview import *
+from pvactools.tools.pvacview import run
 import pvactools.tools.pvacview.main as pvacview_main
 from tests.utils import *
 
@@ -46,7 +46,7 @@ class PvacviewTests(unittest.TestCase):
             "run",
             '-h'
         ], shell=False, stdout=PIPE)
-        self.assertFalse(result.returncode, "Failed `pvacseq run -h`")
+        self.assertFalse(result.returncode, "Failed `pvacview run -h`")
         self.assertRegex(result.stdout.decode(), usage_search)
 
     def test_run_compiles(self):

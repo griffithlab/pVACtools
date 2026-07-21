@@ -7,7 +7,7 @@ import io
 from subprocess import PIPE
 from subprocess import run as subprocess_run
 
-from pvactools.tools import *
+from pvactools.tools import valid_alleles
 from tests.utils import *
 
 class ValidAllelesTests(unittest.TestCase):

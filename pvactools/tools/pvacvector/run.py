@@ -4,25 +4,19 @@
 
 import shutil
 import sys
-import argparse
 import os
-import pandas
 import networkx as nx
 import random
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 import itertools
-import json
-import platform
-import shutil
+import csv
 
 from pvactools.lib.optimal_peptide import OptimalPeptide
 from pvactools.lib.vector_visualization import VectorVisualization
 from pvactools.lib.run_argument_parser import PvacvectorRunArgumentParser
 from pvactools.lib.pvacvector_run_pipeline import PvacvectorRunPipeline
-from pvactools.lib.prediction_class import NetMHCIIVersion
-from pvactools.lib.prediction_class_utils import *
 from pvactools.lib.run_utils import change_permissions_recursive
 
 def define_parser():

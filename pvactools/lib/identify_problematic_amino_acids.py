@@ -5,7 +5,6 @@ import csv
 import textwrap
 import pandas as pd
 
-from pvactools.lib.run_argument_utils import *
 from pvactools.lib.run_utils import supported_amino_acids
 
 
