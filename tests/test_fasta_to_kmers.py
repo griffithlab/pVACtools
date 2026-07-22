@@ -310,3 +310,29 @@ class FastaToKmersTests(unittest.TestCase):
         )
 
         output_dir.cleanup()
+
+    def test_pvacseq_very_long_insertion_produces_expected_output(self):
+        test_data_dir = os.path.join(pvactools_directory(), "tests", "test_data", "fasta_to_kmers")
+        tscript_fasta = os.path.join(test_data_dir, 'pvacseq.very_long_insertion.fasta')
+        output_dir = tempfile.TemporaryDirectory()
+        params = {
+            'fasta'           : tscript_fasta,
+            'output_dir'      : output_dir.name,
+            'epitope_length'  : 8,
+            'sample_name'     : 'sample',
+        }
+        fasta = VariantFastaToKmers(**params)
+        fasta.execute()
+
+        expected_file = os.path.join(test_data_dir, 'output_pvacseq.very_long_insertion.8_kmers.fa')
+        output_file = os.path.join(output_dir.name, 'sample.8.fa')
+
+        self.assertTrue(cmp(
+                output_file,
+                expected_file,
+                False
+            ),
+            "files don't match {} - {}".format(output_file, expected_file)
+        )
+
+        output_dir.cleanup()
