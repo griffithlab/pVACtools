@@ -541,5 +541,21 @@ class VariantToFastaTests(unittest.TestCase):
         expected_output_file = os.path.join(self.test_data_dir, 'output_complex_inframe_insertion.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
 
+    def test_input_file_with_frameshift_variant_position_1_generates_expected_file(self):
+        generate_fasta_input_file      = os.path.join(self.test_data_dir, 'input_frameshift_variant_position_1.tsv')
+        generate_fasta_output_file     = tempfile.NamedTemporaryFile()
+
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'output_file'               : generate_fasta_output_file.name,
+            'downstream_sequence_length': None,
+            'proximal_variants_file'    : None,
+        }
+        generator = VariantToFasta(**generate_fasta_params)
+
+        self.assertFalse(generator.execute())
+        expected_output_file = os.path.join(self.test_data_dir, 'output_frameshift_variant_position_1.fasta')
+        self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
+
 if __name__ == '__main__':
     unittest.main()
