@@ -91,7 +91,7 @@ class VariantFastaToKmers(FastaToKmers):
             end_position = len(mt_dict)
         else:
             offset = len(wt_dict) - len(mt_dict)
-            if variant_type == 'inframe_insertion':
+            if variant_type == 'inframe_ins':
                 end_position = position - offset
             else:
                 end_position = position
