@@ -1,0 +1,3 @@
+allele	seq_num	start	end	length	peptide	ic50	rank
+HLA-A*02:01	1	1	9	9	LPLPPPPLL	20062.00	30
+* Warning: Potential DNA sequence(s) found! This tool is intended to predict for amino acid sequences. Please double check your input fasta file.
