@@ -59,25 +59,12 @@ Contents
    mailing_list
 
 
-Version 7.1.0
+Version 7.1.1
 -------------
 
-This is a minor version release. It adds the following features:
+This is a bugfix release. It fixes the following problem(s):
 
-* pVACtools now supports additional prediction algorithms:
-
-  * TLBind (binding and presentation)
-  * TLImm (immunogenicity)
-
-  These algorithms also support normalized percentiles using the
-  ``--use-normalized-percentiles`` flags. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1377
-
-Additionally, it fixes the following problem(s):
-
-* Fix tiers argument type to have the most up-to-date tier list by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1423
-* Fix NetChop bug that would include position before epitope (0) by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1432
-* Fix bug in lowexpr logic by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1433
-* Fix tbi file existence check in pVACsplice runs by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1434
+* Fix TLBind WT Presentation Percentile not getting set correctly by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1436
 
 New in Version 7
 ----------------
