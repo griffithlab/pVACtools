@@ -75,14 +75,8 @@ postprocess_inputs <- function(df) {
         columns_needed <- c(columns_needed, "ML Prediction (score)")
     }
     df$mainTable <- df$mainTable[, columns_needed]
-    if (df$metricsData$file_type == 'pvacfuse') {
-        df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {
-            gene_a <- str_split_i(x['Gene'], "-", 1)
-            gene_b <- str_split_i(x['Gene'], "-", 2)
-            any(gene_a == df$gene_list || gene_b == df$gene_list)
-        })
-    } else {
-        df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
+    if ("gene_list" %in% names(df)) {
+        df <- set_gene_of_interest(df)
     }
     if ("Comments" %in% colnames(df$mainTable)) {
         df$comments <- data.frame(data = df$mainTable$`Comments`, nrow = nrow(df$mainTable), ncol = 1)
@@ -90,6 +84,18 @@ postprocess_inputs <- function(df) {
         df$comments <- data.frame(matrix("No comments", nrow = nrow(df$mainTable)), ncol = 1)
     }
     rownames(df$comments) <- df$mainTable$ID
+    return(df)
+}
+
+set_gene_of_interest <- function(df) {
+    df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {
+        if (df$metricsData$file_type == 'pvacfuse') {
+            genes = strsplit(x["Gene"], "-")[[1]]
+            any(genes[1] == df$gene_list) || any(genes[2] == df$gene_list)
+        } else {
+            any(x["Gene"] == df$gene_list)
+        }
+    })
     return(df)
 }
 
