@@ -2,6 +2,7 @@ import sys
 import os
 import platform
 import logging
+import shutil
 
 from pvactools.lib.prediction_class import NetMHCIIVersion
 from pvactools.lib.print_log import print_log
@@ -49,19 +50,7 @@ class RunPipeline:
         self.base_output_dir = os.path.abspath(self.output_dir)
         os.makedirs(self.base_output_dir, exist_ok=True)
 
-    def extra_argument_checks(self):
-        pass
-
-    def execute(self):
-        print_log(os.path.join(self.base_output_dir, 'log'), self.original_parameters, 'inputs')
-        self.call_input_to_kmer_pipeline()
-        self.call_prediction_pipeline()
-        self.call_ml_predictor()
-        self.extra_steps()
-        change_permissions_recursive(self.base_output_dir, 0o755, 0o644)
-
-    def call_prediction_pipeline(self):
-        all_params = {
+        self.prediction_pipeline_params = {
             'I': {
                 'iedb_executable': self.iedb_mhc_i_executable,
                 'prediction_algorithms': self.class_i_prediction_algorithms,
@@ -82,7 +71,21 @@ class RunPipeline:
             }
         }
 
-        for (mhc_class, params) in all_params.items():
+    def extra_argument_checks(self):
+        pass
+
+    def execute(self):
+        print_log(os.path.join(self.base_output_dir, 'log'), self.original_parameters, 'inputs')
+        self.call_input_to_kmer_pipeline()
+        self.call_prediction_pipeline()
+        self.call_ml_predictor()
+        self.extra_steps()
+        if not self.keep_tmp_files:
+            self.delete_tmp_files()
+        change_permissions_recursive(self.base_output_dir, 0o755, 0o644)
+
+    def call_prediction_pipeline(self):
+        for (mhc_class, params) in self.prediction_pipeline_params.items():
             if len(params['prediction_algorithms']) > 0 and len(params['alleles']) > 0:
                 params['base_output_dir'] = self.base_output_dir
                 params['mhc_class'] = mhc_class
@@ -145,3 +148,10 @@ class RunPipeline:
 
     def extra_steps(self):
         pass
+
+    def delete_tmp_files(self):
+        for (mhc_class, params) in self.prediction_pipeline_params.items():
+            if len(params['prediction_algorithms']) > 0 and len(params['alleles']) > 0:
+                for length in params['epitope_lengths']:
+                    tmp_dir = os.path.join(self.base_output_dir, f"MHC_Class_{mhc_class}", str(length), "tmp")
+                    shutil.rmtree(tmp_dir, ignore_errors=True)
