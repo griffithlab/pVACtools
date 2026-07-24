@@ -4,7 +4,6 @@ import os
 import shutil
 
 from pvactools.tools.pvacseq.generate_protein_fasta import PvacseqGenerateProteinFasta
-from pvactools.lib.calculate_manufacturability import CalculateManufacturability
 from pvactools.lib.generate_reviews_files import main as run_generate_reviews_files
 from pvactools.lib.color_peptides51mer import main as run_color_peptides
 from pvactools.lib.run_argument_utils import downstream_sequence_length, aggregate_report_evaluations
@@ -172,8 +171,6 @@ class CreatePeptideOrderingForm:
     def execute(self):
         self.create_fastas()
 
-        CalculateManufacturability(self.combined_fasta_output_file, self.peptide_manufacture_output_file, 'fasta').execute()
-
         peptide_51mer_path = run_generate_reviews_files(
             peptides_path=self.peptide_manufacture_output_file,
             classI_path=self.classI_aggregated_tsv,
@@ -219,17 +216,15 @@ class PvacseqCreatePeptideOrderingForm(CreatePeptideOrderingForm):
             'output_file': self.fasta_output_file,
         }
         generator = PvacseqGenerateProteinFasta(**params)
-        generator.generate_fasta()
-        generator.trim_sequences()
-        generator.filter_fasta()
-        shutil.copy(generator.filtered_fasta_file_path, self.fasta_output_file)
+        generator.execute()
+        shutil.copy(generator.manufacturability_file, self.peptide_manufacture_output_file)
+        os.remove(generator.manufacturability_file)
 
-        generator.mutant_only = False
-        generator.output_file = self.combined_fasta_output_file
-        generator.filter_fasta()
-        shutil.copy(generator.filtered_fasta_file_path, self.combined_fasta_output_file)
-        shutil.rmtree(generator.temp_dir, ignore_errors=True)
-
+        params['mutant_only'] = False
+        params['output_file'] = self.combined_fasta_output_file
+        generator = PvacseqGenerateProteinFasta(**params)
+        generator.execute()
+        os.remove(generator.manufacturability_file)
 
 if __name__ == "__main__":
     main()

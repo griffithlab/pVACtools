@@ -26,19 +26,24 @@ class GenerateProteinFasta:
         self.temp_dir = tempfile.mkdtemp()
         self.fasta_file_path = kwargs.pop('fasta_file_path', os.path.join(self.temp_dir, f"{self.sample_name}.transcripts.fa"))
         self.trimmed_fasta_file_path = kwargs.pop('trimmed_fasta_file_path', os.path.join(self.temp_dir, f"{self.sample_name}.transcripts.trimmed.fa"))
-        self.filtered_fasta_file_path = os.path.join(self.temp_dir, f"{self.sample_name}.transcripts.filtered.fa")
+        self.tsv_filtered_fasta_file_path = os.path.join(self.temp_dir, f"{self.sample_name}.transcripts.filtered.fa")
+        self.mutant_only_fasta_file_path = os.path.join(self.temp_dir, f"{self.sample_name}.transcripts.filtered.mt_only.fa")
         self.input_tsv = kwargs.pop('input_tsv', None)
         self.output_file = kwargs.pop('output_file', None)
 
     def execute(self):
         self.generate_fasta()
         self.trim_sequences()
-        self.filter_fasta()
-        shutil.copy(self.filtered_fasta_file_path, self.output_file)
+        self.tsv_filter_sequences()
+        if self.mutant_only:
+            self.filter_wildtype_sequences()
+            shutil.copy(self.mutant_only_fasta_file_path, self.output_file)
+        else:
+            shutil.copy(self.tsv_filtered_fasta_file_path, self.output_file)
         shutil.rmtree(self.temp_dir, ignore_errors=True)
-        manufacturability_file = "{}.manufacturability.tsv".format(self.output_file)
+        self.manufacturability_file = "{}.manufacturability.tsv".format(self.output_file)
         print("Calculating Manufacturability Metrics")
-        CalculateManufacturability(self.output_file, manufacturability_file, 'fasta').execute()
+        CalculateManufacturability(self.output_file, self.manufacturability_file, 'fasta').execute()
         print("Completed")
 
     def generate_fasta(self):
@@ -46,6 +51,7 @@ class GenerateProteinFasta:
 
     def trim_sequences(self):
         raise Exception("Implement in child class")
+
     def parse_input_tsv(self):
         if self.input_tsv is None:
             return (None, None)
@@ -62,9 +68,9 @@ class GenerateProteinFasta:
                 file_type = 'full'
         return (indexes, file_type)
 
-    def filter_fasta(self):
+    def tsv_filter_sequences(self):
         if self.input_tsv is None:
-            shutil.copy(self.trimmed_fasta_file_path, self.filtered_fasta_file_path)
+            shutil.copy(self.trimmed_fasta_file_path, self.tsv_filtered_fasta_file_path)
         else:
             print("Filtering Variant Peptide FASTA")
             (tsv_indexes, file_type) = self.parse_input_tsv()
@@ -94,8 +100,15 @@ class GenerateProteinFasta:
                 ordered_output_records.extend(records)
             output_records = ordered_output_records
 
-            SeqIO.write(output_records, self.filtered_fasta_file_path, "fasta")
+            SeqIO.write(output_records, self.tsv_filtered_fasta_file_path, "fasta")
             print("Completed")
+
+    def filter_wildtype_sequences(self):
+        output_records = []
+        for record in SeqIO.parse(self.tsv_filtered_fasta_file_path, "fasta"):
+            if record.id.startswith('MT.') or record.id.startswith('ALT.'):
+                output_records.append(record)
+        SeqIO.write(output_records, self.mutant_only_fasta_file_path, "fasta")
 
 class PvacseqGenerateProteinFasta(GenerateProteinFasta):
     def __init__(self, **kwargs):
@@ -140,17 +153,15 @@ class PvacseqGenerateProteinFasta(GenerateProteinFasta):
                     start_position = 0
                 trimmed_mt_seq = mt_seq[start_position:end_position]
                 output_records.append(SeqRecord(Seq(trimmed_mt_seq), id=f"MT.{key}", description=""))
-                if not self.mutant_only:
-                    trimmed_wt_seq = wt_seq[start_position:end_position]
-                    output_records.append(SeqRecord(Seq(trimmed_wt_seq), id=f"WT.{key}", description=""))
+                trimmed_wt_seq = wt_seq[start_position:end_position]
+                output_records.append(SeqRecord(Seq(trimmed_wt_seq), id=f"WT.{key}", description=""))
             elif variant_type == 'FS':
                 if start_position < 0:
                     start_position = 0
                 trimmed_mt_seq = mt_seq[start_position:]
                 output_records.append(SeqRecord(Seq(trimmed_mt_seq), id=f"MT.{key}", description=""))
-                if not self.mutant_only:
-                    trimmed_wt_seq = wt_seq[start_position:end_position]
-                    output_records.append(SeqRecord(Seq(trimmed_wt_seq), id=f"WT.{key}", description=""))
+                trimmed_wt_seq = wt_seq[start_position:end_position]
+                output_records.append(SeqRecord(Seq(trimmed_wt_seq), id=f"WT.{key}", description=""))
             elif variant_type == 'inframe_del':
                 match = re.match(r"\d+(?:-\d+)?([A-Z]+)/([A-Z]+|-)", aa_change)
                 wt_aa, mt_aa = match.groups()
@@ -162,10 +173,9 @@ class PvacseqGenerateProteinFasta(GenerateProteinFasta):
                     start_position = 0
                 trimmed_mt_seq = mt_seq[start_position:(end_position)]
                 output_records.append(SeqRecord(Seq(trimmed_mt_seq), id=f"MT.{key}", description=""))
-                if not self.mutant_only:
-                    offset = len(wt_seq) - len(mt_seq)
-                    trimmed_wt_seq = wt_seq[start_position:(end_position + offset)]
-                    output_records.append(SeqRecord(Seq(trimmed_wt_seq), id=f"WT.{key}", description=""))
+                offset = len(wt_seq) - len(mt_seq)
+                trimmed_wt_seq = wt_seq[start_position:(end_position + offset)]
+                output_records.append(SeqRecord(Seq(trimmed_wt_seq), id=f"WT.{key}", description=""))
             else:
                 match = re.match(r"\d+(?:-\d+)?([A-Z]+|-)/([A-Z]+)", aa_change)
                 wt_aa, mt_aa = match.groups()
@@ -178,9 +188,8 @@ class PvacseqGenerateProteinFasta(GenerateProteinFasta):
                 offset = len(mt_seq) - len(wt_seq)
                 trimmed_mt_seq = mt_seq[start_position:(end_position + offset)]
                 output_records.append(SeqRecord(Seq(trimmed_mt_seq), id=f"MT.{key}", description=""))
-                if not self.mutant_only:
-                    trimmed_wt_seq = wt_seq[start_position:(end_position)]
-                    output_records.append(SeqRecord(Seq(trimmed_wt_seq), id=f"WT.{key}", description=""))
+                trimmed_wt_seq = wt_seq[start_position:(end_position)]
+                output_records.append(SeqRecord(Seq(trimmed_wt_seq), id=f"WT.{key}", description=""))
 
         SeqIO.write(output_records, self.trimmed_fasta_file_path, "fasta")
         print("Completed")
@@ -249,8 +258,7 @@ class PvacspliceGenerateProteinFasta(GenerateProteinFasta):
                 raise Exception("Unexpected frameshift status {} for record {}. Skipping".format(frameshift_status, identifier))
             if final_mt_sequence and final_wt_sequence:
                 output_records.append(SeqRecord(final_mt_sequence, id=f"ALT.{key}", description=""))
-                if not self.mutant_only:
-                    output_records.append(SeqRecord(final_wt_sequence, id=f"WT.{key}", description=""))
+                output_records.append(SeqRecord(final_wt_sequence, id=f"WT.{key}", description=""))
 
         SeqIO.write(output_records, self.trimmed_fasta_file_path, "fasta")
 
@@ -295,22 +303,20 @@ class PvacfuseGenerateProteinFasta(GenerateProteinFasta):
             if variant_type == 'frameshift_fusion':
                 trimmed_mt_seq = mt_seq[start_position:]
                 output_records.append(SeqRecord(Seq(trimmed_mt_seq), id=f"MT.{key}", description=""))
-                if not self.mutant_only:
-                    trimmed_wt5_seq = wt5_seq[start_position:(position + self.flanking_sequence_length)]
-                    output_records.append(SeqRecord(Seq(trimmed_wt5_seq), id=f"WT5.{key}", description=""))
+                trimmed_wt5_seq = wt5_seq[start_position:(position + self.flanking_sequence_length)]
+                output_records.append(SeqRecord(Seq(trimmed_wt5_seq), id=f"WT5.{key}", description=""))
             else:
                 end_position = position + self.flanking_sequence_length
                 trimmed_mt_seq = mt_seq[start_position:end_position]
                 output_records.append(SeqRecord(Seq(trimmed_mt_seq), id=f"MT.{key}", description=""))
-                if not self.mutant_only:
-                    trimmed_wt5_seq = wt5_seq[start_position:end_position]
-                    output_records.append(SeqRecord(Seq(trimmed_wt5_seq), id=f"WT5.{key}", description=""))
-                    wt3_position = len(wt3_seq) - len(mt_seq[position:])
-                    wt3_start_position = wt3_position - self.flanking_sequence_length
-                    if wt3_start_position < 0:
-                        wt3_start_position = 0
-                    trimmed_wt3_seq = wt3_seq[wt3_start_position:(wt3_position + self.flanking_sequence_length)]
-                    output_records.append(SeqRecord(Seq(trimmed_wt3_seq), id=f"WT3.{key}", description=""))
+                trimmed_wt5_seq = wt5_seq[start_position:end_position]
+                output_records.append(SeqRecord(Seq(trimmed_wt5_seq), id=f"WT5.{key}", description=""))
+                wt3_position = len(wt3_seq) - len(mt_seq[position:])
+                wt3_start_position = wt3_position - self.flanking_sequence_length
+                if wt3_start_position < 0:
+                    wt3_start_position = 0
+                trimmed_wt3_seq = wt3_seq[wt3_start_position:(wt3_position + self.flanking_sequence_length)]
+                output_records.append(SeqRecord(Seq(trimmed_wt3_seq), id=f"WT3.{key}", description=""))
 
         SeqIO.write(output_records, self.trimmed_fasta_file_path, "fasta")
         print("Completed")
