@@ -23,11 +23,18 @@ class AminoAcid:
 
 def get_mutant_positions_from_fasta(fasta_path, full_id):
     if full_id.startswith("WT.") or full_id.startswith("MT."):
-        full_id = full_id[3:]
+        index = full_id[3:]
+    elif full_id.startswith("ALT."):
+        index = full_id[4:]
+    else:
+        index = full_id
 
-    frameshift = ".FS." in full_id
-    wt_id = f"WT.{full_id}"
-    mt_id = f"MT.{full_id}"
+    frameshift = ".FS." in index or "frameshift" in index
+    wt_id = f"WT.{index}"
+    if 'splice_site' in index:
+        mt_id = f"ALT.{index}"
+    else:
+        mt_id = f"MT.{index}"
     wt_seq = None
     mt_seq = None
 
@@ -38,7 +45,7 @@ def get_mutant_positions_from_fasta(fasta_path, full_id):
             mt_seq = str(record.seq)
 
     if wt_seq is None or mt_seq is None:
-        print(f"Warning: Missing WT or MT for {full_id}")
+        print(f"Warning: Missing WT or MT/ALT for {index}")
         return set()
 
     # Perform global alignment
