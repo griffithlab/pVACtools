@@ -53,26 +53,29 @@ class PredictionPipeline:
                 call_predictors = CallPredictors(**predictor_arguments)
                 call_predictors.execute()
 
-                parsed_file_path = os.path.join(call_predictors.tmp_dir, f"{self.sample_name}.{allele}.{epitope_length}.parsed.tsv")
-                if os.path.exists(parsed_file_path):
-                    print(f"Parsed Output File for Allele {allele} and Epitope Length {epitope_length} already exists. Skipping")
+                if len(call_predictors.output_files) > 0:
+                    parsed_file_path = os.path.join(call_predictors.tmp_dir, f"{self.sample_name}.{allele}.{epitope_length}.parsed.tsv")
+                    if os.path.exists(parsed_file_path):
+                        print(f"Parsed Output File for Allele {allele} and Epitope Length {epitope_length} already exists. Skipping")
+                        parsed_output_files.append(parsed_file_path)
+                        continue
+                    print(f"Parsing prediction file for Allele {allele} and Epitope Length {epitope_length}")
+                    parser_arguments = {
+                        'prediction_files'          : call_predictors.output_files,
+                        'tsv_file'                  : self.input_tsv_file,
+                        'key_files'                 : call_predictors.output_key_files,
+                        'output_file'               : parsed_file_path,
+                        'use_normalized_percentiles': self.use_normalized_percentiles,
+                        'reference_scores_path'     : self.reference_scores_path,
+                        'sample_name'               : self.sample_name,
+                    }
+                    if self.additional_report_columns and 'sample_name' in self.additional_report_columns:
+                        parser_arguments['add_sample_name_column'] = True
+                    self.call_parser(parser_arguments)
+                    print(f"Parsing prediction file for Allele {allele} and Epitope Length {epitope_length} - Completed")
                     parsed_output_files.append(parsed_file_path)
-                    continue
-                print(f"Parsing prediction file for Allele {allele} and Epitope Length {epitope_length}")
-                parser_arguments = {
-                    'prediction_files'          : call_predictors.output_files,
-                    'tsv_file'                  : self.input_tsv_file,
-                    'key_files'                 : call_predictors.output_key_files,
-                    'output_file'               : parsed_file_path,
-                    'use_normalized_percentiles': self.use_normalized_percentiles,
-                    'reference_scores_path'     : self.reference_scores_path,
-                    'sample_name'               : self.sample_name,
-                }
-                if self.additional_report_columns and 'sample_name' in self.additional_report_columns:
-                    parser_arguments['add_sample_name_column'] = True
-                self.call_parser(parser_arguments)
-                print(f"Parsing prediction file for Allele {allele} and Epitope Length {epitope_length} - Completed")
-                parsed_output_files.append(parsed_file_path)
+                else:
+                    print(f"No predictions made for Allele {allele} and Epitope Length {epitope_length}")
 
             if len(parsed_output_files) > 0:
                 print("Combining Parsed Prediction Files")
@@ -88,3 +91,5 @@ class PredictionPipeline:
                     self.output_files.append(output_file)
 
                 self.generate_fasta()
+            else:
+                print(f"No output files created for MHC Class {self.mhc_class}. Aborting")
