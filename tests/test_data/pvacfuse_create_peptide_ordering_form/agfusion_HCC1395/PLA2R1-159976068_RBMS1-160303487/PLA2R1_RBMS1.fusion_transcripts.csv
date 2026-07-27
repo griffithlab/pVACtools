@@ -1,0 +1,46 @@
+5'_gene,3'_gene,5'_transcript,3'_transcript,5'_strand,3'_strand,5'_transcript_biotype,3'_transcript_biotype,Fusion_effect,Protein_length,Protein_weight_(kD)
+PLA2R1,RBMS1,ENST00000460710,ENST00000474820,-,-,processed_transcript,processed_transcript,Outside transcript boundry,NA,NA
+PLA2R1,RBMS1,ENST00000460710,ENST00000348849,-,-,processed_transcript,protein_coding,Outside transcript boundry,NA,NA
+PLA2R1,RBMS1,ENST00000460710,ENST00000474147,-,-,processed_transcript,retained_intron,Outside transcript boundry,NA,NA
+PLA2R1,RBMS1,ENST00000460710,ENST00000409075,-,-,processed_transcript,protein_coding,Outside transcript boundry,NA,NA
+PLA2R1,RBMS1,ENST00000460710,ENST00000409289,-,-,processed_transcript,protein_coding,Outside transcript boundry,NA,NA
+PLA2R1,RBMS1,ENST00000460710,ENST00000475103,-,-,processed_transcript,processed_transcript,Outside transcript boundry,NA,NA
+PLA2R1,RBMS1,ENST00000460710,ENST00000490637,-,-,processed_transcript,retained_intron,Outside transcript boundry,NA,NA
+PLA2R1,RBMS1,ENST00000460710,ENST00000409972,-,-,processed_transcript,protein_coding,Outside transcript boundry,NA,NA
+PLA2R1,RBMS1,ENST00000460710,ENST00000477965,-,-,processed_transcript,retained_intron,Outside transcript boundry,NA,NA
+PLA2R1,RBMS1,ENST00000460710,ENST00000464200,-,-,processed_transcript,retained_intron,Outside transcript boundry,NA,NA
+PLA2R1,RBMS1,ENST00000460710,ENST00000491781,-,-,processed_transcript,retained_intron,Outside transcript boundry,NA,NA
+PLA2R1,RBMS1,ENST00000460710,ENST00000492283,-,-,processed_transcript,processed_transcript,Outside transcript boundry,NA,NA
+PLA2R1,RBMS1,ENST00000460710,ENST00000428519,-,-,processed_transcript,protein_coding,Outside transcript boundry,NA,NA
+PLA2R1,RBMS1,ENST00000460710,ENST00000477486,-,-,processed_transcript,retained_intron,Outside transcript boundry,NA,NA
+PLA2R1,RBMS1,ENST00000460710,ENST00000392753,-,-,processed_transcript,protein_coding,Outside transcript boundry,NA,NA
+PLA2R1,RBMS1,ENST00000283243,ENST00000474820,-,-,protein_coding,processed_transcript,exon-exon,NA,NA
+PLA2R1,RBMS1,ENST00000283243,ENST00000348849,-,-,protein_coding,protein_coding,in-frame,1137,130.21037510000042
+PLA2R1,RBMS1,ENST00000283243,ENST00000474147,-,-,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+PLA2R1,RBMS1,ENST00000283243,ENST00000409075,-,-,protein_coding,protein_coding,in-frame,1134,129.84190080000045
+PLA2R1,RBMS1,ENST00000283243,ENST00000409289,-,-,protein_coding,protein_coding,in-frame,1134,129.84190080000045
+PLA2R1,RBMS1,ENST00000283243,ENST00000475103,-,-,protein_coding,processed_transcript,Outside transcript boundry,NA,NA
+PLA2R1,RBMS1,ENST00000283243,ENST00000490637,-,-,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+PLA2R1,RBMS1,ENST00000283243,ENST00000409972,-,-,protein_coding,protein_coding,in-frame,1134,129.84190080000045
+PLA2R1,RBMS1,ENST00000283243,ENST00000477965,-,-,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+PLA2R1,RBMS1,ENST00000283243,ENST00000464200,-,-,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+PLA2R1,RBMS1,ENST00000283243,ENST00000491781,-,-,protein_coding,retained_intron,exon-exon,NA,NA
+PLA2R1,RBMS1,ENST00000283243,ENST00000492283,-,-,protein_coding,processed_transcript,exon-exon,NA,NA
+PLA2R1,RBMS1,ENST00000283243,ENST00000428519,-,-,protein_coding,protein_coding,exon-exon,NA,NA
+PLA2R1,RBMS1,ENST00000283243,ENST00000477486,-,-,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+PLA2R1,RBMS1,ENST00000283243,ENST00000392753,-,-,protein_coding,protein_coding,exon-exon,NA,NA
+PLA2R1,RBMS1,ENST00000392771,ENST00000474820,-,-,protein_coding,processed_transcript,exon-exon,NA,NA
+PLA2R1,RBMS1,ENST00000392771,ENST00000348849,-,-,protein_coding,protein_coding,in-frame,1137,130.21037510000042
+PLA2R1,RBMS1,ENST00000392771,ENST00000474147,-,-,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+PLA2R1,RBMS1,ENST00000392771,ENST00000409075,-,-,protein_coding,protein_coding,in-frame,1134,129.84190080000045
+PLA2R1,RBMS1,ENST00000392771,ENST00000409289,-,-,protein_coding,protein_coding,in-frame,1134,129.84190080000045
+PLA2R1,RBMS1,ENST00000392771,ENST00000475103,-,-,protein_coding,processed_transcript,Outside transcript boundry,NA,NA
+PLA2R1,RBMS1,ENST00000392771,ENST00000490637,-,-,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+PLA2R1,RBMS1,ENST00000392771,ENST00000409972,-,-,protein_coding,protein_coding,in-frame,1134,129.84190080000045
+PLA2R1,RBMS1,ENST00000392771,ENST00000477965,-,-,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+PLA2R1,RBMS1,ENST00000392771,ENST00000464200,-,-,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+PLA2R1,RBMS1,ENST00000392771,ENST00000491781,-,-,protein_coding,retained_intron,exon-exon,NA,NA
+PLA2R1,RBMS1,ENST00000392771,ENST00000492283,-,-,protein_coding,processed_transcript,exon-exon,NA,NA
+PLA2R1,RBMS1,ENST00000392771,ENST00000428519,-,-,protein_coding,protein_coding,exon-exon,NA,NA
+PLA2R1,RBMS1,ENST00000392771,ENST00000477486,-,-,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+PLA2R1,RBMS1,ENST00000392771,ENST00000392753,-,-,protein_coding,protein_coding,exon-exon,NA,NA

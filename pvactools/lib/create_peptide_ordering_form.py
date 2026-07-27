@@ -3,7 +3,7 @@ import argparse
 import os
 import shutil
 
-from pvactools.lib.generate_protein_fasta import PvacseqGenerateProteinFasta, PvacspliceGenerateProteinFasta
+from pvactools.lib.generate_protein_fasta import PvacseqGenerateProteinFasta, PvacspliceGenerateProteinFasta, PvacfuseGenerateProteinFasta
 from pvactools.lib.generate_reviews_files import main as run_generate_reviews_files
 from pvactools.lib.color_peptides51mer import main as run_color_peptides
 from pvactools.lib.run_argument_utils import downstream_sequence_length, aggregate_report_evaluations, pvacsplice_anchors
@@ -74,6 +74,15 @@ class CreatePeptideOrderingForm:
                 "gtf_file",
                 help="A reference GTF file. Note: this input should be the same as the RegTools gtf input."
             )
+        elif tool == 'pvacfuse':
+            parser.add_argument(
+                "input",
+                help="An AGFusion output directory or Arriba fusion.tsv output file."
+            )
+            parser.add_argument(
+                "ref_fasta",
+                help="A reference CDS FASTA file. Note: this input should match the build and Ensembl version used to create the fusion annotations."
+            )
         parser.add_argument(
             "flanking_sequence_length",
             help="Number of amino acids to add on each side of the mutation when creating the FASTA.",
@@ -115,27 +124,28 @@ class CreatePeptideOrderingForm:
                     +'"Variant Called in External VCF" column of the updated aggregated report '
                     +'"<sample_name>.Annotated.Neoantigen_Candidates.xlsx"'
             )
-        parser.add_argument(
-            '--pass-only',
-            help="Only process VCF entries with a PASS status.",
-            default=False,
-            action='store_true',
-        )
-        parser.add_argument(
-            "--biotypes", type=lambda s:[a for a in s.split(',')],
-            help="A list of biotypes to use for pre-filtering transcripts when generating peptide sequences from "
-                +"the input_vcf.",
-            default=['protein_coding']
-        )
-        parser.add_argument(
-            "--allow-incomplete-transcripts",
-            help="By default, transcripts annotated with incomplete CDS (i.e., 'cds_start_NF' or 'cds_end_NF' flags in the VEP CSQ field) "
-                    + "are excluded from analysis, as they often produce invalid protein sequences. "
-                    + "Use this flag to allow candidates from such transcripts. Only peptides that do not contain 'X' will be included. "
-                    + "These candidates will be deprioritized relative to those from transcripts without incomplete CDS flags.",
-            default=False,
-            action='store_true'
-        )
+        if tool in ['pvacseq', 'pvacsplice']:
+            parser.add_argument(
+                '--pass-only',
+                help="Only process VCF entries with a PASS status.",
+                default=False,
+                action='store_true',
+            )
+            parser.add_argument(
+                "--biotypes", type=lambda s:[a for a in s.split(',')],
+                help="A list of biotypes to use for pre-filtering transcripts when generating peptide sequences from "
+                    +"the input_vcf.",
+                default=['protein_coding']
+            )
+            parser.add_argument(
+                "--allow-incomplete-transcripts",
+                help="By default, transcripts annotated with incomplete CDS (i.e., 'cds_start_NF' or 'cds_end_NF' flags in the VEP CSQ field) "
+                        + "are excluded from analysis, as they often produce invalid protein sequences. "
+                        + "Use this flag to allow candidates from such transcripts. Only peptides that do not contain 'X' will be included. "
+                        + "These candidates will be deprioritized relative to those from transcripts without incomplete CDS flags.",
+                default=False,
+                action='store_true'
+            )
         parser.add_argument(
             "-d", "--downstream-sequence-length",
             default="1000",
@@ -307,6 +317,36 @@ class PvacspliceCreatePeptideOrderingForm(CreatePeptideOrderingForm):
         params['mutant_only'] = False
         params['output_file'] = self.combined_fasta_output_file
         generator = PvacspliceGenerateProteinFasta(**params)
+        generator.execute()
+        os.remove(generator.manufacturability_file)
+
+class PvacfuseCreatePeptideOrderingForm(CreatePeptideOrderingForm):
+    def __init__(self, **kwargs):
+        self.input = kwargs['input']
+        self.ref_fasta = kwargs['ref_fasta']
+        self.input_vcf = None
+        super().__init__(**kwargs)
+
+    def create_fastas(self):
+        params = {
+            'input': self.input,
+            'ref_fasta': self.ref_fasta,
+            'sample_name': self.sample_name,
+            'downstream_sequence_length': self.downstream_sequence_length,
+            'flanking_sequence_length': self.flanking_sequence_length,
+            'mutant_only': True,
+            'aggregate_report_evaluation': self.aggregate_report_evaluation,
+            'input_tsv': self.classI_aggregated_tsv,
+            'output_file': self.fasta_output_file,
+        }
+        generator = PvacfuseGenerateProteinFasta(**params)
+        generator.execute()
+        shutil.copy(generator.manufacturability_file, self.peptide_manufacture_output_file)
+        os.remove(generator.manufacturability_file)
+
+        params['mutant_only'] = False
+        params['output_file'] = self.combined_fasta_output_file
+        generator = PvacfuseGenerateProteinFasta(**params)
         generator.execute()
         os.remove(generator.manufacturability_file)
 

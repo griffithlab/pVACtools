@@ -30,12 +30,21 @@ def get_mutant_positions_from_fasta(fasta_path, full_id):
         index = full_id
 
     frameshift = ".FS." in index or "frameshift" in index
-    wt_id = f"WT.{index}"
+    if 'fusion' in index:
+        wt5_id = f"WT5.{index}"
+        wt3_id = f"WT3.{index}"
+        wt_id = None
+    else:
+        wt_id = f"WT.{index}"
+        wt5_id = None
+        wt3_id = None
     if 'splice_site' in index:
         mt_id = f"ALT.{index}"
     else:
         mt_id = f"MT.{index}"
     wt_seq = None
+    wt5_seq = None
+    wt3_seq = None
     mt_seq = None
 
     for record in SeqIO.parse(fasta_path, "fasta"):
@@ -43,6 +52,15 @@ def get_mutant_positions_from_fasta(fasta_path, full_id):
             wt_seq = str(record.seq)
         elif record.id == mt_id:
             mt_seq = str(record.seq)
+        elif record.id == wt5_id:
+            wt5_seq = str(record.seq)
+        elif record.id == wt3_id:
+            wt3_seq = str(record.seq)
+
+    if wt5_seq and wt3_seq:
+        wt_seq = wt5_seq + wt3_seq
+    elif wt5_seq:
+        wt_seq = wt5_seq
 
     if wt_seq is None or mt_seq is None:
         print(f"Warning: Missing WT or MT/ALT for {index}")
@@ -73,7 +91,7 @@ def get_mutant_positions_from_fasta(fasta_path, full_id):
                 if not frameshift:
                     mutant_positions.add(mt_index)
             mt_index += 1
-    
+
     if frameshift and first_mut_index is not None:
         mutant_positions.update(range(first_mut_index, len(mt_seq)))
 
