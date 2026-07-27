@@ -273,6 +273,7 @@ class PvacfuseGenerateProteinFasta(GenerateProteinFasta):
         params = {
             'input_file': self.input,
             'output_dir': self.temp_dir,
+            'sample_name': self.sample_name,
             'transcript_fasta': self.ref_fasta,
             'downstream_sequence_length': self.downstream_sequence_length,
         }
