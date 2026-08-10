@@ -29,7 +29,7 @@ class RunArgumentParser(metaclass=ABCMeta):
             "allele", type=lambda s:[a for a in s.split(',')],
             help="Name of the allele to use for epitope prediction. "
                  + "Multiple alleles can be specified using a comma-separated list. "
-                 + "For a list of available alleles, use: `{} valid_alleles`.".format(tool_name),
+                 + "For a list of available alleles, use: `pvactools valid_alleles`.",
         )
         parser.add_argument(
             "prediction_algorithms",
