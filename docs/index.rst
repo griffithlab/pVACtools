@@ -59,12 +59,14 @@ Contents
    mailing_list
 
 
-Version 7.1.1
+Version 7.1.2
 -------------
 
 This is a bugfix release. It fixes the following problem(s):
 
-* Fix TLBind WT Presentation Percentile not getting set correctly by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1436
+* Fix AGFusion read support calculation when running with STAR-fusion input by @YT-er in https://github.com/griffithlab/pVACtools/pull/1445
+* Replace remaining mentions of `pvacseq valid_alleles` with `pvactools valid_alleles` by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1448
+* Clean up packaging metadata and repository artifacts by @YT-er in https://github.com/griffithlab/pVACtools/pull/1446
 
 New in Version 7
 ----------------
