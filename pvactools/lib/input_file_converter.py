@@ -865,7 +865,7 @@ class FusionInputConverter(InputFileConverter):
                     'index'                      : pvactools.lib.run_utils.construct_index(count, record_info['genes'], record_info['transcripts'], variant_type, fusion_position),
                 }
                 if starfusion_entry is not None:
-                    output_row['fusion_read_support'] = starfusion_entry['JunctionReadCount'] + starfusion_entry['SpanningFragCount']
+                    output_row['fusion_read_support'] = int(starfusion_entry['JunctionReadCount']) + int(starfusion_entry['SpanningFragCount'])
                     output_row['fusion_expression']   = starfusion_entry['FFPM']
                 else:
                     output_row['fusion_read_support'] = 'NA'
