@@ -1,5 +1,8 @@
 recursive-include pvactools *
 
+# Exclude macOS metadata files
+global-exclude .DS_Store
+
 # Exclude __pycache__ directory
 global-exclude __pycache__
 # Exclude individual bytecode files
