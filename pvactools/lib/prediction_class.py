@@ -243,7 +243,7 @@ class PredictionClass(metaclass=ABCMeta):
         valid_alleles = cls.all_valid_allele_names()
         for allele in alleles:
             if allele not in valid_alleles:
-                sys.exit("Allele %s not valid. Run `pvacseq valid_alleles` for a list of valid allele names." % allele)
+                sys.exit("Allele %s not valid. Run `pvactools valid_alleles` for a list of valid allele names." % allele)
 
     @classmethod
     def allele_to_species_map(self):
@@ -347,7 +347,7 @@ class PredictionClass(metaclass=ABCMeta):
     def check_allele_valid(self, allele):
         valid_alleles = self.valid_allele_names()
         if allele not in valid_alleles:
-            sys.exit("Allele %s not valid for method %s. Run `pvacseq valid_alleles %s` for a list of valid allele names." % (allele, self.__class__.__name__, self.__class__.__name__))
+            sys.exit("Allele %s not valid for method %s. Run `pvactools valid_alleles -p %s` for a list of valid allele names." % (allele, self.__class__.__name__, self.__class__.__name__))
 
 
 class MHCI(PredictionClass, metaclass=ABCMeta):

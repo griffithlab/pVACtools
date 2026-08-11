@@ -188,7 +188,7 @@ enough information to determine whether the cutoff has been met one way or anoth
 
 Not all prediction methods support all epitope lengths or all alleles. To see
 a list of supported alleles for a prediction method you may use the
-``pvacseq valid_alleles`` :ref:`command <valid_alleles>`. For more details on
+``pvactools valid_alleles`` :ref:`command <valid_alleles>`. For more details on
 each algorithm refer to the IEDB MHC `Class I <http://tools.iedb.org/mhci/help/#Method>`_
 and `Class II <http://tools.iedb.org/mhcii/help/#Method>`_ documentation.
 
