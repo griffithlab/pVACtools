@@ -77,7 +77,7 @@ for a variety of additional algorithms.
      - Immunogenicity
      - no
      - yes
-   * - ImmuoScope_IM
+   * - ImmuScope_IM
      -
      - MHC Class II
      - Immunogenicity
@@ -167,7 +167,7 @@ for a variety of additional algorithms.
      - Immunogenicity
      - yes
      - yes
-   * - Pickpocket
+   * - PickPocket
      - 1.1
      - MHC Class I
      - Binding
