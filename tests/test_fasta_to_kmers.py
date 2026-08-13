@@ -310,3 +310,139 @@ class FastaToKmersTests(unittest.TestCase):
         )
 
         output_dir.cleanup()
+
+    def test_pvacseq_very_long_insertion_produces_expected_output(self):
+        test_data_dir = os.path.join(pvactools_directory(), "tests", "test_data", "fasta_to_kmers")
+        tscript_fasta = os.path.join(test_data_dir, 'pvacseq.very_long_insertion.fasta')
+        output_dir = tempfile.TemporaryDirectory()
+        params = {
+            'fasta'           : tscript_fasta,
+            'output_dir'      : output_dir.name,
+            'epitope_length'  : 8,
+            'sample_name'     : 'sample',
+        }
+        fasta = VariantFastaToKmers(**params)
+        fasta.execute()
+
+        expected_file = os.path.join(test_data_dir, 'output_pvacseq.very_long_insertion.8_kmers.fa')
+        output_file = os.path.join(output_dir.name, 'sample.8.fa')
+
+        self.assertTrue(cmp(
+                output_file,
+                expected_file,
+                False
+            ),
+            "files don't match {} - {}".format(output_file, expected_file)
+        )
+
+        output_dir.cleanup()
+
+    def test_pvacseq_complex_inframe_insertion_produces_expected_output(self):
+        test_data_dir = os.path.join(pvactools_directory(), "tests", "test_data", "fasta_to_kmers")
+        tscript_fasta = os.path.join(test_data_dir, 'pvacseq.complex_inframe_insertion.fasta')
+        output_dir = tempfile.TemporaryDirectory()
+        params = {
+            'fasta'           : tscript_fasta,
+            'output_dir'      : output_dir.name,
+            'epitope_length'  : 8,
+            'sample_name'     : 'sample',
+        }
+        fasta = VariantFastaToKmers(**params)
+        fasta.execute()
+
+        expected_file = os.path.join(test_data_dir, 'output_pvacseq.complex_inframe_insertion.8_kmers.fa')
+        output_file = os.path.join(output_dir.name, 'sample.8.fa')
+
+        self.assertTrue(cmp(
+                output_file,
+                expected_file,
+                False
+            ),
+            "files don't match {} - {}".format(output_file, expected_file)
+        )
+
+        output_dir.cleanup()
+
+    def test_pvacseq_frameshift_variant_position_1_produces_expected_output(self):
+        test_data_dir = os.path.join(pvactools_directory(), "tests", "test_data", "fasta_to_kmers")
+        tscript_fasta = os.path.join(test_data_dir, 'pvacseq.frameshift_variant_position_1.fasta')
+        output_dir = tempfile.TemporaryDirectory()
+        params = {
+            'fasta'           : tscript_fasta,
+            'output_dir'      : output_dir.name,
+            'epitope_length'  : 8,
+            'sample_name'     : 'sample',
+        }
+        fasta = VariantFastaToKmers(**params)
+        fasta.execute()
+
+        expected_file = os.path.join(test_data_dir, 'output_pvacseq.frameshift_variant_position_1.8_kmers.fa')
+        output_file = os.path.join(output_dir.name, 'sample.8.fa')
+
+        self.assertTrue(cmp(
+                output_file,
+                expected_file,
+                False
+            ),
+            "files don't match {} - {}".format(output_file, expected_file)
+        )
+
+        output_dir.cleanup()
+
+    def test_pvacseq_repetitive_deletion_produces_expected_output(self):
+        test_data_dir = os.path.join(pvactools_directory(), "tests", "test_data", "fasta_to_kmers")
+        tscript_fasta = os.path.join(test_data_dir, 'pvacseq.repetitive_deletion.fasta')
+        output_dir = tempfile.TemporaryDirectory()
+        params = {
+            'fasta'           : tscript_fasta,
+            'output_dir'      : output_dir.name,
+            'epitope_length'  : 9,
+            'sample_name'     : 'sample',
+        }
+        fasta = VariantFastaToKmers(**params)
+        fasta.execute()
+
+        output_file = os.path.join(output_dir.name, 'sample.9.fa')
+        self.assertFalse(os.path.exists(output_file))
+
+        fasta.epitope_length = 20
+        fasta.execute()
+
+        expected_file = os.path.join(test_data_dir, 'output_pvacseq.repetitive_deletion.20_kmers.fa')
+        output_file = os.path.join(output_dir.name, 'sample.20.fa')
+
+        self.assertTrue(cmp(
+                output_file,
+                expected_file,
+                False
+            ),
+            "files don't match {} - {}".format(output_file, expected_file)
+        )
+
+        output_dir.cleanup()
+
+    def test_pvacseq_repetitive_insertion_produces_expected_output(self):
+        test_data_dir = os.path.join(pvactools_directory(), "tests", "test_data", "fasta_to_kmers")
+        tscript_fasta = os.path.join(test_data_dir, 'pvacseq.repetitive_insertion.fasta')
+        output_dir = tempfile.TemporaryDirectory()
+        params = {
+            'fasta'           : tscript_fasta,
+            'output_dir'      : output_dir.name,
+            'epitope_length'  : 9,
+            'sample_name'     : 'sample',
+        }
+        fasta = VariantFastaToKmers(**params)
+        fasta.execute()
+
+        expected_file = os.path.join(test_data_dir, 'output_pvacseq.repetitive_insertion.9_kmers.fa')
+        output_file = os.path.join(output_dir.name, 'sample.9.fa')
+
+        self.assertTrue(cmp(
+                output_file,
+                expected_file,
+                False
+            ),
+            "files don't match {} - {}".format(output_file, expected_file)
+        )
+
+        output_dir.cleanup()

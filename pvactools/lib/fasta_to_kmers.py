@@ -91,7 +91,12 @@ class VariantFastaToKmers(FastaToKmers):
             end_position = len(mt_dict)
         else:
             offset = len(wt_dict) - len(mt_dict)
-            if variant_type == 'inframe_insertion':
+            #Sometimes complex inframe_del where the deletion goes into the intron
+            #space can result in a longer mt dict - a de facto insertion -
+            #see complex inframe insertion test case
+            #Comparing the length of the dicts instead of using the variant type
+            #is safer
+            if len(mt_dict) > len(wt_dict):
                 end_position = position - offset
             else:
                 end_position = position

@@ -266,6 +266,120 @@
             },
             "wt_peptide": "LLPLLLLLLGASGGG"
           },
+          "LPLLLLLGASGGGGG": {
+            "ic50s_MT": [
+              1335.8
+            ],
+            "combined_percentiles_MT": [
+              40.0
+            ],
+            "binding_percentiles_MT": [
+              40.0
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              1663.7
+            ],
+            "combined_percentiles_WT": [
+              44.0
+            ],
+            "binding_percentiles_WT": [
+              44.0
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "HLA-DRB1*11:01"
+            ],
+            "mutation_position": "1, 2",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NNalign"
+              ],
+              "MT": {
+                "HLA-DRB1*11:01": [
+                  1335.8
+                ]
+              },
+              "WT": {
+                "HLA-DRB1*11:01": [
+                  1663.7
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-DRB1*11:01": []
+              },
+              "WT": {
+                "HLA-DRB1*11:01": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NNalign"
+              ],
+              "MT": {
+                "HLA-DRB1*11:01": [
+                  40.0
+                ]
+              },
+              "WT": {
+                "HLA-DRB1*11:01": [
+                  44.0
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-DRB1*11:01": []
+              },
+              "WT": {
+                "HLA-DRB1*11:01": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-DRB1*11:01": []
+              },
+              "WT": {
+                "HLA-DRB1*11:01": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-DRB1*11:01": []
+              },
+              "WT": {
+                "HLA-DRB1*11:01": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-DRB1*11:01": []
+              },
+              "WT": {
+                "HLA-DRB1*11:01": []
+              }
+            },
+            "wt_peptide": "PLLLLLLGASGGGGG"
+          },
           "LLPLLLLLGASGGGG": {
             "ic50s_MT": [
               1340.1
@@ -379,6 +493,120 @@
               }
             },
             "wt_peptide": "LPLLLLLLGASGGGG"
+          },
+          "PLLLLLGASGGGGGA": {
+            "ic50s_MT": [
+              1401.9
+            ],
+            "combined_percentiles_MT": [
+              41.0
+            ],
+            "binding_percentiles_MT": [
+              41.0
+            ],
+            "presentation_percentiles_MT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_MT": [
+              "NA"
+            ],
+            "ic50s_WT": [
+              1838.7
+            ],
+            "combined_percentiles_WT": [
+              46.0
+            ],
+            "binding_percentiles_WT": [
+              46.0
+            ],
+            "presentation_percentiles_WT": [
+              "NA"
+            ],
+            "immunogenicity_percentiles_WT": [
+              "NA"
+            ],
+            "hla_types": [
+              "HLA-DRB1*11:01"
+            ],
+            "mutation_position": "1",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "NNalign"
+              ],
+              "MT": {
+                "HLA-DRB1*11:01": [
+                  1401.9
+                ]
+              },
+              "WT": {
+                "HLA-DRB1*11:01": [
+                  1838.7
+                ]
+              }
+            },
+            "individual_binding_score_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-DRB1*11:01": []
+              },
+              "WT": {
+                "HLA-DRB1*11:01": []
+              }
+            },
+            "individual_binding_percentile_calls": {
+              "algorithms": [
+                "NNalign"
+              ],
+              "MT": {
+                "HLA-DRB1*11:01": [
+                  41.0
+                ]
+              },
+              "WT": {
+                "HLA-DRB1*11:01": [
+                  46.0
+                ]
+              }
+            },
+            "individual_immunogenicity_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-DRB1*11:01": []
+              },
+              "WT": {
+                "HLA-DRB1*11:01": []
+              }
+            },
+            "individual_immunogenicity_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-DRB1*11:01": []
+              },
+              "WT": {
+                "HLA-DRB1*11:01": []
+              }
+            },
+            "individual_presentation_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-DRB1*11:01": []
+              },
+              "WT": {
+                "HLA-DRB1*11:01": []
+              }
+            },
+            "individual_presentation_percentile_calls": {
+              "algorithms": [],
+              "MT": {
+                "HLA-DRB1*11:01": []
+              },
+              "WT": {
+                "HLA-DRB1*11:01": []
+              }
+            },
+            "wt_peptide": "LLLLLLGASGGGGGA"
           },
           "LLPLLPLLLLLGASG": {
             "ic50s_MT": [
@@ -1090,7 +1318,7 @@
           325
         ],
         "transcript_count": 1,
-        "peptide_count": 9,
+        "peptide_count": 11,
         "total_expr": 0.0
       }
     },
@@ -1101,7 +1329,7 @@
       1
     ],
     "peptide_counts": [
-      9
+      11
     ],
     "set_expr": [
       0.0

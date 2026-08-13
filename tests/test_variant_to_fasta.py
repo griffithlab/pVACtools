@@ -30,8 +30,8 @@ class VariantToFastaTests(unittest.TestCase):
             'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
+        generator.execute()
 
-        self.assertFalse(generator.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
 
@@ -46,8 +46,8 @@ class VariantToFastaTests(unittest.TestCase):
             'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
+        generator.execute()
 
-        self.assertFalse(generator.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_mutation_at_relative_end_of_full_sequence.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
 
@@ -62,8 +62,8 @@ class VariantToFastaTests(unittest.TestCase):
             'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
+        generator.execute()
 
-        self.assertFalse(generator.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_mutation_at_relative_beginning_of_full_sequence.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
 
@@ -78,8 +78,8 @@ class VariantToFastaTests(unittest.TestCase):
             'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
+        generator.execute()
 
-        self.assertFalse(generator.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_short_wildtype_sequence.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
 
@@ -94,8 +94,8 @@ class VariantToFastaTests(unittest.TestCase):
             'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
+        generator.execute()
 
-        self.assertFalse(generator.execute())
         self.assertEqual(os.stat(generate_fasta_output_file.name).st_size, 0)
 
     def test_input_file_with_inframe_insertion_amino_acid_replacement_generates_expected_file(self):
@@ -109,8 +109,8 @@ class VariantToFastaTests(unittest.TestCase):
             'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
+        generator.execute()
 
-        self.assertFalse(generator.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_inframe_insertion_aa_replacement.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
 
@@ -125,8 +125,8 @@ class VariantToFastaTests(unittest.TestCase):
             'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
+        generator.execute()
 
-        self.assertFalse(generator.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_inframe_deletion_aa_replacement.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
 
@@ -141,8 +141,8 @@ class VariantToFastaTests(unittest.TestCase):
             'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
+        generator.execute()
 
-        self.assertFalse(generator.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_inframe_insertion_aa_insertion.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
 
@@ -157,8 +157,8 @@ class VariantToFastaTests(unittest.TestCase):
             'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
+        generator.execute()
 
-        self.assertFalse(generator.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_inframe_deletion_aa_deletion.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
 
@@ -173,8 +173,8 @@ class VariantToFastaTests(unittest.TestCase):
             'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
+        generator.execute()
 
-        self.assertFalse(generator.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_inframe_deletion_range.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
 
@@ -189,8 +189,8 @@ class VariantToFastaTests(unittest.TestCase):
             'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
+        generator.execute()
 
-        self.assertFalse(generator.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_frameshift_variant_feature_truncation.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
 
@@ -205,8 +205,8 @@ class VariantToFastaTests(unittest.TestCase):
             'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
+        generator.execute()
 
-        self.assertFalse(generator.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_frameshift_variant_feature_truncation2.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
 
@@ -221,8 +221,8 @@ class VariantToFastaTests(unittest.TestCase):
             'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
+        generator.execute()
 
-        self.assertFalse(generator.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_frameshift_variant_feature_elongation.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
 
@@ -237,8 +237,8 @@ class VariantToFastaTests(unittest.TestCase):
             'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
+        generator.execute()
 
-        self.assertFalse(generator.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_frameshift_variant_range.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
 
@@ -253,8 +253,8 @@ class VariantToFastaTests(unittest.TestCase):
             'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
+        generator.execute()
 
-        self.assertFalse(generator.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_short_fasta_sequence.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
 
@@ -269,8 +269,8 @@ class VariantToFastaTests(unittest.TestCase):
             'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
+        generator.execute()
 
-        self.assertFalse(generator.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_downstream_sequence_length_limit.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
 
@@ -285,8 +285,8 @@ class VariantToFastaTests(unittest.TestCase):
             'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
+        generator.execute()
 
-        self.assertFalse(generator.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_dnp.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
 
@@ -302,8 +302,8 @@ class VariantToFastaTests(unittest.TestCase):
             'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
+        generator.execute()
 
-        self.assertFalse(generator.execute())
         self.assertEqual(os.path.getsize(generate_fasta_output_file.name), 0)
 
     def test_proximal_variants_generate_expected_file(self):
@@ -318,8 +318,8 @@ class VariantToFastaTests(unittest.TestCase):
             'downstream_sequence_length': None,
         }
         generator = VariantToFasta(**generate_fasta_params)
+        generator.execute()
 
-        self.assertFalse(generator.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_proximal_variants.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
 
@@ -335,8 +335,8 @@ class VariantToFastaTests(unittest.TestCase):
             'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
+        generator.execute()
 
-        self.assertFalse(generator.execute())
         self.assertEqual(os.path.getsize(generate_fasta_output_file.name), 0)
 
     def test_protein_change_with_X_in_wildtype_and_mutatnt(self):
@@ -351,8 +351,8 @@ class VariantToFastaTests(unittest.TestCase):
             'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
+        generator.execute()
 
-        self.assertFalse(generator.execute())
         self.assertEqual(os.path.getsize(generate_fasta_output_file.name), 0)
 
     def test_proximal_variants_for_inframe_insertion_generate_expected_file(self):
@@ -367,8 +367,8 @@ class VariantToFastaTests(unittest.TestCase):
             'downstream_sequence_length': None,
         }
         generator = VariantToFasta(**generate_fasta_params)
+        generator.execute()
 
-        self.assertFalse(generator.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_proximal_variants_inframe_insertion.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
 
@@ -384,8 +384,8 @@ class VariantToFastaTests(unittest.TestCase):
             'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
+        generator.execute()
 
-        self.assertFalse(generator.execute())
         self.assertEqual(os.path.getsize(generate_fasta_output_file.name), 0)
 
     def test_inframe_insertion_with_no_aa_change(self):
@@ -399,8 +399,8 @@ class VariantToFastaTests(unittest.TestCase):
             'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
+        generator.execute()
 
-        self.assertFalse(generator.execute())
         self.assertEqual(os.path.getsize(generate_fasta_output_file.name), 0)
 
     def test_proximal_variant_on_same_codon_as_somatic_variant_results_in_novel_peptide(self):
@@ -416,8 +416,8 @@ class VariantToFastaTests(unittest.TestCase):
             'downstream_sequence_length': None,
         }
         generator = VariantToFasta(**generate_fasta_params)
+        generator.execute()
 
-        self.assertFalse(generator.execute())
         expected_output_file = os.path.join(test_data_dir, 'output.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
 
@@ -434,8 +434,8 @@ class VariantToFastaTests(unittest.TestCase):
             'downstream_sequence_length': None,
         }
         generator = VariantToFasta(**generate_fasta_params)
+        generator.execute()
 
-        self.assertFalse(generator.execute())
         expected_output_file = os.path.join(test_data_dir, 'output_proximal_variant_on_same_codon_as_somatic_variant_results_in_stop_codon.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
 
@@ -452,8 +452,8 @@ class VariantToFastaTests(unittest.TestCase):
             'downstream_sequence_length': None,
         }
         generator = VariantToFasta(**generate_fasta_params)
+        generator.execute()
 
-        self.assertFalse(generator.execute())
         expected_output_file = os.path.join(test_data_dir, 'output.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
 
@@ -470,8 +470,8 @@ class VariantToFastaTests(unittest.TestCase):
             'downstream_sequence_length': None,
         }
         generator = VariantToFasta(**generate_fasta_params)
+        generator.execute()
 
-        self.assertFalse(generator.execute())
         expected_output_file = os.path.join(test_data_dir, 'output_multiple_proximal_variants_on_same_codon_results_in_stop_codon.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
 
@@ -488,8 +488,8 @@ class VariantToFastaTests(unittest.TestCase):
             'downstream_sequence_length': None,
         }
         generator = VariantToFasta(**generate_fasta_params)
+        generator.execute()
 
-        self.assertFalse(generator.execute())
         expected_output_file = os.path.join(test_data_dir, 'output.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
 
@@ -504,9 +504,89 @@ class VariantToFastaTests(unittest.TestCase):
             'proximal_variants_file'    : None,
         }
         generator = VariantToFasta(**generate_fasta_params)
+        generator.execute()
 
-        self.assertFalse(generator.execute())
         expected_output_file = os.path.join(self.test_data_dir, 'output_protein_altering_variant_insertion.fasta')
+        self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
+
+    def test_input_file_with_very_long_insertion_generates_expected_file(self):
+        generate_fasta_input_file      = os.path.join(self.test_data_dir, 'input_very_long_insertion.tsv')
+        generate_fasta_output_file     = tempfile.NamedTemporaryFile()
+
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'output_file'               : generate_fasta_output_file.name,
+            'downstream_sequence_length': None,
+            'proximal_variants_file'    : None,
+        }
+        generator = VariantToFasta(**generate_fasta_params)
+        generator.execute()
+
+        expected_output_file = os.path.join(self.test_data_dir, 'output_very_long_insertion.fasta')
+        self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
+
+    def test_input_file_with_complex_inframe_insertion_generates_expected_file(self):
+        generate_fasta_input_file      = os.path.join(self.test_data_dir, 'input_complex_inframe_insertion.tsv')
+        generate_fasta_output_file     = tempfile.NamedTemporaryFile()
+
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'output_file'               : generate_fasta_output_file.name,
+            'downstream_sequence_length': None,
+            'proximal_variants_file'    : None,
+        }
+        generator = VariantToFasta(**generate_fasta_params)
+        generator.execute()
+
+        expected_output_file = os.path.join(self.test_data_dir, 'output_complex_inframe_insertion.fasta')
+        self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
+
+    def test_input_file_with_frameshift_variant_position_1_generates_expected_file(self):
+        generate_fasta_input_file      = os.path.join(self.test_data_dir, 'input_frameshift_variant_position_1.tsv')
+        generate_fasta_output_file     = tempfile.NamedTemporaryFile()
+
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'output_file'               : generate_fasta_output_file.name,
+            'downstream_sequence_length': None,
+            'proximal_variants_file'    : None,
+        }
+        generator = VariantToFasta(**generate_fasta_params)
+        generator.execute()
+
+        expected_output_file = os.path.join(self.test_data_dir, 'output_frameshift_variant_position_1.fasta')
+        self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
+
+    def test_input_file_with_repetitive_deletion_generates_expected_file(self):
+        generate_fasta_input_file      = os.path.join(self.test_data_dir, 'input_repetitive_deletion.tsv')
+        generate_fasta_output_file     = tempfile.NamedTemporaryFile()
+
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'output_file'               : generate_fasta_output_file.name,
+            'downstream_sequence_length': None,
+            'proximal_variants_file'    : None,
+        }
+        generator = VariantToFasta(**generate_fasta_params)
+        generator.execute()
+
+        expected_output_file = os.path.join(self.test_data_dir, 'output_repetitive_deletion.fasta')
+        self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
+
+    def test_input_file_with_repetitive_insertion_generates_expected_file(self):
+        generate_fasta_input_file      = os.path.join(self.test_data_dir, 'input_repetitive_insertion.tsv')
+        generate_fasta_output_file     = tempfile.NamedTemporaryFile()
+
+        generate_fasta_params = {
+            'input_file'                : generate_fasta_input_file,
+            'output_file'               : generate_fasta_output_file.name,
+            'downstream_sequence_length': None,
+            'proximal_variants_file'    : None,
+        }
+        generator = VariantToFasta(**generate_fasta_params)
+        generator.execute()
+
+        expected_output_file = os.path.join(self.test_data_dir, 'output_repetitive_insertion.fasta')
         self.assertTrue(cmp(generate_fasta_output_file.name, expected_output_file))
 
 if __name__ == '__main__':

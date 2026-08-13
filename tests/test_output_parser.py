@@ -48,11 +48,9 @@ class OutputParserTests(unittest.TestCase):
             'flurry_state'    : 'both',
         }
         parser = PvacseqOutputParser(**parse_output_params)
+        parser.execute()
 
-        self.assertFalse(parser.execute())
         expected_output_file  = os.path.join(self.test_data_dir, "output.all_class_i.tsv")
-        import shutil
-        shutil.copy(output_file.name, expected_output_file)
         self.assertTrue(compare(output_file.name, expected_output_file))
 
     def test_parse_output_runs_and_produces_expected_output_with_all_class_i_files_normalized_percentiles(self):
@@ -86,11 +84,9 @@ class OutputParserTests(unittest.TestCase):
             'use_normalized_percentiles': True,
         }
         parser = PvacseqOutputParser(**parse_output_params)
+        parser.execute()
 
-        self.assertFalse(parser.execute())
         expected_output_file  = os.path.join(self.test_data_dir, "output.all_class_i.normalized_percentiles.tsv")
-        import shutil
-        shutil.copy(output_file.name, expected_output_file)
         self.assertTrue(compare(output_file.name, expected_output_file))
 
     def test_parse_output_runs_and_produces_expected_output_with_all_class_ii_files(self):
@@ -116,8 +112,8 @@ class OutputParserTests(unittest.TestCase):
             'flurry_state'    : 'both',
         }
         parser = PvacseqOutputParser(**parse_output_params)
+        parser.execute()
 
-        self.assertFalse(parser.execute())
         expected_output_file  = os.path.join(self.test_data_dir, "output.all_class_ii.tsv")
         self.assertTrue(compare(output_file.name, expected_output_file))
 
@@ -154,3 +150,23 @@ class OutputParserTests(unittest.TestCase):
         scores = parser.get_scores(line, method)
         expected_scores = {'MHCflurry': {'ic50': 28394.79812418208, 'percentile': 'NA'}, 'MHCflurryEL Processing': {'presentation': 0.0385892167687416, 'percentile': 'NA'}, 'MHCflurryEL Presentation': {'presentation': 0.0040710675126724, 'percentile': 62.74467391304348}}
         self.assertEqual(scores, expected_scores)
+
+    def test_parse_output_runs_with_iedb_dna_warning(self):
+        prediction_files = [
+            os.path.join(self.test_data_dir, "input.iedb_dna_warning.ann.HLA-A*02:A01.9.1-2.tsv")
+        ]
+        key_files = [os.path.join(self.test_data_dir, "input.iedb_dna_warning.1-2.key")]
+        output_file = tempfile.NamedTemporaryFile()
+
+        parse_output_params = {
+            'prediction_files': prediction_files,
+            'tsv_file'        : None,
+            'key_files'       : key_files,
+            'output_file'     : output_file.name,
+            'sample_name'     : 'input',
+        }
+        parser = PvacbindOutputParser(**parse_output_params)
+        parser.execute()
+
+        expected_output_file  = os.path.join(self.test_data_dir, "output.iedb_dna_warning.tsv")
+        self.assertTrue(compare(output_file.name, expected_output_file))
