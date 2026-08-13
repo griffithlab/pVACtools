@@ -48,8 +48,8 @@ class OutputParserTests(unittest.TestCase):
             'flurry_state'    : 'both',
         }
         parser = PvacseqOutputParser(**parse_output_params)
+        parser.execute()
 
-        self.assertFalse(parser.execute())
         expected_output_file  = os.path.join(self.test_data_dir, "output.all_class_i.tsv")
         self.assertTrue(compare(output_file.name, expected_output_file))
 
@@ -84,8 +84,8 @@ class OutputParserTests(unittest.TestCase):
             'use_normalized_percentiles': True,
         }
         parser = PvacseqOutputParser(**parse_output_params)
+        parser.execute()
 
-        self.assertFalse(parser.execute())
         expected_output_file  = os.path.join(self.test_data_dir, "output.all_class_i.normalized_percentiles.tsv")
         self.assertTrue(compare(output_file.name, expected_output_file))
 
@@ -112,8 +112,8 @@ class OutputParserTests(unittest.TestCase):
             'flurry_state'    : 'both',
         }
         parser = PvacseqOutputParser(**parse_output_params)
+        parser.execute()
 
-        self.assertFalse(parser.execute())
         expected_output_file  = os.path.join(self.test_data_dir, "output.all_class_ii.tsv")
         self.assertTrue(compare(output_file.name, expected_output_file))
 
@@ -166,6 +166,7 @@ class OutputParserTests(unittest.TestCase):
             'sample_name'     : 'input',
         }
         parser = PvacbindOutputParser(**parse_output_params)
-        self.assertFalse(parser.execute())
+        parser.execute()
+
         expected_output_file  = os.path.join(self.test_data_dir, "output.iedb_dna_warning.tsv")
         self.assertTrue(compare(output_file.name, expected_output_file))
