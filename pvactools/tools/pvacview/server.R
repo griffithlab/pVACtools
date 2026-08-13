@@ -112,7 +112,6 @@ server <- shinyServer(function(input, output, session) {
     df$metricsData <- fromJSON(input$metricsDataInput$datapath)
     df <- process_metrics_data(df)
     df <- postprocess_inputs(df)
-    df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
     df <- set_formatting_columns(df)
   })
   #Option 1: User uploaded additional data file
@@ -127,7 +126,7 @@ server <- shinyServer(function(input, output, session) {
   observeEvent(input$gene_list, {
     gene_list <- read.table(input$gene_list$datapath, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
     df$gene_list <- gene_list
-    df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
+    df <- set_gene_of_interest(df)
   })
   #Option 2: Load from HCC1395 demo data from github
   observeEvent(input$loadDefaultmain, {
@@ -145,7 +144,6 @@ server <- shinyServer(function(input, output, session) {
       ## Class I demo metrics file
       df$metricsData <- metricsData
       df <- process_metrics_data(df)
-      df <- postprocess_inputs(df)
       incProgress(0.2)
 
       ## Class II additional demo aggregate report
@@ -161,7 +159,7 @@ server <- shinyServer(function(input, output, session) {
       gene_data <- getURL("https://raw.githubusercontent.com/griffithlab/pVACtools/c5a4f4c5b0bfa9c2832fc752e98dddea4c1c9eda/pvactools/tools/pvacview/data/cancer_census_hotspot_gene_list.tsv")
       gene_list <- read.table(text = gene_data, sep = "\t",  header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
       df$gene_list <- gene_list
-      df$mainTable$`Gene of Interest` <- apply(df$mainTable, 1, function(x) {any(x["Gene"] == df$gene_list)})
+      df <- postprocess_inputs(df)
 
       df <- set_formatting_columns(df)
       df$lastSelectedRow <- 1
