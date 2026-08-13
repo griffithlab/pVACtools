@@ -1,0 +1,11 @@
+5'_gene,3'_gene,5'_transcript,3'_transcript,5'_strand,3'_strand,5'_transcript_biotype,3'_transcript_biotype,Fusion_effect,Protein_length,Protein_weight_(kD)
+UNC5C,AC034154.1,ENST00000453304,ENST00000521680,-,-,protein_coding,sense_overlapping,exon-exon,NA,NA
+UNC5C,AC034154.1,ENST00000453304,ENST00000518105,-,-,protein_coding,sense_overlapping,exon-exon,NA,NA
+UNC5C,AC034154.1,ENST00000513796,ENST00000521680,-,-,protein_coding,sense_overlapping,exon-exon,NA,NA
+UNC5C,AC034154.1,ENST00000513796,ENST00000518105,-,-,protein_coding,sense_overlapping,exon-exon,NA,NA
+UNC5C,AC034154.1,ENST00000506749,ENST00000521680,-,-,protein_coding,sense_overlapping,exon-exon,NA,NA
+UNC5C,AC034154.1,ENST00000506749,ENST00000518105,-,-,protein_coding,sense_overlapping,exon-exon,NA,NA
+UNC5C,AC034154.1,ENST00000504962,ENST00000521680,-,-,protein_coding,sense_overlapping,exon-exon,NA,NA
+UNC5C,AC034154.1,ENST00000504962,ENST00000518105,-,-,protein_coding,sense_overlapping,exon-exon,NA,NA
+UNC5C,AC034154.1,ENST00000610318,ENST00000521680,-,-,protein_coding,sense_overlapping,exon-exon,NA,NA
+UNC5C,AC034154.1,ENST00000610318,ENST00000518105,-,-,protein_coding,sense_overlapping,exon-exon,NA,NA

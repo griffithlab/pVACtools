@@ -171,8 +171,8 @@ class GenerateFastaTests(unittest.TestCase):
         generator = PvacseqGenerateProteinFasta(**params)
         generator.generate_fasta()
         generator.trim_sequences()
-        generator.filter_fasta()
-        shutil.copy(generator.filtered_fasta_file_path, generate_protein_fasta_output_file.name)
+        generator.tsv_filter_sequences()
+        shutil.copy(generator.tsv_filtered_fasta_file_path, generate_protein_fasta_output_file.name)
 
         expected_output_file = os.path.join(self.test_data_dir, 'output_with_phased_vcf.fasta')
         self.assertTrue(cmp(generate_protein_fasta_output_file.name, expected_output_file))

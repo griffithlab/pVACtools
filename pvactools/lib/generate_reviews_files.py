@@ -129,12 +129,9 @@ def main(peptides_path, classI_path, classII_path, input_vcf, external_vcf, samp
     peptides['Index'] = peptides['full ID'].apply(lambda x: x.split('.', 1)[1])
 
     def modify_id(original_id):
-        match = re.match(r'([\w\-]+)\.(ENS[0-9A-Z]+\d+(?:\.\d+)?)\.(\w+)\.(.+)$', original_id)
-        if not match:
-            raise Exception(f"Unrecognized ID format: {original_id}")
-            return original_id
 
-        gene, transcript, variant_type, last_part = match.groups()
+        rest, variant_type, last_part = original_id.rsplit('.', 2)
+        gene, transcript = rest.split('.', 1)
 
         if variant_type == "missense" or variant_type == "inframe_ins":
             # Removes the variant type from the ID
@@ -178,8 +175,29 @@ def main(peptides_path, classI_path, classII_path, input_vcf, external_vcf, samp
     classI['51mer ID'] = classI['Index']
     classI['51mer ID'] = classI['51mer ID'].apply(lambda x: x.split('.', 1)[1])  # Removes the MT index from the Index column
     classI['51mer ID'] = classI['51mer ID'].apply(modify_id)
-    class_sequences = pd.merge(classI[['ID', 'Index', 'Best Peptide Class I', '51mer ID', 'Pos', 'AA Change', 'Class I Allele', "Class I IC50 MT", "Class I %ile MT", "Class I Best Transcript"]], 
-                                classII[['ID', 'Best Peptide Class II', 'Class II Allele', "Class II IC50 MT", "Class II %ile MT", "Class II Best Transcript"]], on='ID', how='left')
+    if 'AA Change' not in classI.columns:
+        classI['AA Change'] = pd.NA
+    class_i_columns = [
+        'ID',
+        'Index',
+        'Best Peptide Class I',
+        '51mer ID',
+        'Pos',
+        'AA Change',
+        'Class I Allele',
+        "Class I IC50 MT",
+        "Class I %ile MT",
+        "Class I Best Transcript"
+    ]
+    class_ii_columns = [
+        'ID',
+        'Best Peptide Class II',
+        'Class II Allele',
+        "Class II IC50 MT",
+        "Class II %ile MT",
+        "Class II Best Transcript"
+    ]
+    class_sequences = pd.merge(classI[class_i_columns], classII[class_ii_columns], on='ID', how='left')
 
     merged_peptide_51mer = pd.merge(peptides, class_sequences, on='Index', how='left')
     merged_peptide_51mer = merged_peptide_51mer.drop(columns=['ID', 'Index'])

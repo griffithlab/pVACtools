@@ -1,0 +1,113 @@
+5'_gene,3'_gene,5'_transcript,3'_transcript,5'_strand,3'_strand,5'_transcript_biotype,3'_transcript_biotype,Fusion_effect,Protein_length,Protein_weight_(kD)
+TMEM104,RAB37,ENST00000417024,ENST00000340415,+,+,protein_coding,protein_coding,in-frame,383,42.96357450000004
+TMEM104,RAB37,ENST00000417024,ENST00000402449,+,+,protein_coding,protein_coding,in-frame,417,46.97102300000007
+TMEM104,RAB37,ENST00000417024,ENST00000392617,+,+,protein_coding,retained_intron,exon-exon,NA,NA
+TMEM104,RAB37,ENST00000417024,ENST00000528438,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000417024,ENST00000392615,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000417024,ENST00000392614,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000417024,ENST00000392613,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000417024,ENST00000533530,+,+,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000417024,ENST00000527040,+,+,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000417024,ENST00000577548,+,+,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000417024,ENST00000392612,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000417024,ENST00000392610,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000417024,ENST00000481224,+,+,protein_coding,nonsense_mediated_decay,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000417024,ENST00000488977,+,+,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000417024,ENST00000531420,+,+,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000417024,ENST00000613645,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000578764,ENST00000340415,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000578764,ENST00000402449,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000578764,ENST00000392617,+,+,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000578764,ENST00000528438,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000578764,ENST00000392615,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000578764,ENST00000392614,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000578764,ENST00000392613,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000578764,ENST00000533530,+,+,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000578764,ENST00000527040,+,+,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000578764,ENST00000577548,+,+,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000578764,ENST00000392612,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000578764,ENST00000392610,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000578764,ENST00000481224,+,+,protein_coding,nonsense_mediated_decay,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000578764,ENST00000488977,+,+,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000578764,ENST00000531420,+,+,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000578764,ENST00000613645,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000582773,ENST00000340415,+,+,protein_coding,protein_coding,in-frame,370,41.16756700000004
+TMEM104,RAB37,ENST00000582773,ENST00000402449,+,+,protein_coding,protein_coding,in-frame,404,45.175015500000065
+TMEM104,RAB37,ENST00000582773,ENST00000392617,+,+,protein_coding,retained_intron,exon-exon,NA,NA
+TMEM104,RAB37,ENST00000582773,ENST00000528438,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000582773,ENST00000392615,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000582773,ENST00000392614,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000582773,ENST00000392613,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000582773,ENST00000533530,+,+,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000582773,ENST00000527040,+,+,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000582773,ENST00000577548,+,+,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000582773,ENST00000392612,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000582773,ENST00000392610,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000582773,ENST00000481224,+,+,protein_coding,nonsense_mediated_decay,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000582773,ENST00000488977,+,+,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000582773,ENST00000531420,+,+,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000582773,ENST00000613645,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000584246,ENST00000340415,+,+,retained_intron,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000584246,ENST00000402449,+,+,retained_intron,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000584246,ENST00000392617,+,+,retained_intron,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000584246,ENST00000528438,+,+,retained_intron,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000584246,ENST00000392615,+,+,retained_intron,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000584246,ENST00000392614,+,+,retained_intron,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000584246,ENST00000392613,+,+,retained_intron,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000584246,ENST00000533530,+,+,retained_intron,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000584246,ENST00000527040,+,+,retained_intron,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000584246,ENST00000577548,+,+,retained_intron,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000584246,ENST00000392612,+,+,retained_intron,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000584246,ENST00000392610,+,+,retained_intron,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000584246,ENST00000481224,+,+,retained_intron,nonsense_mediated_decay,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000584246,ENST00000488977,+,+,retained_intron,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000584246,ENST00000531420,+,+,retained_intron,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000584246,ENST00000613645,+,+,retained_intron,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000582330,ENST00000340415,+,+,protein_coding,protein_coding,in-frame,370,41.16756700000004
+TMEM104,RAB37,ENST00000582330,ENST00000402449,+,+,protein_coding,protein_coding,in-frame,404,45.175015500000065
+TMEM104,RAB37,ENST00000582330,ENST00000392617,+,+,protein_coding,retained_intron,exon-exon,NA,NA
+TMEM104,RAB37,ENST00000582330,ENST00000528438,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000582330,ENST00000392615,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000582330,ENST00000392614,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000582330,ENST00000392613,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000582330,ENST00000533530,+,+,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000582330,ENST00000527040,+,+,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000582330,ENST00000577548,+,+,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000582330,ENST00000392612,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000582330,ENST00000392610,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000582330,ENST00000481224,+,+,protein_coding,nonsense_mediated_decay,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000582330,ENST00000488977,+,+,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000582330,ENST00000531420,+,+,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000582330,ENST00000613645,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000584171,ENST00000340415,+,+,processed_transcript,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000584171,ENST00000402449,+,+,processed_transcript,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000584171,ENST00000392617,+,+,processed_transcript,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000584171,ENST00000528438,+,+,processed_transcript,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000584171,ENST00000392615,+,+,processed_transcript,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000584171,ENST00000392614,+,+,processed_transcript,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000584171,ENST00000392613,+,+,processed_transcript,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000584171,ENST00000533530,+,+,processed_transcript,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000584171,ENST00000527040,+,+,processed_transcript,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000584171,ENST00000577548,+,+,processed_transcript,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000584171,ENST00000392612,+,+,processed_transcript,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000584171,ENST00000392610,+,+,processed_transcript,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000584171,ENST00000481224,+,+,processed_transcript,nonsense_mediated_decay,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000584171,ENST00000488977,+,+,processed_transcript,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000584171,ENST00000531420,+,+,processed_transcript,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000584171,ENST00000613645,+,+,processed_transcript,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000335464,ENST00000340415,+,+,protein_coding,protein_coding,in-frame,370,41.16756700000004
+TMEM104,RAB37,ENST00000335464,ENST00000402449,+,+,protein_coding,protein_coding,in-frame,404,45.175015500000065
+TMEM104,RAB37,ENST00000335464,ENST00000392617,+,+,protein_coding,retained_intron,exon-exon,NA,NA
+TMEM104,RAB37,ENST00000335464,ENST00000528438,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000335464,ENST00000392615,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000335464,ENST00000392614,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000335464,ENST00000392613,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000335464,ENST00000533530,+,+,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000335464,ENST00000527040,+,+,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000335464,ENST00000577548,+,+,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000335464,ENST00000392612,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000335464,ENST00000392610,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000335464,ENST00000481224,+,+,protein_coding,nonsense_mediated_decay,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000335464,ENST00000488977,+,+,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000335464,ENST00000531420,+,+,protein_coding,retained_intron,Outside transcript boundry,NA,NA
+TMEM104,RAB37,ENST00000335464,ENST00000613645,+,+,protein_coding,protein_coding,Outside transcript boundry,NA,NA

@@ -14,6 +14,7 @@ from pvactools.tools.pvacsplice import (
     netmhc_stab,
     calculate_reference_proteome_similarity,
     generate_protein_fasta,
+    create_peptide_ordering_form,
     generate_aggregated_report,
     identify_problematic_amino_acids,
     mark_genes_of_interest,
@@ -95,6 +96,13 @@ def define_parser():
         add_help=False
     )
     generate_protein_fasta_parser.set_defaults(func=generate_protein_fasta)
+
+    create_peptide_ordering_form_parser = subparsers.add_parser(
+        "create_peptide_ordering_form",
+        help="Generate a peptide ordering form with coloring.",
+        add_help=False
+    )
+    create_peptide_ordering_form_parser.set_defaults(func=create_peptide_ordering_form)
 
     generate_aggregated_report_parser = subparsers.add_parser(
         "generate_aggregated_report",

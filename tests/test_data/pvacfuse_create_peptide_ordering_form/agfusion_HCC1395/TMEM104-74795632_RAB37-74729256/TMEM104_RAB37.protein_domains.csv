@@ -1,0 +1,51 @@
+5'_gene,3'_gene,5'_transcript,3'_transcript,5'_strand,3'_strand,Domain_ID,Domain_name,Domain_description,Protein_start,Protein_end
+TMEM104,RAB37,ENST00000417024,ENST00000340415,+,+,TMhelix,None,Region of a membrane-bound protein predicted to be embedded in the membrane.,27,49
+TMEM104,RAB37,ENST00000417024,ENST00000340415,+,+,TMhelix,None,Region of a membrane-bound protein predicted to be embedded in the membrane.,64,86
+TMEM104,RAB37,ENST00000417024,ENST00000340415,+,+,TMhelix,None,Region of a membrane-bound protein predicted to be embedded in the membrane.,158,180
+TMEM104,RAB37,ENST00000417024,ENST00000340415,+,+,TMhelix,None,Region of a membrane-bound protein predicted to be embedded in the membrane.,220,225
+TMEM104,RAB37,ENST00000417024,ENST00000340415,+,+,PF00071,Ras,Ras family,225,382
+TMEM104,RAB37,ENST00000417024,ENST00000402449,+,+,TMhelix,None,Region of a membrane-bound protein predicted to be embedded in the membrane.,27,49
+TMEM104,RAB37,ENST00000417024,ENST00000402449,+,+,TMhelix,None,Region of a membrane-bound protein predicted to be embedded in the membrane.,64,86
+TMEM104,RAB37,ENST00000417024,ENST00000402449,+,+,TMhelix,None,Region of a membrane-bound protein predicted to be embedded in the membrane.,158,180
+TMEM104,RAB37,ENST00000417024,ENST00000402449,+,+,TMhelix,None,Region of a membrane-bound protein predicted to be embedded in the membrane.,220,225
+TMEM104,RAB37,ENST00000417024,ENST00000402449,+,+,PF00071,Ras,Ras family,225,385
+TMEM104,RAB37,ENST00000582773,ENST00000340415,+,+,TMhelix,None,Region of a membrane-bound protein predicted to be embedded in the membrane.,13,32
+TMEM104,RAB37,ENST00000582773,ENST00000340415,+,+,PF01490,Aa_trans,Transmembrane amino acid transporter protein,20,66
+TMEM104,RAB37,ENST00000582773,ENST00000340415,+,+,TMhelix,None,Region of a membrane-bound protein predicted to be embedded in the membrane.,42,64
+TMEM104,RAB37,ENST00000582773,ENST00000340415,+,+,TMhelix,None,Region of a membrane-bound protein predicted to be embedded in the membrane.,145,167
+TMEM104,RAB37,ENST00000582773,ENST00000340415,+,+,TMhelix,None,Region of a membrane-bound protein predicted to be embedded in the membrane.,207,212
+TMEM104,RAB37,ENST00000582773,ENST00000340415,+,+,PF00071,Ras,Ras family,212,369
+TMEM104,RAB37,ENST00000582773,ENST00000402449,+,+,TMhelix,None,Region of a membrane-bound protein predicted to be embedded in the membrane.,13,32
+TMEM104,RAB37,ENST00000582773,ENST00000402449,+,+,PF01490,Aa_trans,Transmembrane amino acid transporter protein,20,66
+TMEM104,RAB37,ENST00000582773,ENST00000402449,+,+,TMhelix,None,Region of a membrane-bound protein predicted to be embedded in the membrane.,42,64
+TMEM104,RAB37,ENST00000582773,ENST00000402449,+,+,TMhelix,None,Region of a membrane-bound protein predicted to be embedded in the membrane.,145,167
+TMEM104,RAB37,ENST00000582773,ENST00000402449,+,+,TMhelix,None,Region of a membrane-bound protein predicted to be embedded in the membrane.,207,212
+TMEM104,RAB37,ENST00000582773,ENST00000402449,+,+,PF00071,Ras,Ras family,212,372
+TMEM104,RAB37,ENST00000582330,ENST00000340415,+,+,TMhelix,None,Region of a membrane-bound protein predicted to be embedded in the membrane.,13,32
+TMEM104,RAB37,ENST00000582330,ENST00000340415,+,+,PF01490,Aa_trans,Transmembrane amino acid transporter protein,20,66
+TMEM104,RAB37,ENST00000582330,ENST00000340415,+,+,TMhelix,None,Region of a membrane-bound protein predicted to be embedded in the membrane.,42,64
+TMEM104,RAB37,ENST00000582330,ENST00000340415,+,+,PF01490,Aa_trans,Transmembrane amino acid transporter protein,134,212
+TMEM104,RAB37,ENST00000582330,ENST00000340415,+,+,TMhelix,None,Region of a membrane-bound protein predicted to be embedded in the membrane.,145,167
+TMEM104,RAB37,ENST00000582330,ENST00000340415,+,+,TMhelix,None,Region of a membrane-bound protein predicted to be embedded in the membrane.,207,212
+TMEM104,RAB37,ENST00000582330,ENST00000340415,+,+,PF00071,Ras,Ras family,212,369
+TMEM104,RAB37,ENST00000582330,ENST00000402449,+,+,TMhelix,None,Region of a membrane-bound protein predicted to be embedded in the membrane.,13,32
+TMEM104,RAB37,ENST00000582330,ENST00000402449,+,+,PF01490,Aa_trans,Transmembrane amino acid transporter protein,20,66
+TMEM104,RAB37,ENST00000582330,ENST00000402449,+,+,TMhelix,None,Region of a membrane-bound protein predicted to be embedded in the membrane.,42,64
+TMEM104,RAB37,ENST00000582330,ENST00000402449,+,+,PF01490,Aa_trans,Transmembrane amino acid transporter protein,134,212
+TMEM104,RAB37,ENST00000582330,ENST00000402449,+,+,TMhelix,None,Region of a membrane-bound protein predicted to be embedded in the membrane.,145,167
+TMEM104,RAB37,ENST00000582330,ENST00000402449,+,+,TMhelix,None,Region of a membrane-bound protein predicted to be embedded in the membrane.,207,212
+TMEM104,RAB37,ENST00000582330,ENST00000402449,+,+,PF00071,Ras,Ras family,212,372
+TMEM104,RAB37,ENST00000335464,ENST00000340415,+,+,TMhelix,None,Region of a membrane-bound protein predicted to be embedded in the membrane.,13,32
+TMEM104,RAB37,ENST00000335464,ENST00000340415,+,+,PF01490,Aa_trans,Transmembrane amino acid transporter protein,20,66
+TMEM104,RAB37,ENST00000335464,ENST00000340415,+,+,TMhelix,None,Region of a membrane-bound protein predicted to be embedded in the membrane.,42,64
+TMEM104,RAB37,ENST00000335464,ENST00000340415,+,+,PF01490,Aa_trans,Transmembrane amino acid transporter protein,134,212
+TMEM104,RAB37,ENST00000335464,ENST00000340415,+,+,TMhelix,None,Region of a membrane-bound protein predicted to be embedded in the membrane.,145,167
+TMEM104,RAB37,ENST00000335464,ENST00000340415,+,+,TMhelix,None,Region of a membrane-bound protein predicted to be embedded in the membrane.,207,212
+TMEM104,RAB37,ENST00000335464,ENST00000340415,+,+,PF00071,Ras,Ras family,212,369
+TMEM104,RAB37,ENST00000335464,ENST00000402449,+,+,TMhelix,None,Region of a membrane-bound protein predicted to be embedded in the membrane.,13,32
+TMEM104,RAB37,ENST00000335464,ENST00000402449,+,+,PF01490,Aa_trans,Transmembrane amino acid transporter protein,20,66
+TMEM104,RAB37,ENST00000335464,ENST00000402449,+,+,TMhelix,None,Region of a membrane-bound protein predicted to be embedded in the membrane.,42,64
+TMEM104,RAB37,ENST00000335464,ENST00000402449,+,+,PF01490,Aa_trans,Transmembrane amino acid transporter protein,134,212
+TMEM104,RAB37,ENST00000335464,ENST00000402449,+,+,TMhelix,None,Region of a membrane-bound protein predicted to be embedded in the membrane.,145,167
+TMEM104,RAB37,ENST00000335464,ENST00000402449,+,+,TMhelix,None,Region of a membrane-bound protein predicted to be embedded in the membrane.,207,212
+TMEM104,RAB37,ENST00000335464,ENST00000402449,+,+,PF00071,Ras,Ras family,212,372

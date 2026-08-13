@@ -13,7 +13,7 @@ from tests.utils import *
 from pvactools.lib.color_peptides51mer import annotate_every_nucleotide, set_underline, get_mutant_positions_from_fasta
 
 
-class CreatePeptideOrderingFormTests(unittest.TestCase):
+class PvacseqCreatePeptideOrderingFormTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.python = sys.executable
