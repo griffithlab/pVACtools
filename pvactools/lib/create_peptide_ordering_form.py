@@ -64,7 +64,7 @@ class CreatePeptideOrderingForm:
             parser.add_argument(
                 "annotated_vcf",
                 help="A VEP-annotated single- or multi-sample VCF containing genotype and transcript information."
-                + "The VCF ma be gzipped (requires tabix index)."
+                + "The VCF may be gzipped (requires tabix index)."
             )
             parser.add_argument(
                 "ref_fasta",
