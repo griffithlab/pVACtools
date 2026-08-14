@@ -100,22 +100,40 @@ def get_mutated_frameshift_peptide_with_flanking_sequence(wt_peptide, mt_peptide
         return
     return mutant_subsequence, wildtype_subsequence
 
+def _parse_transcript_boolean(value, column):
+    if pd.api.types.is_bool(value):
+        return bool(value)
+    if isinstance(value, str):
+        if value == 'True':
+            return True
+        if value == 'False':
+            return False
+        if value == 'Not Run':
+            return value
+    raise ValueError(
+        "Invalid value {!r} for {!r}. Expected True, False, or 'Not Run'.".format(
+            value,
+            column,
+        )
+    )
+
 def is_preferred_transcript(mutation, transcript_prioritization_strategy, maximum_transcript_support_level):
     if not isinstance(mutation, pd.Series):
         mutation = pd.Series(mutation)
-        if mutation['Canonical'] != 'Not Run':
-            mutation['Canonical'] = eval(mutation['Canonical'])
-        if mutation['MANE Select'] != 'Not Run':
-            mutation['MANE Select'] = eval(mutation['MANE Select'])
+        canonical = _parse_transcript_boolean(mutation['Canonical'], 'Canonical')
+        mane_select = _parse_transcript_boolean(mutation['MANE Select'], 'MANE Select')
+    else:
+        canonical = mutation['Canonical']
+        mane_select = mutation['MANE Select']
     if 'mane_select' in transcript_prioritization_strategy:
-        if mutation['MANE Select'] == 'Not Run':
+        if mane_select == 'Not Run':
             return True
-        elif mutation['MANE Select']:
+        elif mane_select:
             return True
     if 'canonical' in transcript_prioritization_strategy:
-        if mutation['Canonical'] == 'Not Run':
+        if canonical == 'Not Run':
             return True
-        elif mutation['Canonical']:
+        elif canonical:
             return True
     if 'tsl' in transcript_prioritization_strategy:
         col = 'TSL' if 'TSL' in mutation else 'Transcript Support Level'
