@@ -1,0 +1,4 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	Domain_ID	Domain_name	Domain_description	Protein_start	Protein_end
+HBS1L	BCAS3	ENST00000367837	ENST00000390652	PF08938	HBS1_N	HBS1 N-terminus	54	124
+HBS1L	BCAS3	ENST00000367837	ENST00000390652	PF00009	GTP_EFTU	Elongation factor Tu GTP binding domain	259	435
+HBS1L	BCAS3	ENST00000367837	ENST00000390652	PF12490	BCAS3	Breast carcinoma amplified sequence 3 	681	896

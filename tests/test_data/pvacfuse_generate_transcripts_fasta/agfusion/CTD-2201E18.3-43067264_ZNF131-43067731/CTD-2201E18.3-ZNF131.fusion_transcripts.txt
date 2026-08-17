@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	5'_transcript_biotype	3'_transcript_biotype	Fusion_effect	Protein_length	Protein_weight_(kD)
+CTD-2201E18.3	ZNF131	ENST00000314957	ENST00000509156	sense_overlapping	protein_coding	Outside transcript boundry	NA	NA

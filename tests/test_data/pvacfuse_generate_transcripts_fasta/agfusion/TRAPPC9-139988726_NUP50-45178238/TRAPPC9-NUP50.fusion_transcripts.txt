@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	5'_transcript_biotype	3'_transcript_biotype	Fusion_effect	Protein_length	Protein_weight_(kD)
+TRAPPC9	NUP50	ENST00000389328	ENST00000347635	protein_coding	protein_coding	out-of-frame	1046	117.28958570000073

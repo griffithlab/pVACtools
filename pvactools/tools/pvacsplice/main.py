@@ -13,6 +13,7 @@ from pvactools.tools.pvacsplice import (
     net_chop,
     netmhc_stab,
     calculate_reference_proteome_similarity,
+    generate_transcripts_fasta,
     generate_protein_fasta,
     create_peptide_ordering_form,
     generate_aggregated_report,
@@ -89,6 +90,13 @@ def define_parser():
         add_help=False
     )
     calculate_reference_proteome_similarity_parser.set_defaults(func=calculate_reference_proteome_similarity)
+
+    generate_transcripts_fasta_parser = subparsers.add_parser(
+        "generate_transcripts_fasta",
+        help="Generate afasta file from a RegTools junctions output TSV file with transcripts sequences of splicing events and matching wildtypes",
+        add_help=False
+    )
+    generate_transcripts_fasta_parser.set_defaults(func=generate_transcripts_fasta)
 
     generate_protein_fasta_parser = subparsers.add_parser(
         "generate_protein_fasta",

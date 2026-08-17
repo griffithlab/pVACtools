@@ -1,0 +1,3 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	Domain_ID	Domain_name	Domain_description	Protein_start	Protein_end
+SNRPB2	METTL18	ENST00000246071	ENST00000310392	PF00076	RRM_1	RNA recognition motif. (a.k.a. RRM, RBD, or RNP domain)	9	79
+SNRPB2	METTL18	ENST00000246071	ENST00000310392	PF00076	RRM_1	RNA recognition motif. (a.k.a. RRM, RBD, or RNP domain)	153	212

@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	5'_transcript_biotype	3'_transcript_biotype	Fusion_effect	Protein_length	Protein_weight_(kD)
+LLNLR-285B5.1	ZNF606	ENST00000614345	ENST00000341164	unprocessed_pseudogene	protein_coding	exon-5UTR	NA	NA

@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	5'_transcript_biotype	3'_transcript_biotype	Fusion_effect	Protein_length	Protein_weight_(kD)
+NRCAM	PNPLA8	ENST00000379028	ENST00000422087	protein_coding	protein_coding	5UTR-exon	NA	NA

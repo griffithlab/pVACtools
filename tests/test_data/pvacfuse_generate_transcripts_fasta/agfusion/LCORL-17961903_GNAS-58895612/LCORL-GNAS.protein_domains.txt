@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	Domain_ID	Domain_name	Domain_description	Protein_start	Protein_end
+LCORL	GNAS	ENST00000382226	ENST00000371100	PF00503	G-alpha	G-protein alpha subunit	143	480

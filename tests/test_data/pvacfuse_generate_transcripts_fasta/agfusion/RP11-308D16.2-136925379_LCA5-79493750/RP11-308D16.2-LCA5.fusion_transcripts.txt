@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	5'_transcript_biotype	3'_transcript_biotype	Fusion_effect	Protein_length	Protein_weight_(kD)
+RP11-308D16.2	LCA5	ENST00000424306	ENST00000392959	processed_transcript	protein_coding	exon-exon	NA	NA

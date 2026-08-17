@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	5'_transcript_biotype	3'_transcript_biotype	Fusion_effect	Protein_length	Protein_weight_(kD)
+ABCA12	EXTL2	ENST00000272895	ENST00000370114	protein_coding	protein_coding	out-of-frame	1684	190.77453839999978

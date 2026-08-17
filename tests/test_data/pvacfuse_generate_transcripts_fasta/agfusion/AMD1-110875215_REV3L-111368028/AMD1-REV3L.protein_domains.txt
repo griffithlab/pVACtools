@@ -1,0 +1,5 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	Domain_ID	Domain_name	Domain_description	Protein_start	Protein_end
+AMD1	REV3L	ENST00000368885	ENST00000358835	PF01536	SAM_decarbox	Adenosylmethionine decarboxylase	5	36
+AMD1	REV3L	ENST00000368885	ENST00000358835	PF03104	DNA_pol_B_exo1	DNA polymerase family B, exonuclease domain	410	601
+AMD1	REV3L	ENST00000368885	ENST00000358835	PF00136	DNA_pol_B	DNA polymerase family B	660	1117
+AMD1	REV3L	ENST00000368885	ENST00000358835	PF14260	zf-C4pol	C4-type zinc-finger of DNA polymerase delta	1159	1226

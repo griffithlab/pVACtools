@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	5'_transcript_biotype	3'_transcript_biotype	Fusion_effect	Protein_length	Protein_weight_(kD)
+CTD-2368P22.1	ZNF667-AS1	ENST00000550135	ENST00000585445	antisense	lincRNA	exon-exon	NA	NA

@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	5'_transcript_biotype	3'_transcript_biotype	Fusion_effect	Protein_length	Protein_weight_(kD)
+RP11-465C12.1	CASC17	ENST00000637627	ENST00000569074	lincRNA	lincRNA	exon-exon	NA	NA

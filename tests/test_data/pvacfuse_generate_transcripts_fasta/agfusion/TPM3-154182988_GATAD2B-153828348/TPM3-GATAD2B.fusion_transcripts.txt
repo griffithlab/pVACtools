@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	5'_transcript_biotype	3'_transcript_biotype	Fusion_effect	Protein_length	Protein_weight_(kD)
+TPM3	GATAD2B	ENST00000368530	ENST00000368655	protein_coding	protein_coding	in-frame	674	74.56848720000029

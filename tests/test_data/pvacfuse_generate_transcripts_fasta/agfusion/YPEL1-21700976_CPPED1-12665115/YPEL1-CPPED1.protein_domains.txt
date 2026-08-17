@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	Domain_ID	Domain_name	Domain_description	Protein_start	Protein_end
+YPEL1	CPPED1	ENST00000339468	ENST00000381774	PF03226	Yippee-Mis18	Yippee zinc-binding/DNA-binding /Mis18, centromere assembly	21	112

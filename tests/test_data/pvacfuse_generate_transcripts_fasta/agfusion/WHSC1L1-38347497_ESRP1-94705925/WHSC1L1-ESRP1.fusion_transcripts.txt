@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	5'_transcript_biotype	3'_transcript_biotype	Fusion_effect	Protein_length	Protein_weight_(kD)
+WHSC1L1	ESRP1	ENST00000317025	ENST00000433389	protein_coding	protein_coding	in-frame	225	25.322587400000025

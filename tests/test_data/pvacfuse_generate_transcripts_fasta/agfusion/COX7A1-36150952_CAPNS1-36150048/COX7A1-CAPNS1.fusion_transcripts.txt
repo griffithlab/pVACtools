@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	5'_transcript_biotype	3'_transcript_biotype	Fusion_effect	Protein_length	Protein_weight_(kD)
+COX7A1	CAPNS1	ENST00000292907	ENST00000246533	protein_coding	protein_coding	in-frame	79	9.117416399999996

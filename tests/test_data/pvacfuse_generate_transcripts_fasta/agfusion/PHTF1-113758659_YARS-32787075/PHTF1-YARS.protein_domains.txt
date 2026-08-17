@@ -1,0 +1,4 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	Domain_ID	Domain_name	Domain_description	Protein_start	Protein_end
+PHTF1	YARS	ENST00000369604	ENST00000373477	PF12129	Phtf-FEM1B_bdg	Male germ-cell putative homeodomain transcription factor	6	15
+PHTF1	YARS	ENST00000369604	ENST00000373477	PF00579	tRNA-synt_1b	tRNA synthetases class I (W and Y)	15	108
+PHTF1	YARS	ENST00000369604	ENST00000373477	PF01588	tRNA_bind	Putative tRNA binding domain	157	252

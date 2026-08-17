@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	Domain_ID	Domain_name	Domain_description	Protein_start	Protein_end
+TAOK3	MARCH1	ENST00000392533	ENST00000503008	PF00069	Pkinase	Protein kinase domain	27	214

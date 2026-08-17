@@ -1,0 +1,3 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	Domain_ID	Domain_name	Domain_description	Protein_start	Protein_end
+GMPR2	TINF2	ENST00000557854	ENST00000267415	PF00478	IMPDH	IMP dehydrogenase / GMP reductase domain	28	305
+GMPR2	TINF2	ENST00000557854	ENST00000267415	PF00478	IMPDH	IMP dehydrogenase / GMP reductase domain	363	418

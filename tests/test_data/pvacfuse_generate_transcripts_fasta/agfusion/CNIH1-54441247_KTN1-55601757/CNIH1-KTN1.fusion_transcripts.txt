@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	5'_transcript_biotype	3'_transcript_biotype	Fusion_effect	Protein_length	Protein_weight_(kD)
+CNIH1	KTN1	ENST00000216416	ENST00000395314	protein_coding	protein_coding	in-frame	1384	159.35316110000042

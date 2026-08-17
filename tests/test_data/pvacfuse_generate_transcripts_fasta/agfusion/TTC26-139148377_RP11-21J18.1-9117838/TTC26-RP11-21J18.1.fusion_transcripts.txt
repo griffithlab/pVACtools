@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	5'_transcript_biotype	3'_transcript_biotype	Fusion_effect	Protein_length	Protein_weight_(kD)
+TTC26	RP11-21J18.1	ENST00000464848	ENST00000579126	protein_coding	processed_transcript	exon-exon	NA	NA

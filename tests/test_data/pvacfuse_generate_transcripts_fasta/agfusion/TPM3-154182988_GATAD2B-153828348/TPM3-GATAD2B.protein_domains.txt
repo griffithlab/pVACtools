@@ -1,0 +1,4 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	Domain_ID	Domain_name	Domain_description	Protein_start	Protein_end
+TPM3	GATAD2B	ENST00000368530	ENST00000368655	PF00261	Tropomyosin	Tropomyosin	49	81
+TPM3	GATAD2B	ENST00000368530	ENST00000368655	PF16563	P66_CC	Coiled-coil and interaction region of P66A and P66B with MBD2	240	281
+TPM3	GATAD2B	ENST00000368530	ENST00000368655	PF00320	GATA	GATA zinc finger	501	534

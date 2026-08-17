@@ -1,0 +1,3 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	exon_gene_source	exon_number	exon_chr	exon_start	exon_end
+RPP40	RP11-428J1.5	ENST00000380051	ENST00000606761	'5 gene	1	6	5003885	5004047
+RPP40	RP11-428J1.5	ENST00000380051	ENST00000606761	'3 gene	2	6	5042592	5043449

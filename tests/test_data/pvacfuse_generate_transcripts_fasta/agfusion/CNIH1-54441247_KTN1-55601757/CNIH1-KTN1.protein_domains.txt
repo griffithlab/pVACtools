@@ -1,0 +1,4 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	Domain_ID	Domain_name	Domain_description	Protein_start	Protein_end
+CNIH1	KTN1	ENST00000216416	ENST00000395314	PF03311	Cornichon	Cornichon protein	7	27
+CNIH1	KTN1	ENST00000216416	ENST00000395314	TMhelix	None	None	7	27
+CNIH1	KTN1	ENST00000216416	ENST00000395314	TMhelix	None	None	34	56

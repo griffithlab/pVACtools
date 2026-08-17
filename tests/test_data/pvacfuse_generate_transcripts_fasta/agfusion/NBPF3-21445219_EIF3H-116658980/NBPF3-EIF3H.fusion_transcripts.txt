@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	5'_transcript_biotype	3'_transcript_biotype	Fusion_effect	Protein_length	Protein_weight_(kD)
+NBPF3	EIF3H	ENST00000318249	ENST00000521861	protein_coding	protein_coding	in-frame (with mutation)	300	34.74826640000002

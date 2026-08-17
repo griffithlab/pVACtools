@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	5'_transcript_biotype	3'_transcript_biotype	Fusion_effect	Protein_length	Protein_weight_(kD)
+PTS	RP11-356J5.12	ENST00000280362	ENST00000504610	protein_coding	lincRNA	Outside transcript boundry	NA	NA

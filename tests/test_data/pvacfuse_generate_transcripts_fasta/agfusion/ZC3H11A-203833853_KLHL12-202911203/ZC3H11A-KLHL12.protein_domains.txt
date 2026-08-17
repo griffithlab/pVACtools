@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	Domain_ID	Domain_name	Domain_description	Protein_start	Protein_end
+ZC3H11A	KLHL12	ENST00000545588	ENST00000367261	PF15663	zf-CCCH_3	Zinc-finger containing family	1	109

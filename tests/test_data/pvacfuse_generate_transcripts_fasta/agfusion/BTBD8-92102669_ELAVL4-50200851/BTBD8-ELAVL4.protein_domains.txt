@@ -1,0 +1,2 @@
+5'_gene	3'_gene	5'_transcript	3'_transcript	Domain_ID	Domain_name	Domain_description	Protein_start	Protein_end
+BTBD8	ELAVL4	ENST00000342818	ENST00000357083	PF00651	BTB	BTB/POZ domain	51	132
