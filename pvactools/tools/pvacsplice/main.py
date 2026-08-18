@@ -100,7 +100,7 @@ def define_parser():
 
     generate_protein_fasta_parser = subparsers.add_parser(
         "generate_protein_fasta",
-        help="Generate an annotated fasta file from a RegTools junctions output TSV file with protein sequences of mutations",
+        help="Generate a fasta file with a specific flanking sequence length around the splice site",
         add_help=False
     )
     generate_protein_fasta_parser.set_defaults(func=generate_protein_fasta)
