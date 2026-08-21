@@ -12,6 +12,7 @@ import argparse
 import logging
 from testfixtures import LogCapture, StringComparison as S
 
+from pvactools.lib.prediction_class import IEDB
 from pvactools.lib.fasta_to_kmers import SequenceFastaToKmers
 import pvactools.tools.pvacbind.main as pvacbind_main
 from pvactools.tools.pvacbind import run
@@ -101,11 +102,7 @@ class PvacbindTests(unittest.TestCase):
         output_dir.cleanup()
 
     def test_pvacbind_pipeline(self):
-        with patch('pvactools.lib.call_predictors.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
-            data,
-            files,
-            test_data_directory()
-        ))) as mock_request, patch('pvactools.lib.net_chop.NetChop.post_query', unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: mock_netchop_netmhcstabpan(
+        with patch.object(IEDB, 'predict', autospec=True) as mock_method, patch('pvactools.lib.net_chop.NetChop.post_query', unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: mock_netchop_netmhcstabpan(
             data,
             files,
             self.test_data_directory,
@@ -116,6 +113,13 @@ class PvacbindTests(unittest.TestCase):
             self.test_data_directory,
             'Netmhcstab.html'
         ))):
+            mock_method.side_effect = lambda self_obj, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None: make_iedb_response(
+                self_obj,
+                allele,
+                epitope_length,
+                test_data_directory(),
+            )
+
             output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
 
             run.main([

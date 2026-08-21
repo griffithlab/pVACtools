@@ -4,6 +4,7 @@ import unittest
 import tempfile
 import gzip
 import shutil
+import pandas as pd
 
 def compare(path1, path2):
     r1 = open(path1)
@@ -65,6 +66,14 @@ def make_response(data, files, path, tool=None):
         response_obj.content = reader.read()
         reader.close()
         return response_obj
+
+def make_iedb_response(self_obj, allele, epitope_length, path, tool=None):
+    if tool is not None:
+        filename = f'response_{allele}_{epitope_length}_{self_obj.iedb_prediction_method}.{tool}.tsv'
+    else:
+        filename = f'response_{allele}_{epitope_length}_{self_obj.iedb_prediction_method}.tsv'
+    df = pd.read_csv(os.path.join(path, filename), delimiter="\t")
+    return (df, 'pandas')
 
 def generate_class_i_call(method, allele, length, input_file):
     return generate_prediction_calls(method, allele, length, input_file, 'http://tools-cluster-interface.iedb.org/tools_api/mhci/')
