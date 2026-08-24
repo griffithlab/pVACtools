@@ -761,19 +761,16 @@ class IEDBMHCI(MHCI, IEDB, metaclass=ABCMeta):
         return 'mhci'
 
     def parse_iedb_allele_file(self):
-        #Ultimately we probably want this method to call out to IEDB but their command is currently broken
-        #curl --data "method=ann&species=human" http://tools-api.iedb.org/tools_api/mhci/
         base_dir               = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-        alleles_dir            = os.path.join(base_dir, 'supporting_files', 'alleles', 'class_i')
-        iedb_alleles_file_name = os.path.join(alleles_dir, "%s.tsv" % self.iedb_prediction_method)
+        iedb_alleles_file_name = os.path.join(base_dir, 'supporting_files', 'alleles', 'iedb.tsv')
         alleles = {}
         with open(iedb_alleles_file_name) as iedb_alleles_file:
             tsv_reader = csv.DictReader(iedb_alleles_file, delimiter='\t')
             for row in tsv_reader:
-                allele = row['MHC']
-                if allele not in alleles.keys():
-                    alleles[allele] = []
-                alleles[allele].append(int(row['PeptideLength']))
+                allele = row['IEDB Label']
+                algorithm = row['Tool']
+                if algorithm == self.iedb_prediction_method:
+                    alleles[allele] = [int(l) for l in row['Lengths'].split(',')]
         return alleles
 
     def valid_allele_names(self):
