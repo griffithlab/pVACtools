@@ -541,7 +541,7 @@ class CalculateReferenceProteomeSimilarity:
                         matches = []
                         for query_window, hit_reference_matches in groupby(metric_lines,key=lambda x:x['Match Window']):
                             hit_reference_matches = list(hit_reference_matches)
-                            gene_regex = '^.*gene_symbol:([0-9|A-Z]+).*$'
+                            gene_regex = '^.*gene_symbol:([0-9|A-Z|a-z]+).*$'
                             transcript_regex = '^.*transcript:(ENS[0-9|A-Z|.]+).*$'
                             gene_p = re.compile(gene_regex)
                             transcript_p = re.compile(transcript_regex)
