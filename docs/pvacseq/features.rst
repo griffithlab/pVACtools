@@ -169,12 +169,6 @@ for a variety of additional algorithms.
      - Immunogenicity
      - yes
      - yes
-   * - Pickpocket
-     - 1.1
-     - MHC Class I
-     - Binding
-     - yes
-     - yes
    * - SMM
      - 1.0
      - MHC Class I
