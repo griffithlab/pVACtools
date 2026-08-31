@@ -169,7 +169,7 @@
     "set_expr": [
       0.573
     ],
-    "read_support": 2103.0,
+    "read_support": 213.0,
     "gene_expr": 0.5734,
     "best_peptide_mt": "MLGDLSASI",
     "best_peptide_wt": "MLGDLSDSQ",
@@ -465,7 +465,7 @@
     "set_expr": [
       0.573
     ],
-    "read_support": 2103.0,
+    "read_support": 213.0,
     "gene_expr": 0.5734,
     "best_peptide_mt": "MLGDLSASI",
     "best_peptide_wt": "MLGDLSDSQ",
@@ -761,7 +761,7 @@
     "set_expr": [
       0.153
     ],
-    "read_support": 570.0,
+    "read_support": 57.0,
     "gene_expr": 0.1534,
     "best_peptide_mt": "GYDGEGGDN",
     "best_peptide_wt": "NA",
@@ -909,7 +909,7 @@
     "set_expr": [
       0.153
     ],
-    "read_support": 570.0,
+    "read_support": 57.0,
     "gene_expr": 0.1534,
     "best_peptide_mt": "GYDGEGGDN",
     "best_peptide_wt": "NA",
@@ -1057,7 +1057,7 @@
     "set_expr": [
       0.331
     ],
-    "read_support": 1230.0,
+    "read_support": 123.0,
     "gene_expr": 0.3308,
     "best_peptide_mt": "FIHSKIKAQ",
     "best_peptide_wt": "FIHSKIKAL",
@@ -1205,7 +1205,7 @@
     "set_expr": [
       0.331
     ],
-    "read_support": 1230.0,
+    "read_support": 123.0,
     "gene_expr": 0.3308,
     "best_peptide_mt": "FIHSKIKAQ",
     "best_peptide_wt": "FIHSKIKAL",
@@ -1353,7 +1353,7 @@
     "set_expr": [
       0.331
     ],
-    "read_support": 1230.0,
+    "read_support": 123.0,
     "gene_expr": 0.3308,
     "best_peptide_mt": "FIHSKIKAQ",
     "best_peptide_wt": "FIHSKIKAL",
@@ -1501,7 +1501,7 @@
     "set_expr": [
       0.331
     ],
-    "read_support": 1230.0,
+    "read_support": 123.0,
     "gene_expr": 0.3308,
     "best_peptide_mt": "FIHSKIKAQ",
     "best_peptide_wt": "FIHSKIKAL",
@@ -1649,7 +1649,7 @@
     "set_expr": [
       0.331
     ],
-    "read_support": 1230.0,
+    "read_support": 123.0,
     "gene_expr": 0.3308,
     "best_peptide_mt": "FIHSKIKAQ",
     "best_peptide_wt": "FIHSKIKAL",
@@ -1945,7 +1945,7 @@
     "set_expr": [
       0.331
     ],
-    "read_support": 1230.0,
+    "read_support": 123.0,
     "gene_expr": 0.3308,
     "best_peptide_mt": "FIHSKIKAQ",
     "best_peptide_wt": "FIHSKIKAL",
@@ -2093,7 +2093,7 @@
     "set_expr": [
       0.331
     ],
-    "read_support": 1230.0,
+    "read_support": 123.0,
     "gene_expr": 0.3308,
     "best_peptide_mt": "FIHSKIKAQ",
     "best_peptide_wt": "FIHSKIKAL",
@@ -2241,7 +2241,7 @@
     "set_expr": [
       0.331
     ],
-    "read_support": 1230.0,
+    "read_support": 123.0,
     "gene_expr": 0.3308,
     "best_peptide_mt": "FIHSKIKAQ",
     "best_peptide_wt": "FIHSKIKAL",
@@ -2389,7 +2389,7 @@
     "set_expr": [
       0.11
     ],
-    "read_support": 401.0,
+    "read_support": 41.0,
     "gene_expr": 0.1104,
     "best_peptide_mt": "YRIYLTILV",
     "best_peptide_wt": "YRIYLAIFT",
@@ -2537,7 +2537,7 @@
     "set_expr": [
       0.11
     ],
-    "read_support": 401.0,
+    "read_support": 41.0,
     "gene_expr": 0.1104,
     "best_peptide_mt": "YRIYLTILV",
     "best_peptide_wt": "YRIYLAIFT",
@@ -2685,7 +2685,7 @@
     "set_expr": [
       0.11
     ],
-    "read_support": 401.0,
+    "read_support": 41.0,
     "gene_expr": 0.1104,
     "best_peptide_mt": "YRIYLTILV",
     "best_peptide_wt": "YRIYLAIFT",
@@ -2833,7 +2833,7 @@
     "set_expr": [
       0.11
     ],
-    "read_support": 401.0,
+    "read_support": 41.0,
     "gene_expr": 0.1104,
     "best_peptide_mt": "YRIYLTILV",
     "best_peptide_wt": "YRIYLAIFT",
@@ -2981,7 +2981,7 @@
     "set_expr": [
       0.11
     ],
-    "read_support": 401.0,
+    "read_support": 41.0,
     "gene_expr": 0.1104,
     "best_peptide_mt": "YRIYLTILV",
     "best_peptide_wt": "YRIYLAIFT",
@@ -3129,7 +3129,7 @@
     "set_expr": [
       0.11
     ],
-    "read_support": 401.0,
+    "read_support": 41.0,
     "gene_expr": 0.1104,
     "best_peptide_mt": "YRIYLTILV",
     "best_peptide_wt": "YRIYLAIFT",
@@ -3277,7 +3277,7 @@
     "set_expr": [
       0.11
     ],
-    "read_support": 401.0,
+    "read_support": 41.0,
     "gene_expr": 0.1104,
     "best_peptide_mt": "YRIYLTILV",
     "best_peptide_wt": "YRIYLAIFT",
@@ -3425,7 +3425,7 @@
     "set_expr": [
       0.573
     ],
-    "read_support": 2103.0,
+    "read_support": 213.0,
     "gene_expr": 0.5734,
     "best_peptide_mt": "MLGDLSASI",
     "best_peptide_wt": "MLGDLSDSQ",
@@ -3573,7 +3573,7 @@
     "set_expr": [
       0.11
     ],
-    "read_support": 401.0,
+    "read_support": 41.0,
     "gene_expr": 0.1104,
     "best_peptide_mt": "YRIYLTILV",
     "best_peptide_wt": "YRIYLAIFT",
@@ -3869,7 +3869,7 @@
     "set_expr": [
       0.573
     ],
-    "read_support": 2103.0,
+    "read_support": 213.0,
     "gene_expr": 0.5734,
     "best_peptide_mt": "MLGDLSASI",
     "best_peptide_wt": "MLGDLSDSQ",
@@ -4655,7 +4655,7 @@
     "set_expr": [
       0.573
     ],
-    "read_support": 2103.0,
+    "read_support": 213.0,
     "gene_expr": 0.5734,
     "best_peptide_mt": "MLGDLSASI",
     "best_peptide_wt": "MLGDLSDSQ",

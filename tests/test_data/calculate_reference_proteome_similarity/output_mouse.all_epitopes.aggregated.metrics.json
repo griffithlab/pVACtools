@@ -1,0 +1,389 @@
+{
+  "tumor_purity": null,
+  "vaf_clonal": 0.5,
+  "vaf_subclonal": 0.25,
+  "binding_threshold": 500,
+  "aggregate_inclusion_binding_threshold": 1500,
+  "aggregate_inclusion_count_limit": 15,
+  "trna_vaf": 0.1,
+  "trna_cov": 10,
+  "allele_expr_threshold": 1.0,
+  "transcript_prioritization_strategy": [
+    "canonical",
+    "mane_select",
+    "tsl"
+  ],
+  "maximum_transcript_support_level": 1,
+  "percentile_threshold": 1.0,
+  "percentile_threshold_strategy": "exploratory",
+  "use_allele_specific_binding_thresholds": false,
+  "mt_top_score_metric": "Median",
+  "wt_top_score_metric": "Median",
+  "top_score_metric2": "ic50",
+  "allele_specific_binding_thresholds": {},
+  "allele_specific_anchors": true,
+  "alleles": [
+    "H-2-Db",
+    "H-2-Kb"
+  ],
+  "anchor_contribution_threshold": 0.8,
+  "epitope_lengths": [
+    8,
+    9,
+    10,
+    11
+  ],
+  "11-60132681-60132682-C-T": {
+    "good_binders": {
+      "Transcript Set 1": {
+        "peptides": {
+          "VGGLTSAL": {
+            "ic50s_MT": [
+              "X",
+              2756.1298828125
+            ],
+            "percentiles_MT": [
+              "X",
+              3.700000047683716
+            ],
+            "ic50s_WT": [
+              "X",
+              2099.97
+            ],
+            "percentiles_WT": [
+              "X",
+              3.1
+            ],
+            "hla_types": [
+              "H-2-Db",
+              "H-2-Kb"
+            ],
+            "mutation_position": "5",
+            "problematic_positions": "None",
+            "anchor_fails": "None",
+            "individual_ic50_calls": {
+              "algorithms": [
+                "MHCflurry",
+                "NetMHC",
+                "NetMHCcons",
+                "NetMHCpan",
+                "PickPocket",
+                "SMM",
+                "SMMPMBEC"
+              ],
+              "MT": {
+                "H-2-Kb": [
+                  1297.301924185702,
+                  2756.13,
+                  2812.19,
+                  4129.12,
+                  13356.592119980844,
+                  963.2521787427568,
+                  810.475703373306
+                ]
+              },
+              "WT": {
+                "H-2-Kb": [
+                  1591.284107556557,
+                  2099.97,
+                  2314.53,
+                  3705.0,
+                  14407.494213837925,
+                  655.7525679830561,
+                  672.5738844961288
+                ]
+              }
+            },
+            "individual_ic50_percentile_calls": {
+              "algorithms": [
+                "MHCflurry",
+                "NetMHC",
+                "NetMHCcons",
+                "NetMHCpan",
+                "PickPocket",
+                "SMM",
+                "SMMPMBEC"
+              ],
+              "MT": {
+                "H-2-Kb": [
+                  2.3889999389648438,
+                  4.0,
+                  3.9000000953674316,
+                  4.0,
+                  15.0,
+                  3.7,
+                  3.2
+                ]
+              },
+              "WT": {
+                "H-2-Kb": [
+                  2.6987500000000004,
+                  3.1,
+                  3.3,
+                  3.6,
+                  16.0,
+                  2.7,
+                  2.8
+                ]
+              }
+            },
+            "individual_el_calls": {
+              "algorithms": [
+                "MHCflurryEL Processing",
+                "MHCflurryEL Presentation",
+                "NetMHCpanEL"
+              ],
+              "MT": {
+                "H-2-Kb": [
+                  0.0358441105345264,
+                  0.0750236005508822,
+                  0.041668
+                ]
+              },
+              "WT": {
+                "H-2-Kb": [
+                  0.0814130362123251,
+                  0.0724842731540396,
+                  0.0372
+                ]
+              }
+            },
+            "individual_el_percentile_calls": {
+              "algorithms": [
+                "MHCflurryEL Processing",
+                "MHCflurryEL Presentation",
+                "NetMHCpanEL"
+              ],
+              "MT": {
+                "H-2-Kb": [
+                  "NA",
+                  3.639184782608624,
+                  2.5
+                ]
+              },
+              "WT": {
+                "H-2-Kb": [
+                  "NA",
+                  3.720108695652101,
+                  2.7
+                ]
+              }
+            },
+            "individual_percentile_calls": {
+              "algorithms": [
+                "MHCflurry",
+                "NetMHC",
+                "NetMHCcons",
+                "NetMHCpan",
+                "PickPocket",
+                "SMM",
+                "SMMPMBEC",
+                "MHCflurryEL Presentation",
+                "NetMHCpanEL"
+              ],
+              "MT": {
+                "H-2-Kb": [
+                  2.3889999389648438,
+                  4.0,
+                  3.9000000953674316,
+                  4.0,
+                  15.0,
+                  3.7,
+                  3.2,
+                  3.639184782608624,
+                  2.5
+                ]
+              },
+              "WT": {
+                "H-2-Kb": [
+                  2.6987500000000004,
+                  3.1,
+                  3.3,
+                  3.6,
+                  16.0,
+                  2.7,
+                  2.8,
+                  3.720108695652101,
+                  2.7
+                ]
+              }
+            },
+            "wt_peptide": "VGGLASAL"
+          }
+        },
+        "transcripts": [
+          "ENSMUST00000102683.11-Tom1l2-A/T-414"
+        ],
+        "transcript_expr": [
+          26.654
+        ],
+        "mane_select": [
+          false
+        ],
+        "canonical": [
+          true
+        ],
+        "tsl": [
+          "Not Supported"
+        ],
+        "biotype": [
+          "protein_coding"
+        ],
+        "transcript_cds_flags": [
+          "None"
+        ],
+        "transcript_length": [
+          507
+        ],
+        "transcript_count": 1,
+        "peptide_count": 1,
+        "total_expr": 26.654
+      }
+    },
+    "sets": [
+      "Transcript Set 1"
+    ],
+    "transcript_counts": [
+      1
+    ],
+    "peptide_counts": [
+      1
+    ],
+    "set_expr": [
+      26.654
+    ],
+    "DNA VAF": 1.0,
+    "RNA VAF": 1.0,
+    "gene_expr": 42.475,
+    "best_peptide_mt": "VGGLTSAL",
+    "best_peptide_wt": "VGGLASAL",
+    "best_hla_allele": "H-2-Kb",
+    "reference_matches": {
+      "count": 16,
+      "query_peptide": "YEDPQAVGGLTSALDNRKQNS",
+      "matches": [
+        {
+          "Matched Peptide": "SALDNRKQNS",
+          "Genes": "Tom1l2",
+          "Transcripts": "ENSMUST00000143124.8",
+          "Hit IDs": [
+            "ENSMUSP00000121936.2"
+          ]
+        },
+        {
+          "Matched Peptide": "YEDPQAVGGL",
+          "Genes": "Tom1l2",
+          "Transcripts": "ENSMUST00000143124.8",
+          "Hit IDs": [
+            "ENSMUSP00000121936.2"
+          ]
+        },
+        {
+          "Matched Peptide": "SALDNRKQNS",
+          "Genes": "Tom1l2",
+          "Transcripts": "ENSMUST00000133420.8",
+          "Hit IDs": [
+            "ENSMUSP00000117623.2"
+          ]
+        },
+        {
+          "Matched Peptide": "YEDPQAVGGL",
+          "Genes": "Tom1l2",
+          "Transcripts": "ENSMUST00000133420.8",
+          "Hit IDs": [
+            "ENSMUSP00000117623.2"
+          ]
+        },
+        {
+          "Matched Peptide": "SALDNRKQNS",
+          "Genes": "Tom1l2",
+          "Transcripts": "ENSMUST00000102682.5",
+          "Hit IDs": [
+            "ENSMUSP00000099743.5"
+          ]
+        },
+        {
+          "Matched Peptide": "YEDPQAVGGL",
+          "Genes": "Tom1l2",
+          "Transcripts": "ENSMUST00000102682.5",
+          "Hit IDs": [
+            "ENSMUSP00000099743.5"
+          ]
+        },
+        {
+          "Matched Peptide": "SALDNRKQNS",
+          "Genes": "Tom1l2",
+          "Transcripts": "ENSMUST00000095254.12",
+          "Hit IDs": [
+            "ENSMUSP00000092884.6"
+          ]
+        },
+        {
+          "Matched Peptide": "YEDPQAVGGL",
+          "Genes": "Tom1l2",
+          "Transcripts": "ENSMUST00000095254.12",
+          "Hit IDs": [
+            "ENSMUSP00000092884.6"
+          ]
+        },
+        {
+          "Matched Peptide": "SALDNRKQNS",
+          "Genes": "Tom1l2",
+          "Transcripts": "ENSMUST00000093048.13",
+          "Hit IDs": [
+            "ENSMUSP00000090736.7"
+          ]
+        },
+        {
+          "Matched Peptide": "YEDPQAVGGL",
+          "Genes": "Tom1l2",
+          "Transcripts": "ENSMUST00000093048.13",
+          "Hit IDs": [
+            "ENSMUSP00000090736.7"
+          ]
+        },
+        {
+          "Matched Peptide": "SALDNRKQNS",
+          "Genes": "Tom1l2",
+          "Transcripts": "ENSMUST00000093046.13",
+          "Hit IDs": [
+            "ENSMUSP00000090734.7"
+          ]
+        },
+        {
+          "Matched Peptide": "YEDPQAVGGL",
+          "Genes": "Tom1l2",
+          "Transcripts": "ENSMUST00000093046.13",
+          "Hit IDs": [
+            "ENSMUSP00000090734.7"
+          ]
+        },
+        {
+          "Matched Peptide": "SALDNRKQNS",
+          "Genes": "Tom1l2",
+          "Transcripts": "ENSMUST00000064019.15",
+          "Hit IDs": [
+            "ENSMUSP00000063414.9"
+          ]
+        },
+        {
+          "Matched Peptide": "YEDPQAVGGL",
+          "Genes": "Tom1l2",
+          "Transcripts": "ENSMUST00000064019.15",
+          "Hit IDs": [
+            "ENSMUSP00000063414.9"
+          ]
+        },
+        {
+          "Matched Peptide": "GGLTSALDN",
+          "Genes": "Cacna1e",
+          "Transcripts": "ENSMUST00000187541.7, ENSMUST00000211821.2",
+          "Hit IDs": [
+            "ENSMUSP00000148507.2",
+            "ENSMUSP00000140937.2"
+          ]
+        }
+      ]
+    }
+  }
+}
