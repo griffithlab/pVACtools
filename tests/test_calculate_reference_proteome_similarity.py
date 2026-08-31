@@ -23,6 +23,7 @@ class CalculateReferenceProteomeSimilarityTests(unittest.TestCase):
         cls.executable    = os.path.join(pvactools_directory(), "pvactools", "lib", "calculate_reference_proteome_similarity.py")
         cls.test_data_dir = os.path.join(pvactools_directory(), "tests", "test_data", "calculate_reference_proteome_similarity")
         cls.peptide_fasta = os.path.join(pvactools_directory(), "tests", "test_data", "Homo_sapiens.GRCh38.pep.short.fa.gz")
+        cls.peptide_fasta_mouse = os.path.join(pvactools_directory(), "tests", "test_data", "Mus_musculus.GRCm39.pep.all.fa.gz")
 
     def test_module_compiles(self):
         self.assertTrue(py_compile.compile(self.executable))
@@ -175,12 +176,47 @@ class CalculateReferenceProteomeSimilarityTests(unittest.TestCase):
             input_file,
             input_fasta,
             output_file.name,
-            peptide_fasta=self.peptide_fasta,
+            peptide_fasta=self.peptide_fasta_mouse,
             aggregate_metrics_file=tmp_aggregated_metrics_file.name,
         ).execute())
         self.assertTrue(cmp(
             output_file.name,
             os.path.join(self.test_data_dir, "output.aggregated.peptide_fasta.mouse.tsv"),
+        ))
+        self.assertTrue(cmp(
+            output_aggregated_metrics_file,
+            os.path.join(self.test_data_dir, "output.aggregated.peptide_fasta.mouse.tsv.metrics.json"),
+        ))
+        os.remove(metric_file)
+
+    def test_calculate_self_similarity_with_aggregated_tsv_and_peptide_fasta_mouse_with_matches(self):
+        input_file = os.path.join(self.test_data_dir, 'input_mouse.all_epitopes.aggregated.tsv')
+        input_aggregated_metrics_file = os.path.join(self.test_data_dir, 'input_mouse.all_epitopes.aggregated.metrics.json')
+        tmp_aggregated_metrics_file = tempfile.NamedTemporaryFile()
+        import shutil
+        shutil.copy(input_aggregated_metrics_file, tmp_aggregated_metrics_file.name)
+        input_fasta = os.path.join(self.test_data_dir, 'input_mouse.fasta')
+        output_file = tempfile.NamedTemporaryFile(suffix='.tsv')
+        metric_file = "{}.reference_matches".format(output_file.name)
+        output_aggregated_metrics_file = output_file.name.replace(".tsv", ".metrics.json")
+        self.assertFalse(CalculateReferenceProteomeSimilarity(
+            input_file,
+            input_fasta,
+            output_file.name,
+            peptide_fasta=self.peptide_fasta_mouse,
+            aggregate_metrics_file=tmp_aggregated_metrics_file.name,
+        ).execute())
+        self.assertTrue(cmp(
+            output_file.name,
+            os.path.join(self.test_data_dir, "output_mouse.all_epitopes.aggregated.tsv"),
+        ))
+        self.assertTrue(cmp(
+            output_aggregated_metrics_file,
+            os.path.join(self.test_data_dir, "output_mouse.all_epitopes.aggregated.metrics.json"),
+        ))
+        self.assertTrue(cmp(
+            metric_file,
+            os.path.join(self.test_data_dir, "output_mouse.all_epitopes.aggregated.tsv.reference_matches"),
         ))
         os.remove(metric_file)
 
