@@ -59,7 +59,7 @@ Contents
    mailing_list
 
 
-Version 7.1.2
+Version 7.1.3
 -------------
 
 This is a bugfix release. It fixes the following problem(s):
