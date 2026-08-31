@@ -46,11 +46,11 @@ and immunogenicity algorithms.
 By using the IEDB RESTful web interface, pVACbind leverages their extensive support of different prediction algorithms.
 
 In addition to IEDB-supported prediction algorithms, we've also added support
-for a variety of additional algorithms. The following table lists all algorithms supported
-by pVACbind, whether the algorithm is a MHC class I or class II algorithm, what type of scoring
-the algorithm returns (binding, presentation, or immunogenicity), whether it supports
-percentile ranks natively, supports normalized percentile ranks (``--use-normalized-percentiles``
-flag), and whether the ``select`` algorithm shortcut includes this algorithm.
+for a variety of additional algorithms. The following table lists all prediction algorithms supported
+by pVACbind, whether the predictor is a MHC class I or class II algorithm, what type of scoring
+the predictor returns (binding, presentation, or immunogenicity), whether the algorithm supports
+percentile ranks natively, whether the predictor supports normalized percentile ranks (``--use-normalized-percentiles
+flag), and whether the ``select`` algorithm shortcut includes this predictor.
 
 .. list-table::
    :header-rows: 1
