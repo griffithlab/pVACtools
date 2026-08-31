@@ -62,7 +62,7 @@ class PvacspliceRunPipeline(RunPipeline):
         self.predictor.execute()
 
     def call_generate_protein_fasta(self, params):
-        PvacspliceGenerateProteinFasta(**params).trim_sequences()
+        PvacspliceGenerateProteinFasta(**params).execute()
 
     def call_post_processor(self, all_epitopes_file, filtered_file, post_processing_params):
         post_processing_params['input_file'] = all_epitopes_file

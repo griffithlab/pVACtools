@@ -6,10 +6,11 @@ import shutil
 from pvactools.lib.generate_protein_fasta import PvacseqGenerateProteinFasta, PvacspliceGenerateProteinFasta, PvacfuseGenerateProteinFasta
 from pvactools.lib.generate_reviews_files import main as run_generate_reviews_files
 from pvactools.lib.color_peptides51mer import main as run_color_peptides
-from pvactools.lib.run_argument_utils import downstream_sequence_length, aggregate_report_evaluations, pvacsplice_anchors
+from pvactools.lib.run_argument_utils import aggregate_report_evaluations
 
 class CreatePeptideOrderingForm:
     def __init__(self, **kwargs):
+        self.transcripts_fasta = kwargs['transcripts_fasta']
         self.flanking_sequence_length = kwargs['flanking_sequence_length']
         self.classI_aggregated_tsv = kwargs['classI_aggregated_tsv']
         self.classII_aggregated_tsv = kwargs['classII_aggregated_tsv']
@@ -23,12 +24,8 @@ class CreatePeptideOrderingForm:
                     sys.exit(f"Error: {self.output_path} must specify a directory.")
             else:
                 os.makedirs(self.output_path)
-        self.phased_proximal_variants_vcf = kwargs.pop('phased_proximal_variants_vcf', None)
+        self.input_vcf = kwargs.pop('input_vcf', None)
         self.external_vcf = kwargs.pop('external_vcf', None)
-        self.pass_only = kwargs.pop('pass_only', False)
-        self.biotypes = kwargs.pop('biotypes', ['protein_coding'])
-        self.allow_incomplete_transcripts = kwargs.pop('allow_incomplete_transcripts', False)
-        self.downstream_sequence_length = kwargs.pop('downstream_sequence_length', 1000)
         self.aggregate_report_evaluation = kwargs.pop('aggregate_report_evaluation', ['Accept'])
         self.classI_IC50 = kwargs.pop('classI_IC50', 1000.0)
         self.classI_percent = kwargs.pop('classI_percent', 2.0)
@@ -47,42 +44,12 @@ class CreatePeptideOrderingForm:
             description="Generate peptide ordering files (FASTA, annotated ordering Excel spreadsheet, and review template Excel spreadsheet) to streamline preparation of peptides for synthesis and review.",
             formatter_class=argparse.ArgumentDefaultsHelpFormatter
         )
-        if tool == 'pvacseq':
-            parser.add_argument(
-                "input_vcf",
-                help="A VEP-annotated single- or multi-sample VCF containing genotype, transcript, "
-                    +"Wildtype protein sequence, and Frameshift protein sequence information. "
-                    +"The VCF may be gzipped (requires tabix index). This VCF will be used to extract "
-                    +"peptide sequences for processable variants with 25 flanking amino acids on either "
-                    +"side of the mutation. These sequences will be included in the peptide ordering spreadsheet."
-            )
-        elif tool == 'pvacsplice':
-            parser.add_argument(
-                "input_file",
-                help="RegTools junctions output TSV file"
-            )
-            parser.add_argument(
-                "annotated_vcf",
-                help="A VEP-annotated single- or multi-sample VCF containing genotype and transcript information."
-                + "The VCF may be gzipped (requires tabix index)."
-            )
-            parser.add_argument(
-                "ref_fasta",
-                help="A reference FASTA file. Note: this input should be the same as the RegTools vcf input."
-            )
-            parser.add_argument(
-                "gtf_file",
-                help="A reference GTF file. Note: this input should be the same as the RegTools gtf input."
-            )
-        elif tool == 'pvacfuse':
-            parser.add_argument(
-                "input",
-                help="An AGFusion output directory or Arriba fusion.tsv output file."
-            )
-            parser.add_argument(
-                "ref_fasta",
-                help="A reference CDS FASTA file. Note: this input should match the build and Ensembl version used to create the fusion annotations."
-            )
+
+        parser.add_argument(
+            "transcripts_fasta",
+            help=f"A {tool.replace('vac', 'VAC')} transcripts.fa file with transcript protein sequences of splicing events and matching wildtypes. "
+                 + f"This file can be found in the top-level output directory of your {tool.replace('vac', 'VAC')} run or can be generated using the `{tool} generate_transcripts_fasta` command."
+        )
         parser.add_argument(
             "flanking_sequence_length",
             help="Number of amino acids to add on each side of the mutation when creating the FASTA.",
@@ -113,63 +80,20 @@ class CreatePeptideOrderingForm:
         )
         if tool == 'pvacseq':
             parser.add_argument(
-                "-p", "--phased-proximal-variants-vcf",
-                help="A VCF with phased proximal variant information to incorporate into the predicted fasta sequences "
-                    +"generated from the input_vcf. Must be gzipped and tabix indexed."
+                "--input-vcf",
+                help='The original VEP-annotated VCF used in your pVACseq run to check variants against. '
+                    +'Any variant with a PASS filter or no other filter applied in the input VCF and external VCF '
+                    +'will be marked as called in the '
+                    +'"Variant Called in External VCF" column of the updated aggregated report '
+                    +'"<sample_name>.Annotated.Neoantigen_Candidates.xlsx"'
             )
             parser.add_argument(
                 '--external-vcf',
                 help='A VCF file from an external provider to check variants against. Any variant '
-                    +'with a PASS filter or no other filter applied will be marked as called in the '
+                    +'with a PASS filter or no other filter applied in the input VCF and external VCF '
+                    +'will be marked as called in the '
                     +'"Variant Called in External VCF" column of the updated aggregated report '
                     +'"<sample_name>.Annotated.Neoantigen_Candidates.xlsx"'
-            )
-        if tool in ['pvacseq', 'pvacsplice']:
-            parser.add_argument(
-                '--pass-only',
-                help="Only process VCF entries with a PASS status.",
-                default=False,
-                action='store_true',
-            )
-            parser.add_argument(
-                "--biotypes", type=lambda s:[a for a in s.split(',')],
-                help="A list of biotypes to use for pre-filtering transcripts when generating peptide sequences from "
-                    +"the input_vcf.",
-                default=['protein_coding']
-            )
-            parser.add_argument(
-                "--allow-incomplete-transcripts",
-                help="By default, transcripts annotated with incomplete CDS (i.e., 'cds_start_NF' or 'cds_end_NF' flags in the VEP CSQ field) "
-                        + "are excluded from analysis, as they often produce invalid protein sequences. "
-                        + "Use this flag to allow candidates from such transcripts. Only peptides that do not contain 'X' will be included. "
-                        + "These candidates will be deprioritized relative to those from transcripts without incomplete CDS flags.",
-                default=False,
-                action='store_true'
-            )
-        parser.add_argument(
-            "-d", "--downstream-sequence-length",
-            default="1000",
-            help="Cap to limit the downstream sequence length for frameshifts when creating the fasta file. "
-                + "Use 'full' to include the full downstream sequence.",
-            type=downstream_sequence_length()
-        )
-        if tool == 'pvacsplice':
-            parser.add_argument(
-                "-j", "--junction-score", type=int,
-                help="Junction Coverage Cutoff. Only sites above this read depth cutoff will be considered.",
-                default=10
-            )
-            parser.add_argument(
-                "-v", "--variant-distance", type=int,
-                help="Regulatory variants can lie inside or outside of splicing junction."
-                + "Maximum distance window (upstream and downstream) for a variant outside the junction.",
-                default=100
-            )
-            parser.add_argument(
-                "--anchor-types", type=pvacsplice_anchors(),
-                help="The anchor types of junctions to use. Multiple anchors can be specified using a comma-separated list."
-                + "Choices: A, D, NDA, DA, N",
-                default=['A', 'D', 'NDA'],
             )
         parser.add_argument(
             "--aggregate-report-evaluation",
@@ -247,19 +171,9 @@ class CreatePeptideOrderingForm:
         os.remove(self.combined_fasta_output_file)
 
 class PvacseqCreatePeptideOrderingForm(CreatePeptideOrderingForm):
-    def __init__(self, **kwargs):
-        self.input_vcf = kwargs['input_vcf']
-        super().__init__(**kwargs)
-
     def create_fastas(self):
         params = {
-            'input_vcf': self.input_vcf,
-            'sample_name': self.sample_name,
-            'pass_only': self.pass_only,
-            'phased_proximal_variants_vcf': self.phased_proximal_variants_vcf,
-            'biotypes': self.biotypes,
-            'allow_incomplete_transcripts': self.allow_incomplete_transcripts,
-            'downstream_sequence_length': self.downstream_sequence_length,
+            'transcripts_fasta': self.transcripts_fasta,
             'flanking_sequence_length': self.flanking_sequence_length,
             'mutant_only': True,
             'aggregate_report_evaluation': self.aggregate_report_evaluation,
@@ -278,31 +192,9 @@ class PvacseqCreatePeptideOrderingForm(CreatePeptideOrderingForm):
         os.remove(generator.manufacturability_file)
 
 class PvacspliceCreatePeptideOrderingForm(CreatePeptideOrderingForm):
-    def __init__(self, **kwargs):
-        self.input_file = kwargs['input_file']
-        self.annotated_vcf = kwargs['annotated_vcf']
-        self.ref_fasta = kwargs['ref_fasta']
-        self.gtf_file = kwargs['gtf_file']
-        self.junction_score = kwargs.pop('junction_score', 10)
-        self.variant_distance = kwargs.pop('variant_distance', 100)
-        self.anchor_types = kwargs.pop('anchor_types', ['A', 'D', 'NDA'])
-        self.input_vcf = None
-        super().__init__(**kwargs)
-
     def create_fastas(self):
         params = {
-            'input_file': self.input_file,
-            'annotated_vcf': self.annotated_vcf,
-            'ref_fasta': self.ref_fasta,
-            'gtf_file': self.gtf_file,
-            'junction_score': self.junction_score,
-            'variant_distance': self.variant_distance,
-            'anchor_types': self.anchor_types,
-            'sample_name': self.sample_name,
-            'pass_only': self.pass_only,
-            'biotypes': self.biotypes,
-            'allow_incomplete_transcripts': self.allow_incomplete_transcripts,
-            'downstream_sequence_length': self.downstream_sequence_length,
+            'transcripts_fasta': self.transcripts_fasta,
             'flanking_sequence_length': self.flanking_sequence_length,
             'mutant_only': True,
             'aggregate_report_evaluation': self.aggregate_report_evaluation,
@@ -321,18 +213,9 @@ class PvacspliceCreatePeptideOrderingForm(CreatePeptideOrderingForm):
         os.remove(generator.manufacturability_file)
 
 class PvacfuseCreatePeptideOrderingForm(CreatePeptideOrderingForm):
-    def __init__(self, **kwargs):
-        self.input = kwargs['input']
-        self.ref_fasta = kwargs['ref_fasta']
-        self.input_vcf = None
-        super().__init__(**kwargs)
-
     def create_fastas(self):
         params = {
-            'input': self.input,
-            'ref_fasta': self.ref_fasta,
-            'sample_name': self.sample_name,
-            'downstream_sequence_length': self.downstream_sequence_length,
+            'transcripts_fasta': self.transcripts_fasta,
             'flanking_sequence_length': self.flanking_sequence_length,
             'mutant_only': True,
             'aggregate_report_evaluation': self.aggregate_report_evaluation,
