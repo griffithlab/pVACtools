@@ -64,9 +64,8 @@ Version 7.1.2
 
 This is a bugfix release. It fixes the following problem(s):
 
-* Fix AGFusion read support calculation when running with STAR-fusion input by @YT-er in https://github.com/griffithlab/pVACtools/pull/1445
-* Replace remaining mentions of `pvacseq valid_alleles` with `pvactools valid_alleles` by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1448
-* Clean up packaging metadata and repository artifacts by @YT-er in https://github.com/griffithlab/pVACtools/pull/1446
+* Correctly handle gene name parsing from fasta headers for genes with lowercase characters. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1456
+* Normalize MixMHC2pred alleles to match other class II allele formats. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1454
 
 New in Version 7
 ----------------
