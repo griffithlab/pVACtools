@@ -32,7 +32,7 @@ def define_parser():
     )
     parser.add_argument(
         '--allele-specific-binding-thresholds',
-        help="Use allele-specific binding thresholds. To print the allele-specific binding thresholds run `pvacseq allele_specific_cutoffs`. "
+        help="Use allele-specific binding thresholds. To print the allele-specific binding thresholds run `pvactools allele_specific_cutoffs`. "
              + "If an allele does not have a special threshold value, the `--binding-threshold` value will be used.",
         default=False,
         action='store_true',
