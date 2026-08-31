@@ -56,7 +56,7 @@ prediction's HLA allele are used instead of the value set via the ``--binding-th
 For HLA alleles where no allele-specific binding threshold is available, the
 binding threshold is used as a fallback. Alleles with allele-specific
 threshold as well as the value of those thresholds can be printed by executing
-the ``pvacseq allele_specific_cutoffs`` command.
+the ``pvactools allele_specific_cutoffs`` command.
 
 The binding filter also offers the option to filter on ``Fold Change`` columns, which contain
 the ratio of the MT score to the WT Score. This option can be activated by setting the
@@ -189,7 +189,7 @@ prediction's HLA allele are used instead of the value set via the ``--binding-th
 For HLA alleles where no allele-specific binding threshold is available, the
 binding threshold is used as a fallback. Alleles with allele-specific
 threshold as well as the value of those thresholds can be printed by executing
-the ``pvacseq allele_specific_cutoffs`` command.
+the ``pvactools allele_specific_cutoffs`` command.
 
 **Additional Considerations**
 

@@ -384,7 +384,7 @@ To tier the Best Peptide, several cutoffs can be adjusted using arguments provid
        allele-specific binding thresholds. For alleles where no
        allele-specific binding threshold is available, use the
        ``--binding-threshold`` as a fallback. To print a list of alleles that have
-       specific binding thresholds and the value of those thresholds, run ``pvacseq allele_specific_cutoffs``.
+       specific binding thresholds and the value of those thresholds, run ``pvactools allele_specific_cutoffs``.
      - False
    * - ``--binding-percentile-threshold``
      - Use this threshold to filter epitopes on the IC50 %ile MT score.

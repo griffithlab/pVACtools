@@ -48,7 +48,7 @@ prediction's HLA allele are used instead of the value set via the ``--binding-th
 For HLA alleles where no allele-specific binding threshold is available, the
 binding threshold is used as a fallback. Alleles with allele-specific
 threshold as well as the value of those thresholds can be printed by executing
-the ``pvacbind allele_specific_cutoffs`` command.
+the ``pvactools allele_specific_cutoffs`` command.
 
 In addition to being able to filter on the IC50 score columns, the binding
 filter also offers the ability to filter on the percentile score using the
