@@ -46,7 +46,11 @@ and immunogenicity algorithms.
 By using the IEDB RESTful web interface, pVACbind leverages their extensive support of different prediction algorithms.
 
 In addition to IEDB-supported prediction algorithms, we've also added support
-for a variety of additional algorithms.
+for a variety of additional algorithms. The following table lists all prediction algorithms supported
+by pVACbind, whether the predictor is a MHC class I or class II algorithm, what type of scoring
+the predictor returns (binding, presentation, or immunogenicity), whether the algorithm supports
+percentile ranks natively, whether the predictor supports normalized percentile ranks (``--use-normalized-percentiles
+flag), and whether the ``select`` algorithm shortcut includes this predictor.
 
 .. list-table::
    :header-rows: 1
@@ -57,11 +61,13 @@ for a variety of additional algorithms.
      - Prediction Type
      - Supports Percentile Ranks?
      - Supports Normalized Percentile Ranks?
+     - Included On "select" Strategy?
    * - BigMHC_EL
      -
      - MHC Class I
      - Presentation
      - no
+     - yes
      - yes
    * - BigMHC_IM
      -
@@ -69,22 +75,26 @@ for a variety of additional algorithms.
      - Immunogenicity
      - no
      - yes
+     - yes
    * - DeepImmuno
      -
      - MHC Class I
      - Immunogenicity
      - no
      - yes
-   * - ImmuoScope_IM
+     - yes
+   * - ImmuScope_IM
      -
      - MHC Class II
      - Immunogenicity
      - no
      - no
+     - yes
    * - MHCflurry
      -
      - MHC Class I
      - Binding
+     - yes
      - yes
      - yes
    * - MHCflurryEL
@@ -93,28 +103,33 @@ for a variety of additional algorithms.
      - Presentation, Processing
      - yes (Presentation only)
      - yes (Presentation and Processing)
+     - yes (Presentation and Processing)
    * - MHCnuggetsI
      -
      - MHC Class I
      - Binding
      - yes
      - yes
+     - no
    * - MHCnuggetsII
      -
      - MHC Class II
      - Binding
      - yes
      - no
+     - yes
    * - MixMHC2pred
      -
      - MHC Class II
      - Presentation
      - yes
      - no
+     - yes
    * - MixMHCpred
      -
      - MHC Class I
      - Binding
+     - yes
      - yes
      - yes
    * - NNalign
@@ -123,34 +138,40 @@ for a variety of additional algorithms.
      - Binding
      - yes
      - no
+     - no
    * - NetMHC
      - 4.0
      - MHC Class I
      - Binding
      - yes
      - yes
+     - no
    * - NetMHCIIpan
      - 4.0 (not supported by standalone IEDB), 4.1 (default), 4.2., 4.3
      - MHC Class II
      - Binding
      - yes
      - no
+     - yes
    * - NetMHCIIpanEL
      - 4.0 (not supported by standalone IEDB), 4.1 (default), 4.2., 4.3
      - MHC Class II
      - Presentation
      - yes
      - no
+     - yes
    * - NetMHCcons
      - 1.1
      - MHC Class I
      - Binding
      - yes
      - yes
+     - no
    * - NetMHCpan
      - 4.1
      - MHC Class I
      - Binding
+     - yes
      - yes
      - yes
    * - NetMHCpanEL
@@ -159,16 +180,19 @@ for a variety of additional algorithms.
      - Presentation
      - yes
      - yes
+     - yes
    * - PRIME
      -
      - MHC Class I
      - Immunogenicity
      - yes
      - yes
-   * - Pickpocket
+     - yes
+   * - PickPocket
      - 1.1
      - MHC Class I
      - Binding
+     - yes
      - yes
      - yes
    * - SMM
@@ -177,10 +201,12 @@ for a variety of additional algorithms.
      - Binding
      - yes
      - yes
+     - no
    * - SMMPMBEC
      - 1.0
      - MHC Class I
      - Binding
+     - yes
      - yes
      - yes
    * - SMMalign
@@ -189,6 +215,7 @@ for a variety of additional algorithms.
      - Binding
      - yes
      - no
+     - yes
 
 **Calculation of normalized percentiles**
 
