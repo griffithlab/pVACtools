@@ -263,6 +263,10 @@ def create_distance_matrix(Paths):
     return distance_matrix
 
 def find_optimal_path(graph, distance_matrix, seq_dict, base_output_dir, junctions_file, args):
+    (valid, error) = check_graph_valid(graph, seq_dict)
+    if not valid:
+        raise Exception("Invalid graph passed to find_optimal_path: {}".format(error))
+
     init_state = sorted(graph.nodes())
     if not os.environ.get('TEST_FLAG') or os.environ.get('TEST_FLAG') == '0':
         random.shuffle(init_state)
