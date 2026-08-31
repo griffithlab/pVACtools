@@ -21,7 +21,7 @@ is included. For inframe fusions, both the 5' and 3' fusion partners' wild type
 transcript sequence is included as separate fasta entries.
 
 The ``--downstream-sequence-length`` controls how many amino acids in the mutated
-sequence following a framshift fusion are retained. Setting the parameter to
+sequence following a frameshift fusion are retained. Setting the parameter to
 ``full`` will retain the full downstream sequence.
 
 Generate Protein Fasta
@@ -31,7 +31,7 @@ Generate Protein Fasta
 
 This tool will extract trimmed wild type protein sequences and matched fusion
 protein sequences from a transcripts.fa file. This file is generated during each
-pVACfuse run or can be regenerate using the ``pvacfuse generate_transcripts_fasta``
+pVACfuse run or can be regenerated using the ``pvacfuse generate_transcripts_fasta``
 command.
 
 One use case for this tool is to help select long peptides that contain short
@@ -85,7 +85,7 @@ TSV & reference_match file pair. It requires the input of a pVACfuse run's fasta
 peptide sequence the epitope was derived from. Any substring of that peptide
 sequence that matches against the reference proteome and is at least as long as the specified match length, will be
 considered a hit. This tool also requires the user to provide a filtered.tsv,
-all_epitopes.tsv or aggregated.tsv pVACsfuse report file as an input and any
+all_epitopes.tsv or aggregated.tsv pVACfuse report file as an input and any
 candidates in this input file will be searched for.
 
 This tool may be either run with BLASTp using either the ``refseq_select_prot`` or ``refseq_protein`` database.

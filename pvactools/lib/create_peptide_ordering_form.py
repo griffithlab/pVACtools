@@ -47,8 +47,8 @@ class CreatePeptideOrderingForm:
 
         parser.add_argument(
             "transcripts_fasta",
-            help="A pVACsplice transcripts.fa file with transcript protein sequences of splicing events and matching wildtypes. "
-                 + f"This file can be found in the top-level output directory of your {tool.replace('vac', 'VAC')} run can be generated using the `{tool} generate_transcripts_fasta` command."
+            help=f"A {tool.replace('vac', 'VAC')} transcripts.fa file with transcript protein sequences of splicing events and matching wildtypes. "
+                 + f"This file can be found in the top-level output directory of your {tool.replace('vac', 'VAC')} run or can be generated using the `{tool} generate_transcripts_fasta` command."
         )
         parser.add_argument(
             "flanking_sequence_length",

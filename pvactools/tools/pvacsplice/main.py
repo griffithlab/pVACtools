@@ -93,7 +93,7 @@ def define_parser():
 
     generate_transcripts_fasta_parser = subparsers.add_parser(
         "generate_transcripts_fasta",
-        help="Generate afasta file from a RegTools junctions output TSV file with transcripts sequences of splicing events and matching wildtypes",
+        help="Generate a fasta file from a RegTools junctions output TSV file with transcript sequences of splicing events and matching wildtypes",
         add_help=False
     )
     generate_transcripts_fasta_parser.set_defaults(func=generate_transcripts_fasta)

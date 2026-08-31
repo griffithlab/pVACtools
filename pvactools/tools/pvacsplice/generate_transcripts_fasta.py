@@ -7,7 +7,7 @@ from pvactools.lib.run_argument_utils import pvacsplice_anchors, downstream_sequ
 def define_parser():
     parser = argparse.ArgumentParser(
         "pvacsplice generate_transcripts_fasta",
-        description="Generate afasta file from a RegTools junctions output TSV file with transcripts sequences of splicing events and matching wildtypes",
+        description="Generate a fasta file from a RegTools junctions output TSV file with transcript sequences of splicing events and matching wildtypes",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument(

@@ -28,7 +28,7 @@ will include transcripts with incomplete or unconfirmed coding sequencees,
 i.e. where the VEP FLAGS field includes ``cds_start_nf`` or ``cds_end_nf``.
 
 The ``--downstream-sequence-length`` controls how many amino acids in the mutated
-sequence following a framshift variant are retained. Setting the parameter to
+sequence following a frameshift variant are retained. Setting the parameter to
 ``full`` will retain the full downstream sequence.
 
 Generate Protein Fasta
@@ -38,7 +38,7 @@ Generate Protein Fasta
 
 This tool will extract trimmed wild type protein sequences and matched mutated
 protein sequences surrounding protein altering variants from a transcripts.fa file.
-This file is generated during each pVACseq run or can be regenerate using the
+This file is generated during each pVACseq run or can be regenerated using the
 ``pvacseq generate_transcripts_fasta`` command.
 
 One use case for this tool is to help select long peptides that contain short

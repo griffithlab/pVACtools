@@ -14,7 +14,7 @@ def define_parser():
     parser.add_argument(
         "transcripts_fasta",
         help="A pVACfuse transcripts.fa file with transcript protein sequences of fusions and matching 5'/3' wildtypes. "
-             + "This file can be found in the top-level output directory of your pVACfuse run can be generated using the `pvacseq generate_transcripts_fasta` command."
+             + "This file can be found in the top-level output directory of your pVACfuse run or can be generated using the `pvacfuse generate_transcripts_fasta` command."
     )
     parser.add_argument(
         "flanking_sequence_length", type=int,
