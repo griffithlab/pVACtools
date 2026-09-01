@@ -11,38 +11,30 @@ from pvactools.lib.run_argument_parser import PvacbindRunArgumentParser
 from pvactools.lib.post_processor import PostProcessor
 from pvactools.lib.run_utils import *
 from pvactools.lib.prediction_class_utils import *
+from pvactools.tools.pvacbind.run_planning import (
+    CombinedReportHandoff,
+    PvacbindOutputLayout,
+    PvacbindPipelineHandoffBuilder,
+    PvacbindRunPlan,
+)
 
 def define_parser():
     return PvacbindRunArgumentParser().parser
 
 def create_combined_reports(base_output_dir, args):
-    output_dir = os.path.join(base_output_dir, 'combined')
-    os.makedirs(output_dir, exist_ok=True)
+    output_layout = PvacbindOutputLayout(base_output_dir, args.sample_name)
+    combined_handoff = CombinedReportHandoff(output_layout)
+    os.makedirs(output_layout.combined_output_dir, exist_ok=True)
 
-    file1 = os.path.join(base_output_dir, 'MHC_Class_I', "{}.MHC_I.all_epitopes.tsv".format(args.sample_name))
-    file2 = os.path.join(base_output_dir, 'MHC_Class_II', "{}.MHC_II.all_epitopes.tsv".format(args.sample_name))
-    if not os.path.exists(file1):
-        print("File {} doesn't exist. Aborting.".format(file1))
+    if not os.path.exists(output_layout.class_i_all_epitopes_file):
+        print("File {} doesn't exist. Aborting.".format(output_layout.class_i_all_epitopes_file))
         return
-    if not os.path.exists(file2):
-        print("File {} doesn't exist. Aborting.".format(file2))
+    if not os.path.exists(output_layout.class_ii_all_epitopes_file):
+        print("File {} doesn't exist. Aborting.".format(output_layout.class_ii_all_epitopes_file))
         return
-    combined_output_file = os.path.join(output_dir, "{}.Combined.all_epitopes.tsv".format(args.sample_name))
-    combine_reports([file1, file2], combined_output_file)
-    filtered_report_file = os.path.join(output_dir, "{}.Combined.filtered.tsv".format(args.sample_name))
 
-    post_processing_params = vars(args)
-    post_processing_params['input_file'] = combined_output_file
-    post_processing_params['filtered_report_file'] = filtered_report_file
-    post_processing_params['run_coverage_filter'] = False
-    post_processing_params['minimum_fold_change'] = None
-    post_processing_params['file_type'] = 'pVACbind'
-    post_processing_params['run_transcript_support_level_filter'] = False
-    post_processing_params['run_net_chop'] = False
-    post_processing_params['run_netmhc_stab'] = False
-    post_processing_params['run_manufacturability_metrics'] = False
-    post_processing_params['run_reference_proteome_similarity'] = False
-    post_processing_params["filename_addition"] = "Combined"
+    combine_reports(combined_handoff.input_files, output_layout.combined_all_epitopes_file)
+    post_processing_params = combined_handoff.post_processing_params(args)
 
     PostProcessor(**post_processing_params).execute()
 
@@ -56,7 +48,6 @@ def main(args_input = sys.argv[1:]):
     if args.n_threads > 1 and platform.system() == "Darwin":
         raise Exception("Multithreading is not supported on MacOS")
 
-    input_file_type = 'fasta'
     base_output_dir = os.path.abspath(args.output_dir)
 
     if (args.netmhciipan_version == '4.0' and args.iedb_install_directory is not None):
@@ -66,39 +57,17 @@ def main(args_input = sys.argv[1:]):
     (class_i_prediction_algorithms, class_ii_prediction_algorithms) = split_algorithms(args.prediction_algorithms)
     alleles = combine_class_ii_alleles(args.allele)
     (class_i_alleles, class_ii_alleles, species) = split_alleles(alleles)
+    output_layout = PvacbindOutputLayout(base_output_dir, args.sample_name)
+    run_plan = PvacbindRunPlan(
+        class_i_prediction_algorithms,
+        class_ii_prediction_algorithms,
+        class_i_alleles,
+        class_ii_alleles,
+        species,
+    )
+    pipeline_handoffs = PvacbindPipelineHandoffBuilder(args, run_plan, output_layout)
 
-    shared_arguments = {
-        'input_file'                : args.input_file,
-        'input_file_type'           : input_file_type,
-        'sample_name'               : args.sample_name,
-        'top_score_metric'          : args.top_score_metric,
-        'top_score_metric2'         : args.top_score_metric2,
-        'binding_threshold'         : args.binding_threshold,
-        'binding_percentile_threshold': args.binding_percentile_threshold,
-        'immunogenicity_percentile_threshold': args.immunogenicity_percentile_threshold,
-        'presentation_percentile_threshold': args.presentation_percentile_threshold,
-        'percentile_threshold_strategy': args.percentile_threshold_strategy,
-        'allele_specific_binding_thresholds': args.allele_specific_binding_thresholds,
-        'net_chop_fasta'            : args.input_file,
-        'net_chop_method'           : args.net_chop_method,
-        'net_chop_threshold'        : args.net_chop_threshold,
-        'additional_report_columns' : args.additional_report_columns,
-        'fasta_size'                : args.fasta_size,
-        'iedb_retries'              : args.iedb_retries,
-        'keep_tmp_files'            : args.keep_tmp_files,
-        'n_threads'                 : args.n_threads,
-        'species'                   : species,
-        'run_reference_proteome_similarity': args.run_reference_proteome_similarity,
-        'blastp_path'               : args.blastp_path,
-        'blastp_db'                 : args.blastp_db,
-        'problematic_amino_acids'   : args.problematic_amino_acids,
-        'run_post_processor'        : True,
-        'peptide_fasta'             : args.peptide_fasta,
-        'aggregate_inclusion_binding_threshold': args.aggregate_inclusion_binding_threshold,
-        'aggregate_inclusion_count_limit': args.aggregate_inclusion_count_limit,
-    }
-
-    if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0:
+    if run_plan.should_run_class_i():
         if args.iedb_install_directory:
             iedb_mhc_i_executable = os.path.join(args.iedb_install_directory, 'mhc_i', 'src', 'predict_binding.py')
             if not os.path.exists(iedb_mhc_i_executable):
@@ -112,27 +81,16 @@ def main(args_input = sys.argv[1:]):
 
         print("Executing MHC Class I predictions")
 
-        output_dir = os.path.join(base_output_dir, 'MHC_Class_I')
+        output_dir = output_layout.class_i_output_dir
         os.makedirs(output_dir, exist_ok=True)
 
-        class_i_arguments = shared_arguments.copy()
-        class_i_arguments['alleles']                 = class_i_alleles
-        class_i_arguments['iedb_executable']         = iedb_mhc_i_executable
-        class_i_arguments['epitope_lengths']         = args.class_i_epitope_length
-        class_i_arguments['prediction_algorithms']   = class_i_prediction_algorithms
-        class_i_arguments['output_dir']              = output_dir
-        class_i_arguments['netmhc_stab']             = args.netmhc_stab
-        class_i_arguments['filename_addition']         = "MHC_I"
-        class_i_arguments['use_normalized_percentiles']  = args.use_normalized_percentiles
-        class_i_arguments['reference_scores_path']    = args.reference_scores_path
+        class_i_arguments = pipeline_handoffs.class_i_arguments(iedb_mhc_i_executable)
         pipeline = PvacbindPipeline(**class_i_arguments)
         pipeline.execute()
-    elif len(class_i_prediction_algorithms) == 0:
-        print("No MHC class I prediction algorithms chosen. Skipping MHC class I predictions.")
-    elif len(class_i_alleles) == 0:
-        print("No MHC class I alleles chosen. Skipping MHC class I predictions.")
+    else:
+        print(run_plan.class_i_skip_message())
 
-    if len(class_ii_prediction_algorithms) > 0 and len(class_ii_alleles) > 0:
+    if run_plan.should_run_class_ii():
         if args.iedb_install_directory:
             iedb_mhc_ii_executable = os.path.join(args.iedb_install_directory, 'mhc_ii', 'mhc_II_binding.py')
             if not os.path.exists(iedb_mhc_ii_executable):
@@ -142,25 +100,16 @@ def main(args_input = sys.argv[1:]):
 
         print("Executing MHC Class II predictions")
 
-        output_dir = os.path.join(base_output_dir, 'MHC_Class_II')
+        output_dir = output_layout.class_ii_output_dir
         os.makedirs(output_dir, exist_ok=True)
 
-        class_ii_arguments = shared_arguments.copy()
-        class_ii_arguments['alleles']                 = class_ii_alleles
-        class_ii_arguments['prediction_algorithms']   = class_ii_prediction_algorithms
-        class_ii_arguments['iedb_executable']         = iedb_mhc_ii_executable
-        class_ii_arguments['epitope_lengths']         = args.class_ii_epitope_length
-        class_ii_arguments['output_dir']              = output_dir
-        class_ii_arguments['netmhc_stab']             = False
-        class_ii_arguments['filename_addition']         = "MHC_II"
+        class_ii_arguments = pipeline_handoffs.class_ii_arguments(iedb_mhc_ii_executable)
         pipeline = PvacbindPipeline(**class_ii_arguments)
         pipeline.execute()
-    elif len(class_ii_prediction_algorithms) == 0:
-        print("No MHC class II prediction algorithms chosen. Skipping MHC class II predictions.")
-    elif len(class_ii_alleles) == 0:
-        print("No MHC class II alleles chosen. Skipping MHC class II predictions.")
+    else:
+        print(run_plan.class_ii_skip_message())
 
-    if len(class_i_prediction_algorithms) > 0 and len(class_i_alleles) > 0 and len(class_ii_prediction_algorithms) > 0 and len(class_ii_alleles) > 0:
+    if run_plan.should_create_combined_reports():
         print("Creating combined reports")
         create_combined_reports(base_output_dir, args)
 
