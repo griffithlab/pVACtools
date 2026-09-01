@@ -36,11 +36,11 @@ class CallPredictors:
             prediction = prediction_class()
             valid_alleles = prediction.valid_allele_names()
             if self.allele not in valid_alleles:
-                logging.info(f"Allele {self.allele} not valid for Method {method}. Skipping.")
+                logging.warning(f"Allele {self.allele} not valid for Method {method}. Skipping.")
                 continue
             valid_lengths = prediction.valid_lengths_for_allele(self.allele)
             if self.epitope_length not in valid_lengths:
-                logging.info(f"Epitope Length {self.epitope_length} is not valid for Method {method} and Allele {self.allele} Skipping.")
+                logging.warning(f"Epitope Length {self.epitope_length} is not valid for Method {method} and Allele {self.allele} Skipping.")
                 continue
             for fasta_file in split_fasta_files:
                 argument_sets.append([
