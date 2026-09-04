@@ -20,6 +20,10 @@ from pvactools.lib.get_best_candidate import PvacseqBestCandidate, PvacfuseBestC
 class AggregateAllEpitopes:
     def __init__(self):
         self.hla_types = pd.read_csv(self.input_file, delimiter="\t", usecols=["HLA Allele"])['HLA Allele'].unique()
+        if self.limiting_alleles:
+            extra_alleles = list(set(self.limiting_alleles) - set(self.hla_types))
+            if len(extra_alleles) > 0:
+                raise Exception(f"Alleles specified in the --alleles parameter not found in the input file: {extra_alleles.join(', ')}")
         thresholds = {}
         for hla_type in self.hla_types:
             threshold = PredictionClass.cutoff_for_allele(hla_type)
@@ -387,6 +391,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             anchor_contribution_threshold=0.8,
             aggregate_inclusion_binding_threshold=5000,
             aggregate_inclusion_count_limit=15,
+            limiting_alleles=None,
         ):
         self.input_file = input_file
         self.output_file = output_file
@@ -414,6 +419,7 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
             self.mt_top_score_metric = "Best"
             self.wt_top_score_metric = "Corresponding"
         self.top_score_metric2 = top_score_metric2
+        self.limiting_alleles = limiting_alleles
         self.metrics_file = output_file.replace('.tsv', '.metrics.json')
         super().__init__()
         self.anchor_calculator = AnchorResiduePass(binding_threshold, self.use_allele_specific_binding_thresholds, self.allele_specific_binding_thresholds, allele_specific_anchors, anchor_contribution_threshold, self.wt_top_score_metric)
@@ -443,6 +449,8 @@ class PvacseqAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCMeta):
     def read_input_file(self, used_columns, dtypes):
         df = pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False, na_values="NA", keep_default_na=False, usecols=used_columns, dtype=dtypes)
         df = df.astype({"{} MT IC50 Score".format(self.mt_top_score_metric):'float'})
+        if self.limiting_alleles:
+            df = df[df["HLA Allele"].isin(self.limiting_alleles)]
         return df
 
     def get_sub_df(self, all_epitopes_df, key):
@@ -833,6 +841,7 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
             top_score_metric2=["ic50", "combined_percentile"],
             aggregate_inclusion_binding_threshold=5000,
             aggregate_inclusion_count_limit=15,
+            limiting_alleles=None,
         ):
         self.input_file = input_file
         self.output_file = output_file
@@ -850,6 +859,7 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         else:
             self.mt_top_score_metric = "Best"
         self.top_score_metric2 = top_score_metric2
+        self.limiting_alleles = limiting_alleles
         self.metrics_file = output_file.replace('.tsv', '.metrics.json')
         super().__init__()
 
@@ -867,6 +877,8 @@ class UnmatchedSequenceAggregateAllEpitopes(AggregateAllEpitopes, metaclass=ABCM
         df = pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False, na_values="NA", keep_default_na=False, dtype={"Index": str})
         df = df[df["{} IC50 Score".format(self.mt_top_score_metric)] != 'NA']
         df = df.astype({"{} IC50 Score".format(self.mt_top_score_metric):'float'})
+        if self.limiting_alleles:
+            df = df[df["HLA Allele"].isin(self.limiting_alleles)]
         return df
 
     def get_sub_df(self, all_epitopes_df, key):
@@ -951,6 +963,7 @@ class PvacfuseAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
         expn_val=0.1,
         aggregate_inclusion_binding_threshold=5000,
         aggregate_inclusion_count_limit=15,
+        limiting_alleles=None,
     ):
         UnmatchedSequenceAggregateAllEpitopes.__init__(
             self,
@@ -966,6 +979,7 @@ class PvacfuseAggregateAllEpitopes(UnmatchedSequenceAggregateAllEpitopes, metacl
             top_score_metric2=top_score_metric2,
             aggregate_inclusion_binding_threshold=aggregate_inclusion_binding_threshold,
             aggregate_inclusion_count_limit=aggregate_inclusion_count_limit,
+            limiting_alleles=limiting_alleles,
         )
         self.read_support = read_support
         self.expn_val = expn_val
@@ -1092,6 +1106,7 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
         transcript_prioritization_strategy=['canonical', 'mane_select', 'tsl'],
         maximum_transcript_support_level=1,
         allow_incomplete_transcripts=False,
+        limiting_alleles=None,
     ):
         PvacbindAggregateAllEpitopes.__init__(
             self,
@@ -1107,6 +1122,7 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
             aggregate_inclusion_count_limit=aggregate_inclusion_count_limit,
             top_score_metric=top_score_metric,
             top_score_metric2=top_score_metric2,
+            limiting_alleles=limiting_alleles,
         )
         self.tumor_purity = tumor_purity
         self.trna_vaf = trna_vaf
@@ -1124,8 +1140,11 @@ class PvacspliceAggregateAllEpitopes(PvacbindAggregateAllEpitopes, metaclass=ABC
 
     # pvacbind w/ Index instead of Mutation
     def read_input_file(self, used_columns, dtypes):
-        return pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False,
+        df = pd.read_csv(self.input_file, delimiter='\t', float_precision='high', low_memory=False,
                            na_values="NA", keep_default_na=False, dtype={"Index": str})
+        if self.limiting_alleles:
+            df = df[df["HLA Allele"].isin(self.limiting_alleles)]
+        return df
 
     def sort_included_df(self, df):
         return PvacspliceBestCandidate(
