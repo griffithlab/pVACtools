@@ -76,7 +76,7 @@ class UpdateTiers:
         )
         parser.add_argument(
             '--allele-specific-binding-thresholds',
-            help="Use allele-specific binding thresholds when evaluating the binding criteria for tiering. To print the allele-specific binding thresholds run `%s allele_specific_cutoffs`. " % tool
+            help="Use allele-specific binding thresholds when evaluating the binding criteria for tiering. To print the allele-specific binding thresholds run `pvactools allele_specific_cutoffs`. "
                  + "If an allele does not have a special threshold value, the `--binding-threshold` value will be used.",
             default=False,
             action='store_true',
