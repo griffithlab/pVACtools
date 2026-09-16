@@ -942,19 +942,16 @@ class NetMHCIIVersion:
 
 class ImmuScope_IM(MHCII):
     immuscope_score_col = 'ImmuScope_IM'
-    immuscope_weights_dir = '/opt/ImmuScope/weights'
 
     def resolved_immuscope_weights_dir(self):
+        immu_scope_weights_dir = os.environ.get('IMMU_SCOPE_WEIGHTS_DIR')
         xdg_data_home = os.environ.get('XDG_DATA_HOME')
-        if xdg_data_home:
-            user_dir = os.path.join(xdg_data_home, 'ImmuScope', 'weights')
+        if immu_scope_weights_dir:
+            return immu_scope_weights_dir
+        elif xdg_data_home:
+            return os.path.join(xdg_data_home, 'ImmuScope', 'weights')
         else:
-            user_dir = os.path.join(os.path.expanduser('~/.local/share'), 'ImmuScope', 'weights')
-
-        if os.path.isdir(os.path.join(user_dir, 'IM')):
-            return user_dir
-
-        return self.immuscope_weights_dir
+            return os.path.join(os.path.expanduser('~/.local/share'), 'ImmuScope', 'weights')
 
     def valid_allele_names(self):
         """Return allele names supported by ImmuScope.
