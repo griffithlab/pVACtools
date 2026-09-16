@@ -446,6 +446,29 @@ class TestPvacvector(unittest.TestCase):
 
         output_dir.cleanup()
 
+    def test_find_optimal_path_raises_on_invalid_graph(self):
+        with tempfile.TemporaryDirectory() as output_dir:
+            seq_dict = {"MT.TEST.1": "SYFPEITHI"}
+            graph = run.initialize_graph(seq_dict.keys())
+            distance_matrix = run.create_distance_matrix(graph)
+            junctions_file = run.write_junctions_file(graph, output_dir)
+            args = argparse.Namespace(
+                spacers=["None"],
+                sample_name="single_peptide_no_edges",
+            )
+
+            with self.assertRaises(Exception) as context:
+                run.find_optimal_path(
+                    graph,
+                    distance_matrix,
+                    seq_dict,
+                    output_dir,
+                    junctions_file,
+                    args,
+                )
+
+            self.assertIn("Invalid graph passed to find_optimal_path", str(context.exception))
+
     def test_prevent_clipping_best_peptide(self):
         with patch('pvactools.lib.prediction_class.IEDB.predict', unittest.mock.Mock(side_effect = lambda input_file, allele, length, path, retries, tmp_dir=None, log_dir=None: make_predict_response(
             input_file,
