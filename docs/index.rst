@@ -59,13 +59,15 @@ Contents
    mailing_list
 
 
-Version 7.1.2
+Version 7.1.4
 -------------
 
 This is a bugfix release. It fixes the following problem(s):
 
-* Correctly handle gene name parsing from fasta headers for genes with lowercase characters. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1456
-* Normalize MixMHC2pred alleles to match other class II allele formats. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1454
+* Fix command mentions of the allele_specific_cutoffs command by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1458
+* Fix issue in the Transcript Pass logic that would cause pVACview to crash on retiering by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1459
+* Fix pVACview aggregate report header tooltips by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1463
+* Respect IMMU_SCOPE_WEIGHTS_DIR as first priority for determining ImmuScope weight directory by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1462
 
 New in Version 7
 ----------------

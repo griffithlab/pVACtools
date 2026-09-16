@@ -250,6 +250,10 @@ ImmuScope model weights:
 
    immuscope-download-weights
 
+To overwrite the default download location you may set the ``IMMU_SCOPE_WEIGHTS_DIR``
+environment variable before running the download command. This environment variable
+will also be used by pVACtools to find the weights installation location.
+
 .. note::
 
    ImmuScope needs to be installed in the same python 3
