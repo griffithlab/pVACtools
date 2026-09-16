@@ -91,20 +91,7 @@ set_formatting_columns <- function(df) {
     df$mainTable$`RNA VAF Fail` <- apply(df$mainTable, 1, function(x) {!is.na(x['RNA VAF']) && as.numeric(x['RNA VAF']) <= as.numeric(df$metricsData['trna_vaf'])})
     df$mainTable$`RNA Depth Fail` <- apply(df$mainTable, 1, function(x) {!is.na(x['RNA Depth']) && as.numeric(x['RNA Depth']) <= as.numeric(df$metricsData['trna_cov'])})
     df$mainTable$`Prob Pos Pass` <- apply(df$mainTable, 1, function(x) {is_probaa_pass(x["Prob Pos"])})
-    transcript_pass <- apply(df$mainTable, 1, function(x) {
-      if ('tsl' %in% df$transcript_prioritization_strategy && is_tsl_pass(x["TSL"], as.numeric(df$maximum_transcript_support_level))) {
-        return("True")
-      }
-      else if ('mane_select' %in% df$transcript_prioritization_strategy && is_mane_select_pass(x["MANE Select"])) {
-        return("True")
-      }
-      else if ('canonical' %in% df$transcript_prioritization_strategy && is_canonical_pass(x["Canonical"])) {
-        return("True")
-      }
-      else {
-        return("False")
-      }
-    })
+    transcript_pass <- apply(df$mainTable, 1, function(x) { ifelse(is_transcript_pass(x["Canonical"], x["MANE Select"], x["TSL"], df$transcript_prioritization_strategy, df$maximum_transcript_support_level), "True", "False") })
     df$mainTable <- add_column(df$mainTable, `Transcript Pass` = transcript_pass, .after = "TSL")
     return (df)
 }

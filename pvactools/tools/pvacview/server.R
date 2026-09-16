@@ -348,19 +348,7 @@ server <- shinyServer(function(input, output, session) {
     df$mainTable$`RNA VAF Fail` <- apply(df$mainTable, 1, function(x) {!is.na(x['RNA VAF']) && as.numeric(x['RNA VAF']) <= as.numeric(df$metricsData['trna_vaf'])})
     df$mainTable$`RNA Depth Fail` <- apply(df$mainTable, 1, function(x) {!is.na(x['RNA Depth']) && as.numeric(x['RNA Depth']) <= as.numeric(df$metricsData['trna_cov'])})
     df$mainTable$`Prob Pos Pass` <- apply(df$mainTable, 1, function(x) {is_probaa_pass(x["Prob Pos"])})
-    transcript_pass <- apply(df$mainTable, TRUE, function(x) {
-      if ('tsl' %in% df$transcript_prioritization_strategy && is_tsl_pass(x["TSL"], as.numeric(df$maximum_transcript_support_level))) {
-        return("True")
-      }
-      if ('mane_select' %in% df$transcript_prioritization_strategy && is_mane_select_pass(x["MANE Select"])) {
-        return("True")
-      }
-      if ('canonical' %in% df$transcript_prioritization_strategy && is_canonical_pass(x["Canonical"])) {
-        return("True")
-      }
-      return("False")
-    })
-    df$mainTable <- add_column(df$mainTable, `Transcript Pass` = transcript_pass, .after = "TSL")
+    df$mainTable$`Transcript Pass` <- apply(df$mainTable, 1, function(x) { ifelse(is_transcript_pass(x["Canonical"], x["MANE Select"], x["TSL"], df$transcript_prioritization_strategy, df$maximum_transcript_support_level), "True", "False") })
     tier_sorter <- c("Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "PoorTranscript", "LowExpr", "Anchor", "Subclonal", "ProbPos", "Poor", "NoExpr")
     df$mainTable$`Rank` <- rank(desc(as.numeric(replace(df$mainTable$`Allele Expr`, is.na(df$mainTable$`Allele Expr`), 0))), ties.method = "first")
     for (metric in df$scoring_candidate_metric) {
@@ -420,19 +408,7 @@ server <- shinyServer(function(input, output, session) {
     df$mainTable$`RNA VAF Fail` <- apply(df$mainTable, 1, function(x) {!is.na(x['RNA VAF']) && as.numeric(x['RNA VAF']) <= as.numeric(df$metricsData['trna_vaf'])})
     df$mainTable$`RNA Depth Fail` <- apply(df$mainTable, 1, function(x) {!is.na(x['RNA Depth']) && as.numeric(x['RNA Depth']) <= as.numeric(df$metricsData['trna_cov'])})
     df$mainTable$`Prob Pos Pass` <- apply(df$mainTable, 1, function(x) {is_probaa_pass(x["Prob Pos"])})
-    transcript_pass <- apply(df$mainTable, TRUE, function(x) {
-      if ('tsl' %in% df$transcript_prioritization_strategy && is_tsl_pass(x["TSL"], as.numeric(df$maximum_transcript_support_level))) {
-        return("True")
-      }
-      if ('mane_select' %in% df$transcript_prioritization_strategy && is_mane_select_pass(x["MANE Select"])) {
-        return("True")
-      }
-      if ('canonical' %in% df$transcript_prioritization_strategy && is_canonical_pass(x["Canonical"])) {
-        return("True")
-      }
-      return("False")
-    })
-    df$mainTable <- add_column(df$mainTable, `Transcript Pass` = transcript_pass, .after = "TSL")
+    df$mainTable$`Transcript Pass` <- apply(df$mainTable, 1, function(x) { ifelse(is_transcript_pass(x["Canonical"], x["MANE Select"], x["TSL"], df$transcript_prioritization_strategy, df$maximum_transcript_support_level), "True", "False") })
     tier_sorter <- c("Pass", "PoorBinder", "PoorImmunogenicity", "PoorPresentation", "RefMatch", "PoorTranscript", "LowExpr", "Anchor", "Subclonal", "ProbPos", "Poor", "NoExpr")
     df$mainTable$`Rank` <- rank(desc(as.numeric(replace(df$mainTable$`Allele Expr`, is.na(df$mainTable$`Allele Expr`), 0))), ties.method = "first")
     for (metric in df$scoring_candidate_metric) {
