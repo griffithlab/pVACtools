@@ -125,6 +125,11 @@ class IEDB(metaclass=ABCMeta):
             df.rename(columns={
                 'peptide_index': 'seq_num',
             }, inplace=True)
+            if self.iedb_prediction_method == 'netmhcpan':
+                df.rename(columns={
+                    'binding.netmhcpan.ic50': 'ic50',
+                    'binding.netmhcpan.percentile': 'percentile',
+                }, inplace=True)
             (peptides_match, input_peptides, output_peptides) = self.check_iedb_api_response_matches(input_file, df)
             if not peptides_match:
                 sys.exit(f"IEDB API Output doesn't match input.\nInput sequences:\n{input_peptides}\nOutput sequences:\n{output_peptides}")
