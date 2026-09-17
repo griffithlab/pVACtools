@@ -190,9 +190,9 @@ class PredictionClass(metaclass=ABCMeta):
         return sorted([prediction_class.__name__ for prediction_class in cls.prediction_classes()])
 
     @classmethod
-    def prediction_methods_with_all(cls):
+    def prediction_methods_with_shortcuts(cls):
         methods = cls.prediction_methods()
-        methods.extend(['all', 'all_class_i', 'all_class_ii'])
+        methods.extend(['all', 'all_class_i', 'all_class_ii', 'select', 'select_class_i', 'select_class_ii'])
         return methods
 
     @classmethod
@@ -354,6 +354,10 @@ class MHCI(PredictionClass, metaclass=ABCMeta):
     @property
     def needs_epitope_length(self):
         return True
+
+    @classmethod
+    def select_prediction_methods(cls):
+        return ["BigMHC_EL", "BigMHC_IM", "DeepImmuno", "MHCflurry", "MHCflurryEL", "MixMHCpred", "NetMHCpan", "NetMHCpanEL", "PRIME", "PickPocket", "SMMPMBEC"]
 
 class DeepImmuno(MHCI):
     def valid_allele_names(self):
@@ -889,6 +893,10 @@ class MHCII(PredictionClass, metaclass=ABCMeta):
     @property
     def needs_epitope_length(self):
         return False
+
+    @classmethod
+    def select_prediction_methods(cls):
+        return ["ImmuScope_IM", "MHCnuggetsII", "MixMHC2pred", "NetMHCIIpan", "NetMHCIIpanEL", "SMMalign"]
 
 class MHCnuggetsII(MHCII, MHCnuggets):
     def valid_allele_names(self):

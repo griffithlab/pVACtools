@@ -5,14 +5,25 @@ from pvactools.lib.prediction_class import *
 def split_algorithms(prediction_algorithms):
     if 'all' in prediction_algorithms:
         return (sorted(MHCI.prediction_methods()), sorted(MHCII.prediction_methods()))
+
     class_i_prediction_algorithms = set()
     class_ii_prediction_algorithms = set()
+    if 'select' in prediction_algorithms:
+        class_i_prediction_algorithms.update(MHCI.select_prediction_methods())
+        class_ii_prediction_algorithms.update(MHCII.select_prediction_methods())
     if 'all_class_i' in prediction_algorithms:
-        class_i_prediction_algorithms = set(MHCI.prediction_methods())
-        prediction_algorithms.remove('all_class_i')
+        class_i_prediction_algorithms.update(MHCI.prediction_methods())
+    if 'select_class_i' in prediction_algorithms:
+        class_i_prediction_algorithms.update(MHCI.select_prediction_methods())
     if 'all_class_ii' in prediction_algorithms:
-        class_ii_prediction_algorithms = set(MHCII.prediction_methods())
-        prediction_algorithms.remove('all_class_ii')
+        class_ii_prediction_algorithms.update(MHCII.prediction_methods())
+    if 'select_class_ii' in prediction_algorithms:
+        class_ii_prediction_algorithms.update(MHCII.select_prediction_methods())
+
+    for shortcut in ['select', 'select_class_i', 'select_class_ii', 'all_class_i', 'all_class_ii']:
+        if shortcut in prediction_algorithms:
+            prediction_algorithms.remove(shortcut)
+
     for prediction_algorithm in prediction_algorithms:
         prediction_class = globals()[prediction_algorithm]
         prediction_class_object = prediction_class()
