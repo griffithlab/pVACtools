@@ -30,7 +30,7 @@ class PvacseqCreatePeptideOrderingFormTests(unittest.TestCase):
             "pvacseq_create_peptide_ordering_form",
         )
 
-        cls.input_vcf = os.path.join(cls.test_data_dir, "input.vcf")
+        cls.transcripts_fasta = os.path.join(cls.test_data_dir, "H_NJ-HCC1395-HCC1395.transcripts.fa")
         cls.mhc_class_i_tsv = os.path.join(
             cls.test_data_dir, "MHC_Class_I", "Test.all_epitopes.aggregated.tsv"
         )
@@ -47,7 +47,7 @@ class PvacseqCreatePeptideOrderingFormTests(unittest.TestCase):
             [
                 cls.python,
                 cls.executable,
-                cls.input_vcf,
+                cls.transcripts_fasta,
                 '25',
                 cls.mhc_class_i_tsv,
                 cls.mhc_class_ii_tsv,

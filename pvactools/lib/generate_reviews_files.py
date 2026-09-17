@@ -99,7 +99,7 @@ def main(peptides_path, classI_path, classII_path, input_vcf, external_vcf, samp
     reviewed_candidates = reviewed_candidates.rename(columns={'Comments':'pVAC Review Comments'})
     reviewed_candidates["IGV Review Comments"] = ""
 
-    if external_vcf:
+    if input_vcf and external_vcf:
         fill_variant_called_column(reviewed_candidates, input_vcf, external_vcf)
 
     # create sorting ID that is gene and transcript to sort in the same order as peptide

@@ -129,8 +129,8 @@ class RunPipeline:
         fasta_file = os.path.join(self.predictor.output_dir, f"{self.sample_name}.{flanking_sequence_length}.fasta")
         if not os.path.exists(fasta_file):
             fasta_params = {
-                'fasta_file_path': self.transcript_fasta,
-                'trimmed_fasta_file_path': fasta_file,
+                'transcripts_fasta': self.transcript_fasta,
+                'output_file': fasta_file,
                 'flanking_sequence_length': flanking_sequence_length,
                 'mutant_only': False,
             }
