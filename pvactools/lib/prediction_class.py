@@ -834,11 +834,6 @@ class NetMHCcons(IEDBMHCI):
     def iedb_prediction_method(self):
         return 'netmhccons'
 
-class PickPocket(IEDBMHCI):
-    @property
-    def iedb_prediction_method(self):
-        return 'pickpocket'
-
 class MHCII(PredictionClass, metaclass=ABCMeta):
     @property
     def needs_epitope_length(self):
