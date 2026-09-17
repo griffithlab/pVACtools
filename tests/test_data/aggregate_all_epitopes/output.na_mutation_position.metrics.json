@@ -148,7 +148,6 @@
               "algorithms": [
                 "NetMHCpan",
                 "NetMHC",
-                "NetMHCcons",
                 "SMM",
                 "SMMPMBEC",
                 "MHCflurry",
@@ -158,7 +157,6 @@
                 "HLA-A*31:01": [
                   15.84,
                   7.87,
-                  16.57,
                   25.97,
                   29.035,
                   31.267,
@@ -167,7 +165,6 @@
                 "HLA-C*07:02": [
                   5757.43,
                   6633.29,
-                  12449.51,
                   283.25,
                   268.306,
                   4550.084,
@@ -181,11 +178,9 @@
                   "NA",
                   "NA",
                   "NA",
-                  "NA",
                   "NA"
                 ],
                 "HLA-C*07:02": [
-                  "NA",
                   "NA",
                   "NA",
                   "NA",
@@ -210,7 +205,6 @@
               "algorithms": [
                 "NetMHCpan",
                 "NetMHC",
-                "NetMHCcons",
                 "SMM",
                 "SMMPMBEC",
                 "MHCflurry",
@@ -220,7 +214,6 @@
                 "HLA-A*31:01": [
                   0.09,
                   0.06,
-                  0.34,
                   0.6,
                   0.7,
                   0.054,
@@ -229,7 +222,6 @@
                 "HLA-C*07:02": [
                   2.0,
                   1.7,
-                  18.0,
                   19.0,
                   17.0,
                   7.06,
@@ -243,11 +235,9 @@
                   "NA",
                   "NA",
                   "NA",
-                  "NA",
                   "NA"
                 ],
                 "HLA-C*07:02": [
-                  "NA",
                   "NA",
                   "NA",
                   "NA",
@@ -429,7 +419,6 @@
               "algorithms": [
                 "NetMHCpan",
                 "NetMHC",
-                "NetMHCcons",
                 "SMM",
                 "SMMPMBEC",
                 "MHCflurry",
@@ -439,7 +428,6 @@
                 "HLA-A*31:01": [
                   34.04,
                   33.86,
-                  33.85,
                   133.475,
                   140.026,
                   40.698,
@@ -448,7 +436,6 @@
               },
               "WT": {
                 "HLA-A*31:01": [
-                  "NA",
                   "NA",
                   "NA",
                   "NA",
@@ -471,7 +458,6 @@
               "algorithms": [
                 "NetMHCpan",
                 "NetMHC",
-                "NetMHCcons",
                 "SMM",
                 "SMMPMBEC",
                 "MHCflurry",
@@ -481,7 +467,6 @@
                 "HLA-A*31:01": [
                   0.24,
                   0.37,
-                  0.42,
                   1.5,
                   1.6,
                   0.13,
@@ -490,7 +475,6 @@
               },
               "WT": {
                 "HLA-A*31:01": [
-                  "NA",
                   "NA",
                   "NA",
                   "NA",
@@ -652,7 +636,6 @@
               "algorithms": [
                 "NetMHCpan",
                 "NetMHC",
-                "NetMHCcons",
                 "SMM",
                 "SMMPMBEC",
                 "MHCflurry",
@@ -662,7 +645,6 @@
                 "HLA-A*31:01": [
                   150.55,
                   96.94,
-                  82.19,
                   108.76,
                   130.593,
                   422.368,
@@ -671,7 +653,6 @@
               },
               "WT": {
                 "HLA-A*31:01": [
-                  "NA",
                   "NA",
                   "NA",
                   "NA",
@@ -694,7 +675,6 @@
               "algorithms": [
                 "NetMHCpan",
                 "NetMHC",
-                "NetMHCcons",
                 "SMM",
                 "SMMPMBEC",
                 "MHCflurry",
@@ -704,7 +684,6 @@
                 "HLA-A*31:01": [
                   0.88,
                   0.94,
-                  1.4,
                   1.7,
                   1.9,
                   1.091,
@@ -713,7 +692,6 @@
               },
               "WT": {
                 "HLA-A*31:01": [
-                  "NA",
                   "NA",
                   "NA",
                   "NA",
@@ -875,7 +853,6 @@
               "algorithms": [
                 "NetMHCpan",
                 "NetMHC",
-                "NetMHCcons",
                 "SMM",
                 "SMMPMBEC",
                 "MHCflurry",
@@ -885,7 +862,6 @@
                 "HLA-C*07:02": [
                   5590.34,
                   142.93,
-                  1139.41,
                   28.587,
                   17.363,
                   316.983,
@@ -894,7 +870,6 @@
               },
               "WT": {
                 "HLA-C*07:02": [
-                  "NA",
                   "NA",
                   "NA",
                   "NA",
@@ -917,7 +892,6 @@
               "algorithms": [
                 "NetMHCpan",
                 "NetMHC",
-                "NetMHCcons",
                 "SMM",
                 "SMMPMBEC",
                 "MHCflurry",
@@ -927,7 +901,6 @@
                 "HLA-C*07:02": [
                   1.9,
                   0.03,
-                  1.9,
                   0.4,
                   0.2,
                   1.703,
@@ -936,7 +909,6 @@
               },
               "WT": {
                 "HLA-C*07:02": [
-                  "NA",
                   "NA",
                   "NA",
                   "NA",
@@ -1098,7 +1070,6 @@
               "algorithms": [
                 "NetMHCpan",
                 "NetMHC",
-                "NetMHCcons",
                 "SMM",
                 "SMMPMBEC",
                 "MHCflurry",
@@ -1108,7 +1079,6 @@
                 "HLA-C*07:02": [
                   2707.92,
                   412.71,
-                  506.12,
                   72.806,
                   70.572,
                   71.367,
@@ -1119,7 +1089,6 @@
                 "HLA-C*07:02": [
                   5590.34,
                   142.93,
-                  1139.41,
                   28.587,
                   17.363,
                   316.983,
@@ -1140,7 +1109,6 @@
               "algorithms": [
                 "NetMHCpan",
                 "NetMHC",
-                "NetMHCcons",
                 "SMM",
                 "SMMPMBEC",
                 "MHCflurry",
@@ -1150,7 +1118,6 @@
                 "HLA-C*07:02": [
                   0.83,
                   0.09,
-                  1.0,
                   2.3,
                   2.2,
                   0.283,
@@ -1161,7 +1128,6 @@
                 "HLA-C*07:02": [
                   1.9,
                   0.03,
-                  1.9,
                   0.4,
                   0.2,
                   1.703,
@@ -1321,7 +1287,6 @@
               "algorithms": [
                 "NetMHCpan",
                 "NetMHC",
-                "NetMHCcons",
                 "SMM",
                 "SMMPMBEC",
                 "MHCflurry",
@@ -1331,7 +1296,6 @@
                 "HLA-B*07:02": [
                   232.9,
                   193.28,
-                  324.79,
                   428.371,
                   444.253,
                   366.206,
@@ -1340,7 +1304,6 @@
               },
               "WT": {
                 "HLA-B*07:02": [
-                  "NA",
                   "NA",
                   "NA",
                   "NA",
@@ -1363,7 +1326,6 @@
               "algorithms": [
                 "NetMHCpan",
                 "NetMHC",
-                "NetMHCcons",
                 "SMM",
                 "SMMPMBEC",
                 "MHCflurry",
@@ -1373,7 +1335,6 @@
                 "HLA-B*07:02": [
                   0.38,
                   0.54,
-                  0.89,
                   1.8,
                   1.9,
                   0.803,
@@ -1382,7 +1343,6 @@
               },
               "WT": {
                 "HLA-B*07:02": [
-                  "NA",
                   "NA",
                   "NA",
                   "NA",
@@ -1544,7 +1504,6 @@
               "algorithms": [
                 "NetMHCpan",
                 "NetMHC",
-                "NetMHCcons",
                 "SMM",
                 "SMMPMBEC",
                 "MHCflurry",
@@ -1554,7 +1513,6 @@
                 "HLA-A*31:01": [
                   484.27,
                   471.5,
-                  342.84,
                   270.689,
                   272.22,
                   101.847,
@@ -1563,7 +1521,6 @@
               },
               "WT": {
                 "HLA-A*31:01": [
-                  "NA",
                   "NA",
                   "NA",
                   "NA",
@@ -1586,7 +1543,6 @@
               "algorithms": [
                 "NetMHCpan",
                 "NetMHC",
-                "NetMHCcons",
                 "SMM",
                 "SMMPMBEC",
                 "MHCflurry",
@@ -1596,7 +1552,6 @@
                 "HLA-A*31:01": [
                   2.0,
                   2.8,
-                  2.7,
                   2.9,
                   2.9,
                   0.47,
@@ -1605,7 +1560,6 @@
               },
               "WT": {
                 "HLA-A*31:01": [
-                  "NA",
                   "NA",
                   "NA",
                   "NA",
@@ -1767,7 +1721,6 @@
               "algorithms": [
                 "NetMHCpan",
                 "NetMHC",
-                "NetMHCcons",
                 "SMM",
                 "SMMPMBEC",
                 "MHCflurry",
@@ -1777,7 +1730,6 @@
                 "HLA-A*31:01": [
                   628.83,
                   503.69,
-                  297.86,
                   319.448,
                   410.402,
                   2528.618,
@@ -1786,7 +1738,6 @@
               },
               "WT": {
                 "HLA-A*31:01": [
-                  "NA",
                   "NA",
                   "NA",
                   "NA",
@@ -1809,7 +1760,6 @@
               "algorithms": [
                 "NetMHCpan",
                 "NetMHC",
-                "NetMHCcons",
                 "SMM",
                 "SMMPMBEC",
                 "MHCflurry",
@@ -1819,7 +1769,6 @@
                 "HLA-A*31:01": [
                   2.3,
                   2.9,
-                  2.5,
                   3.1,
                   3.7,
                   2.2,
@@ -1828,7 +1777,6 @@
               },
               "WT": {
                 "HLA-A*31:01": [
-                  "NA",
                   "NA",
                   "NA",
                   "NA",
@@ -1990,7 +1938,6 @@
               "algorithms": [
                 "NetMHCpan",
                 "NetMHC",
-                "NetMHCcons",
                 "SMM",
                 "SMMPMBEC",
                 "MHCflurry",
@@ -2000,7 +1947,6 @@
                 "HLA-A*31:01": [
                   693.17,
                   275.76,
-                  18.97,
                   "NA",
                   "NA",
                   4731.342,
@@ -2009,7 +1955,6 @@
               },
               "WT": {
                 "HLA-A*31:01": [
-                  "NA",
                   "NA",
                   "NA",
                   "NA",
@@ -2032,7 +1977,6 @@
               "algorithms": [
                 "NetMHCpan",
                 "NetMHC",
-                "NetMHCcons",
                 "SMM",
                 "SMMPMBEC",
                 "MHCflurry",
@@ -2042,7 +1986,6 @@
                 "HLA-A*31:01": [
                   2.5,
                   2.1,
-                  0.38,
                   "NA",
                   "NA",
                   2.869,
@@ -2051,7 +1994,6 @@
               },
               "WT": {
                 "HLA-A*31:01": [
-                  "NA",
                   "NA",
                   "NA",
                   "NA",
@@ -2213,7 +2155,6 @@
               "algorithms": [
                 "NetMHCpan",
                 "NetMHC",
-                "NetMHCcons",
                 "SMM",
                 "SMMPMBEC",
                 "MHCflurry",
@@ -2223,7 +2164,6 @@
                 "HLA-C*07:02": [
                   3433.34,
                   2479.65,
-                  557.89,
                   "NA",
                   "NA",
                   500.198,
@@ -2232,7 +2172,6 @@
               },
               "WT": {
                 "HLA-C*07:02": [
-                  "NA",
                   "NA",
                   "NA",
                   "NA",
@@ -2255,7 +2194,6 @@
               "algorithms": [
                 "NetMHCpan",
                 "NetMHC",
-                "NetMHCcons",
                 "SMM",
                 "SMMPMBEC",
                 "MHCflurry",
@@ -2265,7 +2203,6 @@
                 "HLA-C*07:02": [
                   1.2,
                   0.48,
-                  1.2,
                   "NA",
                   "NA",
                   2.31,
@@ -2274,7 +2211,6 @@
               },
               "WT": {
                 "HLA-C*07:02": [
-                  "NA",
                   "NA",
                   "NA",
                   "NA",
@@ -2436,7 +2372,6 @@
               "algorithms": [
                 "NetMHCpan",
                 "NetMHC",
-                "NetMHCcons",
                 "SMM",
                 "SMMPMBEC",
                 "MHCflurry",
@@ -2446,7 +2381,6 @@
                 "HLA-B*07:02": [
                   1157.9,
                   3333.69,
-                  3491.59,
                   1078.673,
                   1538.721,
                   665.23,
@@ -2455,7 +2389,6 @@
               },
               "WT": {
                 "HLA-B*07:02": [
-                  "NA",
                   "NA",
                   "NA",
                   "NA",
@@ -2478,7 +2411,6 @@
               "algorithms": [
                 "NetMHCpan",
                 "NetMHC",
-                "NetMHCcons",
                 "SMM",
                 "SMMPMBEC",
                 "MHCflurry",
@@ -2488,7 +2420,6 @@
                 "HLA-B*07:02": [
                   1.2,
                   3.8,
-                  3.8,
                   3.4,
                   4.2,
                   1.053,
@@ -2497,7 +2428,6 @@
               },
               "WT": {
                 "HLA-B*07:02": [
-                  "NA",
                   "NA",
                   "NA",
                   "NA",
@@ -2659,7 +2589,6 @@
               "algorithms": [
                 "NetMHCpan",
                 "NetMHC",
-                "NetMHCcons",
                 "SMM",
                 "SMMPMBEC",
                 "MHCflurry",
@@ -2669,7 +2598,6 @@
                 "HLA-C*07:02": [
                   8811.28,
                   7800.44,
-                  19932.311,
                   41.226,
                   14.442,
                   1084.238,
@@ -2678,7 +2606,6 @@
               },
               "WT": {
                 "HLA-C*07:02": [
-                  "NA",
                   "NA",
                   "NA",
                   "NA",
@@ -2701,7 +2628,6 @@
               "algorithms": [
                 "NetMHCpan",
                 "NetMHC",
-                "NetMHCcons",
                 "SMM",
                 "SMMPMBEC",
                 "MHCflurry",
@@ -2711,7 +2637,6 @@
                 "HLA-C*07:02": [
                   3.2,
                   2.1,
-                  29.0,
                   0.7,
                   0.2,
                   3.514,
@@ -2720,7 +2645,6 @@
               },
               "WT": {
                 "HLA-C*07:02": [
-                  "NA",
                   "NA",
                   "NA",
                   "NA",
@@ -2882,7 +2806,6 @@
               "algorithms": [
                 "NetMHCpan",
                 "NetMHC",
-                "NetMHCcons",
                 "SMM",
                 "SMMPMBEC",
                 "MHCflurry",
@@ -2892,7 +2815,6 @@
                 "HLA-B*07:02": [
                   4111.11,
                   1990.33,
-                  1584.89,
                   473.031,
                   554.83,
                   1495.272,
@@ -2901,7 +2823,6 @@
               },
               "WT": {
                 "HLA-B*07:02": [
-                  "NA",
                   "NA",
                   "NA",
                   "NA",
@@ -2924,7 +2845,6 @@
               "algorithms": [
                 "NetMHCpan",
                 "NetMHC",
-                "NetMHCcons",
                 "SMM",
                 "SMMPMBEC",
                 "MHCflurry",
@@ -2934,7 +2854,6 @@
                 "HLA-B*07:02": [
                   2.6,
                   2.7,
-                  2.7,
                   1.9,
                   2.1,
                   1.449,
@@ -2943,7 +2862,6 @@
               },
               "WT": {
                 "HLA-B*07:02": [
-                  "NA",
                   "NA",
                   "NA",
                   "NA",
@@ -3105,7 +3023,6 @@
               "algorithms": [
                 "NetMHCpan",
                 "NetMHC",
-                "NetMHCcons",
                 "SMM",
                 "SMMPMBEC",
                 "MHCflurry",
@@ -3115,7 +3032,6 @@
                 "HLA-A*31:01": [
                   783.57,
                   300.91,
-                  652.65,
                   "NA",
                   "NA",
                   4440.516,
@@ -3124,7 +3040,6 @@
                 "HLA-C*07:02": [
                   13441.4,
                   3640.58,
-                  2043.73,
                   "NA",
                   "NA",
                   657.767,
@@ -3138,11 +3053,9 @@
                   "NA",
                   "NA",
                   "NA",
-                  "NA",
                   "NA"
                 ],
                 "HLA-C*07:02": [
-                  "NA",
                   "NA",
                   "NA",
                   "NA",
@@ -3167,7 +3080,6 @@
               "algorithms": [
                 "NetMHCpan",
                 "NetMHC",
-                "NetMHCcons",
                 "SMM",
                 "SMMPMBEC",
                 "MHCflurry",
@@ -3177,7 +3089,6 @@
                 "HLA-A*31:01": [
                   2.6,
                   2.2,
-                  3.7,
                   "NA",
                   "NA",
                   2.78,
@@ -3186,7 +3097,6 @@
                 "HLA-C*07:02": [
                   5.5,
                   0.77,
-                  2.9,
                   "NA",
                   "NA",
                   2.71,
@@ -3200,11 +3110,9 @@
                   "NA",
                   "NA",
                   "NA",
-                  "NA",
                   "NA"
                 ],
                 "HLA-C*07:02": [
-                  "NA",
                   "NA",
                   "NA",
                   "NA",
@@ -3386,7 +3294,6 @@
               "algorithms": [
                 "NetMHCpan",
                 "NetMHC",
-                "NetMHCcons",
                 "SMM",
                 "SMMPMBEC",
                 "MHCflurry",
@@ -3396,7 +3303,6 @@
                 "HLA-C*07:02": [
                   4351.82,
                   6774.58,
-                  780.22,
                   "NA",
                   "NA",
                   174.839,
@@ -3405,7 +3311,6 @@
               },
               "WT": {
                 "HLA-C*07:02": [
-                  "NA",
                   "NA",
                   "NA",
                   "NA",
@@ -3428,7 +3333,6 @@
               "algorithms": [
                 "NetMHCpan",
                 "NetMHC",
-                "NetMHCcons",
                 "SMM",
                 "SMMPMBEC",
                 "MHCflurry",
@@ -3438,7 +3342,6 @@
                 "HLA-C*07:02": [
                   1.5,
                   1.8,
-                  1.2,
                   "NA",
                   "NA",
                   1.05,
@@ -3447,7 +3350,6 @@
               },
               "WT": {
                 "HLA-C*07:02": [
-                  "NA",
                   "NA",
                   "NA",
                   "NA",
