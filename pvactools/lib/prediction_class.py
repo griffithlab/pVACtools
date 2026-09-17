@@ -769,7 +769,11 @@ class IEDBMHCI(MHCI, IEDB, metaclass=ABCMeta):
             for row in tsv_reader:
                 allele = row['IEDB Label']
                 algorithm = row['Tool']
-                if algorithm == self.iedb_prediction_method:
+                if self.iedb_prediction_method == 'netmhcpan_el':
+                    method = 'netmhcpan'
+                else:
+                    method = self.iedb_prediction_method
+                if algorithm == method:
                     alleles[allele] = [int(l) for l in row['Lengths'].split(',')]
         return alleles
 
