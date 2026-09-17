@@ -829,11 +829,6 @@ class SMM(IEDBMHCI):
     def iedb_prediction_method(self):
         return 'smm'
 
-class NetMHCcons(IEDBMHCI):
-    @property
-    def iedb_prediction_method(self):
-        return 'netmhccons'
-
 class MHCII(PredictionClass, metaclass=ABCMeta):
     @property
     def needs_epitope_length(self):
