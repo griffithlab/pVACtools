@@ -1,4 +1,4 @@
-sequence_number	peptide	start	end	length	allele	seq_num	median_percentile	binding.netmhcpan.core	binding.netmhcpan.icore	binding.netmhcpan.ic50	binding.netmhcpan.percentile
+sequence_number	peptide	start	end	length	allele	seq_num	median_percentile	binding.netmhcpan.core	binding.netmhcpan.icore	ic50	percentile
 1	PPPLLPLLP	1	9	9	HLA-E*01:01	1	56.0	PPPLLPLLP	PPPLLPLLP	47147.07	56.0
 2	PPPLLPLLL	1	9	9	HLA-E*01:01	2	3.5	PPPLLPLLL	PPPLLPLLL	31723.29	3.5
 3	PPLLPLLPL	1	9	9	HLA-E*01:01	3	26.0	PPLLPLLPL	PPLLPLLPL	43778.61	26.0

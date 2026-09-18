@@ -29,7 +29,7 @@
   "allele_specific_binding_thresholds": {},
   "allele_specific_anchors": false,
   "alleles": [
-    "H-2-Kb"
+    "H2-Kb"
   ],
   "anchor_contribution_threshold": 0.8,
   "epitope_lengths": [
@@ -71,7 +71,7 @@
               "NA"
             ],
             "hla_types": [
-              "H-2-Kb"
+              "H2-Kb"
             ],
             "mutation_position": "NA",
             "problematic_positions": "None",
@@ -81,12 +81,12 @@
                 "NetMHC"
               ],
               "MT": {
-                "H-2-Kb": [
+                "H2-Kb": [
                   9840.04
                 ]
               },
               "WT": {
-                "H-2-Kb": [
+                "H2-Kb": [
                   "NA"
                 ]
               }
@@ -94,10 +94,10 @@
             "individual_binding_score_calls": {
               "algorithms": [],
               "MT": {
-                "H-2-Kb": []
+                "H2-Kb": []
               },
               "WT": {
-                "H-2-Kb": []
+                "H2-Kb": []
               }
             },
             "individual_binding_percentile_calls": {
@@ -105,12 +105,12 @@
                 "NetMHC"
               ],
               "MT": {
-                "H-2-Kb": [
+                "H2-Kb": [
                   15.0
                 ]
               },
               "WT": {
-                "H-2-Kb": [
+                "H2-Kb": [
                   "NA"
                 ]
               }
@@ -118,37 +118,37 @@
             "individual_immunogenicity_calls": {
               "algorithms": [],
               "MT": {
-                "H-2-Kb": []
+                "H2-Kb": []
               },
               "WT": {
-                "H-2-Kb": []
+                "H2-Kb": []
               }
             },
             "individual_immunogenicity_percentile_calls": {
               "algorithms": [],
               "MT": {
-                "H-2-Kb": []
+                "H2-Kb": []
               },
               "WT": {
-                "H-2-Kb": []
+                "H2-Kb": []
               }
             },
             "individual_presentation_calls": {
               "algorithms": [],
               "MT": {
-                "H-2-Kb": []
+                "H2-Kb": []
               },
               "WT": {
-                "H-2-Kb": []
+                "H2-Kb": []
               }
             },
             "individual_presentation_percentile_calls": {
               "algorithms": [],
               "MT": {
-                "H-2-Kb": []
+                "H2-Kb": []
               },
               "WT": {
-                "H-2-Kb": []
+                "H2-Kb": []
               }
             },
             "wt_peptide": "FS-NA"
@@ -200,6 +200,6 @@
     "gene_expr": 48.123,
     "best_peptide_mt": "CGPAPLNL",
     "best_peptide_wt": "NA",
-    "best_hla_allele": "H-2-Kb"
+    "best_hla_allele": "H2-Kb"
   }
 }
