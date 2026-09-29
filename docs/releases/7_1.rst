@@ -54,3 +54,11 @@ This is a bugfix release. It fixes the following problem(s):
 * Fix issue in the Transcript Pass logic that would cause pVACview to crash on retiering by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1459
 * Fix pVACview aggregate report header tooltips by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1463
 * Respect IMMU_SCOPE_WEIGHTS_DIR as first priority for determining ImmuScope weight directory by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1462
+
+Version 7.1.5
+-------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+* Set prime_allele default so that PRIME doesn't fail on non-human alleles. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1469
+* Move ImmuScope alleles file to correct location under supporting_files. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1467
