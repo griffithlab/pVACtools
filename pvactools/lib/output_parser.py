@@ -567,9 +567,8 @@ class OutputParser(metaclass=ABCMeta):
         mt_epitope_seq = result['mt_epitope_seq']
         try:
             wt_result      = wt_results[match_position]
-        except:
-            import pdb
-            pdb.set_trace()
+        except KeyError:
+            raise KeyError(f"No wildtype result found at position {match_position} for MT epitope {mt_epitope_seq}")
         wt_epitope_seq = wt_result['wt_epitope_seq']
         result['wt_epitope_position'] = match_position
         total_matches  = self.determine_total_matches(mt_epitope_seq, wt_epitope_seq)
