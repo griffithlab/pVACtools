@@ -13,7 +13,7 @@ def readme():
 
 setup(
     name="pvactools",
-    version="7.1.4",
+    version="7.1.5",
     entry_points={
         "console_scripts":[
             "pvactools = pvactools.tools.main:main",

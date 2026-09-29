@@ -611,6 +611,8 @@ class PRIME(MHCI):
             tmp_output_file = tempfile.NamedTemporaryFile('r', dir=tmp_dir, delete=False)
             if allele.startswith('HLA'):
                 prime_allele = allele.replace("HLA-", "").replace("*", "").replace(":", "")
+            else:
+                prime_allele = allele
             arguments = ["PRIME", "-i", tmp_input_file.name, "-o", tmp_output_file.name, "-a", prime_allele, "-mix", "MixMHCpred"]
             stderr_fh = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
             try:
@@ -915,7 +917,7 @@ class ImmuScope_IM(MHCII):
         """
 
         base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-        alleles_dir = os.path.join(base_dir, 'tools', 'pvacseq', 'iedb_alleles', 'class_ii')
+        alleles_dir = os.path.join(base_dir, 'supporting_files', 'alleles', 'class_ii')
         alleles_file_name = os.path.join(alleles_dir, 'Immuscope.txt')
         with open(alleles_file_name, 'r') as fh:
             return list(filter(None, (line.strip() for line in fh)))
