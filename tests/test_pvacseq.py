@@ -37,7 +37,7 @@ class PvacseqTests(unittest.TestCase):
             'ann': {
                 'HLA-E*01:01': [9, 10]
             },
-            'pickpocket': {
+            'netmhcpan': {
                 'HLA-G*01:09': [9, 10],
                 'HLA-E*01:01': [9, 10],
             },
@@ -112,7 +112,7 @@ class PvacseqTests(unittest.TestCase):
                 'sample.name',
                 'HLA-G*01:09,HLA-E*01:01,DRB1*11:01',
                 'NetMHC',
-                'PickPocket',
+                'NetMHCpan',
                 'NNalign',
                 output_dir.name,
                 '-e1', '9,10',
@@ -218,7 +218,7 @@ class PvacseqTests(unittest.TestCase):
                     'sample.name',
                     'HLA-G*01:09,HLA-E*01:01,DRB1*11:01',
                     'NetMHC',
-                    'PickPocket',
+                    'NetMHCpan',
                     'NNalign',
                     output_dir.name,
                     '-e1', '9,10',
@@ -342,7 +342,7 @@ class PvacseqTests(unittest.TestCase):
                 'Test',
                 'HLA-G*01:09,HLA-E*01:01',
                 'NetMHC',
-                'PickPocket',
+                'NetMHCpan',
                 output_dir.name,
                 '-e1', '9,10',
                 '--biotypes', 'IG_V_gene,protein_coding',
@@ -384,7 +384,7 @@ class PvacseqTests(unittest.TestCase):
                 'Test',
                 'HLA-G*01:09,HLA-E*01:01,DRB1*11:01',
                 'NetMHC',
-                'PickPocket',
+                'NetMHCpan',
                 'NNalign',
                 output_dir.name,
                 '-e1', '9,10',

@@ -19,7 +19,7 @@ Here is an example of how to run pVACvector with a pVACseq output TSV:
    <example_data_dir>/input.tsv \
    Test \
    HLA-A*02:01,HLA-B*35:01 \
-   MHCflurry MHCnuggetsI MHCnuggetsII NNalign NetMHC PickPocket SMM SMMPMBEC SMMalign \
+   MHCflurry MHCnuggetsI MHCnuggetsII NNalign NetMHC SMM SMMPMBEC SMMalign \
    <output_dir> \
    -e1 8,9,10 \
    -e2 15 \
@@ -33,7 +33,7 @@ In this example pVACvector is run with an input FASTA file:
    <example_data_dir>/input.fa \
    Test \
    HLA-A*02:01,HLA-B*35:01 \
-   MHCflurry MHCnuggetsI MHCnuggetsII NNalign NetMHC PickPocket SMM SMMPMBEC SMMalign \
+   MHCflurry MHCnuggetsI MHCnuggetsII NNalign NetMHC SMM SMMPMBEC SMMalign \
    <output_dir> \
    -e1 8,9,10 \
    -e2 15
