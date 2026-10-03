@@ -21,6 +21,65 @@ class RunUtilsTests(unittest.TestCase):
     def test_module_compiles(self):
         self.assertTrue(py_compile.compile(self.utils_path))
 
+    def test_split_algorithms(self):
+        #individual shortcuts
+        self.assertEqual(
+            split_algorithms(["all"]),
+            (['BigMHC_EL', 'BigMHC_IM', 'DeepImmuno', 'MHCflurry', 'MHCflurryEL', 'MHCnuggetsI', 'MixMHCpred', 'NetMHC', 'NetMHCcons', 'NetMHCpan', 'NetMHCpanEL', 'PRIME', 'PickPocket', 'SMM', 'SMMPMBEC', 'TLBind', 'TLImm'], ['ImmuScope_IM', 'MHCnuggetsII', 'MixMHC2pred', 'NNalign', 'NetMHCIIpan', 'NetMHCIIpanEL', 'SMMalign'])
+        )
+        self.assertEqual(
+            split_algorithms(["all_class_i"]),
+            (['BigMHC_EL', 'BigMHC_IM', 'DeepImmuno', 'MHCflurry', 'MHCflurryEL', 'MHCnuggetsI', 'MixMHCpred', 'NetMHC', 'NetMHCcons', 'NetMHCpan', 'NetMHCpanEL', 'PRIME', 'PickPocket', 'SMM', 'SMMPMBEC', 'TLBind', 'TLImm'], [])
+        )
+        self.assertEqual(
+            split_algorithms(["all_class_ii"]),
+            ([], ['ImmuScope_IM', 'MHCnuggetsII', 'MixMHC2pred', 'NNalign', 'NetMHCIIpan', 'NetMHCIIpanEL', 'SMMalign'])
+        )
+        self.assertEqual(
+            split_algorithms(["select"]),
+            (['BigMHC_EL', 'BigMHC_IM', 'DeepImmuno', 'MHCflurry', 'MHCflurryEL', 'MixMHCpred', 'NetMHCpan', 'NetMHCpanEL', 'PRIME', 'PickPocket', 'SMMPMBEC'], ['ImmuScope_IM', 'MHCnuggetsII', 'MixMHC2pred', 'NetMHCIIpan', 'NetMHCIIpanEL', 'SMMalign'])
+        )
+        self.assertEqual(
+            split_algorithms(["select_class_i"]),
+            (['BigMHC_EL', 'BigMHC_IM', 'DeepImmuno', 'MHCflurry', 'MHCflurryEL', 'MixMHCpred', 'NetMHCpan', 'NetMHCpanEL', 'PRIME', 'PickPocket', 'SMMPMBEC'], [])
+        )
+        self.assertEqual(
+            split_algorithms(["select_class_ii"]),
+            ([], ['ImmuScope_IM', 'MHCnuggetsII', 'MixMHC2pred', 'NetMHCIIpan', 'NetMHCIIpanEL', 'SMMalign'])
+        )
+
+        #Combining all and select gives you all
+        self.assertEqual(
+            split_algorithms(["all", "select"]),
+            split_algorithms(["all"])
+        )
+        self.assertEqual(
+            split_algorithms(["all_class_i", "select_class_i"]),
+            split_algorithms(["all_class_i"])
+        )
+        self.assertEqual(
+            split_algorithms(["all_class_ii", "select_class_ii"]),
+            split_algorithms(["all_class_ii"])
+        )
+
+        #Combining shortcuts with individual algorithms gives you the superset
+        self.assertEqual(
+            split_algorithms(["all_class_i", "NNalign"]),
+            (['BigMHC_EL', 'BigMHC_IM', 'DeepImmuno', 'MHCflurry', 'MHCflurryEL', 'MHCnuggetsI', 'MixMHCpred', 'NetMHC', 'NetMHCcons', 'NetMHCpan', 'NetMHCpanEL', 'PRIME', 'PickPocket', 'SMM', 'SMMPMBEC', 'TLBind', 'TLImm'], ['NNalign'])
+        )
+        self.assertEqual(
+            split_algorithms(["all_class_ii", "NetMHC"]),
+            (['NetMHC'], ['ImmuScope_IM', 'MHCnuggetsII', 'MixMHC2pred', 'NNalign', 'NetMHCIIpan', 'NetMHCIIpanEL', 'SMMalign'])
+        )
+        self.assertEqual(
+            split_algorithms(["select_class_i", "NetMHC"]),
+            (['BigMHC_EL', 'BigMHC_IM', 'DeepImmuno', 'MHCflurry', 'MHCflurryEL', 'MixMHCpred', 'NetMHC', 'NetMHCpan', 'NetMHCpanEL', 'PRIME', 'PickPocket', 'SMMPMBEC'], [])
+        )
+        self.assertEqual(
+            split_algorithms(["select_class_ii", "NNalign"]),
+            ([], ['ImmuScope_IM', 'MHCnuggetsII', 'MixMHC2pred', 'NNalign', 'NetMHCIIpan', 'NetMHCIIpanEL', 'SMMalign'])
+        )
+
     def test_combine_class_ii_alleles(self):
         self.assertEqual(
             sorted(combine_class_ii_alleles(["DQA1*06:02", "DQB1*06:43", "DQB1*06:44"])),

@@ -33,7 +33,7 @@ class RunArgumentParser(metaclass=ABCMeta):
         )
         parser.add_argument(
             "prediction_algorithms",
-            choices=PredictionClass.prediction_methods_with_all(),
+            choices=PredictionClass.prediction_methods_with_shortcuts(),
             nargs="+",
             help="The epitope prediction algorithms to use. Multiple prediction algorithms can be specified, separated by spaces.",
         )
