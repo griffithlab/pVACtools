@@ -83,6 +83,11 @@ def define_parser():
              + "Whether the lowest or median is considered for each metric is controlled by the --top-score-metric parameter. ",
         default=['ic50', 'combined_percentile'],
     )
+    parser.add_argument(
+        "--limiting-alleles", type=lambda s:[a for a in s.split(',')],
+        help="Comma-separated list of alleles used for the predictions made in the input file. "
+             + "If specified, only predictions for those alleles will be included in the aggregated report."
+    )
     return parser
 
 def main(args_input = sys.argv[1:]):
@@ -104,6 +109,7 @@ def main(args_input = sys.argv[1:]):
         top_score_metric=args.top_score_metric,
         aggregate_inclusion_binding_threshold=args.aggregate_inclusion_binding_threshold,
         aggregate_inclusion_count_limit=args.aggregate_inclusion_count_limit,
+        limiting_alleles=args.limiting_alleles,
     ).execute()
     print("Completed")
 
