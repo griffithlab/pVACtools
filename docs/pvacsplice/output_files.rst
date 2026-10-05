@@ -544,7 +544,7 @@ The aggregate report is sorted as follows:
        "RefMatch", "PoorTranscript", "LowExpr", "Subclonal", "ProbPos", "Poor", "NoExpr"
    * - Candidates are ranked separately on ``Allele Expr`` (highest = rank 1)
        and on each metric chosen with ``--top-score-metric2`` (lowest = rank 1).
-       Options: ``IC50 MT``, ``%ile MT``, ``IC50 %ile MT``, ``Pres %ile MT``;
+       Options: ``IC50 MT``, ``%ile MT``, ``IC50 %ile MT``, ``Pres %ile MT``, ``IM %ile MT``;
        default is ``IC50 MT`` and ``%ile MT``. To produce a final Sort Order
        these ranks are summed, and candidates are sorted by that sum from lowest
        (best) to highest.
