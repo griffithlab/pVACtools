@@ -20,8 +20,9 @@ class VariantToKmerPipeline(InputToKmerPipeline):
         self.class_ii_epitope_length = kwargs.pop('class_ii_epitope_length', None)
         self.class_i_hla = kwargs.pop('class_i_hla', None)
         self.class_ii_hla = kwargs.pop('class_ii_hla', None)
-        self.flanking_bases = kwargs.pop('flanking_bases', None)
-        if self.flanking_bases is None:
+        if self.choose_final_lengths() is None:
+            self.flanking_bases = 100
+        else:
             self.flanking_bases = max(self.choose_final_lengths())
 
     def create_file_path(self, key):

@@ -11,9 +11,9 @@ class PvacfusePredictionPipeline(PredictionPipeline):
     def generate_fasta(self):
         fasta_file = os.path.join(self.output_dir, "{}.fasta".format(self.sample_name))
         params = {
-            'fasta_file_path': self.transcript_fasta,
-            'trimmed_fasta_file_path': fasta_file,
+            'transcripts_fasta': self.transcript_fasta,
+            'output_file': fasta_file,
             'flanking_sequence_length': max(self.epitope_lengths) - 1,
             'mutant_only': False,
         }
-        PvacfuseGenerateProteinFasta(**params).trim_sequences()
+        PvacfuseGenerateProteinFasta(**params).execute()
