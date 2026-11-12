@@ -112,7 +112,7 @@ class PvacvectorInputFastaGenerator():
                 new_position = occurrences[0]
             #epitope occurs multiple times
             else:
-                #find the occurence that is closest to the original position and use that
+                #find the occurrence that is closest to the original position and use that
                 new_position = min(occurrences, key=lambda x:abs(original_position-1-x))
 
             length = int(length)
