@@ -48,7 +48,7 @@ setup(
         'pyfaidx>=0.7.1',
         'fsspec<=2025.3.0',
         'packaging',
-        'pyarrow',
+        'pyarrow==25.0.1',
         'polars==0.16.18',
         'XlsxWriter',
         'openpyxl',
