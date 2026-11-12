@@ -178,7 +178,7 @@ def determine_neoepitopes(sequence, length):
         epitopes[i+1] = sequence[i:i+length]
     return epitopes
 
-def get_mutated_peptide_with_flanking_sequence(wt_peptide, mt_peptide, flanking_length):
+def get_mutated_peptide_with_flanking_sequence(wt_peptide, mt_peptide, flanking_length, index):
     wt_epitopes = determine_neoepitopes(wt_peptide, flanking_length+1)
     mt_epitopes = determine_neoepitopes(mt_peptide, flanking_length+1)
     for start, (wt_epitope, mt_epitope) in enumerate(zip(list(wt_epitopes.values()), list(mt_epitopes.values()))):
@@ -195,11 +195,11 @@ def get_mutated_peptide_with_flanking_sequence(wt_peptide, mt_peptide, flanking_
     if mutant_subsequence[-1] not in supported_aas:
         mutant_subsequence = mutant_subsequence[0:-1]
     if not all([c in supported_aas for c in mutant_subsequence]):
-        print("Warning. Mutant sequence contains unsupported amino acid. Skipping entry {}".format(line['index']))
+        print(f"Warning. Mutant sequence contains unsupported amino acid. Skipping entry {index}")
         return
     return mutant_subsequence
 
-def get_mutated_frameshift_peptide_with_flanking_sequence(wt_peptide, mt_peptide, flanking_length):
+def get_mutated_frameshift_peptide_with_flanking_sequence(wt_peptide, mt_peptide, flanking_length, index):
     wt_epitopes = determine_neoepitopes(wt_peptide, flanking_length+1)
     mt_epitopes = determine_neoepitopes(mt_peptide, flanking_length+1)
     for start, (wt_epitope, mt_epitope) in enumerate(zip(list(wt_epitopes.values()), list(mt_epitopes.values()))):
@@ -212,7 +212,7 @@ def get_mutated_frameshift_peptide_with_flanking_sequence(wt_peptide, mt_peptide
     if mutant_subsequence[-1] not in supported_aas:
         mutant_subsequence = mutant_subsequence[0:-1]
     if not all([c in supported_aas for c in mutant_subsequence]):
-        print("Warning. Mutant sequence contains unsupported amino acid. Skipping entry {}".format(line['index']))
+        print(f"Warning. Mutant sequence contains unsupported amino acid. Skipping entry {index}")
         return
     return mutant_subsequence
 

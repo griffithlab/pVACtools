@@ -317,9 +317,9 @@ class CalculateReferenceProteomeSimilarity:
                 return None, None, None
             _, frameshift_status = identifier.rsplit('.', 1)
             if frameshift_status == 'inframe_splice_site':
-                peptide = get_mutated_peptide_with_flanking_sequence(wt_peptide, mt_peptide, self.match_length-1)
+                peptide = get_mutated_peptide_with_flanking_sequence(wt_peptide, mt_peptide, self.match_length-1, identifier)
             elif frameshift_status == 'frameshift_splice_site':
-                peptide = get_mutated_frameshift_peptide_with_flanking_sequence(wt_peptide, mt_peptide, self.match_length-1)
+                peptide = get_mutated_frameshift_peptide_with_flanking_sequence(wt_peptide, mt_peptide, self.match_length-1, identifier)
             else:
                 raise Exception("Unexpected frameshift status {} for record {}. Skipping".format(frameshift_status, identifier))
             full_peptide = peptide
