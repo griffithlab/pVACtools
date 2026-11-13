@@ -101,9 +101,9 @@ class PvacvectorInputFastaGenerator():
         extracted_peptides = {}
         for index, epitope in sorted(epitopes.items()):
             p = re.compile('^(.+)_pos([0-9]+)_len([0-9]+)$')
-            identifier = p.search(index).group(1)
-            original_position = p.search(index).group(2)
-            length = p.search(index).group(3)
+            identifier, original_position, length = p.search(index).groups()
+            original_position = int(original_position)
+            length = int(length)
             full_sequence = transcript_dict[identifier]
             #find all occurrences of the epitope in the full sequence
             occurrences = [n for n in range(len(full_sequence)) if full_sequence.find(epitope, n) == n]
@@ -112,10 +112,9 @@ class PvacvectorInputFastaGenerator():
                 new_position = occurrences[0]
             #epitope occurs multiple times
             else:
-                #find the occurence that is closest to the original positon and use that
+                #find the occurrence that is closest to the original position and use that
                 new_position = min(occurrences, key=lambda x:abs(original_position-1-x))
 
-            length = int(length)
             n_mer = int(self.n_mer)
             if len(full_sequence) <= n_mer:
                 extracted_sequence = full_sequence
