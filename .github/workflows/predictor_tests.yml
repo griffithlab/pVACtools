@@ -57,6 +57,7 @@ jobs:
           pip install git+https://github.com/griffithlab/TL-MHC.git#egg=TL-MHC
           pip install git+https://github.com/griffithlab/ImmuScope.git#egg=ImmuScope
           pip install -e .
+          pip install "tensorflow<2.16"
           mhcflurry-downloads fetch
           immuscope-download-weights
       - name: Install MixMHCpred
