@@ -59,13 +59,15 @@ Contents
    mailing_list
 
 
-Version 7.1.5
+Version 7.1.6
 -------------
 
 This is a bugfix release. It fixes the following problem(s):
 
-* Set prime_allele default so that PRIME doesn't fail on non-human alleles. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1469
-* Move ImmuScope alleles file to correct location under supporting_files. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1467
+* Fix bug in pVACvector input fasta generator trying to use original_position without casting to int first. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1475
+* Fix MHCflurryEL-only runs reporting MHCflurry binding scores instead of EL scores. by @jberg5 in https://github.com/griffithlab/pVACtools/pull/1481
+* Fix missing argument in ``_with_flanking_sequence`` helper functions. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1476
+* Add new and renamed columns to pVACcompare supported column lists. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1478
 
 New in Version 7
 ----------------
