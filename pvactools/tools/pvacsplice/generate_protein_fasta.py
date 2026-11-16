@@ -176,9 +176,9 @@ def main(args_input = sys.argv[1:]):
             continue
         _, frameshift_status = index.rsplit('.', 1)
         if frameshift_status == 'inframe_splice_site':
-            final_sequence = get_mutated_peptide_with_flanking_sequence(wt_sequence, mt_sequence, min(args.flanking_sequence_length, len(wt_sequence)-1, len(mt_sequence)-1))
+            final_sequence = get_mutated_peptide_with_flanking_sequence(wt_sequence, mt_sequence, min(args.flanking_sequence_length, len(wt_sequence)-1, len(mt_sequence)-1), index)
         elif frameshift_status == 'frameshift_splice_site':
-            final_sequence = get_mutated_frameshift_peptide_with_flanking_sequence(wt_sequence, mt_sequence, min(args.flanking_sequence_length, len(wt_sequence)-1, len(mt_sequence)-1))
+            final_sequence = get_mutated_frameshift_peptide_with_flanking_sequence(wt_sequence, mt_sequence, min(args.flanking_sequence_length, len(wt_sequence)-1, len(mt_sequence)-1), index)
         else:
             raise Exception("Unexpected frameshift status {} for record {}. Skipping".format(frameshift_status, identifier))
         if final_sequence:
