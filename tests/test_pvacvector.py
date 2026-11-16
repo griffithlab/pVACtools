@@ -491,3 +491,28 @@ class TestPvacvector(unittest.TestCase):
                         self.assertIn(best_peptide, file_content)
 
                 output_dir.cleanup()
+
+    def test_pvacvector_input_vcf_multiple_matches_converts_and_single_sequence_fails(self):
+        input_vcf = os.path.join(self.test_data_dir, "input_multiple_matches.vcf.gz")
+        input_tsv = os.path.join(self.test_data_dir, "input_multiple_matches.tsv")
+        output_dir = tempfile.TemporaryDirectory()
+
+        with self.assertRaises(Exception) as context:
+            run.main([
+                input_tsv,
+                "E_2025_51883-T1-DNA1-WES1",
+                self.allele,
+                self.method,
+                output_dir.name,
+                '-v', input_vcf,
+                '-k',
+            ])
+            self.assertIn("pVACvector requires at least 2 input peptide sequences to run. The input only contains 1", str(context.exception))
+
+        #conversion from vcf to fasta file succeeds, even though peptide contains target epitope multiple times
+        self.assertTrue(compare(
+            os.path.join(output_dir.name, "vector_input.fa"),
+            os.path.join(self.test_data_dir, "input_multiple_matches_output.fa")
+        ))
+
+        output_dir.cleanup()

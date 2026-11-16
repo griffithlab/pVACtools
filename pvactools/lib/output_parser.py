@@ -380,7 +380,7 @@ class OutputParser(metaclass=ABCMeta):
                     )
                 }
 
-            if self.flurry_state == 'el_only':
+            if self.flurry_state == 'EL_only':
                 return {
                     **self._make_score_entry(
                         line, 'MHCflurryEL Processing', 'presentation',

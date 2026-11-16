@@ -460,6 +460,8 @@ def main(args_input=sys.argv[1:]):
     seq_dict = dict()
     for record in SeqIO.parse(input_file, "fasta"):
         seq_dict[record.id] = str(record.seq)
+    if len(seq_dict) < 2:
+        raise Exception(f"pVACvector requires at least 2 input peptide sequences to run. The input only contains {len(seq_dict)}")
     seq_keys = sorted(seq_dict)
     graph = initialize_graph(seq_keys)
 
