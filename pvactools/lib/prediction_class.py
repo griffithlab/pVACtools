@@ -241,7 +241,7 @@ class PredictionClass(metaclass=ABCMeta):
         valid_alleles = cls.all_valid_allele_names()
         for allele in alleles:
             if allele not in valid_alleles:
-                sys.exit("Allele %s not valid. Run `pvacseq valid_alleles` for a list of valid allele names." % allele)
+                sys.exit("Allele %s not valid. Run `pvactools valid_alleles` for a list of valid allele names." % allele)
 
     @classmethod
     def allele_to_species_map(self):
@@ -345,7 +345,7 @@ class PredictionClass(metaclass=ABCMeta):
     def check_allele_valid(self, allele):
         valid_alleles = self.valid_allele_names()
         if allele not in valid_alleles:
-            sys.exit("Allele %s not valid for method %s. Run `pvacseq valid_alleles %s` for a list of valid allele names." % (allele, self.__class__.__name__, self.__class__.__name__))
+            sys.exit("Allele %s not valid for method %s. Run `pvactools valid_alleles -p %s` for a list of valid allele names." % (allele, self.__class__.__name__, self.__class__.__name__))
 
 
 class MHCI(PredictionClass, metaclass=ABCMeta):
@@ -611,6 +611,8 @@ class PRIME(MHCI):
             tmp_output_file = tempfile.NamedTemporaryFile('r', dir=tmp_dir, delete=False)
             if allele.startswith('HLA'):
                 prime_allele = allele.replace("HLA-", "").replace("*", "").replace(":", "")
+            else:
+                prime_allele = allele
             arguments = ["PRIME", "-i", tmp_input_file.name, "-o", tmp_output_file.name, "-a", prime_allele, "-mix", "MixMHCpred"]
             stderr_fh = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
             try:
@@ -886,19 +888,16 @@ class NetMHCIIVersion:
 
 class ImmuScope_IM(MHCII):
     immuscope_score_col = 'ImmuScope_IM'
-    immuscope_weights_dir = '/opt/ImmuScope/weights'
 
     def resolved_immuscope_weights_dir(self):
+        immu_scope_weights_dir = os.environ.get('IMMU_SCOPE_WEIGHTS_DIR')
         xdg_data_home = os.environ.get('XDG_DATA_HOME')
-        if xdg_data_home:
-            user_dir = os.path.join(xdg_data_home, 'ImmuScope', 'weights')
+        if immu_scope_weights_dir:
+            return immu_scope_weights_dir
+        elif xdg_data_home:
+            return os.path.join(xdg_data_home, 'ImmuScope', 'weights')
         else:
-            user_dir = os.path.join(os.path.expanduser('~/.local/share'), 'ImmuScope', 'weights')
-
-        if os.path.isdir(os.path.join(user_dir, 'IM')):
-            return user_dir
-
-        return self.immuscope_weights_dir
+            return os.path.join(os.path.expanduser('~/.local/share'), 'ImmuScope', 'weights')
 
     def valid_allele_names(self):
         """Return allele names supported by ImmuScope.
@@ -908,7 +907,7 @@ class ImmuScope_IM(MHCII):
         """
 
         base_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-        alleles_dir = os.path.join(base_dir, 'tools', 'pvacseq', 'iedb_alleles', 'class_ii')
+        alleles_dir = os.path.join(base_dir, 'supporting_files', 'alleles', 'class_ii')
         alleles_file_name = os.path.join(alleles_dir, 'Immuscope.txt')
         with open(alleles_file_name, 'r') as fh:
             return list(filter(None, (line.strip() for line in fh)))

@@ -26,3 +26,10 @@ This is a bugfix release. It fixes the following problem(s):
 * Add missing pvacsplice.wdl to download_wdls command. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1389
 * Fix top score filter to work with presentation/immunogenicity-only reports. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1391
 * Replace deprecated pkg_resources with importlib.metadata. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1392
+
+Version 6.1.2
+-------------
+
+This is a backport bugfix release. It fixes the following problem first fixed in version 7.1.2:
+
+* Fix AGFusion read support calculation when running with STAR-fusion input by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1451

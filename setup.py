@@ -13,7 +13,7 @@ def readme():
 
 setup(
     name="pvactools",
-    version="7.1.1",
+    version="7.1.6",
     entry_points={
         "console_scripts":[
             "pvactools = pvactools.tools.main:main",
@@ -48,7 +48,7 @@ setup(
         'pyfaidx>=0.7.1',
         'fsspec<=2025.3.0',
         'packaging',
-        'pyarrow',
+        'pyarrow<=25.0.1',
         'polars==0.16.18',
         'XlsxWriter',
         'openpyxl',
@@ -56,7 +56,8 @@ setup(
         'scikit-learn>=1.6.0,<1.8.0',
         'imblearn',
     ],
-    packages=find_namespace_packages(),
+    packages=find_namespace_packages(include=["pvactools", "pvactools.*"]),
+    python_requires=">=3.9,<3.12",
     include_package_data=True,
     classifiers=[
         'Development Status :: 5 - Production/Stable',

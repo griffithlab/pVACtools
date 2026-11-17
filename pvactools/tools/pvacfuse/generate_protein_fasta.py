@@ -2,22 +2,19 @@ import sys
 import argparse
 
 from pvactools.lib.generate_protein_fasta import PvacfuseGenerateProteinFasta
-from pvactools.lib.run_argument_utils import aggregate_report_evaluations, downstream_sequence_length
+from pvactools.lib.run_argument_utils import aggregate_report_evaluations
 
 def define_parser():
     parser = argparse.ArgumentParser(
         "pvacfuse generate_protein_fasta",
-        description="Generate an annotated fasta file from AGFusion or Arriba output.",
+        description="Generate a fasta file with a specific flanking sequence length around the fusion",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
 
     parser.add_argument(
-        "input",
-        help="An AGFusion output directory or Arriba fusion.tsv output file."
-    )
-    parser.add_argument(
-        "ref_fasta",
-        help="A reference CDS FASTA file. Note: this input should match the build and Ensembl version used to create the fusion annotations."
+        "transcripts_fasta",
+        help="A pVACfuse transcripts.fa file with transcript protein sequences of fusions and matching 5'/3' wildtypes. "
+             + "This file can be found in the top-level output directory of your pVACfuse run or can be generated using the `pvacfuse generate_transcripts_fasta` command."
     )
     parser.add_argument(
         "flanking_sequence_length", type=int,
@@ -43,13 +40,6 @@ def define_parser():
         default='Accept',
         type=aggregate_report_evaluations(),
     )
-    parser.add_argument(
-        "-d", "--downstream-sequence-length",
-        default="1000",
-        help="Cap to limit the downstream sequence length for frameshift fusion when creating the fasta file. "
-            + "Use 'full' to include the full downstream sequence.",
-        type=downstream_sequence_length()
-    )
     return parser
 
 def main(args_input = sys.argv[1:]):
@@ -57,13 +47,10 @@ def main(args_input = sys.argv[1:]):
     args = parser.parse_args(args_input)
 
     params = {
-        'input': args.input,
-        'ref_fasta': args.ref_fasta,
-        'downstream_sequence_length': args.downstream_sequence_length,
+        'transcripts_fasta': args.transcripts_fasta,
         'flanking_sequence_length': args.flanking_sequence_length,
         'mutant_only': args.mutant_only,
         'aggregate_report_evaluation': args.aggregate_report_evaluation,
-        'input_tsv': args.input_tsv,
         'output_file': args.output_file,
     }
     PvacfuseGenerateProteinFasta(**params).execute()

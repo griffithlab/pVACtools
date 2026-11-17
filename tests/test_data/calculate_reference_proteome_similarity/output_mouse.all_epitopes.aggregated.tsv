@@ -1,0 +1,2 @@
+ID	Index	H-2-Db	H-2-Kb	Gene	AA Change	Num Passing Transcripts	Best Peptide	Best Transcript	MANE Select	Canonical	TSL	Allele	Pos	Prob Pos	Num Included Peptides	Num Passing Peptides	IC50 MT	IC50 WT	%ile MT	%ile WT	RNA Expr	RNA VAF	Allele Expr	RNA Depth	DNA VAF	Tier	Ref Match	Evaluation
+11-60132681-60132682-C-T	302.Tom1l2.ENSMUST00000102683.11.missense.414A/T			Tom1l2	A414T	1	VGGLTSAL	ENSMUST00000102683.11	False	True	Not Supported	H-2-Kb	5	None	1	0	2756.130	2099.970	3.700	3.100	42.475	1.000	42.475	135.000	1.000	Poor	True	Pending

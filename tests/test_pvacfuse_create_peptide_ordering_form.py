@@ -30,10 +30,7 @@ class PvacfuseCreatePeptideOrderingFormTests(unittest.TestCase):
             "pvacfuse_create_peptide_ordering_form",
         )
 
-        cls.input = os.path.join(cls.test_data_dir, "agfusion_HCC1395")
-        cls.peptide_fasta = os.path.join(cls.test_data_dir, "Homo_sapiens.GRCh38.pep.short.fa.gz")
-        transcript_fasta = os.path.join(cls.test_data_dir, 'Homo_sapiens.GRCh38.95.cds.all.fa.gz')
-        cls.unzipped_transcript_fasta = gunzip_file(transcript_fasta)
+        cls.transcripts_fasta = os.path.join(cls.test_data_dir, "HCC1395_TUMOR_DNA.transcripts.fa")
         cls.mhc_class_i_tsv = os.path.join(
             cls.test_data_dir, "MHC_Class_I", "sample.name.MHC_I.all_epitopes.aggregated.tsv"
         )
@@ -50,8 +47,7 @@ class PvacfuseCreatePeptideOrderingFormTests(unittest.TestCase):
             [
                 cls.python,
                 cls.executable,
-                cls.input,
-                cls.unzipped_transcript_fasta,
+                cls.transcripts_fasta,
                 '25',
                 cls.mhc_class_i_tsv,
                 cls.mhc_class_ii_tsv,

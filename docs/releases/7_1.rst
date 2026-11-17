@@ -1,0 +1,74 @@
+Version 7.1
+===========
+
+Version 7.1.0
+-------------
+
+This is a minor version release. It adds the following features:
+
+* pVACtools now supports additional prediction algorithms:
+
+  * TLBind (binding and presentation)
+  * TLImm (immunogenicity)
+
+  These algorithms also support normalized percentiles using the
+  ``--use-normalized-percentiles`` flags. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1377
+
+Additionally, it fixes the following problem(s):
+
+* Fix tiers argument type to have the most up-to-date tier list by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1423
+* Fix NetChop bug that would include position before epitope (0) by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1432
+* Fix bug in lowexpr logic by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1433
+* Fix tbi file existence check in pVACsplice runs by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1434
+
+Version 7.1.1
+-------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+* Fix TLBind WT Presentation Percentile not getting set correctly by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1436
+
+Version 7.1.2
+-------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+* Fix AGFusion read support calculation when running with STAR-fusion input by @YT-er in https://github.com/griffithlab/pVACtools/pull/1445
+* Replace remaining mentions of `pvacseq valid_alleles` with `pvactools valid_alleles` by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1448
+* Clean up packaging metadata and repository artifacts by @YT-er in https://github.com/griffithlab/pVACtools/pull/1446
+
+Version 7.1.3
+-------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+* Correctly handle gene name parsing from fasta headers for genes with lowercase characters. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1456
+* Normalize MixMHC2pred alleles to match other class II allele formats. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1454
+
+Version 7.1.4
+-------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+* Fix command mentions of the allele_specific_cutoffs command by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1458
+* Fix issue in the Transcript Pass logic that would cause pVACview to crash on retiering by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1459
+* Fix pVACview aggregate report header tooltips by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1463
+* Respect IMMU_SCOPE_WEIGHTS_DIR as first priority for determining ImmuScope weight directory by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1462
+
+Version 7.1.5
+-------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+* Set prime_allele default so that PRIME doesn't fail on non-human alleles. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1469
+* Move ImmuScope alleles file to correct location under supporting_files. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1467
+
+Version 7.1.6
+-------------
+
+This is a bugfix release. It fixes the following problem(s):
+
+* Fix bug in pVACvector input fasta generator trying to use original_position without casting to int first. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1475
+* Fix MHCflurryEL-only runs reporting MHCflurry binding scores instead of EL scores. by @jberg5 in https://github.com/griffithlab/pVACtools/pull/1481
+* Fix missing argument in ``_with_flanking_sequence`` helper functions. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1476
+* Add new and renamed columns to pVACcompare supported column lists. by @susannasiebert in https://github.com/griffithlab/pVACtools/pull/1478
