@@ -37,7 +37,7 @@ class PvacspliceTests(unittest.TestCase):
             'ann': {
                 'HLA-E*01:01': [9, 10]
             },
-            'pickpocket': {
+            'netmhcpan': {
                 'HLA-G*01:09': [9, 10],
                 'HLA-E*01:01': [9, 10],
             },
@@ -142,7 +142,7 @@ class PvacspliceTests(unittest.TestCase):
                 'HCC1395_TUMOR_DNA',
                 'HLA-G*01:09,HLA-E*01:01',
                 'NetMHC',
-                'PickPocket',
+                'NetMHCpan',
                 output_dir.name,
                 os.path.join(self.test_data_directory, "inputs", "annotated.expression_chr1.vcf.gz"),
                 unzipped_fasta_file,
@@ -211,7 +211,7 @@ class PvacspliceTests(unittest.TestCase):
                     'HCC1395_TUMOR_DNA',
                     'HLA-G*01:09,HLA-E*01:01',
                     'NetMHC',
-                    'PickPocket',
+                    'NetMHCpan',
                     output_dir.name,
                     os.path.join(self.test_data_directory, "inputs", "annotated.expression_chr1.vcf.gz"),
                     unzipped_fasta_file,

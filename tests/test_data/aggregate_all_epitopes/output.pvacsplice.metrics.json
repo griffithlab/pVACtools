@@ -91,27 +91,22 @@
             "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  37421.59,
-                  16404.99
+                  37421.59
                 ],
                 "HLA-G*01:09": [
-                  "NA",
-                  14882.82
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  39155.87,
-                  17505.31
+                  39155.87
                 ],
                 "HLA-G*01:09": [
-                  "NA",
-                  26694.99
+                  "NA"
                 ]
               }
             },
@@ -128,27 +123,22 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  28.0,
-                  44.0
+                  28.0
                 ],
                 "HLA-G*01:09": [
-                  "NA",
-                  31.0
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  36.0,
-                  47.0
+                  36.0
                 ],
                 "HLA-G*01:09": [
-                  "NA",
-                  51.0
+                  "NA"
                 ]
               }
             },
@@ -248,19 +238,16 @@
             "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-G*01:09": [
-                  "NA",
-                  7860.43
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-G*01:09": [
-                  "NA",
-                  32085.75
+                  "NA"
                 ]
               }
             },
@@ -275,19 +262,16 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-G*01:09": [
-                  "NA",
-                  3.5
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-G*01:09": [
-                  "NA",
-                  28.0
+                  "NA"
                 ]
               }
             },
@@ -379,19 +363,16 @@
             "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  28675.35,
-                  14407.49
+                  28675.35
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  32594.15,
-                  21970.92
+                  32594.15
                 ]
               }
             },
@@ -406,19 +387,16 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  8.2,
-                  39.0
+                  8.2
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  15.0,
-                  57.0
+                  15.0
                 ]
               }
             },
@@ -510,19 +488,16 @@
             "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-G*01:09": [
-                  "NA",
-                  23192.26
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-G*01:09": [
-                  "NA",
-                  50000.0
+                  "NA"
                 ]
               }
             },
@@ -537,19 +512,16 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-G*01:09": [
-                  "NA",
-                  46.0
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-G*01:09": [
-                  "NA",
-                  73.0
+                  "NA"
                 ]
               }
             },
@@ -641,19 +613,16 @@
             "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  40715.54,
-                  8297.38
+                  40715.54
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  42354.73,
-                  13070.67
+                  42354.73
                 ]
               }
             },
@@ -668,19 +637,16 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  44.0,
-                  19.0
+                  44.0
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  57.0,
-                  35.0
+                  57.0
                 ]
               }
             },
@@ -772,19 +738,16 @@
             "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-G*01:09": [
-                  "NA",
-                  29108.61
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-G*01:09": [
-                  "NA",
-                  38984.65
+                  "NA"
                 ]
               }
             },
@@ -799,19 +762,16 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-G*01:09": [
-                  "NA",
-                  25.0
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-G*01:09": [
-                  "NA",
-                  34.0
+                  "NA"
                 ]
               }
             },
@@ -903,19 +863,16 @@
             "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  40584.46,
-                  18279.56
+                  40584.46
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  43276.11,
-                  50000.0
+                  43276.11
                 ]
               }
             },
@@ -930,19 +887,16 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  44.0,
-                  49.0
+                  44.0
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  65.0,
-                  88.0
+                  65.0
                 ]
               }
             },
@@ -1034,19 +988,16 @@
             "anchor_fails": "HLA-G*01:09",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-G*01:09": [
-                  "NA",
-                  645.63
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-G*01:09": [
-                  "NA",
-                  2635.42
+                  "NA"
                 ]
               }
             },
@@ -1061,19 +1012,16 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-G*01:09": [
-                  "NA",
-                  0.2
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-G*01:09": [
-                  "NA",
-                  2.4
+                  "NA"
                 ]
               }
             },
@@ -1242,27 +1190,22 @@
             "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  37753.86,
-                  2812.19
+                  37753.86
                 ],
                 "HLA-G*01:09": [
-                  "NA",
-                  9759.45
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  38410.62,
-                  3685.69
+                  38410.62
                 ],
                 "HLA-G*01:09": [
-                  "NA",
-                  23699.6
+                  "NA"
                 ]
               }
             },
@@ -1279,27 +1222,22 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  30.0,
-                  1.7
+                  30.0
                 ],
                 "HLA-G*01:09": [
-                  "NA",
-                  20.0
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  32.0,
-                  3.5
+                  32.0
                 ],
                 "HLA-G*01:09": [
-                  "NA",
-                  47.0
+                  "NA"
                 ]
               }
             },
@@ -1399,27 +1337,22 @@
             "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  32579.72,
-                  11112.54
+                  32579.72
                 ],
                 "HLA-G*01:09": [
-                  "NA",
-                  26694.99
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  40823.6,
-                  11730.27
+                  40823.6
                 ],
                 "HLA-G*01:09": [
-                  "NA",
-                  50000.0
+                  "NA"
                 ]
               }
             },
@@ -1436,27 +1369,22 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  15.0,
-                  29.0
+                  15.0
                 ],
                 "HLA-G*01:09": [
-                  "NA",
-                  51.0
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  45.0,
-                  31.0
+                  45.0
                 ],
                 "HLA-G*01:09": [
-                  "NA",
-                  73.0
+                  "NA"
                 ]
               }
             },
@@ -1556,19 +1484,16 @@
             "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  38041.28,
-                  13648.77
+                  38041.28
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  31198.74,
-                  13501.89
+                  31198.74
                 ]
               }
             },
@@ -1583,19 +1508,16 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  31.0,
-                  37.0
+                  31.0
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  13.0,
-                  36.0
+                  13.0
                 ]
               }
             },
@@ -1687,19 +1609,16 @@
             "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  42565.14,
-                  12653.21
+                  42565.14
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  37481.16,
-                  13947.35
+                  37481.16
                 ]
               }
             },
@@ -1714,19 +1633,16 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  58.0,
-                  34.0
+                  58.0
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  28.0,
-                  37.0
+                  28.0
                 ]
               }
             },
@@ -1895,27 +1811,22 @@
             "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  42356.1,
-                  13947.35
+                  42356.1
                 ],
                 "HLA-G*01:09": [
-                  "NA",
-                  23957.42
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  42468.98,
-                  13070.67
+                  42468.98
                 ],
                 "HLA-G*01:09": [
-                  "NA",
-                  18478.42
+                  "NA"
                 ]
               }
             },
@@ -1932,27 +1843,22 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  57.0,
-                  37.0
+                  57.0
                 ],
                 "HLA-G*01:09": [
-                  "NA",
-                  47.0
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  58.0,
-                  35.0
+                  58.0
                 ],
                 "HLA-G*01:09": [
-                  "NA",
-                  38.0
+                  "NA"
                 ]
               }
             },
@@ -2052,19 +1958,16 @@
             "anchor_fails": "HLA-E*01:01",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  31304.25,
-                  7692.16
+                  31304.25
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  16566.24,
-                  4989.87
+                  16566.24
                 ]
               }
             },
@@ -2079,19 +1982,16 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  13.0,
-                  1.4
+                  13.0
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  1.6,
-                  0.5
+                  1.6
                 ]
               }
             },
@@ -2183,19 +2083,16 @@
             "anchor_fails": "HLA-E*01:01",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  34008.55,
-                  8119.76
+                  34008.55
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  18564.99,
-                  5267.25
+                  18564.99
                 ]
               }
             },
@@ -2210,19 +2107,16 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  18.0,
                   18.0
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  2.2,
-                  7.6
+                  2.2
                 ]
               }
             },
@@ -2314,18 +2208,15 @@
             "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-G*01:09": [
-                  "NA",
-                  19717.81
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-G*01:09": [
-                  "NA",
                   "NA"
                 ]
               }
@@ -2341,18 +2232,15 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-G*01:09": [
-                  "NA",
-                  16.0
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-G*01:09": [
-                  "NA",
                   "NA"
                 ]
               }
@@ -2445,18 +2333,15 @@
             "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-G*01:09": [
-                  "NA",
-                  21734.48
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-G*01:09": [
-                  "NA",
                   "NA"
                 ]
               }
@@ -2472,18 +2357,15 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-G*01:09": [
-                  "NA",
-                  44.0
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-G*01:09": [
-                  "NA",
                   "NA"
                 ]
               }
@@ -2576,18 +2458,15 @@
             "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  34351.36,
-                  9654.43
+                  34351.36
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  "NA",
                   "NA"
                 ]
               }
@@ -2603,18 +2482,15 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  19.0,
-                  24.0
+                  19.0
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  "NA",
                   "NA"
                 ]
               }
@@ -2707,18 +2583,15 @@
             "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  36171.97,
-                  14882.82
+                  36171.97
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  "NA",
                   "NA"
                 ]
               }
@@ -2734,18 +2607,15 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  24.0,
-                  40.0
+                  24.0
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  "NA",
                   "NA"
                 ]
               }
@@ -2838,19 +2708,16 @@
             "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  43497.69,
-                  14407.49
+                  43497.69
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  44866.2,
-                  18478.42
+                  44866.2
                 ]
               }
             },
@@ -2865,19 +2732,16 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  67.0,
-                  39.0
+                  67.0
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  81.0,
-                  49.0
+                  81.0
                 ]
               }
             },
@@ -3030,19 +2894,16 @@
             "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-G*01:09": [
-                  "NA",
-                  11857.88
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-G*01:09": [
-                  "NA",
-                  16946.23
+                  "NA"
                 ]
               }
             },
@@ -3057,19 +2918,16 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-G*01:09": [
-                  "NA",
-                  6.8
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-G*01:09": [
-                  "NA",
-                  13.0
+                  "NA"
                 ]
               }
             },
@@ -3161,27 +3019,22 @@
             "anchor_fails": "HLA-E*01:01",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  27022.49,
-                  2842.78
+                  27022.49
                 ],
                 "HLA-G*01:09": [
-                  "NA",
-                  16053.81
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  25118.48,
-                  3133.53
+                  25118.48
                 ],
                 "HLA-G*01:09": [
-                  "NA",
-                  22942.68
+                  "NA"
                 ]
               }
             },
@@ -3198,27 +3051,22 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  6.6,
-                  1.8
+                  6.6
                 ],
                 "HLA-G*01:09": [
-                  "NA",
-                  33.0
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  5.2,
-                  2.3
+                  5.2
                 ],
                 "HLA-G*01:09": [
-                  "NA",
-                  46.0
+                  "NA"
                 ]
               }
             },
@@ -3318,19 +3166,16 @@
             "anchor_fails": "HLA-E*01:01",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  39292.52,
-                  8297.38
+                  39292.52
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  16566.24,
-                  4989.87
+                  16566.24
                 ]
               }
             },
@@ -3345,19 +3190,16 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  36.0,
-                  1.6
+                  36.0
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  1.6,
-                  0.5
+                  1.6
                 ]
               }
             },
@@ -3449,19 +3291,16 @@
             "anchor_fails": "HLA-E*01:01",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  39334.2,
-                  8758.62
+                  39334.2
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  18564.99,
-                  5267.25
+                  18564.99
                 ]
               }
             },
@@ -3476,19 +3315,16 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  37.0,
-                  21.0
+                  37.0
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  2.2,
-                  7.6
+                  2.2
                 ]
               }
             },
@@ -3641,26 +3477,21 @@
             "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  27407.65,
-                  12790.86
+                  27407.65
                 ],
                 "HLA-G*01:09": [
-                  "NA",
-                  5620.54
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  "NA",
                   "NA"
                 ],
                 "HLA-G*01:09": [
-                  "NA",
                   "NA"
                 ]
               }
@@ -3678,26 +3509,21 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  6.9,
-                  4.9
+                  6.9
                 ],
                 "HLA-G*01:09": [
-                  "NA",
-                  1.8
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  "NA",
                   "NA"
                 ],
                 "HLA-G*01:09": [
-                  "NA",
                   "NA"
                 ]
               }
@@ -3798,26 +3624,21 @@
             "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  18750.11,
-                  3975.68
+                  18750.11
                 ],
                 "HLA-G*01:09": [
-                  "NA",
-                  5099.03
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  "NA",
                   "NA"
                 ],
                 "HLA-G*01:09": [
-                  "NA",
                   "NA"
                 ]
               }
@@ -3835,26 +3656,21 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  2.3,
-                  4.2
+                  2.3
                 ],
                 "HLA-G*01:09": [
-                  "NA",
-                  7.5
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  "NA",
                   "NA"
                 ],
                 "HLA-G*01:09": [
-                  "NA",
                   "NA"
                 ]
               }
@@ -3955,26 +3771,21 @@
             "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  35374.27,
-                  5382.48
+                  35374.27
                 ],
                 "HLA-G*01:09": [
-                  "NA",
-                  7208.66
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  "NA",
                   "NA"
                 ],
                 "HLA-G*01:09": [
-                  "NA",
                   "NA"
                 ]
               }
@@ -3992,26 +3803,21 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  22.0,
-                  0.5
+                  22.0
                 ],
                 "HLA-G*01:09": [
-                  "NA",
-                  3.0
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  "NA",
                   "NA"
                 ],
                 "HLA-G*01:09": [
-                  "NA",
                   "NA"
                 ]
               }
@@ -4112,26 +3918,21 @@
             "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  29539.48,
-                  8950.22
+                  29539.48
                 ],
                 "HLA-G*01:09": [
-                  "NA",
-                  9447.76
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  "NA",
                   "NA"
                 ],
                 "HLA-G*01:09": [
-                  "NA",
                   "NA"
                 ]
               }
@@ -4149,26 +3950,21 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  9.2,
-                  21.0
+                  9.2
                 ],
                 "HLA-G*01:09": [
-                  "NA",
-                  19.0
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  "NA",
                   "NA"
                 ],
                 "HLA-G*01:09": [
-                  "NA",
                   "NA"
                 ]
               }
@@ -4269,26 +4065,21 @@
             "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  37672.24,
-                  11355.63
+                  37672.24
                 ],
                 "HLA-G*01:09": [
-                  "NA",
-                  11730.27
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  "NA",
                   "NA"
                 ],
                 "HLA-G*01:09": [
-                  "NA",
                   "NA"
                 ]
               }
@@ -4306,26 +4097,21 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  29.0,
-                  3.6
+                  29.0
                 ],
                 "HLA-G*01:09": [
-                  "NA",
-                  6.7
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  "NA",
                   "NA"
                 ],
                 "HLA-G*01:09": [
-                  "NA",
                   "NA"
                 ]
               }
@@ -4426,26 +4212,21 @@
             "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  17848.81,
-                  6262.79
+                  17848.81
                 ],
                 "HLA-G*01:09": [
-                  "NA",
-                  16583.46
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  "NA",
                   "NA"
                 ],
                 "HLA-G*01:09": [
-                  "NA",
                   "NA"
                 ]
               }
@@ -4463,26 +4244,21 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  1.9,
-                  12.0
+                  1.9
                 ],
                 "HLA-G*01:09": [
-                  "NA",
-                  34.0
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  "NA",
                   "NA"
                 ],
                 "HLA-G*01:09": [
-                  "NA",
                   "NA"
                 ]
               }
@@ -4583,26 +4359,21 @@
             "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  27619.01,
-                  1765.99
+                  27619.01
                 ],
                 "HLA-G*01:09": [
-                  "NA",
-                  12653.21
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  "NA",
                   "NA"
                 ],
                 "HLA-G*01:09": [
-                  "NA",
                   "NA"
                 ]
               }
@@ -4620,26 +4391,21 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  7.1,
-                  0.5
+                  7.1
                 ],
                 "HLA-G*01:09": [
-                  "NA",
-                  26.0
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  "NA",
                   "NA"
                 ],
                 "HLA-G*01:09": [
-                  "NA",
                   "NA"
                 ]
               }
@@ -4740,18 +4506,15 @@
             "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-G*01:09": [
-                  "NA",
-                  22209.93
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-G*01:09": [
-                  "NA",
                   "NA"
                 ]
               }
@@ -4767,18 +4530,15 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-G*01:09": [
-                  "NA",
-                  44.0
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-G*01:09": [
-                  "NA",
                   "NA"
                 ]
               }
@@ -4871,19 +4631,16 @@
             "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-G*01:09": [
-                  "NA",
-                  23699.6
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-G*01:09": [
-                  "NA",
-                  47366.92
+                  "NA"
                 ]
               }
             },
@@ -4898,19 +4655,16 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-G*01:09": [
-                  "NA",
-                  47.0
+                  "NA"
                 ]
               },
               "WT": {
                 "HLA-G*01:09": [
-                  "NA",
-                  71.0
+                  "NA"
                 ]
               }
             },
@@ -5002,18 +4756,15 @@
             "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  37441.44,
-                  14407.49
+                  37441.44
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  "NA",
                   "NA"
                 ]
               }
@@ -5029,18 +4780,15 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  28.0,
-                  39.0
+                  28.0
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  "NA",
                   "NA"
                 ]
               }
@@ -5133,18 +4881,15 @@
             "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  37261.19,
-                  19295.7
+                  37261.19
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  "NA",
                   "NA"
                 ]
               }
@@ -5160,18 +4905,15 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  28.0,
-                  51.0
+                  28.0
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  "NA",
                   "NA"
                 ]
               }
@@ -5264,19 +5006,16 @@
             "anchor_fails": "None",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  43696.75,
-                  14564.23
+                  43696.75
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  42468.98,
-                  13070.67
+                  42468.98
                 ]
               }
             },
@@ -5291,19 +5030,16 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  69.0,
-                  39.0
+                  69.0
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  58.0,
-                  35.0
+                  58.0
                 ]
               }
             },
@@ -5395,19 +5131,16 @@
             "anchor_fails": "HLA-E*01:01",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  37366.97,
-                  6978.43
+                  37366.97
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  16566.24,
-                  4989.87
+                  16566.24
                 ]
               }
             },
@@ -5422,19 +5155,16 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  28.0,
-                  1.0
+                  28.0
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  1.6,
-                  0.5
+                  1.6
                 ]
               }
             },
@@ -5526,19 +5256,16 @@
             "anchor_fails": "HLA-E*01:01",
             "individual_ic50_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  37573.32,
-                  7366.35
+                  37573.32
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  18564.99,
-                  5267.25
+                  18564.99
                 ]
               }
             },
@@ -5553,19 +5280,16 @@
             },
             "individual_binding_percentile_calls": {
               "algorithms": [
-                "NetMHC",
-                "PickPocket"
+                "NetMHC"
               ],
               "MT": {
                 "HLA-E*01:01": [
-                  29.0,
-                  16.0
+                  29.0
                 ]
               },
               "WT": {
                 "HLA-E*01:01": [
-                  2.2,
-                  7.6
+                  2.2
                 ]
               }
             },
