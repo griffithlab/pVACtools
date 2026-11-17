@@ -251,9 +251,9 @@ class PvacspliceGenerateProteinFasta(GenerateProteinFasta):
                 continue
             _, frameshift_status = key.rsplit('.', 1)
             if frameshift_status == 'inframe_splice_site':
-                final_mt_sequence, final_wt_sequence = get_mutated_peptide_with_flanking_sequence(wt_sequence, mt_sequence, min(self.flanking_sequence_length, len(wt_sequence)-1, len(mt_sequence)-1))
+                final_mt_sequence, final_wt_sequence = get_mutated_peptide_with_flanking_sequence(wt_sequence, mt_sequence, min(self.flanking_sequence_length, len(wt_sequence)-1, len(mt_sequence)-1), key)
             elif frameshift_status == 'frameshift_splice_site':
-                final_mt_sequence, final_wt_sequence = get_mutated_frameshift_peptide_with_flanking_sequence(wt_sequence, mt_sequence, min(self.flanking_sequence_length, len(wt_sequence)-1, len(mt_sequence)-1))
+                final_mt_sequence, final_wt_sequence = get_mutated_frameshift_peptide_with_flanking_sequence(wt_sequence, mt_sequence, min(self.flanking_sequence_length, len(wt_sequence)-1, len(mt_sequence)-1), key)
             else:
                 raise Exception("Unexpected frameshift status {} for record {}. Skipping".format(frameshift_status, identifier))
             if final_mt_sequence and final_wt_sequence:

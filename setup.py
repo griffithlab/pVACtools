@@ -13,7 +13,7 @@ def readme():
 
 setup(
     name="pvactools",
-    version="7.1.5",
+    version="7.1.6",
     entry_points={
         "console_scripts":[
             "pvactools = pvactools.tools.main:main",
@@ -48,7 +48,7 @@ setup(
         'pyfaidx>=0.7.1',
         'fsspec<=2025.3.0',
         'packaging',
-        'pyarrow',
+        'pyarrow<=25.0.1',
         'polars==0.16.18',
         'XlsxWriter',
         'openpyxl',
