@@ -144,7 +144,6 @@ class PvacseqGenerateProteinFastaTests(unittest.TestCase):
         os.unlink("{}.manufacturability.tsv".format(generate_protein_fasta_output_file.name))
 
     def test_output_peptide_sequence_length_longer_that_wildtype(self):
-        flanking_sequence_length           = '300'
         generate_protein_fasta_input_file  = os.path.join(self.test_input_data_dir, 'output.fasta')
         generate_protein_fasta_output_file = tempfile.NamedTemporaryFile()
 
