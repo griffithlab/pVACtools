@@ -58,6 +58,25 @@ class PvacseqTests(unittest.TestCase):
         parser = pvacseq_main.define_parser()
         self.assertEqual(type(parser), argparse.ArgumentParser)
 
+    def test_ml_accept_limit_argument(self):
+        inputs = ['input.vcf', 'Test', 'HLA-A*02:01', 'all', 'output', '--run-ml-predictions']
+        parser = run.define_parser()
+        with tempfile.TemporaryDirectory() as folder:
+            files = [os.path.join(folder, str(i)) for i in range(4)]
+            for path in files:
+                open(path, 'w').close()
+            for options, expected in [([], 20), (['--ml-accept-limit', '0'], 0),
+                                      (['--ml-accept-limit', '5'], 5)]:
+                with self.subTest(options=options):
+                    args = parser.parse_args(inputs + options)
+                    with patch.object(run, 'locate_ml_input_files', return_value=files), \
+                         patch('pvactools.lib.ml_predictor.run_ml_predictions') as predict:
+                        run.run_ml_predictions(folder, args)
+                    self.assertEqual(predict.call_args.kwargs['ml_accept_limit'], expected)
+        for value in ['-1', '1.5', 'invalid']:
+            with self.subTest(value=value), patch('sys.stderr'), self.assertRaises(SystemExit):
+                parser.parse_args(inputs + ['--ml-accept-limit', value])
+
     def test_pvacseq_commands(self):
         pvac_script_path = os.path.join(
             self.pvactools_directory,
@@ -462,7 +481,7 @@ class PvacseqTests(unittest.TestCase):
             close_mock_fhs()
 
         # Check that ML prediction output file exists in MHC_Class_I (same folder as aggregated TSV)
-        ml_output_file = os.path.join(output_dir.name, 'MHC_Class_I', 'Test.MHC_I.all_epitopes.aggregated.ML_predict.tsv')
+        ml_output_file = os.path.join(output_dir.name, 'MHC_Class_I', 'Test.MHC_I.all_epitopes.aggregated.ML_predicted.tsv')
         self.assertTrue(os.path.exists(ml_output_file), f"ML prediction file not found: {ml_output_file}")
 
         # Check that the ML prediction output file matches the expected content

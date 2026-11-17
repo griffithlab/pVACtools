@@ -55,7 +55,7 @@ Each folder will contain the same list of output files (listed in the order crea
      - pVACview R Shiny application files.
    * - ``www`` (directory)
      - Directory containing image files for pVACview.
-   * - ``<sample_name>.MHC_I.all_epitopes.aggregated.ML_predict.tsv`` (optional)
+   * - ``<sample_name>.MHC_I.all_epitopes.aggregated.ML_predicted.tsv`` (optional)
      - A version of the ``<sample_name>.MHC_I.all_epitopes.aggregated.tsv`` with ML-based neoantigen evaluation predictions. Generated when both MHC Class I and Class II predictions are run and the ``--run-ml-predictions`` flag is set. Written only to the ``MHC_Class_I`` folder.
 
 
@@ -416,10 +416,10 @@ parameter.
 
 .. _ml_prediction_output:
 
-<sample_name>.MHC_I.all_epitopes.aggregated.ML_predict.tsv Report Columns
+<sample_name>.MHC_I.all_epitopes.aggregated.ML_predicted.tsv Report Columns
 -------------------------------------------------------------------------
 
-The ``<sample_name>.MHC_I.all_epitopes.aggregated.ML_predict.tsv`` file is generated when using the :ref:`add_ml_predictions <optional_downstream_analysis_tools_label>` 
+The ``<sample_name>.MHC_I.all_epitopes.aggregated.ML_predicted.tsv`` file is generated when using the :ref:`add_ml_predictions <optional_downstream_analysis_tools_label>`
 tool or when running pVACseq with both MHC Class I and Class II predictions and the ``--run-ml-predictions`` flag enabled. 
 This file contains all columns from the Class I aggregated file (``all_epitopes.aggregated.tsv``) with one additional ML prediction column added.  
 
@@ -433,9 +433,13 @@ The file is written to the same folder as the Class I aggregated file (``MHC_Cla
    * - All columns from ``<sample_name>.MHC_I.all_epitopes.aggregated.tsv``
      - All columns described in the :ref:`aggregated` section above are included in this file.
    * - ``Evaluation``
-     - Populated with ML-predicted evaluation status for each candidate. Values: ``Accept`` for variants with prediction probability >= ``ml-threshold-accept`` (default: 0.55), ``Reject`` for variants with prediction probability <= ``ml-threshold-reject`` (default: 0.30), and ``Pending`` for variants with prediction probability between ``ml-threshold-reject`` and ``ml-threshold-accept`` or when the ML model cannot make a prediction due to missing data.
+     - Preselected evaluation status for each candidate. ``Accept`` for variants with probability >= ``ml-threshold-accept`` (default: 0.55), limited to the highest-scoring 20 predicted Accept candidates by default. ``Reject`` for variants with probability <= ``ml-threshold-reject`` (default: 0.30). ``Pending`` for candidates between the thresholds, beyond the Accept limit, or without an ML prediction. Use ``--ml-accept-limit N`` to change the cap or ``--ml-accept-limit 0`` to disable it.
    * - ``ML Prediction (score)``
-     - ML-based prediction evaluation with probability score. Format: ``"<Evaluation> (<probability_score>)"`` (e.g., ``"Accept (0.72)"``, ``"Reject (0.15)"``, ``"Review (0.48)"``). Shows ``"NA"`` when the ML model cannot make a prediction due to missing data (e.g., when Class I and Class II aggregated files have different numbers of rows).
+     - Original model prediction with probability score. Format: ``"<prediction> (<probability_score>)"`` (e.g., ``"Accept (0.72)"``, ``"Reject (0.15)"``, ``"Review (0.48)"``). An Accept candidate beyond the cap retains ``"Accept (<score>)"`` here while its ``Evaluation`` is ``Pending``. Shows ``"NA"`` when the ML model cannot make a prediction due to missing data (e.g., when Class I and Class II aggregated files have different numbers of rows).
+
+The Accept limit applies per sample/report and ranks full-precision
+probabilities, not the rounded displayed scores. Exact ties retain input order.
+The output row order and other annotations are preserved.
 
 .. _pvacseq_best_peptide:
 

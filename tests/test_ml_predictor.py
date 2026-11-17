@@ -3,6 +3,9 @@ import os
 import tempfile
 import shutil
 import pandas as pd
+import numpy as np
+import joblib
+import pickle
 import py_compile
 from unittest.mock import patch, MagicMock
 
@@ -37,11 +40,85 @@ class MLPredictorTests(unittest.TestCase):
     def test_resolve_artifact_paths(self):
         """Test that artifact paths are resolved correctly."""
         test_dir = "/test/path"
-        model_path, imputer_path, encoders_path = _resolve_artifact_paths(test_dir)
+        model_path, encoders_path = _resolve_artifact_paths(test_dir)
 
-        self.assertEqual(model_path, "/test/path/rf_downsample_model_numpy126.pkl")
-        self.assertEqual(imputer_path, "/test/path/trained_imputer_numpy126.joblib")
+        self.assertEqual(model_path, "/test/path/random_forest_ds_pvactools7.2.joblib")
         self.assertEqual(encoders_path, "/test/path/label_encoders_numpy126.pkl")
+
+    def test_missingness_indicators_and_sentinel(self):
+        """Flag WT/MT/RNA nulls before filling them, categories, and Pos with -1."""
+        model_path, encoders_path = _resolve_artifact_paths(self.model_artifacts_path)
+        bundle = joblib.load(model_path)
+        with open(encoders_path, "rb") as handle:
+            encoders = pickle.load(handle)
+        indicators = ["WT_missing", "MT_missing", "RNA_missing"]
+        raw_features = [c for c in bundle["feature_order"] if c not in indicators]
+        data = pd.DataFrame(0.0, index=range(4), columns=raw_features)
+        for column, encoder in encoders.items():
+            data[column] = encoder.classes_[0]
+        data["ID"] = ["wt", "mt", "rna", "other"]
+        data["Evaluation"] = "Pending"
+        data.loc[0, "IC50 WT class1"] = np.nan
+        data.loc[1, "NetMHC MT IC50 Score"] = np.nan
+        data.loc[2, "RNA VAF"] = np.nan
+        data.loc[3, ["Pos", "Biotype"]] = np.nan
+        data[["Ref Match", "Prob match", "Gene of Interest"]] = False
+
+        result = clean_and_impute_data(data, self.model_artifacts_path)
+
+        self.assertEqual(result.columns.tolist(), ["ID", "Evaluation", *bundle["feature_order"]])
+        self.assertEqual(result[indicators].values.tolist(),
+                         [[1, 0, 0], [0, 1, 0], [0, 0, 1], [0, 0, 0]])
+        for row, column in [(0, "IC50 WT class1"), (1, "NetMHC MT IC50 Score"),
+                            (2, "RNA VAF"), (3, "Pos"), (3, "Biotype")]:
+            self.assertEqual(result.loc[row, column], -1)
+        self.assertFalse(result.isna().any().any())
+        pd.testing.assert_series_equal(result["ID"], data["ID"])
+        pd.testing.assert_series_equal(result["Evaluation"], data["Evaluation"])
+
+    def test_accept_limit_preserves_scores_and_report_order(self):
+        scores = [0.75] * 21 + [0.750001, 0.95, 0.85, 0.55, 0.45, 0.10]
+        predictions = pd.DataFrame({
+            'ID': [str(i) for i in range(27)],
+            'Evaluation_pred': ['Accept'] * 25 + ['Review', 'Reject'],
+            'Accept_pred_prob': scores,
+        }).iloc[::-1]
+        original = pd.DataFrame({
+            'ID': [str(i) for i in range(28)],
+            'Annotation': [f'original-{i}' for i in range(28)],
+            'Evaluation': ['Pending'] * 28,
+        })
+        with tempfile.TemporaryDirectory() as folder:
+            source = os.path.join(folder, 'input.tsv')
+            original.to_csv(source, sep='\t', index=False)
+            reference = None
+            cases = [(None, set(range(17)) | {21, 22, 23}),
+                     (3, {21, 22, 23}), (0, set(range(25))), (50, set(range(25)))]
+            for limit, expected in cases:
+                with self.subTest(limit=limit):
+                    options = {} if limit is None else {'ml_accept_limit': limit}
+                    output = create_final_output(predictions, source, folder, 'Test', **options)
+                    result = pd.read_csv(output, sep='\t', dtype=str, keep_default_na=False)
+                    accepted = set(result.loc[result.Evaluation == 'Accept', 'ID'].astype(int))
+                    self.assertEqual(accepted, expected)
+                    pd.testing.assert_frame_equal(result[['ID', 'Annotation']], original[['ID', 'Annotation']])
+                    for candidate in set(range(25)) - expected:
+                        self.assertEqual(result.loc[candidate, 'Evaluation'], 'Pending')
+                        self.assertTrue(result.loc[candidate, 'ML Prediction (score)'].startswith('Accept ('))
+                    self.assertEqual(result.loc[25, 'Evaluation'], 'Pending')
+                    self.assertEqual(result.loc[25, 'ML Prediction (score)'], 'Review (0.45)')
+                    self.assertEqual(result.loc[26, 'Evaluation'], 'Reject')
+                    self.assertEqual(result.loc[27, 'Evaluation'], 'Pending')
+                    self.assertEqual(result.loc[27, 'ML Prediction (score)'], 'NA')
+                    if reference is not None:
+                        pd.testing.assert_frame_equal(result.drop(columns='Evaluation'), reference)
+                    reference = result.drop(columns='Evaluation')
+
+    def test_negative_accept_limit(self):
+        with self.assertRaisesRegex(ValueError, 'ml_accept_limit'):
+            run_ml_predictions('unused', 'unused', 'unused', ml_accept_limit=-1)
+        with self.assertRaisesRegex(ValueError, 'ml_accept_limit'):
+            create_final_output(pd.DataFrame(), 'unused', 'unused', 'Test', ml_accept_limit=-1)
 
     def test_merge_and_prepare_data_basic(self):
         """Test merge_and_prepare_data with valid inputs."""
@@ -66,6 +143,27 @@ class MLPredictorTests(unittest.TestCase):
         self.assertTrue(pd.api.types.is_bool_dtype(result["Prob match"]))
         self.assertTrue(pd.api.types.is_bool_dtype(result["Gene of Interest"]))
         self.assertTrue(pd.api.types.is_integer_dtype(result["TSL"]))
+
+    def test_merge_preserves_gene_of_interest_booleans(self):
+        """False booleans must not become True through an unmapped NaN value."""
+        mhc1_agg_file = os.path.join(self.test_data_path, "MHC_Class_I", "HCC1395_TUMOR_DNA.MHC_I.all_epitopes.aggregated.tsv")
+        mhc1_all_file = os.path.join(self.test_data_path, "MHC_Class_I", "HCC1395_TUMOR_DNA.MHC_I.all_epitopes.tsv")
+        mhc2_agg_file = os.path.join(self.test_data_path, "MHC_Class_II", "HCC1395_TUMOR_DNA.MHC_II.all_epitopes.aggregated.tsv")
+        read_csv = pd.read_csv
+
+        for value, expected in [(False, False), (True, True), ("False", False),
+                                ("True", True), (np.nan, False)]:
+            with self.subTest(value=value):
+                def read_with_gene_of_interest(path, *args, **kwargs):
+                    frame = read_csv(path, *args, **kwargs)
+                    if path == mhc1_all_file and kwargs.get("nrows") != 0:
+                        frame["Gene of Interest"] = value
+                    return frame
+
+                with patch("pvactools.lib.ml_predictor.pd.read_csv", side_effect=read_with_gene_of_interest):
+                    result = merge_and_prepare_data(mhc1_agg_file, mhc1_all_file, mhc2_agg_file)
+                self.assertGreater(len(result), 0)
+                self.assertTrue(result["Gene of Interest"].eq(expected).all())
 
     def test_merge_and_prepare_data_pos_transformation(self):
         """Test that Pos column transformation handles various formats."""
@@ -107,7 +205,7 @@ class MLPredictorTests(unittest.TestCase):
         self.assertTrue(os.path.exists(result))
 
         # Check file path matches expected naming convention
-        self.assertIn(".MHC_I.all_epitopes.aggregated.ML_predict.tsv", result)
+        self.assertIn(".MHC_I.all_epitopes.aggregated.ML_predicted.tsv", result)
 
         # Check that file contains data
         df = pd.read_csv(result, sep='\t')
@@ -183,14 +281,15 @@ class MLPredictorTests(unittest.TestCase):
 
             pending_rows = df[df['Evaluation'] == 'Pending']
             if len(pending_rows) > 0:
-                # Pending rows can have either "NA" or "Review (X.XX)" format
-                # (because Review gets converted to Pending but keeps original score format)
+                # Pending includes Review, capped Accept predictions, and unmatched rows.
                 pending_scores = pending_rows['ML Prediction (score)'].dropna()
                 if len(pending_scores) > 0:
                     expected_formats = (
                         pending_scores == "NA"
                     ) | (
                         pending_scores.str.startswith("Review (")
+                    ) | (
+                        pending_scores.str.startswith("Accept (")
                     )
                     self.assertTrue(
                         expected_formats.all(),

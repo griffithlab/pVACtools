@@ -6,6 +6,7 @@ import py_compile
 import tempfile
 from subprocess import PIPE
 from subprocess import run as subprocess_run
+from unittest.mock import patch
 
 from pvactools.tools.pvacseq import *
 from tests.utils import *
@@ -43,6 +44,17 @@ class PvacseqAddMlPredictionsTests(unittest.TestCase):
         ], shell=False, stdout=PIPE)
         self.assertFalse(result.returncode, "Failed `pvacseq add_ml_predictions -h`")
         self.assertRegex(result.stdout.decode(), usage_search)
+
+    def test_accept_limit_argument(self):
+        inputs = ['class1.tsv', 'epitopes.tsv', 'class2.tsv', 'Test']
+        for options, expected in [([], 20), (['--ml-accept-limit', '0'], 0),
+                                  (['--ml-accept-limit', '5'], 5)]:
+            with self.subTest(options=options), patch.object(add_ml_predictions, 'run_ml_predictions') as predict:
+                add_ml_predictions.main(inputs + options)
+                self.assertEqual(predict.call_args.kwargs['ml_accept_limit'], expected)
+        for value in ['-1', '1.5', 'invalid']:
+            with self.subTest(value=value), patch('sys.stderr'), self.assertRaises(SystemExit):
+                add_ml_predictions.main(inputs + ['--ml-accept-limit', value])
 
     # A sanity check that the script compiles and is free of basic syntax errors.
     def test_compiles(self):
