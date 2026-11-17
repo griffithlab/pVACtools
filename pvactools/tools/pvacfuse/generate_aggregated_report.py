@@ -93,6 +93,11 @@ def define_parser():
         help="Expression Cutoff. Expression is meassured as FFPM (fusion fragments per million total reads). When failing this cutoff sites will be binned in the \"LowExpr\" tier.",
         default=0.1
     )
+    parser.add_argument(
+        "--limiting-alleles", type=lambda s:[a for a in s.split(',')],
+        help="Comma-separated list of alleles used for the predictions made in the input file. "
+             + "If specified, only predictions for those alleles will be included in the aggregated report."
+    )
 
     return parser
 
@@ -118,6 +123,7 @@ def main(args_input = sys.argv[1:]):
         expn_val=args.expn_val,
         aggregate_inclusion_binding_threshold=args.aggregate_inclusion_binding_threshold,
         aggregate_inclusion_count_limit=args.aggregate_inclusion_count_limit,
+        limiting_alleles=args.limiting_alleles,
     ).execute()
     print("Completed")
 
