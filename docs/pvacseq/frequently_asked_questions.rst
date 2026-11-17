@@ -78,13 +78,7 @@ There are a number of factors that determine the number of IEDB calls to be made
 
   **Speedup suggestion**: Reduce the number of prediction algorithms,
   epitope lengths, and/or HLA-alleles to the ones that will be the most
-  meaningful for your analysis. For example, the NetMHCcons method is
-  already a consensus method between NetMHC, NetMHCpan, and PickPocket.
-  If NetMHCcons is chosen, you may want to omit the underlying prediction
-  methods. Likewise, if you want to run NetMHC, NetMHCpan, and PickPocket
-  individually, you may want to skip NetMHCcons. Note that PickPocket is no
-  longer a prediction algorithm supported by IEDB, so it's been removed as
-  an algorithm in pVACtools.
+  meaningful for your analysis.
 
 - ``--downstream-sequence-length`` parameter value
 

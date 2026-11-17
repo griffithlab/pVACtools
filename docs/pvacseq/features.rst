@@ -145,12 +145,6 @@ for a variety of additional algorithms.
      - Presentation
      - yes
      - no
-   * - NetMHCcons
-     - 1.1
-     - MHC Class I
-     - Binding
-     - yes
-     - yes
    * - NetMHCpan
      - 4.1
      - MHC Class I
