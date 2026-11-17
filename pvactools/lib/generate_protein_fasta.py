@@ -13,26 +13,18 @@ from pvactools.lib.run_utils import get_mutated_peptide_with_flanking_sequence, 
 
 class GenerateProteinFasta:
     def __init__(self, **kwargs):
-        self.sample_name = kwargs.pop('sample_name', 'tmp')
-        if self.sample_name is None:
-            self.sample_name = 'tmp'
-        self.downstream_sequence_length = kwargs.pop('downstream_sequence_length', 1000)
-        self.pass_only = kwargs.pop('pass_only', False)
-        self.biotypes = kwargs.pop('biotypes', ['protein_coding'])
-        self.allow_incomplete_transcripts = kwargs.pop('allow_incomplete_transcripts', False)
+        self.transcripts_fasta = kwargs['transcripts_fasta']
         self.flanking_sequence_length = kwargs.pop('flanking_sequence_length')
         self.mutant_only = kwargs.pop('mutant_only', False)
         self.aggregate_report_evaluation = kwargs.pop('aggregate_report_evaluation', ['Accept'])
         self.temp_dir = tempfile.mkdtemp()
-        self.fasta_file_path = kwargs.pop('fasta_file_path', os.path.join(self.temp_dir, f"{self.sample_name}.transcripts.fa"))
-        self.trimmed_fasta_file_path = kwargs.pop('trimmed_fasta_file_path', os.path.join(self.temp_dir, f"{self.sample_name}.transcripts.trimmed.fa"))
-        self.tsv_filtered_fasta_file_path = os.path.join(self.temp_dir, f"{self.sample_name}.transcripts.filtered.fa")
-        self.mutant_only_fasta_file_path = os.path.join(self.temp_dir, f"{self.sample_name}.transcripts.filtered.mt_only.fa")
+        self.trimmed_fasta_file_path = kwargs.pop('trimmed_fasta_file_path', os.path.join(self.temp_dir, f"tmp.transcripts.trimmed.fa"))
+        self.tsv_filtered_fasta_file_path = os.path.join(self.temp_dir, f"tmp.transcripts.filtered.fa")
+        self.mutant_only_fasta_file_path = os.path.join(self.temp_dir, f"tmp.transcripts.filtered.mt_only.fa")
         self.input_tsv = kwargs.pop('input_tsv', None)
         self.output_file = kwargs.pop('output_file', None)
 
     def execute(self):
-        self.generate_fasta()
         self.trim_sequences()
         self.tsv_filter_sequences()
         if self.mutant_only:
@@ -45,9 +37,6 @@ class GenerateProteinFasta:
         print("Calculating Manufacturability Metrics")
         CalculateManufacturability(self.output_file, self.manufacturability_file, 'fasta').execute()
         print("Completed")
-
-    def generate_fasta(self):
-        raise Exception("Implement in child class")
 
     def trim_sequences(self):
         raise Exception("Implement in child class")
@@ -111,32 +100,11 @@ class GenerateProteinFasta:
         SeqIO.write(output_records, self.mutant_only_fasta_file_path, "fasta")
 
 class PvacseqGenerateProteinFasta(GenerateProteinFasta):
-    def __init__(self, **kwargs):
-        self.input_vcf = kwargs.pop('input_vcf', None)
-        self.phased_proximal_variants_vcf = kwargs.pop('phased_proximal_variants_vcf', None)
-        super().__init__(**kwargs)
-
-    def generate_fasta(self):
-        from pvactools.lib.variant_to_kmer_pipeline import VariantToKmerPipeline
-        params = {
-            'output_dir'                  : self.temp_dir,
-            'input_file'                  : self.input_vcf,
-            'sample_name'                 : self.sample_name,
-            'pass_only'                   : self.pass_only,
-            'proximal_variants_vcf'       : self.phased_proximal_variants_vcf,
-            'biotypes'                    : self.biotypes,
-            'allow_incomplete_transcripts': self.allow_incomplete_transcripts,
-            'downstream_sequence_length'  : self.downstream_sequence_length,
-            'flanking_bases'              : self.flanking_sequence_length,
-        }
-        pipeline = VariantToKmerPipeline(**params)
-        pipeline.generate_fasta()
-
     def trim_sequences(self):
         print("Trimming Variant Peptide FASTA")
         records = {}
         keys = set()
-        for record in SeqIO.parse(self.fasta_file_path, "fasta"):
+        for record in SeqIO.parse(self.transcripts_fasta, "fasta"):
             records[record.id] = str(record.seq)
             keys.add(record.id.split('.', 1)[1])
 
@@ -195,51 +163,10 @@ class PvacseqGenerateProteinFasta(GenerateProteinFasta):
         print("Completed")
 
 class PvacspliceGenerateProteinFasta(GenerateProteinFasta):
-    def __init__(self, **kwargs):
-        self.input_file = kwargs.pop('input_file', None)
-        self.annotated_vcf = kwargs.pop('annotated_vcf', None)
-        self.ref_fasta = kwargs.pop('ref_fasta', None)
-        self.gtf_file = kwargs.pop('gtf_file', None)
-        self.junction_score = kwargs.pop('junction_score', 10)
-        self.variant_distance = kwargs.pop('variant_distance', 100)
-        self.anchor_types = kwargs.pop('anchor_types', ['A', 'D', 'NDA'])
-        super().__init__(**kwargs)
-
-    def generate_fasta(self):
-        from pvactools.lib.junction_to_kmer_pipeline import JunctionToKmerPipeline
-        junction_arguments = {
-            'input_file_type'                  : 'junctions',
-            'junctions_dir'                    : self.temp_dir,
-            'input_file'                       : self.input_file,
-            'gtf_file'                         : self.gtf_file,
-            'save_gtf'                         : False,
-            'sample_name'                      : self.sample_name,
-            'ref_fasta'                        : self.ref_fasta,
-            'annotated_vcf'                    : self.annotated_vcf,
-            'pass_only'                        : self.pass_only,
-            'biotypes'                         : self.biotypes,
-            'allow_incomplete_transcripts'     : self.allow_incomplete_transcripts,
-            'junction_score'                   : self.junction_score,
-            'variant_distance'                 : self.variant_distance,
-            'anchor_types'                     : self.anchor_types,
-            'downstream_sequence_length'       : self.downstream_sequence_length,
-            'normal_sample_name'               : None,
-            'keep_tmp_files'                   : False,
-            'class_i_epitope_length'           : [],
-            'class_ii_epitope_length'          : [],
-            'class_i_hla'                      : [],
-            'class_ii_hla'                     : [],
-        }
-
-        pipeline = JunctionToKmerPipeline(**junction_arguments)
-        pipeline.generate_fasta()
-
-        return pipeline.create_file_path('fasta')
-
     def trim_sequences(self):
         records = {}
         keys = set()
-        for record in SeqIO.parse(self.fasta_file_path, "fasta"):
+        for record in SeqIO.parse(self.transcripts_fasta, "fasta"):
             records[record.id] = record.seq
             keys.add(record.id.split('.', 1)[1])
 
@@ -263,28 +190,11 @@ class PvacspliceGenerateProteinFasta(GenerateProteinFasta):
         SeqIO.write(output_records, self.trimmed_fasta_file_path, "fasta")
 
 class PvacfuseGenerateProteinFasta(GenerateProteinFasta):
-    def __init__(self, **kwargs):
-        self.input = kwargs.pop('input', None)
-        self.ref_fasta = kwargs.pop('ref_fasta', None)
-        super().__init__(**kwargs)
-
-    def generate_fasta(self):
-        from pvactools.lib.fusion_to_kmer_pipeline import FusionToKmerPipeline
-        params = {
-            'input_file': self.input,
-            'output_dir': self.temp_dir,
-            'sample_name': self.sample_name,
-            'transcript_fasta': self.ref_fasta,
-            'downstream_sequence_length': self.downstream_sequence_length,
-        }
-        pipeline = FusionToKmerPipeline(**params)
-        pipeline.generate_fasta()
-
     def trim_sequences(self):
         print("Trimming Variant Peptide FASTA")
         records = {}
         keys = set()
-        for record in SeqIO.parse(self.fasta_file_path, "fasta"):
+        for record in SeqIO.parse(self.transcripts_fasta, "fasta"):
             records[record.id] = str(record.seq)
             keys.add(record.id.split('.', 1)[1])
 

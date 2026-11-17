@@ -11,6 +11,7 @@ from pvactools.tools.pvacfuse import (
     net_chop,
     netmhc_stab,
     calculate_reference_proteome_similarity,
+    generate_transcripts_fasta,
     generate_protein_fasta,
     create_peptide_ordering_form,
     generate_aggregated_report,
@@ -81,9 +82,16 @@ def define_parser():
     )
     calculate_reference_proteome_similarity_parser.set_defaults(func=calculate_reference_proteome_similarity)
 
+    generate_transcripts_fasta_parser = subparsers.add_parser(
+        "generate_transcripts_fasta",
+        help="Generate a fasta file of matched fusion and 5'/3' wildtype transcript sequences from AGFusion or Arriba output.",
+        add_help=False
+    )
+    generate_transcripts_fasta_parser.set_defaults(func=generate_transcripts_fasta)
+
     generate_protein_fasta_parser = subparsers.add_parser(
         "generate_protein_fasta",
-        help="Generate an annotated fasta file from AGFusion or Arriba output",
+        help="Generate a fasta file with a specific flanking sequence length around the fusion",
         add_help=False,
     )
     generate_protein_fasta_parser.set_defaults(func=generate_protein_fasta)

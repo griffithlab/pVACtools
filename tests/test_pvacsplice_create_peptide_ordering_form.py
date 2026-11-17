@@ -30,10 +30,7 @@ class PvacspliceCreatePeptideOrderingFormTests(unittest.TestCase):
             "pvacsplice_create_peptide_ordering_form",
         )
 
-        cls.input_tsv = os.path.join(cls.test_data_dir, "splice_junctions_chr1.tsv")
-        cls.input_vcf = os.path.join(cls.test_data_dir, "annotated.expression_chr1.vcf.gz")
-        cls.input_fasta = os.path.join(cls.test_data_dir, "all_sequences_chr1.fa.gz")
-        cls.input_gtf = os.path.join(cls.test_data_dir, "Homo_sapiens.GRCh38.105_chr1.sorted.filtered.gtf")
+        cls.transcripts_fasta = os.path.join(cls.test_data_dir, "HCC1395_TUMOR_DNA.transcripts.fa")
         cls.mhc_class_i_tsv = os.path.join(
             cls.test_data_dir, "MHC_Class_I", "HCC1395_TUMOR_DNA.MHC_I.all_epitopes.aggregated.tsv"
         )
@@ -50,10 +47,7 @@ class PvacspliceCreatePeptideOrderingFormTests(unittest.TestCase):
             [
                 cls.python,
                 cls.executable,
-                cls.input_tsv,
-                cls.input_vcf,
-                cls.input_fasta,
-                cls.input_gtf,
+                cls.transcripts_fasta,
                 '25',
                 cls.mhc_class_i_tsv,
                 cls.mhc_class_ii_tsv,
