@@ -67,36 +67,35 @@ jobs:
           immuscope-download-weights
       - name: Install IEDB MHC I
         run: |
-          mkdir ./IEDB
-          cd ./IEDB
-          wget https://downloads.iedb.org/tools/mhci/3.1.7/IEDB_MHC_I-3.1.7.tar.gz; tar -xzvf IEDB_MHC_I-3.1.7.tar.gz; rm IEDB_MHC_I-3.1.7.tar.gz
-          cd mhc_i
+          mkdir -p "$RUNNER_TEMP/IEDB/mhc_i"
+          cd "$RUNNER_TEMP/IEDB"
+          wget https://downloads.iedb.org/nextgen-tools/tcell_mhci/v0.2-beta/IEDB_NG_TC1-v0.2-beta.tar.gz && tar -xzvf IEDB_NG_TC1-v0.2-beta.tar.gz -C mhc_i --strip-components=1 && rm IEDB_NG_TC1-v0.2-beta.tar.gz
+          cd "$RUNNER_TEMP/IEDB/mhc_i"
           ./configure
       - name: Install IEDB MHC II
         run: |
-          cd ./IEDB
-          wget https://downloads.iedb.org/tools/mhcii/3.1.12/IEDB_MHC_II-3.1.12.tar.gz; tar -xzvf IEDB_MHC_II-3.1.12.tar.gz; rm IEDB_MHC_II-3.1.12.tar.gz
-          cd mhc_ii
-          python ./configure.py -k netmhciipan -k smm -k nn
+          cd "$RUNNER_TEMP/IEDB"
+          mkdir -p "$RUNNER_TEMP/IEDB/mhc_ii"
+          wget https://downloads.iedb.org/nextgen-tools/tcell_mhcii/v0.2.3-beta/IEDB_NG_TC2-v0.2.3-beta.tar.gz && tar -xzvf IEDB_NG_TC2-v0.2.3-beta.tar.gz -C mhc_ii --strip-components=1 && rm IEDB_NG_TC2-v0.2.3-beta.tar.gz
       - name: Set IEDB_PATH environment variable
-        run: echo "IEDB_PATH=./IEDB" >> $GITHUB_ENV
+        run: echo "IEDB_PATH=$RUNNER_TEMP/IEDB" >> $GITHUB_ENV
       - name: Install MixMHCpred
         uses: actions/checkout@master
         with:
           repository: GfellerLab/MixMHCpred
-          path: ./MixMHCpred
+          path: MixMHCpred
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Set up MixMHCpred
         run: |
-          cd MixMHCpred
+          cd "$GITHUB_WORKSPACE/MixMHCpred"
           pip install -r code/setup_pythonLibrary.txt
           chmod +x MixMHCpred
           echo "$(pwd -P)" >> $GITHUB_PATH
           cd ..
       - name: Install and set up MixMHC2pred
         run: |
-          mkdir ./MixMHC2pred
-          cd ./MixMHC2pred
+          mkdir "$RUNNER_TEMP/MixMHC2pred"
+          cd "$RUNNER_TEMP/MixMHC2pred"
           wget https://github.com/GfellerLab/MixMHC2pred/releases/download/v2.0.2.2/MixMHC2pred-2.0.zip
           unzip MixMHC2pred-2.0.zip
           rm MixMHC2pred-2.0.zip
@@ -106,11 +105,11 @@ jobs:
         uses: actions/checkout@master
         with:
           repository: GfellerLab/PRIME
-          path: ./PRIME
+          path: PRIME
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Set up PRIME
         run: |
-          cd PRIME
+          cd "$GITHUB_WORKSPACE/PRIME"
           echo "$(pwd -P)" >> $GITHUB_PATH
           cd lib
           g++ -O3 PRIME.cc -o PRIME.x

@@ -61,14 +61,39 @@ class IEDB(metaclass=ABCMeta):
 
     def predict(self, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None):
         if iedb_executable_path is not None:
-            arguments = [sys.executable]
-            arguments.extend(self.iedb_executable_params(iedb_executable_path, self.iedb_prediction_method, allele, input_file, epitope_length))
-            response_fh = tempfile.TemporaryFile(dir=tmp_dir)
-            response = run(arguments, stdout=response_fh, check=True)
-            response_fh.seek(0)
-            response_text = self.filter_response(response_fh.read())
-            response_fh.close()
-            return (response_text, 'wb')
+            with open(input_file, 'r') as input_fh:
+                input_sequence_text = input_fh.read()
+            input_json = {
+                "input_sequence_text": input_sequence_text,
+                "peptide_length_range": [
+                    epitope_length,
+                    epitope_length
+                ],
+                "alleles": allele,
+                "predictors": [
+                    {
+                      "type": "binding",
+                      "method": self.iedb_prediction_method
+                    }
+                ]
+            }
+            with tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False) as input_json_fh:
+                json.dump(input_json, input_json_fh)
+            output_dir = tempfile.TemporaryDirectory(dir=tmp_dir)
+            arguments = [sys.executable, iedb_executable_path, '-j', input_json_fh.name, '-o', os.path.join(output_dir.name, 'tmp'), '-f', 'tsv']
+            response = run(arguments, check=True)
+            response_tsv = os.path.join(output_dir.name, 'tmp.tsv')
+            df = pd.read_csv(response_tsv, sep='\t')
+            output_dir.cleanup()
+            results = pd.DataFrame()
+            for record in SeqIO.parse(input_file, "fasta"):
+                seq_num = record.id
+                epitope = str(record.seq)
+                epitope_df = df[df['peptide'] == epitope]
+                epitope_df['seq_num'] = seq_num
+                epitope_df['start'] = 1
+                results = pd.concat((results, epitope_df), axis=0)
+            return (results, 'pandas')
         else:
             allele = allele.replace('-DPB', '/DPB').replace('-DQB', '/DQB')
             if self.species_for_allele(allele) == 'human' and not allele.startswith('HLA'):

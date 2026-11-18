@@ -13,7 +13,8 @@ from mock import patch
 from pvactools.lib.call_predictors import CallPredictors
 from pvactools.lib.prediction_class import PredictionClass, IEDB, NetMHCIIpan, NetMHCIIpanEL, NetMHCIIVersion
 
-from tests.utils import *
+def pvactools_directory():
+    return os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
 def test_data_directory():
     return os.path.join(pvactools_directory(), 'predictor_tests', 'test_data')
@@ -72,7 +73,7 @@ class CallClassIPredictorsTests(CallPredictorsTests):
                     'allele': self.allele,
                     'epitope_length': self.epitope_length,
                     'prediction_algorithms': [class_name],
-                    'iedb_executable_path': os.path.join(iedb_path, 'mhc_i', 'src', 'predict_binding.py'),
+                    'iedb_executable_path': os.path.join(iedb_path, 'mhc_i', 'src', 'tcell_mhci.py'),
                     'iedb_retries': 5,
                     'n_threads': 1,
                     'output_dir': output_dir,
@@ -387,7 +388,7 @@ class CallClassIIPredictorsTests(CallPredictorsTests):
                     'allele': self.allele,
                     'epitope_length': self.epitope_length,
                     'prediction_algorithms': [class_name],
-                    'iedb_executable_path': os.path.join(iedb_path, 'mhc_ii', 'mhc_II_binding.py'),
+                    'iedb_executable_path': os.path.join(iedb_path, 'mhc_ii', 'src', 'tcell_mhcii.py'),
                     'iedb_retries': 5,
                     'n_threads': 1,
                     'output_dir': output_dir,
