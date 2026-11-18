@@ -15,6 +15,18 @@ Usage
 
 .. program-output:: pvacseq run -h
 
+ML Accept Preselection
+----------------------
+
+With ``--run-ml-predictions``, at most 20 ML-predicted Accept candidates per
+sample are preselected as ``Accept`` in the ``Evaluation`` column. Candidates
+are ranked by their full-precision Accept probability; additional predicted
+Accept candidates are set to ``Pending``.
+
+Use ``--ml-accept-limit N`` to change the limit, or ``--ml-accept-limit 0`` to
+disable it and preselect every predicted Accept candidate. This option also
+applies to ``pvacseq add_ml_predictions``.
+
 ..  .. argparse::
         :module: tools.pvacseq.run
         :func: define_parser

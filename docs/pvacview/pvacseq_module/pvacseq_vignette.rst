@@ -423,13 +423,20 @@ The ML prediction file includes all columns from the Class I aggregated file wit
 
 The ``Evaluation`` column is pre-populated with ML-predicted evaluation status for each candidate:
 
-- ``Accept``: Variants with prediction probability >= ``--ml-threshold-accept`` (default: 0.55). These candidates are predicted to be favorable neoantigen candidates to be included in a vaccine. 
+- ``Accept``: Variants with prediction probability >= ``--ml-threshold-accept`` (default: 0.55), limited to the highest-scoring 20 predicted Accept candidates by default. These candidates are predicted to be favorable neoantigen candidates to be included in a vaccine.
 - ``Reject``: Variants with prediction probability <= ``--ml-threshold-reject`` (default: 0.30). These candidates are predicted to be unfavorable. ``--ml-threshold-reject`` should be set to a value less than ``--ml-threshold-accept``.
-- ``Pending``: Variants with prediction probability between ``--ml-threshold-reject`` and ``--ml-threshold-accept``, or when the ML model cannot make a prediction due to missing data. These candidates require manual review.
+- ``Pending``: Variants between the probability thresholds, predicted Accept candidates beyond the Accept limit, or candidates without an ML prediction. These candidates require manual review.
+
+Use ``--ml-accept-limit N`` with either ML command to change the number of
+preselected Accept candidates, or ``--ml-accept-limit 0`` to disable the cap.
+Ranking uses full-precision probabilities; exact ties retain input report order.
+Report rows are not reordered, and Reject predictions are unchanged.
 
 **ML Prediction (score) Column**
 
-The ``ML Prediction (score)`` column provides additional context by displaying the evaluation status along with the underlying prediction probability score. 
+The ``ML Prediction (score)`` column displays the original model-predicted label
+and probability score. A capped candidate retains ``Accept (<score>)`` here
+even when its ``Evaluation`` is ``Pending``.
 The format is ``"<Evaluation> (<probability_score>)"`` (e.g., ``"Accept (0.72)"``, ``"Reject (0.15)"``, ``"Review (0.48)"``). 
 The "Review" status is retained in this column as a suggestion for users to change the status in the "Evaluation" column to "Review", or "Accept" or "Reject" manually.
 This column shows ``"NA"`` when the ML model cannot make a prediction due to missing data (e.g., when a candidate is found in the Class I aggregated report but not in the Class II aggregated report).
@@ -454,7 +461,7 @@ including binding affinity plots, anchor position analysis, and reference proteo
 **pVACview ML Predictions Example**
 
 To view predictions on pVACview, load the following files: 
-1. The ML prediction file (``<sample_name>.MHC_I.all_epitopes.aggregated.ML_predict.tsv``) in place of the Class I tsv file. 
+1. The ML prediction file (``<sample_name>.MHC_I.all_epitopes.aggregated.ML_predict.tsv``) in place of the Class I tsv file.
 2. The metrics.json file of Class I data. 
 3. The Class II aggregated.tsv file.  
 4. A list of genes of interest (optional).

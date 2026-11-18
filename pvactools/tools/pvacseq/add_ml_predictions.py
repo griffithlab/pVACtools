@@ -27,6 +27,7 @@ def main(args_input=sys.argv[1:]):
         args.sample_name,
         args.ml_threshold_accept,
         args.ml_threshold_reject,
+        ml_accept_limit=args.ml_accept_limit,
     )
 
 

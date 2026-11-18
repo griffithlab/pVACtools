@@ -70,6 +70,12 @@ def float_range(minimum, maximum):
     # Return function handle to checking function
     return float_range_checker
 
+def nonnegative_int(value):
+    value = int(value)
+    if value < 0:
+        raise argparse.ArgumentTypeError("must be a nonnegative integer")
+    return value
+
 def aggregate_report_evaluations():
     """Return function handle of an argument type function for
        ArgumentParser checking of the aggregate report evaluation values.

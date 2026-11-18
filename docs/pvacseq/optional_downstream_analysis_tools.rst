@@ -78,25 +78,34 @@ The tool merges these files, performs data cleaning and imputation, and applies 
 
 Note that the built-in ML model was trained with most of the features listed under :doc:`Features <features>`. It is STRONGLY recommended to use the `all` option for the `prediction_algorithms` parameter when running the pVACseq pipeline for the best predictions.
 
-The output file is written to the same directory as the Class I aggregated file (the directory you pass as ``output_dir`` when using the standalone command) as ``<sample_name>.MHC_I.all_epitopes.aggregated.ML_predict.tsv``. The output file contains all columns from the original 
+The output file is written to the same directory as the Class I aggregated file (the directory you pass as ``output_dir`` when using the standalone command) as ``<sample_name>.MHC_I.all_epitopes.aggregated.ML_predict.tsv``. The output file contains all columns from the original
 Class I aggregated file with some changes:  
 
 
 .. list-table::
 
  * - ``Evaluation``
-   - The ML-predicted evaluation status: "Accept", "Reject", or "Pending", based on the prediction probability score.
+   - The preselected evaluation status: "Accept", "Reject", or "Pending", based on the prediction probability score and Accept limit described below.
  * - ``ML Prediction (score)``
    - A formatted output combining the model-predicted evaluation with the prediction probability score (e.g., 
      "Accept (0.72)"). It shows "NA" for variants where the model could not make a prediction, which may be due to a candidate having Class I 
      algorithm predictions but not Class II algorithm predictions, causing the Class I and Class II aggregated reports to have different numbers of rows.
 
 The ``--ml-threshold-accept`` parameter controls the probability threshold for Accept predictions (default: 0.55). 
-Variants with prediction probabilities >= this threshold are evaluated as "Accept". The ``--ml-threshold-reject`` parameter 
+Variants with prediction probabilities >= this threshold are predicted as "Accept". The ``--ml-threshold-reject`` parameter
 controls the probability threshold for Reject predictions (default: 0.30). Variants with prediction probabilities <= 
 this threshold are evaluated as "Reject". Everything in between is set to "Pending" for manual review. 
 The ``--artifacts-path`` parameter allows you to specify a custom directory containing ML model artifacts. By default 
 the tool uses the model artifacts included with the pvactools package.
+
+By default, ``--ml-accept-limit 20`` preselects at most 20 predicted Accept
+candidates per sample as ``Accept`` in ``Evaluation``, ranked by full-precision
+Accept probability. Additional predicted Accept candidates become ``Pending``
+but retain ``Accept (<score>)`` in ``ML Prediction (score)``. Exact ties retain
+input order, and output rows are not reordered. Reject and Review predictions
+are unaffected. Use ``--ml-accept-limit N`` for a different limit or
+``--ml-accept-limit 0`` to disable the cap. The same option is available with
+``pvacseq run --run-ml-predictions``.
 
 Calculate Reference Proteome Similarity
 ---------------------------------------
