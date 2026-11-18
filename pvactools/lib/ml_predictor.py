@@ -433,7 +433,7 @@ def create_final_output(post_imputed_data, original_agg_file_path, output_dir, s
     final_df[cols_to_preserve] = orig_df[cols_to_preserve]
     
     # Save output file
-    output_file = os.path.join(output_dir, f"{sample_name}.MHC_I.all_epitopes.aggregated.ML_predicted.tsv")
+    output_file = os.path.join(output_dir, f"{sample_name}.MHC_I.all_epitopes.aggregated.ML_predict.tsv")
 
     final_df.to_csv(output_file, float_format='%.3f', sep="\t", index=False, na_rep="NA")
     

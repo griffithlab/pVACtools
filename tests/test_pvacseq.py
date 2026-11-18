@@ -481,11 +481,11 @@ class PvacseqTests(unittest.TestCase):
             close_mock_fhs()
 
         # Check that ML prediction output file exists in MHC_Class_I (same folder as aggregated TSV)
-        ml_output_file = os.path.join(output_dir.name, 'MHC_Class_I', 'Test.MHC_I.all_epitopes.aggregated.ML_predicted.tsv')
+        ml_output_file = os.path.join(output_dir.name, 'MHC_Class_I', 'Test.MHC_I.all_epitopes.aggregated.ML_predict.tsv')
         self.assertTrue(os.path.exists(ml_output_file), f"ML prediction file not found: {ml_output_file}")
 
         # Check that the ML prediction output file matches the expected content
-        expected_file = os.path.join(self.test_data_directory, 'ml_predictor', 'Test.MHC_I.all_epitopes.aggregated.ML_predicted.tsv')
+        expected_file = os.path.join(self.test_data_directory, 'ml_predictor', 'Test.MHC_I.all_epitopes.aggregated.ML_predict.tsv')
         self.assertTrue(compare(ml_output_file, expected_file))
         
         output_dir.cleanup()

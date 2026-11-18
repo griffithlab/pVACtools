@@ -31,4 +31,3 @@ Release Notes
    releases/6_1
    releases/7_0
    releases/7_1
-   releases/7_2

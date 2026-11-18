@@ -205,7 +205,7 @@ class MLPredictorTests(unittest.TestCase):
         self.assertTrue(os.path.exists(result))
 
         # Check file path matches expected naming convention
-        self.assertIn(".MHC_I.all_epitopes.aggregated.ML_predicted.tsv", result)
+        self.assertIn(".MHC_I.all_epitopes.aggregated.ML_predict.tsv", result)
 
         # Check that file contains data
         df = pd.read_csv(result, sep='\t')

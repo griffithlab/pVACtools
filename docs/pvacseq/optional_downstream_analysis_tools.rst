@@ -78,7 +78,7 @@ The tool merges these files, performs data cleaning and imputation, and applies 
 
 Note that the built-in ML model was trained with most of the features listed under :doc:`Features <features>`. It is STRONGLY recommended to use the `all` option for the `prediction_algorithms` parameter when running the pVACseq pipeline for the best predictions.
 
-The output file is written to the same directory as the Class I aggregated file (the directory you pass as ``output_dir`` when using the standalone command) as ``<sample_name>.MHC_I.all_epitopes.aggregated.ML_predicted.tsv``. The output file contains all columns from the original
+The output file is written to the same directory as the Class I aggregated file (the directory you pass as ``output_dir`` when using the standalone command) as ``<sample_name>.MHC_I.all_epitopes.aggregated.ML_predict.tsv``. The output file contains all columns from the original
 Class I aggregated file with some changes:  
 
 

@@ -414,7 +414,7 @@ __________________________________________
 
 This ML prediction output file contains ML-based evaluation predictions that can help prioritize neoantigen candidates by presetting the evaluation status for each candidate. 
 When pVACseq is run with both MHC Class I and Class II predictions and the ``--run-ml-predictions`` flag enabled, or when using the :ref:`add_ml_predictions <optional_downstream_analysis_tools_label>` 
-tool, an aggregate report file with ML predictions (``<sample_name>.MHC_I.all_epitopes.aggregated.ML_predicted.tsv``) is generated in the same folder as the Class I aggregated file (``MHC_Class_I``). This file can be loaded into pVACview in combination with the Class I metrics.json file and the Class II aggregated file from their usual locations.
+tool, an aggregate report file with ML predictions (``<sample_name>.MHC_I.all_epitopes.aggregated.ML_predict.tsv``) is generated in the same folder as the Class I aggregated file (``MHC_Class_I``). This file can be loaded into pVACview in combination with the Class I metrics.json file and the Class II aggregated file from their usual locations.
 This file contains ML-based evaluation predictions that can help prioritize neoantigen candidates by presetting the evaluation status for each candidate.
 
 The ML prediction file includes all columns from the Class I aggregated file with two columns different:
@@ -461,7 +461,7 @@ including binding affinity plots, anchor position analysis, and reference proteo
 **pVACview ML Predictions Example**
 
 To view predictions on pVACview, load the following files: 
-1. The ML prediction file (``<sample_name>.MHC_I.all_epitopes.aggregated.ML_predicted.tsv``) in place of the Class I tsv file.
+1. The ML prediction file (``<sample_name>.MHC_I.all_epitopes.aggregated.ML_predict.tsv``) in place of the Class I tsv file.
 2. The metrics.json file of Class I data. 
 3. The Class II aggregated.tsv file.  
 4. A list of genes of interest (optional).
