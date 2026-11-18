@@ -31,11 +31,11 @@ class RunPipeline:
         (self.class_i_alleles, self.class_ii_alleles, self.species) = split_alleles(alleles)
 
         if self.iedb_install_directory:
-            self.iedb_mhc_i_executable = os.path.join(self.iedb_install_directory, 'mhc_i', 'src', 'predict_binding.py')
-            if not os.path.exists(iedb_mhc_i_executable):
+            self.iedb_mhc_i_executable = os.path.join(self.iedb_install_directory, 'mhc_i', 'src', 'tcell_mhci.py')
+            if not os.path.exists(self.iedb_mhc_i_executable):
                 raise Exception("IEDB MHC I executable path doesn't exist %s" % self.iedb_mhc_i_executable)
-            self.iedb_mhc_ii_executable = os.path.join(self.iedb_install_directory, 'mhc_ii', 'mhc_II_binding.py')
-            if not os.path.exists(iedb_mhc_ii_executable):
+            self.iedb_mhc_ii_executable = os.path.join(self.iedb_install_directory, 'mhc_ii', 'src', 'tcell_mhcii.py')
+            if not os.path.exists(self.iedb_mhc_ii_executable):
                 raise Exception("IEDB MHC II executable path doesn't exist %s" % self.iedb_mhc_ii_executable)
         else:
             self.iedb_mhc_i_executable = None
