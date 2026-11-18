@@ -1,8 +1,18 @@
 import pandas as pd
 import csv
+import operator
 import sys
 
 pd.options.mode.chained_assignment = None
+
+FILTER_OPERATORS = {
+    "<": operator.lt,
+    "<=": operator.le,
+    "==": operator.eq,
+    "!=": operator.ne,
+    ">=": operator.ge,
+    ">": operator.gt,
+}
 
 class Filter:
     def __init__(self, input_file, output_file, filter_criteria, int_filter_columns=[], filter_strategy="AND"):
@@ -20,13 +30,23 @@ class Filter:
             for line in reader:
                 to_filter = False
 
-                process_criterion = lambda criterion: (
-                    (line[criterion.column] != 'NA' and criterion.skip_value != line[criterion.column] and not eval("{} {} {}".format(
-                        line[criterion.column] if line[criterion.column] != 'inf' else sys.maxsize,
-                        criterion.operator,
-                        criterion.threshold
-                    )))
-                )
+                def process_criterion(criterion):
+                    value = line[criterion.column]
+                    if value == 'NA' or criterion.skip_value == value:
+                        return False
+                    if value == 'inf':
+                        numeric_value = sys.maxsize
+                    else:
+                        try:
+                            numeric_value = float(value)
+                        except (TypeError, ValueError):
+                            raise ValueError(
+                                "Invalid numeric value {!r} for filter column {!r}.".format(
+                                    value,
+                                    criterion.column,
+                                )
+                            )
+                    return not criterion.comparator(numeric_value, criterion.threshold)
 
                 if self.filter_strategy == "AND":
                     to_filter = any(process_criterion(criterion) for criterion in self.filter_criteria)
@@ -38,7 +58,24 @@ class Filter:
 
 class FilterCriterion:
     def __init__(self, column, operator, threshold, skip_value=None):
+        if operator not in FILTER_OPERATORS:
+            raise ValueError(
+                "Unsupported filter operator {!r}. Supported operators are: {}.".format(
+                    operator,
+                    ", ".join(FILTER_OPERATORS),
+                )
+            )
+        try:
+            numeric_threshold = float(threshold)
+        except (TypeError, ValueError):
+            raise ValueError(
+                "Invalid numeric threshold {!r} for filter column {!r}.".format(
+                    threshold,
+                    column,
+                )
+            )
         self.column = column
         self.operator = operator
-        self.threshold = threshold
+        self.comparator = FILTER_OPERATORS[operator]
+        self.threshold = numeric_threshold
         self.skip_value = skip_value
