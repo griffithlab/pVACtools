@@ -89,7 +89,7 @@ class IEDB(metaclass=ABCMeta):
             for record in SeqIO.parse(input_file, "fasta"):
                 seq_num = record.id
                 epitope = str(record.seq)
-                epitope_df = df[df['peptide'] == epitope]
+                epitope_df = df[df['peptide'] == epitope].copy()
                 epitope_df['seq_num'] = seq_num
                 epitope_df['start'] = 1
                 results = pd.concat((results, epitope_df), axis=0)
@@ -425,7 +425,7 @@ class DeepImmuno(MHCI):
             for record in SeqIO.parse(input_file, "fasta"):
                 seq_num = record.id
                 epitope = str(record.seq)
-                epitope_df = df[df['peptide'] == epitope]
+                epitope_df = df[df['peptide'] == epitope].copy()
                 epitope_df['seq_num'] = seq_num
                 epitope_df['start'] = 1
                 epitope_df['allele'] = allele
@@ -482,7 +482,7 @@ class BigMHC(metaclass=ABCMeta):
             for record in SeqIO.parse(input_file, "fasta"):
                 seq_num = record.id
                 epitope = str(record.seq)
-                epitope_df = df[df['peptide'] == epitope]
+                epitope_df = df[df['peptide'] == epitope].copy()
                 epitope_df['seq_num'] = seq_num
                 epitope_df['start'] = 1
                 results = pd.concat((results, epitope_df), axis=0)
@@ -543,7 +543,7 @@ class MHCflurry(MHCI):
             for record in SeqIO.parse(input_file, "fasta"):
                 seq_num = record.id
                 epitope = str(record.seq)
-                epitope_df = df[df['peptide'] == epitope]
+                epitope_df = df[df['peptide'] == epitope].copy()
                 epitope_df['seq_num'] = seq_num
                 epitope_df['start'] = 1
                 results = pd.concat((results, epitope_df), axis=0)
@@ -599,7 +599,7 @@ class MixMHCpred(MHCI):
             for record in SeqIO.parse(input_file, "fasta"):
                 seq_num = record.id
                 epitope = str(record.seq)
-                epitope_df = df[df['peptide'] == epitope]
+                epitope_df = df[df['peptide'] == epitope].copy()
                 epitope_df['seq_num'] = seq_num
                 epitope_df['start'] = 1
                 epitope_df['allele'] = allele
@@ -659,7 +659,7 @@ class PRIME(MHCI):
             for record in SeqIO.parse(input_file, "fasta"):
                 seq_num = record.id
                 epitope = str(record.seq)
-                epitope_df = df[df['peptide'] == epitope]
+                epitope_df = df[df['peptide'] == epitope].copy()
                 epitope_df['seq_num'] = seq_num
                 epitope_df['start'] = 1
                 epitope_df['allele'] = allele
@@ -712,7 +712,7 @@ class TLBind(MHCI):
             for record in SeqIO.parse(input_file, "fasta"):
                 seq_num = record.id
                 epitope = str(record.seq)
-                epitope_df = df[df['peptide'] == epitope]
+                epitope_df = df[df['peptide'] == epitope].copy()
                 epitope_df['seq_num'] = seq_num
                 epitope_df['start'] = 1
                 epitope_df['allele'] = allele
@@ -765,7 +765,7 @@ class TLImm(MHCI):
             for record in SeqIO.parse(input_file, "fasta"):
                 seq_num = record.id
                 epitope = str(record.seq)
-                epitope_df = df[df['peptide'] == epitope]
+                epitope_df = df[df['peptide'] == epitope].copy()
                 epitope_df['seq_num'] = seq_num
                 epitope_df['start'] = 1
                 epitope_df['allele'] = allele
@@ -1141,7 +1141,7 @@ class MixMHC2pred(MHCII):
             for record in SeqIO.parse(input_file, "fasta"):
                 seq_num = record.id
                 epitope = str(record.seq)
-                epitope_df = df[df['peptide'] == epitope]
+                epitope_df = df[df['peptide'] == epitope].copy()
                 epitope_df['seq_num'] = seq_num
                 epitope_df['start'] = 1
                 epitope_df['allele'] = allele
