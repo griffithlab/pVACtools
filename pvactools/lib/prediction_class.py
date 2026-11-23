@@ -7,7 +7,7 @@ import requests
 import re
 import pandas as pd
 import time
-from subprocess import run, DEVNULL, STDOUT
+from subprocess import run, DEVNULL, STDOUT, CalledProcessError
 import tempfile
 from collections import defaultdict
 from Bio import SeqIO
@@ -81,7 +81,12 @@ class IEDB(metaclass=ABCMeta):
                 json.dump(input_json, input_json_fh)
             output_dir = tempfile.TemporaryDirectory(dir=tmp_dir)
             arguments = [sys.executable, iedb_executable_path, '-j', input_json_fh.name, '-o', os.path.join(output_dir.name, 'tmp'), '-f', 'tsv']
-            response = run(arguments, check=True)
+            try:
+                response = run(arguments, check=True, capture_output=True, text=True)
+            except CalledProcessError as e:
+                print("Command failed with exit code:", e.returncode)
+                print("STDERR:", e.stderr)
+                raise Exception("An error occurred while calling IEDB:\n{}".format(e.stderr))
             response_tsv = os.path.join(output_dir.name, 'tmp.tsv')
             df = pd.read_csv(response_tsv, sep='\t')
             output_dir.cleanup()
@@ -177,17 +182,12 @@ class MHCnuggets(metaclass=ABCMeta):
         arguments = ["python", script, input_file, allele, str(epitope_length), class_type, tmp_output_file.name]
         if tmp_dir:
             arguments.extend(['--tmp-dir', tmp_dir])
-        stderr_fh = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
         try:
-            response = run(arguments, check=True, stdout=DEVNULL, stderr=stderr_fh)
-        except:
-            stderr_fh.close()
-            with open(stderr_fh.name, 'r') as fh:
-                err = fh.read()
-            os.unlink(stderr_fh.name)
-            raise Exception("An error occurred while calling MHCnuggets:\n{}".format(err))
-        stderr_fh.close()
-        os.unlink(stderr_fh.name)
+            response = run(arguments, check=True, capture_output=True, text=True)
+        except CalledProcessError as e:
+            print("Command failed with exit code:", e.returncode)
+            print("STDERR:", e.stderr)
+            raise Exception("An error occurred while calling MHCnuggets:\n{}".format(e.stderr))
         tmp_output_file.close()
         df = pd.read_csv(tmp_output_file.name)
         os.unlink(tmp_output_file.name)
@@ -407,17 +407,12 @@ class DeepImmuno(MHCI):
                 tmp_input_file.write("{},{}\n".format(epitope, allele.replace(':', '')))
             tmp_input_file.close()
             arguments = ['deepimmuno-cnn', '--mode', 'multiple', '--intdir', tmp_input_file.name, '--outdir', output_dir.name]
-            stderr_fh = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
             try:
-                response = run(arguments, check=True, stdout=DEVNULL, stderr=stderr_fh)
-            except:
-                stderr_fh.close()
-                with open(stderr_fh.name, 'r') as fh:
-                    err = fh.read()
-                os.unlink(stderr_fh.name)
-                raise Exception("An error occurred while calling DeepImmuno:\n{}".format(err))
-            stderr_fh.close()
-            os.unlink(stderr_fh.name)
+                response = run(arguments, check=True, capture_output=True, text=True)
+            except CalledProcessError as e:
+                print("Command failed with exit code:", e.returncode)
+                print("STDERR:", e.stderr)
+                raise Exception("An error occurred while calling DeepImmuno:\n{}".format(e.stderr))
             os.unlink(tmp_input_file.name)
             tmp_output_file_name = os.path.join(output_dir.name, "deepimmuno-cnn-result.txt")
             df = pd.read_csv(tmp_output_file_name, sep="\t")
@@ -460,17 +455,12 @@ class BigMHC(metaclass=ABCMeta):
             tmp_input_file.close()
             tmp_output_file = tempfile.NamedTemporaryFile('r', dir=tmp_dir, delete=False)
             arguments = ['bigmhc_predict', '-a', allele, '-i', tmp_input_file.name, '-p', '0', '-c', '0', '-o', tmp_output_file.name, '-m', bigmhc_type, '-d', 'cpu']
-            stderr_fh = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
             try:
-                response = run(arguments, check=True, stdout=DEVNULL, stderr=stderr_fh)
-            except:
-                stderr_fh.close()
-                with open(stderr_fh.name, 'r') as fh:
-                    err = fh.read()
-                os.unlink(stderr_fh.name)
-                raise Exception("An error occurred while calling BigMHC:\n{}".format(err))
-            stderr_fh.close()
-            os.unlink(stderr_fh.name)
+                response = run(arguments, check=True, capture_output=True, text=True)
+            except CalledProcessError as e:
+                print("Command failed with exit code:", e.returncode)
+                print("STDERR:", e.stderr)
+                raise Exception("An error occurred while calling BigMHC:\n{}".format(e.stderr))
             os.unlink(tmp_input_file.name)
             tmp_output_file.close()
             df = pd.read_csv(tmp_output_file.name)
@@ -520,17 +510,12 @@ class MHCflurry(MHCI):
             tmp_output_file = tempfile.NamedTemporaryFile('r', dir=tmp_dir, delete=False)
             arguments = ["mhcflurry-predict", "--alleles", allele, "--out", tmp_output_file.name, "--peptides"]
             arguments.extend(all_epitopes)
-            stderr_fh = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
             try:
-                response = run(arguments, check=True, stdout=DEVNULL, stderr=stderr_fh)
-            except:
-                stderr_fh.close()
-                with open(stderr_fh.name, 'r') as fh:
-                    err = fh.read()
-                os.unlink(stderr_fh.name)
-                raise Exception("An error occurred while calling MHCflurry:\n{}".format(err))
-            stderr_fh.close()
-            os.unlink(stderr_fh.name)
+                response = run(arguments, check=True, capture_output=True, text=True)
+            except CalledProcessError as e:
+                print("Command failed with exit code:", e.returncode)
+                print("STDERR:", e.stderr)
+                raise Exception("An error occurred while calling MHCflurry:\n{}".format(e.stderr))
             tmp_output_file.close()
             df = pd.read_csv(tmp_output_file.name)
             os.unlink(tmp_output_file.name)
@@ -577,17 +562,12 @@ class MixMHCpred(MHCI):
             tmp_input_file.close()
             tmp_output_file = tempfile.NamedTemporaryFile('r', dir=tmp_dir, delete=False)
             arguments = ["MixMHCpred", "-i", tmp_input_file.name, "-o", tmp_output_file.name, "-a", allele]
-            stderr_fh = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
             try:
-                response = run(arguments, check=True, stdout=DEVNULL, stderr=stderr_fh)
-            except:
-                stderr_fh.close()
-                with open(stderr_fh.name, 'r') as fh:
-                    err = fh.read()
-                os.unlink(stderr_fh.name)
-                raise Exception("An error occurred while calling MixMHCpred:\n{}".format(err))
-            stderr_fh.close()
-            os.unlink(stderr_fh.name)
+                response = run(arguments, check=True, capture_output=True, text=True)
+            except CalledProcessError as e:
+                print("Command failed with exit code:", e.returncode)
+                print("STDERR:", e.stderr)
+                raise Exception("An error occurred while calling MixMHCpred:\n{}".format(e.stderr))
             tmp_output_file.close()
             df = pd.read_csv(tmp_output_file.name, sep="\t", skiprows=11)
             os.unlink(tmp_output_file.name)
@@ -637,17 +617,12 @@ class PRIME(MHCI):
             else:
                 prime_allele = allele
             arguments = ["PRIME", "-i", tmp_input_file.name, "-o", tmp_output_file.name, "-a", prime_allele, "-mix", "MixMHCpred"]
-            stderr_fh = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
             try:
-                response = run(arguments, check=True, stdout=DEVNULL, stderr=stderr_fh)
-            except:
-                stderr_fh.close()
-                with open(stderr_fh.name, 'r') as fh:
-                    err = fh.read()
-                os.unlink(stderr_fh.name)
-                raise Exception("An error occurred while calling PRIME:\n{}".format(err))
-            stderr_fh.close()
-            os.unlink(stderr_fh.name)
+                response = run(arguments, check=True, capture_output=True, text=True)
+            except CalledProcessError as e:
+                print("Command failed with exit code:", e.returncode)
+                print("STDERR:", e.stderr)
+                raise Exception("An error occurred while calling PRIME:\n{}".format(e.stderr))
             tmp_output_file.close()
             df = pd.read_csv(tmp_output_file.name, sep="\t", skiprows=11)
             os.unlink(tmp_output_file.name)
@@ -695,17 +670,12 @@ class TLBind(MHCI):
             tmp_input_file.close()
             tmp_output_file = tempfile.NamedTemporaryFile('r', dir=tmp_dir, delete=False)
             arguments = ["TLBind.py", tmp_input_file.name, "--out", tmp_output_file.name]
-            stderr_fh = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
             try:
-                response = run(arguments, check=True, stdout=DEVNULL, stderr=stderr_fh)
-            except:
-                stderr_fh.close()
-                with open(stderr_fh.name, 'r') as fh:
-                    err = fh.read()
-                os.unlink(stderr_fh.name)
-                raise Exception("An error occurred while calling TLBind:\n{}".format(err))
-            stderr_fh.close()
-            os.unlink(stderr_fh.name)
+                response = run(arguments, check=True, capture_output=True, text=True)
+            except CalledProcessError as e:
+                print("Command failed with exit code:", e.returncode)
+                print("STDERR:", e.stderr)
+                raise Exception("An error occurred while calling TLBind:\n{}".format(e.stderr))
             tmp_output_file.close()
             df = pd.read_csv(tmp_output_file.name, sep=",")
             os.unlink(tmp_output_file.name)
@@ -748,17 +718,12 @@ class TLImm(MHCI):
             tmp_input_file.close()
             tmp_output_file = tempfile.NamedTemporaryFile('r', dir=tmp_dir, delete=False)
             arguments = ["TLImm.py", tmp_input_file.name, "--out", tmp_output_file.name]
-            stderr_fh = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
             try:
-                response = run(arguments, check=True, stdout=DEVNULL, stderr=stderr_fh)
-            except:
-                stderr_fh.close()
-                with open(stderr_fh.name, 'r') as fh:
-                    err = fh.read()
-                os.unlink(stderr_fh.name)
-                raise Exception("An error occurred while calling TLImm:\n{}".format(err))
-            stderr_fh.close()
-            os.unlink(stderr_fh.name)
+                response = run(arguments, check=True, capture_output=True, text=True)
+            except CalledProcessError as e:
+                print("Command failed with exit code:", e.returncode)
+                print("STDERR:", e.stderr)
+                raise Exception("An error occurred while calling TLImm:\n{}".format(e.stderr))
             tmp_output_file.close()
             df = pd.read_csv(tmp_output_file.name, sep=",")
             os.unlink(tmp_output_file.name)
@@ -995,20 +960,12 @@ class ImmuScope_IM(MHCII):
             '--seq-num-col', 'seq_num',
             '--start-col', 'start',
         ]
-        stderr_fh = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
         try:
-            run(arguments, check=True, stdout=DEVNULL, stderr=stderr_fh)
-        except:
-            stderr_fh.close()
-            with open(stderr_fh.name, 'r') as fh:
-                err = fh.read()
-            os.unlink(stderr_fh.name)
-            os.unlink(tmp_input_file.name)
-            if os.path.exists(tmp_output_file.name):
-                os.unlink(tmp_output_file.name)
-            raise Exception("An error occurred while calling ImmuScope:\n{}".format(err))
-        stderr_fh.close()
-        os.unlink(stderr_fh.name)
+            response = run(arguments, check=True, capture_output=True, text=True)
+        except CalledProcessError as e:
+            print("Command failed with exit code:", e.returncode)
+            print("STDERR:", e.stderr)
+            raise Exception("An error occurred while calling ImmuScope:\n{}".format(e.stderr))
         os.unlink(tmp_input_file.name)
 
         df = pd.read_csv(tmp_output_file.name, sep='\t')
@@ -1119,17 +1076,12 @@ class MixMHC2pred(MHCII):
             else:
                 arguments = ["MixMHC2pred_unix"]
             arguments.extend(["-i", tmp_input_file.name, "-o", tmp_output_file.name, "-a", mixmhc2pred_allele, "--no_context", "--extra_out"])
-            stderr_fh = tempfile.NamedTemporaryFile('w', dir=tmp_dir, delete=False)
             try:
-                response = run(arguments, check=True, stdout=DEVNULL, stderr=stderr_fh)
-            except:
-                stderr_fh.close()
-                with open(stderr_fh.name, 'r') as fh:
-                    err = fh.read()
-                os.unlink(stderr_fh.name)
-                raise Exception("An error occurred while calling MixMHC2pred:\n{}".format(err))
-            stderr_fh.close()
-            os.unlink(stderr_fh.name)
+                response = run(arguments, check=True, capture_output=True, text=True)
+            except CalledProcessError as e:
+                print("Command failed with exit code:", e.returncode)
+                print("STDERR:", e.stderr)
+                raise Exception("An error occurred while calling MixMHC2pred:\n{}".format(e.stderr))
             tmp_output_file.close()
             df = pd.read_csv(tmp_output_file.name, sep="\t", skiprows=19)
             os.unlink(tmp_output_file.name)
