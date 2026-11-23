@@ -12,21 +12,10 @@ import unittest.mock
 from mock import patch
 import argparse
 
+from pvactools.lib.prediction_class import IEDB
 from pvactools.tools.pvacvector import run, visualize, download_example_data
 import pvactools.tools.pvacvector.main as pvacvector_main
 from tests.utils import *
-
-def make_response(data, path, test_name):
-    filename = 'response_%s_%s_%s_%s.tsv' % (data['allele'], data['length'], data['method'], test_name)
-    reader = open(os.path.join(
-        path,
-        filename
-    ), mode='r')
-    response_obj = lambda :None
-    response_obj.status_code = 200
-    response_obj.text = reader.read()
-    reader.close()
-    return response_obj
 
 def make_predict_response(input_file, allele, length, path, test_name):
     file_parts = input_file.rsplit(os.sep, 6)
@@ -142,11 +131,14 @@ class TestPvacvector(unittest.TestCase):
         output_dir.cleanup()
 
     def test_pvacvector_fa_input_runs_and_produces_expected_output(self):
-        with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data: make_response(
-            data,
-            test_data_directory(),
-            'fa_input',
-        ))) as mock_request:
+        with patch.object(IEDB, 'predict', autospec=True) as mock_method:
+            mock_method.side_effect = lambda self_obj, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None: make_iedb_response(
+                self_obj,
+                allele,
+                epitope_length,
+                test_data_directory(),
+                'fa_input',
+            )
             output_dir = tempfile.TemporaryDirectory()
 
             run.main([
@@ -282,11 +274,14 @@ class TestPvacvector(unittest.TestCase):
             output_dir.cleanup()
 
     def test_pvacvector_percentile_threshold(self):
-        with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
-            data,
-            test_data_directory(),
-            'percentile_threshold',
-        ))) as mock_request:
+        with patch.object(IEDB, 'predict', autospec=True) as mock_method:
+            mock_method.side_effect = lambda self_obj, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None: make_iedb_response(
+                self_obj,
+                allele,
+                epitope_length,
+                test_data_directory(),
+                'percentile_threshold',
+            )
             output_dir = tempfile.TemporaryDirectory()
 
             run.main([

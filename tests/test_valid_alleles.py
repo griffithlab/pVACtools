@@ -62,7 +62,7 @@ class ValidAllelesTests(unittest.TestCase):
             "--species",
             "mouse",
         ]))
-        self.assertIn("H-2-Db", mock_stdout.getvalue())
+        self.assertIn("H2-Db", mock_stdout.getvalue())
 
     @patch('sys.stdout', new_callable=io.StringIO)
     def test_valid_alleles_with_length(self, mock_stdout):
@@ -94,7 +94,7 @@ class ValidAllelesTests(unittest.TestCase):
             "--length",
             "8"
         ]))
-        self.assertIn("H-2-Db", mock_stdout.getvalue())
+        self.assertIn("H2-Db", mock_stdout.getvalue())
 
     @patch('sys.stdout', new_callable=io.StringIO)
     def test_valid_alleles_with_algorithm_and_species_and_length(self, mock_stdout):
@@ -106,4 +106,4 @@ class ValidAllelesTests(unittest.TestCase):
             "--length",
             "8"
         ]))
-        self.assertIn("H-2-Db", mock_stdout.getvalue())
+        self.assertIn("H2-Db", mock_stdout.getvalue())
