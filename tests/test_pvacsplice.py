@@ -16,6 +16,7 @@ from urllib.request import urlopen
 from shutil import copyfileobj
 from tempfile import NamedTemporaryFile
 
+from pvactools.lib.prediction_class import IEDB
 from pvactools.tools.pvacsplice import run
 import pvactools.tools.pvacsplice.main as pvacsplice_main
 from tests.utils import *
@@ -118,11 +119,7 @@ class PvacspliceTests(unittest.TestCase):
             )
 
     def test_pvacsplice_pipeline_class_I(self):
-        with patch('pvactools.lib.call_predictors.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
-            data,
-            files,
-            os.path.join(test_data_directory(), 'mock_files'),
-        ))) as mock_request, patch('pvactools.lib.net_chop.NetChop.post_query', unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: mock_netchop_netmhcstabpan(
+        with patch.object(IEDB, 'predict', autospec=True) as mock_method, patch('pvactools.lib.net_chop.NetChop.post_query', unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: mock_netchop_netmhcstabpan(
             data,
             files,
             os.path.join(test_data_directory(), 'mock_files'),
@@ -133,6 +130,13 @@ class PvacspliceTests(unittest.TestCase):
             os.path.join(test_data_directory(), 'mock_files'),
             'Netmhcstab.html'
         ))):
+            mock_method.side_effect = lambda self_obj, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None: make_iedb_response(
+                self_obj,
+                allele,
+                epitope_length,
+                os.path.join(test_data_directory(), 'mock_files'),
+            )
+
             output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
 
             fasta_file = os.path.join(self.test_data_directory, "inputs", "all_sequences_chr1.fa.gz")
@@ -203,7 +207,7 @@ class PvacspliceTests(unittest.TestCase):
                 ):
                     output_file   = os.path.join(output_dir.name, 'MHC_Class_I', str(length), file_name)
                     expected_file = os.path.join(self.test_data_directory, 'results', 'run', 'MHC_Class_I', 'MHC_Class_I_{}'.format(length), file_name)
-                    self.assertTrue(cmp(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
+                    self.assertTrue(compare(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
 
             with self.assertRaises(SystemExit) as cm:
                 run.main([
@@ -239,11 +243,14 @@ class PvacspliceTests(unittest.TestCase):
             os.unlink(unzipped_fasta_file)
 
     def test_pvacsplice_pipeline_class_II(self):
-        with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
-            data,
-            files,
-            os.path.join(test_data_directory(), 'mock_files'),
-        ))) as mock_request:
+        with patch.object(IEDB, 'predict', autospec=True) as mock_method:
+            mock_method.side_effect = lambda self_obj, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None: make_iedb_response(
+                self_obj,
+                allele,
+                epitope_length,
+                os.path.join(test_data_directory(), 'mock_files'),
+            )
+
             output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
 
             fasta_file = os.path.join(self.test_data_directory, "inputs", "all_sequences_chr1.fa.gz")
@@ -310,7 +317,7 @@ class PvacspliceTests(unittest.TestCase):
             ):
                 output_file   = os.path.join(output_dir.name, 'MHC_Class_II', '15', file_name)
                 expected_file = os.path.join(self.test_data_directory, 'results', 'run', 'MHC_Class_II', 'MHC_Class_II_15', file_name)
-                self.assertTrue(cmp(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
+                self.assertTrue(compare(output_file, expected_file), "files don't match %s - %s" %(output_file, expected_file))
 
             output_dir.cleanup()
             os.unlink(unzipped_fasta_file)
@@ -336,11 +343,14 @@ class PvacspliceTests(unittest.TestCase):
         self.assertTrue('Requested alleles are not from the same species.' in str(context.exception))
 
     def test_pvacsplice_pipeline_multiple_somatic_variants_overlapping_splice_site(self):
-        with patch('pvactools.lib.call_predictors.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
-            data,
-            files,
-            os.path.join(test_data_directory(), 'mock_files'),
-        ))):
+        with patch.object(IEDB, 'predict', autospec=True) as mock_method:
+            mock_method.side_effect = lambda self_obj, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None: make_iedb_response(
+                self_obj,
+                allele,
+                epitope_length,
+                os.path.join(test_data_directory(), 'mock_files'),
+            )
+
             output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
 
             fasta_file = os.path.join(self.test_data_directory, "inputs", "inputs_multiple_variants_overlapping_splice_site", "Mus_musculus.GRCm38.dna.chromosome.1.fa.gz")
@@ -348,7 +358,7 @@ class PvacspliceTests(unittest.TestCase):
             run.main([
                 os.path.join(self.test_data_directory, "inputs", "inputs_multiple_variants_overlapping_splice_site", "multiple_overlapping_mutations.regtools.tsv"),
                 'tumor',
-                'H-2-Kb',
+                'H2-Kb',
                 'NetMHC',
                 output_dir.name,
                 os.path.join(self.test_data_directory, "inputs", "inputs_multiple_variants_overlapping_splice_site", "variants.vcf.gz"),

@@ -177,32 +177,12 @@ class OutputParser(metaclass=ABCMeta):
             )
 
         if m == 'netmhcpanel':
-            presentation = line.get('score')
-
-            percentile = self._extract_percentile(
-                line, 'percentile_rank', 'rank',
-                fallback='NA'
-            )
-
-            entry = self._make_score_entry(
+            return self._make_score_entry(
                 line, 'NetMHCpanEL', 'presentation',
-                presentation, 'NetMHCpanEL',
-                include_percentile=False,
+                line.get('score'), method,
+                percentile_keys=['percentile'],
                 is_reversed=True
             )
-
-            if not self.use_normalized_percentiles:
-                entry['NetMHCpanEL']['percentile'] = percentile
-            else:
-                entry['NetMHCpanEL']['percentile'] = self.normalized_percentile_calculator.calculate_normalized_percentile(
-                    line.get('allele'),
-                    len(line.get('peptide') or ''),
-                    self._parse_float_or_na(presentation),
-                    'NetMHCpanEL',
-                    is_reversed=True
-                )
-
-            return entry
 
         if 'netmhciipanel' in m:
             presentation = (

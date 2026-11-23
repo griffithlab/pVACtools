@@ -16,6 +16,7 @@ from urllib.request import urlopen
 from shutil import copyfileobj, copyfile
 from tempfile import NamedTemporaryFile
 
+from pvactools.lib.prediction_class import IEDB
 from pvactools.tools.pvacseq import run
 import pvactools.tools.pvacseq.main as pvacseq_main
 from tests.utils import *
@@ -90,11 +91,7 @@ class PvacseqTests(unittest.TestCase):
         self.assertTrue(compiled_run_path)
 
     def test_pvacseq_pipeline(self):
-        with patch('pvactools.lib.call_predictors.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
-            data,
-            files,
-            test_data_directory()
-        ))) as mock_request, patch('pvactools.lib.net_chop.NetChop.post_query', unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: mock_netchop_netmhcstabpan(
+        with patch.object(IEDB, 'predict', autospec=True) as mock_method, patch('pvactools.lib.net_chop.NetChop.post_query', unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: mock_netchop_netmhcstabpan(
             data,
             files,
             self.test_data_directory,
@@ -105,6 +102,13 @@ class PvacseqTests(unittest.TestCase):
             self.test_data_directory,
             'Netmhcstab.html'
         ))):
+            mock_method.side_effect = lambda self_obj, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None: make_iedb_response(
+                self_obj,
+                allele,
+                epitope_length,
+                test_data_directory(),
+            )
+
             output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
 
             run.main([
@@ -244,77 +248,83 @@ class PvacseqTests(unittest.TestCase):
 
             output_dir.cleanup()
 
-    @patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
-        data,
-        files,
-        test_data_directory()
-    )))
     def test_pvacseq_pipeline_additional_report_columns(self):
-        output_dir = tempfile.TemporaryDirectory()
-        params = [
-            os.path.join(self.test_data_directory, "input.vcf"),
-            'Test',
-            'DRB1*11:01',
-            'NNalign',
-            output_dir.name,
-            '-e2', '15',
-            '-a', 'sample_name',
-            '-d', 'full',
-            '--top-score-metric', 'lowest',
-            '--top-score-metric2', 'ic50',
-            '--biotypes', 'IG_V_gene,protein_coding',
-            '--fasta-size', '800',
-        ]
-        run.main(params)
-        output_file   = os.path.join(output_dir.name, 'MHC_Class_II', 'Test.MHC_II.filtered.tsv')
-        expected_file = os.path.join(self.test_data_directory, 'Test_with_additional_report_columns.final.tsv')
-        self.assertTrue(cmp(output_file, expected_file, False))
-        output_dir.cleanup()
+        with patch.object(IEDB, 'predict', autospec=True) as mock_method:
+            mock_method.side_effect = lambda self_obj, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None: make_iedb_response(
+                self_obj,
+                allele,
+                epitope_length,
+                test_data_directory(),
+            )
 
-    @patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
-        data,
-        files,
-        test_data_directory()
-    )))
+            output_dir = tempfile.TemporaryDirectory()
+            params = [
+                os.path.join(self.test_data_directory, "input.vcf"),
+                'Test',
+                'DRB1*11:01',
+                'NNalign',
+                output_dir.name,
+                '-e2', '15',
+                '-a', 'sample_name',
+                '-d', 'full',
+                '--top-score-metric', 'lowest',
+                '--top-score-metric2', 'ic50',
+                '--biotypes', 'IG_V_gene,protein_coding',
+                '--fasta-size', '800',
+            ]
+            run.main(params)
+            output_file   = os.path.join(output_dir.name, 'MHC_Class_II', 'Test.MHC_II.filtered.tsv')
+            expected_file = os.path.join(self.test_data_directory, 'Test_with_additional_report_columns.final.tsv')
+            self.assertTrue(cmp(output_file, expected_file, False))
+            output_dir.cleanup()
+
     def test_pvacseq_pipeline_proximal_variants_vcf(self):
-        output_dir = tempfile.TemporaryDirectory()
+        with patch.object(IEDB, 'predict', autospec=True) as mock_method:
+            mock_method.side_effect = lambda self_obj, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None: make_iedb_response(
+                self_obj,
+                allele,
+                epitope_length,
+                test_data_directory(),
+            )
 
-        params = [
-            os.path.join(self.test_data_directory, "input_somatic.vcf.gz"),
-            'Test',
-            'HLA-E*01:01',
-            'NetMHC',
-            output_dir.name,
-            '-e1', '8',
-            '-s', '8000',
-            '-k',
-            '-p', os.path.join(self.test_data_directory, 'phased.vcf.gz'),
-            '--biotypes', 'IG_V_gene,protein_coding',
-            '--allow-incomplete-transcripts',
-        ]
-        run.main(params)
+            output_dir = tempfile.TemporaryDirectory()
 
-        for file_name in ['Test.MHC_I.all_epitopes.tsv', 'Test.fasta']:
-            output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
-            expected_file = os.path.join(self.test_data_directory, 'phased', 'MHC_Class_I', file_name)
-            self.assertTrue(compare(output_file, expected_file))
+            params = [
+                os.path.join(self.test_data_directory, "input_somatic.vcf.gz"),
+                'Test',
+                'HLA-E*01:01',
+                'NetMHC',
+                output_dir.name,
+                '-e1', '8',
+                '-s', '8000',
+                '-k',
+                '-p', os.path.join(self.test_data_directory, 'phased.vcf.gz'),
+                '--biotypes', 'IG_V_gene,protein_coding',
+                '--allow-incomplete-transcripts',
+            ]
+            run.main(params)
 
-        for file_name in [
-            'Test.MHC_I.all_epitopes.aggregated.tsv',
-            'Test.MHC_I.all_epitopes.aggregated.metrics.json',
-            'Test.MHC_I.filtered.tsv'
-        ]:
-            output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
-            expected_file = os.path.join(self.test_data_directory, 'phased', 'MHC_Class_I', file_name)
-            self.assertTrue(cmp(output_file, expected_file, False), "files don't match %s - %s" %(output_file, expected_file))
+            for file_name in ['Test.MHC_I.all_epitopes.tsv', 'Test.fasta']:
+                output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
+                expected_file = os.path.join(self.test_data_directory, 'phased', 'MHC_Class_I', file_name)
+                self.assertTrue(compare(output_file, expected_file))
 
-        for file_name in [
-            'Test.proximal_variants.tsv',
-        ]:
-            output_file   = os.path.join(output_dir.name, file_name)
-            expected_file = os.path.join(self.test_data_directory, 'phased', file_name)
-            self.assertTrue(cmp(output_file, expected_file, False), "files don't match %s - %s" %(output_file, expected_file))
-        output_dir.cleanup()
+            for file_name in [
+                'Test.MHC_I.all_epitopes.aggregated.tsv',
+                'Test.MHC_I.all_epitopes.aggregated.metrics.json',
+                'Test.MHC_I.filtered.tsv'
+            ]:
+                output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
+                expected_file = os.path.join(self.test_data_directory, 'phased', 'MHC_Class_I', file_name)
+                self.assertTrue(cmp(output_file, expected_file, False), "files don't match %s - %s" %(output_file, expected_file))
+
+            for file_name in [
+                'Test.proximal_variants.tsv',
+            ]:
+                output_file   = os.path.join(output_dir.name, file_name)
+                expected_file = os.path.join(self.test_data_directory, 'phased', file_name)
+                self.assertTrue(cmp(output_file, expected_file, False), "files don't match %s - %s" %(output_file, expected_file))
+            output_dir.cleanup()
 
     def test_mismatched_allele_species_raises_exception(self):
         with self.assertRaises(Exception) as context:
@@ -331,12 +341,15 @@ class PvacseqTests(unittest.TestCase):
         self.assertTrue('Requested alleles are not from the same species.' in str(context.exception))
 
     def test_problematic_amino_acids(self):
-        output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
-        with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
-            data,
-            files,
-            test_data_directory()
-        ))) as mock_request:
+        with patch.object(IEDB, 'predict', autospec=True) as mock_method:
+            mock_method.side_effect = lambda self_obj, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None: make_iedb_response(
+                self_obj,
+                allele,
+                epitope_length,
+                test_data_directory(),
+            )
+
+            output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
             run.main([
                 os.path.join(self.test_data_directory, "input.vcf"),
                 'Test',
@@ -351,22 +364,18 @@ class PvacseqTests(unittest.TestCase):
                 '--fasta-size', '800',
             ])
 
-        for file_name in (
-            'Test.MHC_I.all_epitopes.tsv',
-            'Test.MHC_I.filtered.tsv',
-            'Test.MHC_I.all_epitopes.aggregated.tsv',
-        ):
-            output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
-            expected_file = os.path.join(self.test_data_directory, 'problematic_amino_acids', 'MHC_Class_I', file_name)
-            self.assertTrue(compare(output_file, expected_file))
-        output_dir.cleanup()
+            for file_name in (
+                'Test.MHC_I.all_epitopes.tsv',
+                'Test.MHC_I.filtered.tsv',
+                'Test.MHC_I.all_epitopes.aggregated.tsv',
+            ):
+                output_file   = os.path.join(output_dir.name, 'MHC_Class_I', file_name)
+                expected_file = os.path.join(self.test_data_directory, 'problematic_amino_acids', 'MHC_Class_I', file_name)
+                self.assertTrue(compare(output_file, expected_file))
+            output_dir.cleanup()
 
     def test_pvacseq_run_with_ml_predictions(self):
-        with patch('pvactools.lib.call_predictors.requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
-            data,
-            files,
-            test_data_directory()
-        ))) as mock_request, patch('pvactools.lib.net_chop.NetChop.post_query', unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: mock_netchop_netmhcstabpan(
+        with patch.object(IEDB, 'predict', autospec=True) as mock_method, patch('pvactools.lib.net_chop.NetChop.post_query', unittest.mock.Mock(side_effect = lambda url, data, timeout, files=None: mock_netchop_netmhcstabpan(
             data,
             files,
             self.test_data_directory,
@@ -377,6 +386,13 @@ class PvacseqTests(unittest.TestCase):
             self.test_data_directory,
             'Netmhcstab.html'
         ))):
+            mock_method.side_effect = lambda self_obj, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None: make_iedb_response(
+                self_obj,
+                allele,
+                epitope_length,
+                test_data_directory(),
+            )
+
             output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
 
             run.main([

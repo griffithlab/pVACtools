@@ -23,8 +23,6 @@ class CallPredictors:
         self.output_dir = kwargs['output_dir']
         self.tmp_dir = os.path.join(self.output_dir, 'tmp')
         os.makedirs(self.tmp_dir, exist_ok=True)
-        self.log_dir = os.path.join(self.output_dir, 'log')
-        os.makedirs(self.log_dir, exist_ok=True),
         self.output_files = []
         self.output_key_files = []
 
@@ -38,11 +36,11 @@ class CallPredictors:
             prediction = prediction_class()
             valid_alleles = prediction.valid_allele_names()
             if self.allele not in valid_alleles:
-                logging.info(f"Allele {self.allele} not valid for Method {method}. Skipping.")
+                logging.warning(f"Allele {self.allele} not valid for Method {method}. Skipping.")
                 continue
             valid_lengths = prediction.valid_lengths_for_allele(self.allele)
             if self.epitope_length not in valid_lengths:
-                logging.info(f"Epitope Length {self.epitope_length} is not valid for Method {method} and Allele {self.allele} Skipping.")
+                logging.warning(f"Epitope Length {self.epitope_length} is not valid for Method {method} and Allele {self.allele} Skipping.")
                 continue
             for fasta_file in split_fasta_files:
                 argument_sets.append([
@@ -65,7 +63,7 @@ class CallPredictors:
                 prediction_class = getattr(sys.modules[__name__], method)
                 prediction_class_object = prediction_class()
 
-                (response_text, output_mode) = prediction_class_object.predict(filename, allele, self.epitope_length, self.iedb_executable_path, self.iedb_retries, tmp_dir=self.tmp_dir, log_dir=self.log_dir)
+                (response_text, output_mode) = prediction_class_object.predict(filename, allele, self.epitope_length, self.iedb_executable_path, self.iedb_retries, tmp_dir=self.tmp_dir)
 
                 _, chunk, _ = filename.rsplit('.', 2)
                 output_file = os.path.join(self.tmp_dir, f'{self.sample_name}.{method}.{allele}.{self.epitope_length}.{chunk}.tsv')

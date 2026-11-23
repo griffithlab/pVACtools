@@ -16,6 +16,7 @@ from urllib.request import urlopen
 from shutil import copyfileobj
 from tempfile import NamedTemporaryFile
 
+from pvactools.lib.prediction_class import IEDB
 from pvactools.tools.pvacfuse import run
 import pvactools.tools.pvacfuse.main as pvacfuse_main
 from tests.utils import *
@@ -83,12 +84,15 @@ class PvacfuseTests(unittest.TestCase):
         self.assertTrue(compiled_run_path)
 
     def test_pvacfuse_pipeline(self):
-        with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
-            data,
-            files,
-            test_data_directory(),
-            'agfusion',
-        ))) as mock_request:
+        with patch.object(IEDB, 'predict', autospec=True) as mock_method:
+            mock_method.side_effect = lambda self_obj, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None: make_iedb_response(
+                self_obj,
+                allele,
+                epitope_length,
+                test_data_directory(),
+                'agfusion',
+            )
+
             output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
 
             run.main([
@@ -145,12 +149,15 @@ class PvacfuseTests(unittest.TestCase):
             output_dir.cleanup()
 
     def test_pvacfuse_pipeline_agfusion_starfusion(self):
-        with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
-            data,
-            files,
-            test_data_directory(),
-            'agfusion_starfusion',
-        ))) as mock_request:
+        with patch.object(IEDB, 'predict', autospec=True) as mock_method:
+            mock_method.side_effect = lambda self_obj, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None: make_iedb_response(
+                self_obj,
+                allele,
+                epitope_length,
+                test_data_directory(),
+                'agfusion_starfusion',
+            )
+
             output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
 
             run.main([
@@ -203,12 +210,15 @@ class PvacfuseTests(unittest.TestCase):
             output_dir.cleanup()
 
     def test_pvacfuse_pipeline_arriba(self):
-        with patch('requests.post', unittest.mock.Mock(side_effect = lambda url, data, files=None: make_response(
-            data,
-            files,
-            test_data_directory(),
-            'arriba',
-        ))) as mock_request:
+        with patch.object(IEDB, 'predict', autospec=True) as mock_method:
+            mock_method.side_effect = lambda self_obj, input_file, allele, epitope_length, iedb_executable_path, iedb_retries, tmp_dir=None, log_dir=None: make_iedb_response(
+                self_obj,
+                allele,
+                epitope_length,
+                test_data_directory(),
+                'arriba',
+            )
+
             output_dir = tempfile.TemporaryDirectory(dir = self.test_data_directory)
 
             run.main([
