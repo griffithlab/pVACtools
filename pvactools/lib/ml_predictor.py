@@ -9,8 +9,10 @@ import os
 import pandas as pd
 import joblib
 import pickle
+import re
 import numpy as np
 from pathlib import Path
+from pvactools.lib.run_utils import nonnegative_int_or_none
 
 
 def merge_and_prepare_data(class1_aggregated_path, class1_all_epitopes_path, class2_aggregated_path):
@@ -102,10 +104,10 @@ def merge_and_prepare_data(class1_aggregated_path, class1_all_epitopes_path, cla
     
     # Helper function to add missing columns with NaN values
     def add_missing_columns(df, missing_cols):
-        """Add missing columns to dataframe filled with NaN (for sklearn imputer compatibility)."""
+        """Add missing columns filled with NaN for later missingness encoding."""
         if missing_cols:
             for col in missing_cols:
-                df[col] = np.nan  # Use np.nan instead of pd.NA for sklearn imputer compatibility
+                df[col] = np.nan
         return df
     
     # --- Read the three input files ---
@@ -195,7 +197,9 @@ def merge_and_prepare_data(class1_aggregated_path, class1_all_epitopes_path, cla
     
     # Note: Gene of Interest column will exist (either from file or added with NA)
     # Handle NA values by converting them to False
-    merged_all['Gene of Interest'] = merged_all['Gene of Interest'].fillna('False').map({'True': True, 'False': False}).astype(bool)
+    merged_all['Gene of Interest'] = merged_all['Gene of Interest'].fillna('False').map(
+        {True: True, False: False, 'True': True, 'False': False}
+    ).astype(bool)
     
     # Replace NA in TSL with 6, change into int (updated to match merge_data_predict_ml.py)
     # Note: TSL column will exist (either from file or added with NA)
@@ -240,9 +244,8 @@ def _resolve_artifact_paths(model_artifacts_path=None):
     Resolve standard artifact file paths inside the provided artifacts directory.
     If no path is provided, uses the default artifacts directory from the package.
 
-    Expected filenames (numpy126 versions):
-      - rf_downsample_model_numpy126.pkl
-      - trained_imputer_numpy126.joblib
+    Expected filenames:
+      - random_forest_ds_pvactools7.2.joblib
       - label_encoders_numpy126.pkl
     
     Args:
@@ -253,53 +256,80 @@ def _resolve_artifact_paths(model_artifacts_path=None):
     else:
         artifacts_dir = model_artifacts_path
     artifacts_dir = Path(artifacts_dir)
-    model_path = artifacts_dir / 'rf_downsample_model_numpy126.pkl'
-    imputer_path = artifacts_dir / 'trained_imputer_numpy126.joblib'
+    model_path = artifacts_dir / 'random_forest_ds_pvactools7.2.joblib'
     encoders_path = artifacts_dir / 'label_encoders_numpy126.pkl'
-    return str(model_path), str(imputer_path), str(encoders_path)
+    return str(model_path), str(encoders_path)
 
 def clean_and_impute_data(merged_all, model_artifacts_path):
     """
-    Clean and impute the merged data for ML prediction.
+    Encode categories and missingness, then replace missing values with -1.
     
     Args:
         merged_all (pd.DataFrame): Merged data from merge_and_prepare_data
         model_artifacts_path (str): Path to the model artifacts directory
         
     Returns:
-        pd.DataFrame: Cleaned and imputed data ready for prediction
+        pd.DataFrame: Encoded data ready for prediction
     """
     print("Loading ML model artifacts...")
     
-    # Load trained imputer and label encoders
-    _model_path, imputer_path, label_encoders_path = _resolve_artifact_paths(model_artifacts_path)
-    imputer = joblib.load(imputer_path)
+    # Load the model's feature order and saved label encoders.
+    model_path, label_encoders_path = _resolve_artifact_paths(model_artifacts_path)
+    bundle = joblib.load(model_path)
     with open(label_encoders_path, "rb") as f:
         label_encoders = pickle.load(f)
 
-    # Prepare columns for imputation
-    exclude_columns = ["ID", "Evaluation"]  # Add any other columns you want to exclude
-    columns_to_impute = merged_all.columns.difference(exclude_columns)
+    indicators = ["WT_missing", "MT_missing", "RNA_missing"]
+    features = bundle["feature_order"]
+    if len(features) != 75 or len(set(features)) != 75 or not set(indicators).issubset(features):
+        raise ValueError("Require the 75-feature Strategy 2 model, including its three indicators.")
+    if set(indicators).intersection(merged_all.columns):
+        raise ValueError("Provide raw predictors, before missingness encoding.")
+    raw_features = [c for c in features if c not in indicators]
+    X = merged_all[raw_features].copy().replace(
+        r"(?i)^\s*(?:na|n/a|nan|null|none|<na>)?\s*$", np.nan, regex=True)
 
-    excluded_data = merged_all[exclude_columns].copy()
-    data_to_impute = merged_all[columns_to_impute].copy()
+    # Apply the training encoders, preserving missing cells until flags are set.
+    if set(label_encoders) != set(bundle["category_maps"]):
+        raise ValueError("Label encoder columns do not match the model's category maps.")
+    for column, encoder in label_encoders.items():
+        mapping = {value: i for i, value in enumerate(encoder.classes_)}
+        if mapping != bundle["category_maps"][column]:
+            raise ValueError(f"Label encoder mapping disagrees with the model for {column}.")
+        observed = X[column].notna()
+        values = X.loc[observed, column]
+        unknown = set(values) - set(encoder.classes_)
+        if unknown:
+            raise ValueError(f"Unknown categories in {column}: {sorted(map(str, unknown))}")
+        encoded = pd.Series(np.nan, index=X.index)
+        if observed.any():
+            encoded.loc[observed] = encoder.transform(values)
+        X[column] = encoded
+    for column in ["Ref Match", "Prob match", "Gene of Interest"]:
+        encoded = X[column].map({True: 1, False: 0, "True": 1, "False": 0, "true": 1, "false": 0})
+        if (X[column].notna() & encoded.isna()).any():
+            raise ValueError(f"Unknown boolean values in {column}.")
+        X[column] = encoded
+    X = X.apply(pd.to_numeric, errors="raise")
+    groups = {
+        "WT_missing": [c for c in X if "WT" in c.split() or re.fullmatch(r"(?:Corresponding|Median) Fold Change", c)],
+        "MT_missing": [c for c in X if re.fullmatch(r"(?:NetMHC|SMM|SMMPMBEC) MT (?:IC50 Score|Percentile)", c)],
+        "RNA_missing": [c for c in X if re.fullmatch(r"RNA (?:VAF|Depth)|Allele Expr", c)],
+    }
+    if [len(group) for group in groups.values()] != [29, 6, 3]:
+        raise ValueError("Unexpected WT/MT/RNA feature groups in the model.")
+    affected = [c for group in groups.values() for c in group] + ["Pos"]
+    if X[affected].le(-1).any().any():
+        raise ValueError("Missingness encoding requires raw measurements greater than -1 or null.")
+    for indicator, columns in groups.items():
+        X[indicator] = X[columns].isna().any(axis=1).astype(int)
+    X = X[features].fillna(-1)
+    if not np.isfinite(X.to_numpy(dtype=float)).all():
+        raise ValueError("Predictors contain infinities.")
 
-    # Apply label encoding to categorical columns
-    categorical_columns = data_to_impute.select_dtypes(include=['category', 'object']).columns
-    for col in categorical_columns:
-        if col in label_encoders:
-            le = label_encoders[col]
-            # Handle unseen categories by using the most common category
-            data_to_impute.loc[:, col] = data_to_impute[col].map(
-                lambda x: le.transform([x])[0] if x in le.classes_ else le.transform([le.classes_[0]])[0]
-            )
-
-    # Impute missing values
-    imputed_data = imputer.transform(data_to_impute)
-    imputed_data = pd.DataFrame(imputed_data, columns=columns_to_impute)
-
-    # Combine imputed and excluded columns
-    post_imputed_data = pd.concat([excluded_data.reset_index(drop=True), imputed_data.reset_index(drop=True)], axis=1)
+    post_imputed_data = pd.concat([
+        merged_all[["ID", "Evaluation"]].reset_index(drop=True), X.reset_index(drop=True)
+    ], axis=1)
     
     return post_imputed_data
 
@@ -308,7 +338,7 @@ def make_ml_predictions(post_imputed_data, model_artifacts_path, ml_threshold_ac
     Make ML predictions using the trained model.
     
     Args:
-        post_imputed_data (pd.DataFrame): Cleaned and imputed data
+        post_imputed_data (pd.DataFrame): Encoded data with missingness indicators
         model_path (str): Path to the trained ML model
         ml_threshold_accept (float): Threshold for Accept predictions (default: 0.55)
         ml_threshold_reject (float): Threshold for Reject predictions (default: 0.30)
@@ -319,12 +349,13 @@ def make_ml_predictions(post_imputed_data, model_artifacts_path, ml_threshold_ac
     print("Loading ML model and making predictions...")
     
     # Load the trained Random Forest model
-    model_path, _imputer_path, _encoders_path = _resolve_artifact_paths(model_artifacts_path)
-    rf_model = joblib.load(model_path)
+    model_path, _encoders_path = _resolve_artifact_paths(model_artifacts_path)
+    bundle = joblib.load(model_path)
+    rf_model = bundle["model"]
 
     # Prepare data for prediction
     # If 'ID' or 'Evaluation' are in post_imputed_data, drop them for prediction
-    predict_cols = [col for col in post_imputed_data.columns if col not in ['ID', 'Evaluation', 'patient_id']]
+    predict_cols = bundle["feature_order"]
 
     # Make prediction with rf_model
     rf_pred = rf_model.predict_proba(post_imputed_data[predict_cols])[:, 1]
@@ -343,7 +374,7 @@ def make_ml_predictions(post_imputed_data, model_artifacts_path, ml_threshold_ac
     
     return post_imputed_data
 
-def create_final_output(post_imputed_data, original_agg_file_path, output_dir, sample_name):
+def create_final_output(post_imputed_data, original_agg_file_path, output_dir, sample_name, ml_accept_limit=20):
     """
     Create the final output file with ML predictions.
     
@@ -352,10 +383,14 @@ def create_final_output(post_imputed_data, original_agg_file_path, output_dir, s
         original_agg_file_path (str): Path to original aggregated file
         output_dir (str): Output directory for results
         sample_name (str): Sample name for output file
+        ml_accept_limit (int or None): Maximum preselected Accept candidates (default: 20).
+            Use None to preselect all predicted Accept candidates or 0 to preselect zero.
         
     Returns:
         str: Path to the final output file
     """
+    if ml_accept_limit is not None and ml_accept_limit < 0:
+        raise ValueError("ml_accept_limit must be a nonnegative integer or None.")
     print("Creating final output file...")
     
     # 1) Read original aggregated file as pure text, preserving None/empty values
@@ -389,19 +424,24 @@ def create_final_output(post_imputed_data, original_agg_file_path, output_dir, s
     )
     # Modify 'Review' to 'Pending' in Evaluation column
     merged_df.loc[merged_df['Evaluation'] == 'Review', 'Evaluation'] = 'Pending'
+    if ml_accept_limit is not None:
+        # Rank full-precision scores without changing report order or model labels.
+        accepted = merged_df.loc[merged_df['Evaluation'] == 'Accept'].sort_values(
+            'Accept_pred_prob', ascending=False, kind='stable')
+        merged_df.loc[accepted.index[ml_accept_limit:], 'Evaluation'] = 'Pending'
     final_df = merged_df.drop(columns=['Accept_pred_prob'])
     
     final_df[cols_to_preserve] = orig_df[cols_to_preserve]
     
     # Save output file
-    output_file = os.path.join(output_dir, f"{sample_name}.MHC_I.all_epitopes.aggregated.ML_predict.tsv") 
+    output_file = os.path.join(output_dir, f"{sample_name}.MHC_I.all_epitopes.aggregated.ML_predict.tsv")
 
     final_df.to_csv(output_file, float_format='%.3f', sep="\t", index=False, na_rep="NA")
     
     print(f"ML predictions saved to: {output_file}")
     return output_file
 
-def run_ml_predictions(class1_aggregated_path, class1_all_epitopes_path, class2_aggregated_path, model_artifacts_path=None, output_dir=None, sample_name=None, ml_threshold_accept=0.55, ml_threshold_reject=0.30):
+def run_ml_predictions(class1_aggregated_path, class1_all_epitopes_path, class2_aggregated_path, model_artifacts_path=None, output_dir=None, sample_name=None, ml_threshold_accept=0.55, ml_threshold_reject=0.30, ml_accept_limit=20):
     """
     Main function to run ML predictions on pVACtools output files.
     
@@ -415,10 +455,14 @@ def run_ml_predictions(class1_aggregated_path, class1_all_epitopes_path, class2_
         sample_name (str, optional): Sample name for output file
         ml_threshold_accept (float): Threshold for Accept predictions (default: 0.55)
         ml_threshold_reject (float): Threshold for Reject predictions (default: 0.30)
+        ml_accept_limit (int or None): Maximum preselected Accept candidates (default: 20).
+            Use None to preselect all predicted Accept candidates or 0 to preselect zero.
         
     Returns:
         str: Path to the final output file
     """
+    if ml_accept_limit is not None and ml_accept_limit < 0:
+        raise ValueError("ml_accept_limit must be a nonnegative integer or None.")
     # Validate threshold parameters
     if ml_threshold_reject > ml_threshold_accept:
         raise ValueError(
@@ -432,14 +476,15 @@ def run_ml_predictions(class1_aggregated_path, class1_all_epitopes_path, class2_
         # Step 1: Merge and prepare data
         merged_all = merge_and_prepare_data(class1_aggregated_path, class1_all_epitopes_path, class2_aggregated_path)
         
-        # Step 2: Clean and impute data
+        # Step 2: Encode categories and missingness; fill missing values with -1
         post_imputed_data = clean_and_impute_data(merged_all, model_artifacts_path)
         
         # Step 3: Make ML predictions
         post_imputed_data = make_ml_predictions(post_imputed_data, model_artifacts_path, ml_threshold_accept, ml_threshold_reject)
         
         # Step 4: Create final output
-        output_files = create_final_output(post_imputed_data, class1_aggregated_path, output_dir, sample_name)
+        output_files = create_final_output(post_imputed_data, class1_aggregated_path, output_dir, sample_name,
+                                          ml_accept_limit=ml_accept_limit)
         
         print("ML prediction pipeline completed successfully!")
         return output_files
@@ -497,6 +542,11 @@ def define_add_ml_predictions_parser(tool='pvacseq'):
         default=0.30,
         help="Prediction threshold for Reject predictions (default: 0.30)."
     )
+    parser.add_argument(
+        "--ml-accept-limit", type=nonnegative_int_or_none, default=20, metavar="N|none",
+        help="Maximum candidates preselected as Accept in Evaluation, ranked by ML probability "
+             "(default: 20). Use 'none' to preselect all predicted Accept candidates or 0 to preselect zero."
+    )
     return parser
 
 
@@ -513,5 +563,6 @@ if __name__ == "__main__":
         output_dir,
         args.sample_name,
         args.ml_threshold_accept,
-        args.ml_threshold_reject
+        args.ml_threshold_reject,
+        ml_accept_limit=args.ml_accept_limit
     )
