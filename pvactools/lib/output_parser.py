@@ -420,7 +420,7 @@ class OutputParser(metaclass=ABCMeta):
                 line.get('BigMHC_IM'), method,
                 percentile_keys=None, percentile_fallback='NA', is_reversed=True
             )
-        
+
         if m == 'immuscope_im':
             return self._make_score_entry(
                 line, 'ImmuScope_IM', 'immunogenicity',
@@ -922,7 +922,7 @@ class OutputParser(metaclass=ABCMeta):
                 headers.append("TLBind MT Presentation Score")
                 headers.append("TLBind WT Presentation Percentile")
                 headers.append("TLBind MT Presentation Percentile")
-            elif method in ['BigMHC_EL', 'netmhciipan_el', 'netmhcpan_el', 'MixMHC2pred']:
+            elif pretty_method in ['BigMHC_EL', 'NetMHCIIpanEL', 'NetMHCpanEL', 'MixMHC2pred']:
                 headers.append("%s WT Presentation Score" % pretty_method)
                 headers.append("%s MT Presentation Score" % pretty_method)
             elif method in ['BigMHC_IM', 'DeepImmuno', 'PRIME', 'ImmuScope_IM', 'TLImm']:
@@ -1304,7 +1304,7 @@ class UnmatchedSequencesOutputParser(OutputParser):
                 headers.append("TLBind IC50 Score")
                 headers.append("TLBind Presentation Score")
                 headers.append("TLBind Presentation Percentile")
-            elif method in ['BigMHC_EL', 'netmhciipan_el', 'netmhcpan_el', 'MixMHC2pred']:
+            elif pretty_method in ['BigMHC_EL', 'NetMHCIIpanEL', 'NetMHCpanEL', 'MixMHC2pred']:
                 headers.append("%s Presentation Score" % pretty_method)
             elif method in ['BigMHC_IM', 'DeepImmuno', 'PRIME', 'ImmuScope_IM', 'TLImm']:
                 headers.append("%s Immunogenicity Score" % pretty_method)
