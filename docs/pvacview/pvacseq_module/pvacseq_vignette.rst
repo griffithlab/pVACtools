@@ -427,9 +427,11 @@ The ``Evaluation`` column is pre-populated with ML-predicted evaluation status f
 - ``Reject``: Variants with prediction probability <= ``--ml-threshold-reject`` (default: 0.30). These candidates are predicted to be unfavorable. ``--ml-threshold-reject`` should be set to a value less than ``--ml-threshold-accept``.
 - ``Pending``: Variants between the probability thresholds, predicted Accept candidates beyond the Accept limit, or candidates without an ML prediction. These candidates require manual review.
 
-Use ``--ml-accept-limit N`` with either ML command to change the number of
-preselected Accept candidates, or ``--ml-accept-limit 0`` to disable the cap.
-Ranking uses full-precision probabilities; exact ties retain input report order.
+Use ``--ml-accept-limit N`` with either ML command to set a numeric limit or
+``--ml-accept-limit none`` to preselect every predicted Accept candidate.
+With ``--ml-accept-limit 0``, all predicted Accept candidates are set to
+``Pending`` in ``Evaluation``.
+Ranking uses full-precision probabilities. Exact ties retain input report order.
 Report rows are not reordered, and Reject predictions are unchanged.
 
 **ML Prediction (score) Column**

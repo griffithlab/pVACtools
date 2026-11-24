@@ -48,7 +48,8 @@ class PvacseqAddMlPredictionsTests(unittest.TestCase):
     def test_accept_limit_argument(self):
         inputs = ['class1.tsv', 'epitopes.tsv', 'class2.tsv', 'Test']
         for options, expected in [([], 20), (['--ml-accept-limit', '0'], 0),
-                                  (['--ml-accept-limit', '5'], 5)]:
+                                  (['--ml-accept-limit', '5'], 5),
+                                  (['--ml-accept-limit', 'none'], None)]:
             with self.subTest(options=options), patch.object(add_ml_predictions, 'run_ml_predictions') as predict:
                 add_ml_predictions.main(inputs + options)
                 self.assertEqual(predict.call_args.kwargs['ml_accept_limit'], expected)

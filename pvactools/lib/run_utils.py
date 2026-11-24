@@ -76,6 +76,14 @@ def nonnegative_int(value):
         raise argparse.ArgumentTypeError("must be a nonnegative integer")
     return value
 
+def nonnegative_int_or_none(value):
+    if value == 'none':
+        return None
+    try:
+        return nonnegative_int(value)
+    except (ValueError, argparse.ArgumentTypeError):
+        raise argparse.ArgumentTypeError("must be a nonnegative integer or 'none'") from None
+
 def aggregate_report_evaluations():
     """Return function handle of an argument type function for
        ArgumentParser checking of the aggregate report evaluation values.

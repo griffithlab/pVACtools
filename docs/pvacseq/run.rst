@@ -19,13 +19,15 @@ ML Accept Preselection
 ----------------------
 
 With ``--run-ml-predictions``, at most 20 ML-predicted Accept candidates per
-sample are preselected as ``Accept`` in the ``Evaluation`` column. Candidates
-are ranked by their full-precision Accept probability; additional predicted
-Accept candidates are set to ``Pending``.
+sample are preselected as ``Accept`` in the ``Evaluation`` column by default.
+Candidates are ranked by their full-precision Accept probability. Additional
+predicted Accept candidates are set to ``Pending``.
 
-Use ``--ml-accept-limit N`` to change the limit, or ``--ml-accept-limit 0`` to
-disable it and preselect every predicted Accept candidate. This option also
-applies to ``pvacseq add_ml_predictions``.
+Use ``--ml-accept-limit N`` to set a numeric limit or
+``--ml-accept-limit none`` to preselect every predicted Accept candidate.
+With ``--ml-accept-limit 0``, all predicted Accept candidates are set to
+``Pending`` in ``Evaluation``. This option also applies to
+``pvacseq add_ml_predictions``.
 
 ..  .. argparse::
         :module: tools.pvacseq.run

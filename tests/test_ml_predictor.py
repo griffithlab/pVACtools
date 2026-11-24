@@ -92,11 +92,15 @@ class MLPredictorTests(unittest.TestCase):
             source = os.path.join(folder, 'input.tsv')
             original.to_csv(source, sep='\t', index=False)
             reference = None
-            cases = [(None, set(range(17)) | {21, 22, 23}),
-                     (3, {21, 22, 23}), (0, set(range(25))), (50, set(range(25)))]
-            for limit, expected in cases:
-                with self.subTest(limit=limit):
-                    options = {} if limit is None else {'ml_accept_limit': limit}
+            cases = [
+                ({}, set(range(17)) | {21, 22, 23}),
+                ({'ml_accept_limit': 3}, {21, 22, 23}),
+                ({'ml_accept_limit': 0}, set()),
+                ({'ml_accept_limit': None}, set(range(25))),
+                ({'ml_accept_limit': 50}, set(range(25))),
+            ]
+            for options, expected in cases:
+                with self.subTest(options=options):
                     output = create_final_output(predictions, source, folder, 'Test', **options)
                     result = pd.read_csv(output, sep='\t', dtype=str, keep_default_na=False)
                     accepted = set(result.loc[result.Evaluation == 'Accept', 'ID'].astype(int))

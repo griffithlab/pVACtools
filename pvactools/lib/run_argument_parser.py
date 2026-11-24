@@ -435,9 +435,10 @@ class RunArgumentParser(metaclass=ABCMeta):
             help="Threshold for Reject predictions in ML model (default: 0.30).",
         )
         self.parser.add_argument(
-            "--ml-accept-limit", type=nonnegative_int, default=20,
+            "--ml-accept-limit", type=nonnegative_int_or_none, default=20, metavar="N|none",
             help="Maximum candidates preselected as Accept in Evaluation, ranked by ML probability. "
-                 "Use 0 to disable. Applies with --run-ml-predictions; ML labels and scores are unchanged.",
+                 "Use 'none' to preselect all predicted Accept candidates or 0 to preselect zero. "
+                 "Applies with --run-ml-predictions.",
         )
 
     def pvacsplice(self):

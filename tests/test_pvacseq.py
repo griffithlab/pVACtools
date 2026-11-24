@@ -66,7 +66,8 @@ class PvacseqTests(unittest.TestCase):
             for path in files:
                 open(path, 'w').close()
             for options, expected in [([], 20), (['--ml-accept-limit', '0'], 0),
-                                      (['--ml-accept-limit', '5'], 5)]:
+                                      (['--ml-accept-limit', '5'], 5),
+                                      (['--ml-accept-limit', 'none'], None)]:
                 with self.subTest(options=options):
                     args = parser.parse_args(inputs + options)
                     with patch.object(run, 'locate_ml_input_files', return_value=files), \

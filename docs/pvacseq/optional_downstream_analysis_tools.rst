@@ -103,8 +103,10 @@ candidates per sample as ``Accept`` in ``Evaluation``, ranked by full-precision
 Accept probability. Additional predicted Accept candidates become ``Pending``
 but retain ``Accept (<score>)`` in ``ML Prediction (score)``. Exact ties retain
 input order, and output rows are not reordered. Reject and Review predictions
-are unaffected. Use ``--ml-accept-limit N`` for a different limit or
-``--ml-accept-limit 0`` to disable the cap. The same option is available with
+are unaffected. Use ``--ml-accept-limit N`` to set a numeric limit or
+``--ml-accept-limit none`` to preselect every predicted Accept candidate.
+With ``--ml-accept-limit 0``, all predicted Accept candidates are set to
+``Pending`` in ``Evaluation``. The same option is available with
 ``pvacseq run --run-ml-predictions``.
 
 Calculate Reference Proteome Similarity

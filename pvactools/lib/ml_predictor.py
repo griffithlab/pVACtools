@@ -12,7 +12,7 @@ import pickle
 import re
 import numpy as np
 from pathlib import Path
-from pvactools.lib.run_utils import nonnegative_int
+from pvactools.lib.run_utils import nonnegative_int_or_none
 
 
 def merge_and_prepare_data(class1_aggregated_path, class1_all_epitopes_path, class2_aggregated_path):
@@ -383,13 +383,14 @@ def create_final_output(post_imputed_data, original_agg_file_path, output_dir, s
         original_agg_file_path (str): Path to original aggregated file
         output_dir (str): Output directory for results
         sample_name (str): Sample name for output file
-        ml_accept_limit (int): Maximum preselected Accept candidates; 0 disables the cap.
+        ml_accept_limit (int or None): Maximum preselected Accept candidates (default: 20).
+            Use None to preselect all predicted Accept candidates or 0 to preselect zero.
         
     Returns:
         str: Path to the final output file
     """
-    if ml_accept_limit < 0:
-        raise ValueError("ml_accept_limit must be nonnegative; use 0 to disable the cap.")
+    if ml_accept_limit is not None and ml_accept_limit < 0:
+        raise ValueError("ml_accept_limit must be a nonnegative integer or None.")
     print("Creating final output file...")
     
     # 1) Read original aggregated file as pure text, preserving None/empty values
@@ -423,7 +424,7 @@ def create_final_output(post_imputed_data, original_agg_file_path, output_dir, s
     )
     # Modify 'Review' to 'Pending' in Evaluation column
     merged_df.loc[merged_df['Evaluation'] == 'Review', 'Evaluation'] = 'Pending'
-    if ml_accept_limit:
+    if ml_accept_limit is not None:
         # Rank full-precision scores without changing report order or model labels.
         accepted = merged_df.loc[merged_df['Evaluation'] == 'Accept'].sort_values(
             'Accept_pred_prob', ascending=False, kind='stable')
@@ -454,13 +455,14 @@ def run_ml_predictions(class1_aggregated_path, class1_all_epitopes_path, class2_
         sample_name (str, optional): Sample name for output file
         ml_threshold_accept (float): Threshold for Accept predictions (default: 0.55)
         ml_threshold_reject (float): Threshold for Reject predictions (default: 0.30)
-        ml_accept_limit (int): Maximum preselected Accept candidates (default: 20); 0 disables the cap.
+        ml_accept_limit (int or None): Maximum preselected Accept candidates (default: 20).
+            Use None to preselect all predicted Accept candidates or 0 to preselect zero.
         
     Returns:
         str: Path to the final output file
     """
-    if ml_accept_limit < 0:
-        raise ValueError("ml_accept_limit must be nonnegative; use 0 to disable the cap.")
+    if ml_accept_limit is not None and ml_accept_limit < 0:
+        raise ValueError("ml_accept_limit must be a nonnegative integer or None.")
     # Validate threshold parameters
     if ml_threshold_reject > ml_threshold_accept:
         raise ValueError(
@@ -541,9 +543,9 @@ def define_add_ml_predictions_parser(tool='pvacseq'):
         help="Prediction threshold for Reject predictions (default: 0.30)."
     )
     parser.add_argument(
-        "--ml-accept-limit", type=nonnegative_int, default=20,
+        "--ml-accept-limit", type=nonnegative_int_or_none, default=20, metavar="N|none",
         help="Maximum candidates preselected as Accept in Evaluation, ranked by ML probability "
-             "(default: 20). Use 0 to disable. ML prediction labels and scores are unchanged."
+             "(default: 20). Use 'none' to preselect all predicted Accept candidates or 0 to preselect zero."
     )
     return parser
 
